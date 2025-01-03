@@ -267,7 +267,7 @@ href="#ref-samii2016causal" role="doc-biblioref">2016</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>1/16, 1/21</strong></th>
+<th style="text-align: center;"><strong>1/16 1/21</strong></th>
 <td style="text-align: left;">Review (cont.) / What is
 Identification?</td>
 <td style="text-align: left;">observation versus intervention, potential
@@ -290,7 +290,7 @@ role="doc-biblioref">2019</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>1/23, 1/28</strong></th>
+<th style="text-align: center;"><strong>1/23 1/28</strong></th>
 <td style="text-align: left;">Regression and Causality</td>
 <td style="text-align: left;">CES and its properties, selection on
 observables, conditional ignorability</td>
@@ -331,7 +331,7 @@ role="doc-biblioref">2016</a>)</span></li>
 DESIGNS</strong></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>2/4, 2/6</strong></th>
+<th style="text-align: center;"><strong>2/4 2/6</strong></th>
 <td style="text-align: left;">Basics of Experimental Design</td>
 <td style="text-align: left;">target quantities (SATE, PATE) and
 estimands, inference for the SATE and PATE in an idealized experiment,
@@ -360,7 +360,7 @@ stratification and block randomization, factorial designs</td>
 FOR CAUSAL INFERENCE</strong></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>2/13, 2/18</strong></th>
+<th style="text-align: center;"><strong>2/13 2/18</strong></th>
 <td style="text-align: left;">Matching</td>
 <td style="text-align: left;">exact matching, coarsened exact matching,
 nearest neighbor matching and bias correction, balance checking,
@@ -380,7 +380,7 @@ role="doc-biblioref">2008</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>2/20, 2/25</strong></th>
+<th style="text-align: center;"><strong>2/20 2/25</strong></th>
 <td style="text-align: left;">Instrumental Variables</td>
 <td style="text-align: left;">IV estimator, 2SLS, variance
 estimation</td>
@@ -415,7 +415,7 @@ role="doc-biblioref">2015</a>, Ch. 9.3)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>3/4, 3/6</strong></th>
+<th style="text-align: center;"><strong>3/4 3/6</strong></th>
 <td style="text-align: left;">Panel Data</td>
 <td style="text-align: left;">fixed and random effects, within
 estimator, LSDV</td>
@@ -429,13 +429,13 @@ role="doc-biblioref">2015</a>, Ch. 11.3)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>3/11, 3/13, 3/18</strong></th>
+<th style="text-align: center;"><strong>3/11 3/13 3/18</strong></th>
 <td style="text-align: left;">No Class</td>
 <td style="text-align: left;">Spring Break/New Faces</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>3/20, 3/25</strong></th>
+<th style="text-align: center;"><strong>3/20 3/25</strong></th>
 <td style="text-align: left;">Difference-in-Differences</td>
 <td style="text-align: left;">two-period DID, pre-trends, event study,
 conditional DID, triple differences, continuous treatment DID, TWFE bias
@@ -451,14 +451,14 @@ role="doc-biblioref">2004</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>3/27, 4/1</strong></th>
+<th style="text-align: center;"><strong>3/27 4/1</strong></th>
 <td style="text-align: left;">Synthetic Control</td>
 <td style="text-align: left;">identification, estimation and statistical
 inference, interactive FEs</td>
 <td style="text-align: left;">TBD</td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>4/3, 4/8</strong></th>
+<th style="text-align: center;"><strong>4/3 4/8</strong></th>
 <td style="text-align: left;">Regression Discontinuity Designs</td>
 <td style="text-align: left;">parametric, non-parametric local
 regression, optimized RD and honest inference, threats, fuzzy RDD
@@ -608,7 +608,7 @@ know has been harassed or assaulted, they can call the Project Safe
 be found at Project Safe. The University’s Title IX Coordinator
 (615-322-4705) is another contact point, where appropriate resources and
 contacts for confidential support are available:
-[www.vanderbilt.edu/title-ix/](https://www.vanderbilt.edu/title-ix/)
+[www.vanderbilt.edu/title-ix/](https://www.vanderbilt.edu/title-ix/).
 
 As faculty members, professors have responsibilities to help create a
 safe learning environment on campus, regardless of identity or
@@ -659,14 +659,16 @@ schedule and/or tasks.
 
 ------------------------------------------------------------------------
 
-## Acknowledgements
+## Acknowledgments
 
-The course is heavily based on the materials prepared for previous
-itteration of Statistics for Political Research III taught by [Bradley
-Smith](https://bradleycarlsmith.com/) at Vanderbilt. In addition some
+This course is largely based on the materials prepared for a previous
+iteration of Statistics for Political Research III taught by [Bradley
+Smith](https://bradleycarlsmith.com/) at Vanderbilt. Additionally, some
 weeks draw on materials from similar classes taught by [Cyrus
 Samii](https://cyrussamii.com/) at NYU and [Naoki
 Egami](https://naokiegami.com/) at Columbia.
+
+------------------------------------------------------------------------
 
 ## References
 
