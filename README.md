@@ -439,8 +439,7 @@ role="doc-biblioref">2015</a>, Ch. 11.3)</span></li>
 <td style="text-align: left;">Difference-in-Differences</td>
 <td style="text-align: left;">two-period DID, pre-trends, event study,
 conditional DID, triple differences, continuous treatment DID, TWFE bias
-with multiple events, event-by-event estimation, shift-share DID
-(?)</td>
+with multiple events, event-by-event estimation</td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="angrist2009mostly">Angrist and
 Pischke (<a href="#ref-angrist2009mostly" role="doc-biblioref">2009</a>,

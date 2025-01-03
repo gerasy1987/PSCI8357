@@ -250,7 +250,7 @@ Readings, lectures, assignments, and news for the course will be posted on the c
 
 *   - **3/20 3/25**
     - Difference-in-Differences
-    - two-period DID, pre-trends, event study, conditional DID, triple differences, continuous treatment DID, TWFE bias with multiple events, event-by-event estimation, shift-share DID (?)
+    - two-period DID, pre-trends, event study, conditional DID, triple differences, continuous treatment DID, TWFE bias with multiple events, event-by-event estimation
     -   - @angrist2009mostly [Ch. 5.2]
         - @bertrand2004much
 
