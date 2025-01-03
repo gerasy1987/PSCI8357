@@ -12,7 +12,8 @@
 
 #### **TA:** Alex Dean
 
--   **Office hours:** *TBD*
+-   **Recitations:** *TBD (likely Friday)*
+-   **Office hours:** *TBD (likely Monday)*
 
 ------------------------------------------------------------------------
 
@@ -31,9 +32,10 @@ inference using frequentist approaches.
 
 There are two prerequisits for this class. First, students should have a
 firm grasp of probability theory, statistical inference, and linear
-models at the level of STAT I or an equivalent course (e.g. do you
-remember what the law of iterated expectations is? Or the significance
-of the equation *β* = (*X*′*X*)<sup>−1</sup>(*X*′*Y*). Second, students
+models at the level of STAT I or an equivalent course ( e.g. do you
+remember what the law of iterated expectations is? or what does it mean
+for two random variables to be independent? or the significance of the
+equation *β* = (*X*′*X*)<sup>−1</sup>(*X*′*Y*) ? ). Second, students
 should have some background in writing scripts to implement statistical
 analyses in <span class="proglang">R</span>. The course provides
 foundational methodological training to Political Science PhD students
@@ -74,58 +76,62 @@ credit, your homework must comply with the following guidelines:
     explanations for important techniques.
 
 Homework will be graded for points as indicated on each assignment and
-count toward 50% of your grade.
+count toward 40 % of your grade.
 
 ### Replications (2 × 20 %)
 
-The main goal of this course is to learn not just theoretical
-foundations but also to learn how to implement some of the techniques in
-practice. To this end you will be required to complete two re-analyses
-of existing studies: one RCT or experiment and one observational. Each
-of you will be expected to pick up a paper at least a month prior to the
-replication deadline and let professor and TA know which paper you
-picked. Importantly, make sure that the replication data is available
-for the paper (e.g. via Harvard Dataverse or OSF). If the data is not
-readily available in online repositories, you can try to contact the
-authors (or ask professor), but be mindful of deadlines.
+The primary objective of this course is to provide both a theoretical
+understanding and practical experience in implementing the discussed
+techniques. To achieve this, you are required to complete two
+re-analyses of existing studies: one involving a Randomized Controlled
+Trial (RCT) or experiment, and the other using an observational study.
+Each student must select a paper at least one month before the
+replication deadline and notify both the professor and the TA of their
+choice. It is crucial to ensure that replication data is available for
+the paper, typically through repositories like Harvard Dataverse or OSF.
+If the data is not readily accessible online, you may contact the
+authors or request assistance from the professor, but it is essential to
+adhere to the deadlines.
 
-Once you pick the paper you are expected to do two main things. First,
-replicate the main analyses reported in the paper using your own code,
-not the code provided by the authors in replication archive (!). Second,
-you are expected to expand the main analyses in the paper in at least
-one of the following ways:
+Once you have selected your paper, you are expected to accomplish two
+main tasks. First, replicate the primary analyses reported in the paper
+using your own code, rather than the authors’ code from the replication
+archive. Second, expand upon the main analyses in at least one of the
+following ways:
 
-1.  Check for robustness. This can for example focus on how much do
-    things depend on the particular estimation model or measurement
-    technique.
-2.  Alternatively you can go more deeply into the logic of authors’
-    theory. This might sometimes constructing new tests (based on the
-    implications of authors theory/hypotheses).
+1.  Check for robustness. For example, examine how the results depend on
+    specific estimation models or measurement techniques.
+2.  Alternatively, delve deeper into the logic of the authors’ theory.
+    This may involve constructing new tests based on the implications of
+    the authors’ theory or hypotheses.
 
-For both parts you need to post an abbreviated replication plan on
-Piazza at least a week before the submission of the replication report.
+For both tasks, you need to post a brief replication plan on the
+Brightspace forum at least one week before submitting the replication
+report.
 
-Your final submission should include data files you used + replication
-write-up in reproducible R Markdown or Quarto Markdown file (i.e. so
-that professor and TA can re-run your analyses on their machines). The
-write-up should include the following:
+Your final submission should include the data files you used and a
+replication write-up in a reproducible <span class="proglang">R</span>
+Markdown or Quarto Markdown file, enabling the professor and TA to
+re-run your analyses on their machines. The write-up should encompass
+the following:
 
--   Brief summary of the paper’s theory/hypotheses
--   Brief description of the data, model and main results (you can use
-    screenshots from the paper to reference main results)
--   Report on replication of main results (code, output, interpretation)
--   Report on analyses expansion(s) (code, output, interpretation)
+-   A brief summary of the paper’s theory and hypotheses.
+-   A concise description of the data, model, and main results (you may
+    use screenshots from the paper to reference the main results).
+-   A report on the replication of the main results (including code,
+    output, and discussion of any diviations from original paper).
+-   A report on the expansion of analyses (including code, output, and
+    interpretation).
 
-### Final Exam (20 %)
+### Final Exam (20%)
 
-A final exam will be scheduled during the final examination week (Week
-of April 21st). The final also serves the purpose of evaluating
-individual progress, which in turn allows me to provide individualized
-recommendations on where students should apply effort to strengthen
-their methodological foundations. If you are unable to work during the
-exam period, you must provide notice at least a week prior so that we
-can arrange an alternative time. The final will count toward 25% of your
-grade.
+A final exam will be scheduled during the final examination week (the
+week of April 21st). The exam aims to assess individual progress, thus
+allowing me to provide personalized recommendations for improving your
+methodological foundations. If you cannot take the exam during the
+scheduled period, you must provide notice at least one week in advance
+so that we can arrange an alternative time. The final will constitute
+20% of your grade.
 
 ------------------------------------------------------------------------
 
@@ -147,7 +153,9 @@ D 64-66 | D- 60-63 | F \<60
 
 ------------------------------------------------------------------------
 
-## Software
+## Required Resources
+
+### Software
 
 You will have to work in <span class="proglang">R</span> in this class.
 I encourage using [Quarto](https://quarto.org/) for your assignments.
@@ -155,11 +163,14 @@ This is a great investment that will pay off in the long run in terms of
 productivity as well as reproducibility. Quarto Markdown runs easily
 through RStudio or VS Code (or even many of its wrappers like
 [Cursor](https://www.cursor.com/) or soon
-[Positron](https://positron.posit.co/)).
+[Positron](https://positron.posit.co/)). You can also check materials in
+the repository I prepared for the Scientific Workflow workshop at
+Vanderbilt here:
+[github.com/gerasy1987/workflow_workshop](https://github.com/gerasy1987/workflow_workshop).
 
 ------------------------------------------------------------------------
 
-## Textbooks
+### Textbooks
 
 We will draw on textbooks and papers for the course. Here are the
 **required** textbooks:
@@ -194,14 +205,21 @@ You can obtain these as PDFs on Brightspace or on the authors’ websites
 and online preprint archives (SSRN or arXiv). Papers are listed below
 according to topic.
 
+### Brightspace
+
+Readings, lectures, assignments, and news for the course will be posted
+on the course page on Brightspace (course management system used by
+Vanderbilt). I will post announcements and changes to the home page of
+the site, please keep an eye out. In addition, we will have discussion
+forums for any class related questions and class related news/social
+media posts on Brightspace.
+
 ------------------------------------------------------------------------
 
 ## Course Schedule
 
-***Note:** The schedule is subject to change. readings will be
-distributed ahead of each class.*
-
-### Introduction and primer on causal inference
+***Note:** The schedule is subject to change. Readings will be
+distributed through Brightspace ahead of each class.*
 
 <table>
 <colgroup>
@@ -239,9 +257,7 @@ INFERENCE</strong></td>
 <tr>
 <th style="text-align: center;"><strong>1/14</strong></th>
 <td style="text-align: left;">Probability Review</td>
-<td style="text-align: left;">observation versus intervention, potential
-outcomes (ATE, ATT, mediation effect, interference, probability of
-necessity)</td>
+<td style="text-align: left;"></td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="samii2016causal">Samii (<a
 href="#ref-samii2016causal" role="doc-biblioref">2016</a>)</span></li>
@@ -251,7 +267,7 @@ href="#ref-samii2016causal" role="doc-biblioref">2016</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>1/16</strong></th>
+<th style="text-align: center;"><strong>1/16, 1/21</strong></th>
 <td style="text-align: left;">Review (cont.) / What is
 Identification?</td>
 <td style="text-align: left;">observation versus intervention, potential
@@ -274,7 +290,7 @@ role="doc-biblioref">2019</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>1/23</strong></th>
+<th style="text-align: center;"><strong>1/23, 1/28</strong></th>
 <td style="text-align: left;">Regression and Causality</td>
 <td style="text-align: left;">CES and its properties, selection on
 observables, conditional ignorability</td>
@@ -303,9 +319,10 @@ Ch. 3.2.3-3.5)</span></li>
 and Winship (<a href="#ref-morgan2015counterfactuals"
 role="doc-biblioref">2015</a>, Ch. 6.3)</span></li>
 <li><span class="citation" data-cites="clarke2005phantom">Clarke (<a
-href="#ref-clarke2005phantom" role="doc-biblioref">2005</a>)</span>,
-<span class="citation" data-cites="aronow2016does">Aronow and Samii (<a
-href="#ref-aronow2016does" role="doc-biblioref">2016</a>)</span></li>
+href="#ref-clarke2005phantom" role="doc-biblioref">2005</a>)</span></li>
+<li><span class="citation" data-cites="aronow2016does">Aronow and Samii
+(<a href="#ref-aronow2016does"
+role="doc-biblioref">2016</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
@@ -314,7 +331,7 @@ href="#ref-aronow2016does" role="doc-biblioref">2016</a>)</span></li>
 DESIGNS</strong></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>2/4</strong></th>
+<th style="text-align: center;"><strong>2/4, 2/6</strong></th>
 <td style="text-align: left;">Basics of Experimental Design</td>
 <td style="text-align: left;">target quantities (SATE, PATE) and
 estimands, inference for the SATE and PATE in an idealized experiment,
@@ -343,7 +360,7 @@ stratification and block randomization, factorial designs</td>
 FOR CAUSAL INFERENCE</strong></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>2/13</strong></th>
+<th style="text-align: center;"><strong>2/13, 2/18</strong></th>
 <td style="text-align: left;">Matching</td>
 <td style="text-align: left;">exact matching, coarsened exact matching,
 nearest neighbor matching and bias correction, balance checking,
@@ -363,7 +380,7 @@ role="doc-biblioref">2008</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>2/20</strong></th>
+<th style="text-align: center;"><strong>2/20, 2/25</strong></th>
 <td style="text-align: left;">Instrumental Variables</td>
 <td style="text-align: left;">IV estimator, 2SLS, variance
 estimation</td>
@@ -398,7 +415,7 @@ role="doc-biblioref">2015</a>, Ch. 9.3)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>3/4</strong></th>
+<th style="text-align: center;"><strong>3/4, 3/6</strong></th>
 <td style="text-align: left;">Panel Data</td>
 <td style="text-align: left;">fixed and random effects, within
 estimator, LSDV</td>
@@ -412,17 +429,18 @@ role="doc-biblioref">2015</a>, Ch. 11.3)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>3/11</strong></th>
+<th style="text-align: center;"><strong>3/11, 3/13, 3/18</strong></th>
 <td style="text-align: left;">No Class</td>
 <td style="text-align: left;">Spring Break/New Faces</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>3/20</strong></th>
+<th style="text-align: center;"><strong>3/20, 3/25</strong></th>
 <td style="text-align: left;">Difference-in-Differences</td>
 <td style="text-align: left;">two-period DID, pre-trends, event study,
 conditional DID, triple differences, continuous treatment DID, TWFE bias
-with multiple events, event-by-event estimation</td>
+with multiple events, event-by-event estimation, shift-share DID
+(?)</td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="angrist2009mostly">Angrist and
 Pischke (<a href="#ref-angrist2009mostly" role="doc-biblioref">2009</a>,
@@ -433,17 +451,18 @@ role="doc-biblioref">2004</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>3/27</strong></th>
+<th style="text-align: center;"><strong>3/27, 4/1</strong></th>
 <td style="text-align: left;">Synthetic Control</td>
 <td style="text-align: left;">identification, estimation and statistical
 inference, interactive FEs</td>
 <td style="text-align: left;">TBD</td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>4/3</strong></th>
+<th style="text-align: center;"><strong>4/3, 4/8</strong></th>
 <td style="text-align: left;">Regression Discontinuity Designs</td>
 <td style="text-align: left;">parametric, non-parametric local
-regression, optimized RD and honest inference, threats</td>
+regression, optimized RD and honest inference, threats, fuzzy RDD
+(?)</td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="angrist2009mostly">Angrist and
 Pischke (<a href="#ref-angrist2009mostly" role="doc-biblioref">2009</a>,
@@ -639,6 +658,15 @@ meeting to discuss and make fair and reasonable adjustments to the
 schedule and/or tasks.
 
 ------------------------------------------------------------------------
+
+## Acknowledgements
+
+The course is heavily based on the materials prepared for previous
+itteration of Statistics for Political Research III taught by [Bradley
+Smith](https://bradleycarlsmith.com/) at Vanderbilt. In addition some
+weeks draw on materials from similar classes taught by [Cyrus
+Samii](https://cyrussamii.com/) at NYU and [Naoki
+Egami](https://naokiegami.com/) at Columbia.
 
 ## References
 
