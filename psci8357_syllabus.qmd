@@ -161,7 +161,7 @@ Readings, lectures, assignments, and news for the course will be posted on the c
 *   - **1/7**
     - Welcome
     - 
-    - 
+    - [probability quiz](problem_sets/quiz_refresher.pdf)
 
 *   - **1/9**
     - No class

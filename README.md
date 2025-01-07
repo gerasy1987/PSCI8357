@@ -241,7 +241,8 @@ distributed through Brightspace ahead of each class.*
 <th style="text-align: center;"><strong>1/7</strong></th>
 <td style="text-align: left;">Welcome</td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
+<td style="text-align: left;"><a
+href="problem_sets/quiz_refresher.pdf">probability quiz</a></td>
 </tr>
 <tr>
 <th style="text-align: center;"><strong>1/9</strong></th>
