@@ -10,7 +10,7 @@
 -   **Office hourse sign-up link:**
     <https://calendar.app.google/MnsMZr3F6SYaBk7g7>
 
-#### **TA:** Alex Dean
+#### **TA:** Alexander (Alex) Dean
 
 -   **Recitations:** *TBD (likely Friday)*
 -   **Office hours:** *TBD (likely Monday)*
@@ -256,14 +256,11 @@ INFERENCE</strong></td>
 </tr>
 <tr>
 <th style="text-align: center;"><strong>1/14</strong></th>
-<td style="text-align: left;">Probability Review</td>
+<td style="text-align: left;">Probability Review / Introduction</td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="samii2016causal">Samii (<a
 href="#ref-samii2016causal" role="doc-biblioref">2016</a>)</span></li>
-<li><span class="citation" data-cites="gerber2012field">Gerber and Green
-(<a href="#ref-gerber2012field" role="doc-biblioref">2012</a>, Ch.
-2)</span></li>
 </ul></td>
 </tr>
 <tr>
@@ -271,22 +268,21 @@ href="#ref-samii2016causal" role="doc-biblioref">2016</a>)</span></li>
 <td style="text-align: left;">Review (cont.) / What is
 Identification?</td>
 <td style="text-align: left;">observation versus intervention, potential
-outcomes (ATE, ATT, mediation effect, interference, probability of
-necessity), ATE under SUTVA and strong ignorability, causal effects with
-potential outcomes</td>
+outcomes (ATE, ATT, probability of necessity), ATE under SUTVA and
+strong ignorability, causal effects with potential outcomes</td>
 <td style="text-align: left;"><ul>
+<li><span class="citation" data-cites="gerber2012field">Gerber and Green
+(<a href="#ref-gerber2012field" role="doc-biblioref">2012</a>, Ch.
+2)</span></li>
 <li><span class="citation" data-cites="angrist2009mostly">Angrist and
 Pischke (<a href="#ref-angrist2009mostly" role="doc-biblioref">2009</a>,
 Ch. 1-2)</span></li>
 <li><span class="citation" data-cites="morgan2015counterfactuals">Morgan
 and Winship (<a href="#ref-morgan2015counterfactuals"
-role="doc-biblioref">2015</a>, Ch. 2-3)</span></li>
+role="doc-biblioref">2015</a>, Ch. 1-2)</span></li>
 <li><span class="citation" data-cites="holland1986statistics">Holland
 (<a href="#ref-holland1986statistics"
 role="doc-biblioref">1986</a>)</span></li>
-<li><span class="citation" data-cites="lewbel2019identification">Lewbel
-(<a href="#ref-lewbel2019identification"
-role="doc-biblioref">2019</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
@@ -333,9 +329,9 @@ DESIGNS</strong></td>
 <tr>
 <th style="text-align: center;"><strong>2/4 2/6</strong></th>
 <td style="text-align: left;">Basics of Experimental Design</td>
-<td style="text-align: left;">target quantities (SATE, PATE) and
-estimands, inference for the SATE and PATE in an idealized experiment,
-randomization inference</td>
+<td style="text-align: left;">target quantities (SATE, PATE), inference
+for the SATE and PATE in an idealized experiment, randomization
+inference</td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="gerber2012field">Gerber and Green
 (<a href="#ref-gerber2012field" role="doc-biblioref">2012</a>, Ch.
@@ -711,10 +707,6 @@ the American Statistical Association* 81 (396): 945–60.
 Imbens, Guido W, and Thomas Lemieux. 2008. “Regression Discontinuity
 Designs: A Guide to Practice.” *Journal of Econometrics* 142 (2):
 615–35.
-
-Lewbel, Arthur. 2019. “The Identification Zoo: Meanings of
-Identification in Econometrics.” *Journal of Economic Literature* 57
-(4): 835–903.
 
 Morgan, Stephen L, and Christopher Winship. 2015. *Counterfactuals and
 Causal Inference*. Cambridge University Press.

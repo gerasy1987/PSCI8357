@@ -47,7 +47,7 @@ pacman::p_load(tidyverse)
 -   **Office hours:** Wednesday, 2-4 PM or by appointment in Commons 351;
 -   **Office hourse sign-up link:** <https://calendar.app.google/MnsMZr3F6SYaBk7g7>
 
-#### **TA:** Alex Dean
+#### **TA:** Alexander (Alex) Dean
 
 -   **Recitations:** *TBD (likely Friday)*
 -   **Office hours:** *TBD (likely Monday)*
@@ -162,6 +162,7 @@ Readings, lectures, assignments, and news for the course will be posted on the c
     - Welcome
     - 
     - 
+
 *   - **1/9**
     - No class
     - SPSA
@@ -171,19 +172,18 @@ Readings, lectures, assignments, and news for the course will be posted on the c
     - []{colspan=3} **PRIMER ON CAUSAL INFERENCE**
 
 *   - **1/14**
-    - Probability Review
+    - Probability Review / Introduction
     - 
     -   - @samii2016causal
-        - @gerber2012field [Ch. 2]
 
 *   - **1/16 1/21**
     - Review (cont.) / What is Identification?
-    - observation versus intervention, potential outcomes (ATE, ATT, mediation effect, interference, probability of necessity), ATE under SUTVA and strong ignorability, causal effects with potential outcomes
-    -   - @angrist2009mostly [Ch. 1-2]
-        - @morgan2015counterfactuals [Ch. 2-3]
+    - observation versus intervention, potential outcomes (ATE, ATT, probability of necessity), ATE under SUTVA and strong ignorability, causal effects with potential outcomes
+    -   - @gerber2012field [Ch. 2]
+        - @angrist2009mostly [Ch. 1-2]
+        - @morgan2015counterfactuals [Ch. 1-2]
         - @holland1986statistics
-        - @lewbel2019identification
-
+        
 *   - **1/23 1/28**
     - Regression and Causality
     - CES and its properties, selection on observables, conditional ignorability
@@ -204,7 +204,7 @@ Readings, lectures, assignments, and news for the course will be posted on the c
 
 *   - **2/4 2/6**
     - Basics of Experimental Design
-    - target quantities (SATE, PATE) and estimands, inference for the SATE and PATE in an idealized experiment, randomization inference
+    - target quantities (SATE, PATE), inference for the SATE and PATE in an idealized experiment, randomization inference
     -   - @gerber2012field [Ch. 3]
 
 *   - **2/11**
