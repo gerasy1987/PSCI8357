@@ -1,0 +1,163 @@
+---
+title: "Probability Quiz"
+author: "STAT II (Spring 2025)"
+date-modified: "**`r Sys.Date()`**"
+format-links: false
+format:
+   pdf:
+      toc: false
+      margin-left: "2cm"
+      margin-top: "2cm"
+      margin-right: "2cm"
+      margin-bottom: "2cm"
+      pdf-engine: pdflatex
+      include-in-header: 
+         text: |
+            \usepackage{multicol}
+            \usepackage{enumitem}
+            \usepackage{ragged2e}
+        # include-in-header: ../_supp/mystyle.sty
+editor: source
+fontsize: 11pt
+bibliography: ../_supp/psci8357.bib
+# csl: _supp/chicago_syllabus.csl
+bibliographystyle: chicago
+suppress-bibliography: true
+link-citations: true
+citations-hover: true
+---
+
+```{=tex}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\textrm{Pr}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\argmin}{\arg\!\min}
+\newcommand{\argmax}{\arg\!\max}
+\newcommand{\qedknitr}{\hfill\rule{1.2ex}{1.2ex}}
+\newcommand{\given}{\:\vert\:}
+\newcommand{\indep}{\mbox{$\perp\!\!\!\perp$}}
+```
+
+***Disclaimer:** This quiz is UNGRADED and is designed to assess how well you recall the last semester materials. You have 45 minutes to complete as many questions as you can. If you have any questions about the content of the quiz, please seek clarification from the instructor. For multiple choice questions, select only one correct answer. For open-ended questions, write your response in the box provided below each question.*
+
+---
+
+## Section 1: Multiple Choice
+
+*Circle the correct answer.*
+
+**Question 1.** The expectation  $\E [X]$ of a random variable $X$ is:
+
+a. The value of $X$ that occurs most frequently.  
+b. A weighted average of possible values of  $X$, weighted by their probabilities.  
+c. The variance of  $X$.  
+d. The square root of the variance of  $X$.
+
+**Question 2.** Which of the following is **NOT** true about conditional expectation  $\E [X \given Y]$?
+
+a. It is a random variable itself.  
+b. $\E [X \given Y]$ can sometimes equal $\E [X]$.  
+c. $\E [X \given Y]$ is always greater than  $\E [X]$.  
+d. It provides the expected value of  $X$ given the value of  $Y$.
+
+**Question 3.** The variance  $V(X)$ of a random variable is:
+
+a. $\E [X^2] - (\E [X])^2$.  
+b. $(\E [X])^2 - \E [X^2]$.  
+c. $\E [X]\E [X]$.  
+d. $\E [X^2] + \E [X]$.
+
+**Question 4.** What does  $X \indep Y$ signify?
+
+a.  $X$ and  $Y$ are uncorrelated.  
+b.  $X$ and  $Y$ are independent.  
+c.  $X$ and  $Y$ have the same mean.  
+d.  $X$ and  $Y$ have the same variance.
+
+**Question 5.** If $X$ and $Y$ are independent, which of the following is incorrect?
+
+a. $\E [XY] = \E [X] \E [Y]$.
+b. $\E [f(X)Y] = \E [f(X)] \E [Y]$ for any function $f(X)$.
+c. $\E [X \given Y] = \E [X]$.
+d. $\Cov [X, Y] \neq 0$.
+
+---
+
+## Section 2: Short Answers
+
+*Answer briefly. Provide the necessary steps and formulas for your proofs.*
+
+**Question 6.** Explain the difference between variance and covariance, and describe what a positive covariance indicates about the relationship between two random variables.
+
+```{=tex}
+\framebox(\linewidth,150){}
+```
+
+**Question 7.** Define the Law of Iterated Expectation and provide a brief example of its application.
+
+```{=tex}
+\framebox(\linewidth,150){}
+```
+
+**Question 8.** Explain the Central Limit Theorem (CLT) and why it is fundamental for hypothesis testing.
+
+```{=tex}
+\framebox(\linewidth,150){}
+```
+
+**Question 9.** What is a $p$-value, and how do you interpret it in the context of a hypothesis test?
+
+```{=tex}
+\framebox(\linewidth,150){}
+```
+
+**Question 10.** Consider the simple mean estimator for a population mean. Define the estimator $\bar{X}$ as the average of a sample of observations $X_1, X_2, \ldots, X_n$, where each $X_i$ is an independent and identically distributed (i.i.d.) random variable with the population mean $\mu$. Show that $\bar{X}$ is an unbiased estimator of $\mu$.
+
+```{=tex}
+\framebox(\linewidth,150){}
+```
+
+**Question 11.** A study analyzes the relationship between individuals' access to the internet and their participation in anti-government protest. Let $Y$ represent protest turnout (1 for protest, 0 for stay home), and $X$ represent internet access (1 for access, 0 for no access). The joint probability distribution is given below:
+
+|  **$Y$ \\ $X$**                   |    **Access ($X = 1$)**   |   **No Access ($X = 0$)**  |
+|-------------------------|:-------------------------:|:--------------------------:|
+| **Protest ($Y = 1$)**    |          0.4              |          0.2               |
+| **Stay home ($Y = 0$)** |          0.1              |          0.3               |
+
+1. Find $\Prob (Y = 1 \given X = 1)$ and $\Prob (Y = 1 \given X = 0)$.
+
+```{=tex}
+\framebox(\linewidth,150){}
+```
+
+2. Are protest participation ($X$) and internet access ($Y$) independent? Justify mathematically.
+
+```{=tex}
+\framebox(\linewidth,150){}
+```
+
+**Question 12.** You are studying the relationship between voter turnout ($Y$), campaign intensity in the district ($Z$), and political engagement ($X$) across citizens eligible to vote. The following frequency table summarizes the data you collected:
+
+| **Political Engagement ($X$)** | **Campaign Intensity ($Z$)** | **Voter Turnout ($Y$)** | **Frequency** |
+|:----------------------------------:|:--------------------------------:|:---------------------------:|:-------------:|
+| Low                                | Low                              | Yes                         | 10            |
+| Low                                | Low                              | No                          | 20            |
+| Low                                | High                             | Yes                         | 15            |
+| Low                                | High                             | No                          | 5             |
+| High                               | Low                              | Yes                         | 25            |
+| High                               | Low                              | No                          | 10            |
+| High                               | High                             | Yes                         | 20            |
+| High                               | High                             | No                          | 10            |
+
+1. Calculate the joint probabilities $\Prob (Y, Z \given X)$ for $X = \text{Low}$.
+
+```{=tex}
+\framebox(\linewidth,150){}
+```
+
+2. Is $Y$ independent of $Z$ given $X$? You can check this using definition of conditional independence. *(Hint. Remember that it is enough for the conditional independence to not hold for at least one level of $X$)*
+
+```{=tex}
+\framebox(\linewidth,150){}
+```
