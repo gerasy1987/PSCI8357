@@ -1,0 +1,351 @@
+---
+title: "Changing Preferences For Redistribution Due to a Fear of Crime"
+author: "Alex Dean"
+institute: "Vanderbilt University"
+format: 
+  revealjs:
+    theme: dark
+    footer: "Alexander Dean (Vanderbilt University)"
+    slide-number: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    self-contained-math: true
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+fontsize: 32px
+editor: source
+---
+
+```{r}
+#| label: setup
+#| include: false
+#| eval: true
+
+setwd("/users/alexdean/documents/Research/Ongoing Projects/Redistribution_Crime_Fear/Data Exploration")
+
+data <- read.csv("./data/cleaned_data.csv", stringsAsFactors = F)
+data$year <- stringr::str_extract(data$country_year, "\\d{4}")
+data_panel <- plm::pdata.frame(data, index = c("COUNTRY", "year"))
+options(scipen = 999)
+
+pacman::p_load(tidyverse, DeclareDesign, knitr, kableExtra, DesignLibrary, sandwich,
+               lmtest, dagitty, Parallel)
+
+knitr::opts_chunk$set(
+  echo = TRUE, 
+  warning = FALSE #,
+  # error = TRUE, 
+  # message = FALSE,
+  # eval = TRUE
+  )
+
+set.seed(315)
+```
+
+## Roadmap
+
+<br>
+
+-   [RQ and Rationale](#RQ)
+-   [Literature and Theory](#lit)
+-   [Hypotheses](#hypotheses)
+-   [Research Design](#RandD)
+-   [Results](#results)
+-   [Implications](#implications)
+-   [A Proposed Survey Experiment](#experiment)
+-   [Declare Design Plan](#ddp)
+
+## Research Question and Rationale {#RQ}
+
+<br>
+
+1. What is the affect of fear of crime on preferences for redistribution?
+2. Does relative wealth moderate this relationship?
+
+------------------------------------------------------------------------
+
+## Lit {#lit}
+
+::: fragment
+- Cannonical models of redistribution highlight the importance of inequality in the strength of the relationship (Romer 1975; Meltzer & Richards 1981)
+- Many parameters impact this relationship (Dimick et al. 2016; Holland 2018; Alt & Iverson 2017)
+:::
+
+::: incremental
+- What is the relationship between fear of crime and preference for redistribution, moderated by income?
+- Evidence from developed contexts suggest that a fear of crime causes wealthy individuals to increase support for redistribution (Rueda & Stegmueller 2016)
+:::
+
+
+::: {.notes}
+I won't go too deep into the literature and theory here, but I want to start from the canonical political economy models of redistribution which highlight that poorer individuals will prefer greater redistribution than wealthy individuals, that this relationship is linear, and that this different preference increases as macro-level inequality increases. However, there is a rich literature which highlights when we see divergent preferences for redistribution, such as a result of ethnic heterogeneity in a state or altruism, compared to the canonical models. However, we know little about how people's policy preferences for crime and redistribution relate to one another. What evidence we do have from the literature suggests that wealthy individuals who are fearful of crime increase support for redistribution, which is counter intuitive, at least initially. 
+:::
+
+------------------------------------------------------------------------
+
+## Lit (Cont'd)
+
+::: fragment
+- The Logic:
+  - Crime is worsened by economic inequality (Becker 1968)
+  - Wealthy individuals have longer time horizions (Dynan et al. 2004)
+  - Fearful wealthy individuals thus prefer a long-term solution to crime reduction over other methods of mitigation
+:::
+
+::: {.notes}
+The logic is essentially that there is a connection that individuals make between the level of crime and economic inequality, that there is a positive relationship and that wealthy individuals have longer time horizons than other groups of people. As a result, fearful wealthy individuals will support long-term policy solutions to crime reduction such as increased redistribution of wealth by the state. 
+:::
+
+------------------------------------------------------------------------
+
+## Hypotheses {#hypotheses}
+
+1. Wealthy individuals who are fearful of crime will increase their support for redistribution
+2. This relationship is stronger in more unequal countries
+
+:::{.notes}
+From the literature and theory that I very briefly touched upon before, I derive the these two hypotheses that I test using data from the AmericasBarometer survey conducted by LAPOP, although I will discuss the survey more later. In this presentation I focus on the first hypothesis, that wealthy individuals who are fearful of crime will increase their support for redistribution. 
+:::
+
+------------------------------------------------------------------------
+
+## Research Design {#RandD}
+
+::: fragment
+- Time series with cross-sectional data
+  - AmericasBarometer (LAPOP)
+  - 9 South American countries
+  - 7 years (2008-2023)
+:::
+
+::: fragment
+- Preference for Redistribution: DV
+- Relative Income ($income_{idv} - \overline{income}$): IV
+- Fear of crime: IV
+- Individual-level controls
+- Country-level controls
+:::
+
+::: {.notes}
+To empirically test my hypotheses and the theory broadly, I rely upon existing survey data from the AmericasBarometer survey, run by LAPOP. I use every available survey from 2008 to 2023 for 9 South American countries. Argentina, Bolivia, Brazil, Chile, Colombia, Ecuador, Paraguay, Peru, and Uruguay were included in the analysis. The only Latin American South American country not included in the analysis was Venezuela because LAPOP does not have full survey coverage of the country in this time period. I'll show you my primary model on the next slide, but for now, the dependent variable that I use is preference for redistribution of the respondent. I have two primary independent variables, the relative income of the individual, which is their income subtracted by the mean income of that country-year on the survey. I can talk more about the calculation of relative income later because it is a fuzzy measure. The other primary IV was fear of crime. I also include selected individual and country-level controls as well.
+:::
+
+------------------------------------------------------------------------
+
+## Model
+
+<br><br>
+
+$$ Redistribution = \beta_{0} + \beta_{1}Fear + \beta_{2}Relative \space Inc. \\
++ \space \beta_{3}Fear*Relative + \kappa + \theta + \epsilon \tag{1}$$
+
+::: {.notes}
+Here we can see the primary model that I use for the regression analysis of the observational data that I have. I include an interaction between relative income and fear of crime to test hypothesis 1. Kappa is the individual-level controls that I included, such as age and gender. Theta is the country-level controls, like macro-inequality measured by the Gini index and country-level unemployment statistics. One last thing to note on this slide is that my error term is clustered at the country-level.
+:::
+
+------------------------------------------------------------------------
+
+## Preliminary Results {#results}
+```{r, echo=F}
+################## Create Models ###############################################
+# Main Model with FE
+main_model_fe <- plm::plm(redistribution_preference ~ relative_income*fear_crime
+                  + age + gender + education_level 
+                  + gini + unemployment,
+                  data = data_panel,
+                  index = c("country", "year"),
+                  model = "within",
+                  effect = "twoways")
+
+# Main Model w/o FE
+main_model_no_fe <- plm::plm(redistribution_preference ~ relative_income*fear_crime
+                          + age + gender + education_level 
+                          + gini + unemployment,
+                          data = data_panel,
+                          model = 'pooling')
+
+# Main Model No Interaction
+main_model_no_int <- plm::plm(redistribution_preference ~ relative_income +
+                              fear_crime + age + gender + education_level +
+                              age + gender + gini + unemployment, 
+                              data = data_panel,
+                              index = c("country", "year"), model = "within")
+
+# Naive OLS Model
+model_ols <- lm(redistribution_preference ~ relative_income*fear_crime
+                 + age + gender + education_level 
+                 + gini + unemployment,
+                 data = data)
+
+# Model w/o any controls
+model_no_controls <- plm::plm(redistribution_preference ~ relative_income +
+                                fear_crime + relative_income:fear_crime,
+                              data = data_panel)
+
+# Model with only country controls
+model_country_controls <- plm::plm(redistribution_preference ~ relative_income +
+                                   fear_crime + relative_income:fear_crime +
+                                   gini + unemployment,
+                                   data = data_panel,
+                                   index = c("country", "year"),
+                                   model = "within")
+
+# Model with only individual controls
+model_indv_controls <- plm::plm(redistribution_preference ~ relative_income +
+                                fear_crime + relative_income:fear_crime + age 
+                                + gender + education_level, data = data_panel,
+                                index = c("country", "year"),
+                                model = "within")
+
+# Model with only time FE
+model_time_fe <- plm::plm(redistribution_preference ~ relative_income*fear_crime
+                  + age + gender + education_level 
+                  + gini + unemployment,
+                  data = data_panel,
+                  index = c("country", "year"),
+                  model = "within",
+                  effect = "time")
+
+# Model with only country FE
+model_country_fe <- plm::plm(redistribution_preference ~ relative_income*fear_crime
+                  + age + gender + education_level 
+                  + gini + unemployment,
+                  data = data_panel,
+                  index = c("country", "year"),
+                  model = "within",
+                  effect = "individual")
+
+# List of models
+models_unrobust <- list(
+  "No Controls" = model_no_controls,
+  "No Interaction" = main_model_no_int,
+  "Main Model" = main_model_fe,
+  "Time FE" = model_time_fe,
+  "Country FE" = model_country_fe,
+  "No FE" = main_model_no_fe,
+  "Country Ctrls" = model_country_controls,
+  "Indiv. Ctrls" = model_indv_controls
+  )
+
+models_table <- list(
+  "No Controls" = model_no_controls,
+  "No FE" = main_model_no_fe,
+  "Main Model" = main_model_fe,
+  "Time FE" = model_time_fe,
+  "Country FE" = model_country_fe
+  )
+
+# Put models into a list
+### Show time fixed effects are needed and country fixed effects
+main_table <- modelsummary::modelsummary(models_table,
+                                         vcov = "HC3",
+                                         stars = TRUE,
+                                         gof_omit = "AIC|BIC|Num.Obs|R2|R2 Adj.|RMSE|Std.Errors",
+                                         coef_rename = c('Relative Income', 
+                                                         'Crime Fear', 
+                                                         'Income:Fear',
+                                                         'Intercept',
+                                                         'Age', 
+                                                         'Gender', 
+                                                         'Ed. Level', 
+                                                         'Gini', 
+                                                         'Unemployment'),
+                                         title = paste("Relationship between", 
+                                         "Redistributive Preference and",
+                                         "Independent Variables"),
+                                         notes = "Note: Main Model has Country and Year FE",
+                                         output = 'kableExtra')
+```
+
+::: {style="font-size: 50%;"}
+```{r, echo=F}
+main_table
+```
+:::
+
+:::{.notes}
+Here we can see the results in tabular form. I apologize for the big table but I'll show something more aesthetically pleasing in just a minute. We can see that, contrary to theory, that relative income does not have a significant negative association on preference for redistribution. The sign is in the correct direction but the magnitude of the effect is very very low. Additionally, there is not a positive relationship between increased preferences for redistribution for wealthy individuals who are fearful of crime. But perhaps most surprising from my analysis was the strong negative association that a fear of crime had on preferences for redistribution.
+:::
+
+## Preliminary Results cont'd
+
+```{r,echo=F}
+
+main_plot <- ggplot2::ggplot(data, aes(x = relative_income, 
+                                         y = redistribution_preference,
+                                         color = factor(fear_crime))) +
+  geom_smooth(method = "lm") +
+  scale_color_manual(name = "Fear Level",
+                     values = c("navy", "goldenrod"), 
+                     labels = c("Not Fearful", "Fearful")) +
+  labs(x = "Relative Income (Indv. Income - Income)",
+       y = "Preference for Redistribution (1-7 scale)",
+       title = "Preference for Redistribution by Relative Income and Fear of Crime")
+
+main_plot
+```
+
+:::{.notes}
+I think that when we look at this relationship visually, it makes interpreting this relationship easier. We can see that for not-fearful individuals that there is a clear negative association between relative income and preference for redistribution. With the fearful group, we can see that the association between relative income and redistribution does not actually decrease, but rather is constant. This might be indicative of the fact that some wealthy individuals are updating their preferences for redistribution as a result of their fear of crime, although this analysis cannot conclude this statistically nor causally. 
+:::
+
+------------------------------------------------------------------------
+
+## Implications
+
+- Differences in historical attempts at redistribution in Latin America (Holland 2018)
+- Only some wealthy individuals see a connection between crime and inequality and as a result update their preferences?
+
+:::{.notes}
+As I have already mentioned these findings are somewhat contrary to what the literature would suggest. A very similar study in West Europe and the United States suggested that fearful wealthy individuals become more favorable towards increased redistribution. This highlights that there might be scope conditions to this theory where it does not apply well outside of highly-developed contexts. Historical attempts at redistribution from the state have often enriched middle class formalized workers rather than the least well-to-do and this could be a reason why we are not seeing the hypothesized relationship. Additionally, it could be the case that wealthy individuals who are fearful are not updating their preferences for redistribution but instead prefer other measures of crime mitigation such as the purchase of private security. 
+:::
+
+------------------------------------------------------------------------
+
+## Thinking about Survey Experiment Design
+
+- What is the mechanism by which individuals learn to associate crime and inequality?
+- How does one experimentally manipulate fear of crime?
+- If fearful wealthy individuals don't increase support for redistribution, why? How does private security provision affect this relationship?
+
+:::{.notes}
+Moving from the observational evidence that I have given you today, the second part of my term paper is the beginning construction of a survey experiment to gain causal leverage into this relationship. However, a survey experiment, while giving insight into causality, also has several weaknesses that I am still thinking through. The primary difficulty, at least, in my mind, is the experimental manipulation of a fear of crime. The standard measure of a fear of crime in observational surveys asks respondents how afraid they are to walk alone in their neighborhood at night, or if they are afraid of being assaulted in their neighborhood. It isn't immediately obvious how to translate this to an experimental condition. Further, there are multiple ethical concerns with how a researcher would manipulate a fear of crime. There is also a question about two mechanisms in this relationship. While there is some academic literature about the connection between crime and inequality, it doesn't seem totally obvious to me at least that average citizens make this connection, especially when media sources often frame crime coverage not in this manner but in a more salacious tone.
+:::
+
+------------------------------------------------------------------------
+
+## Declare Design 
+
+::: incremental
+- Initial plan: power calculation
+- New plan: bias estimation for survey measures vs the true parameter
+    - Relative Income Measure
+    - Preference for Redistribution
+:::
+
+::: fragment
+- Thoughts?
+:::
+
+::: {.notes}
+Alright, last section here that I have for you guys today. Given the nature of this project and pre-analysis plan, where I introduce exploratory data which informs the contents of the survey experiment that I am proposing, my initial plan for the declare design portion of my pre analysis plan was to include a power analysis. However, after I expanded my analysis to be a time series analysis, rather than a singular point, I didn't feel like a power analysis would be particularly useful in determining whether fear of crime does cause wealthy people to update their preferences for increased redistribution. Instead, I will use declare design to estimate the bias of the survey conceptualization of two key independent and dependent variables, respectively. While the income question on the AmericasBarometer survey is relatively reliable, creating a wealth index is more accurate to the true parameter of relative income in the region. Likewise, the survey asks respondents for their preference for increased redistribution in an abstract way. Likely, less individuals would support increasing redistribution if the question were able to ask respondents in a more realistic scenario. I'd love to hear your thoughts about using DeclareDesign for this. Thanks!
+:::
+
+------------------------------------------------------------------------
+
+## Roadmap
+
+-   [RQ and Rationale](#RQ)
+-   [Literature and Theory](#lit)
+-   [Hypotheses](#hypotheses)
+-   [Research Design](#RandD)
+-   [Results](#results)
+-   [Implications](#implications)
+-   [A Proposed Survey Experiment](#experiment)
+-   [Declare Design Plan](#ddp)

@@ -1,0 +1,72 @@
+---
+title: "Your Title"
+author: "Your Name"
+format:
+  pdf: # This can be html or even word
+    link-citations: true # Hyperlink citation from body to bibliography
+    number-sections: true # write `false` if you wish
+    fontsize: 11pt
+    indent: true
+    keep-tex: true
+    math: true # Makes writing equations easier
+    documentclass: article
+bibliography: bib_name.bib # Put in your folder after export from Zotero
+# csl: csl_name.csl
+# The hashtag above comments a line
+header-includes:
+# Insert your preferred LaTeX packages here
+- \usepackage[margin=1in]{geometry}
+execute:
+  echo: false # Show code chunks
+  warning: false # Show warnings from running code chunks
+  cache: true
+---
+
+```{r knitr_options}
+#| echo: true
+#| eval: false
+#| warning: false
+
+# The above shows the code chunk, but doesn't run it, 
+# flip echo and eval for the opposite
+
+# Set working directory, load required packages, and load data
+
+setwd("")
+
+# I like calling packages with this method below, which makes it easy
+# to load packages without redownloading, as well as make it easy for
+# people who will run your scripts when they need a package they haven't
+# already downloaded
+
+if (!require(tidyverse)) install.packages("tidyverse")
+
+pacman::p_load(tidyverse)
+
+```
+
+# Introduction {#sec-section_nam2}
+
+This is a paragraph. If I want to cite something at the end of a sentence, it is quite simple [@callawayDifferenceinDifferencesMultipleTime2021]. If I only want to cite the year, because I noted the author in the sentence, I only make a small change [-@gibbonsBrokenFixedEffects2019]. Footnotes are a breeze as well.^[See, look how easy this is!] You even have another way to reference footnotes, like this.[^2] There are other things to note with Quarto, but these are the basics for writing a standard manuscript. Below, in [Section 2](#sec-section_name2) I will show how you implement LaTeX math environments. See the .qmd file for how to cross-reference, like the sentence above
+
+[^2]: The other way of typing a footnote! 
+
+# Writing Math {#sec-section_name2}
+
+Below, I have a math equation that I wrote in LaTeX's math environment. It's super easy to implement into your quarto files, you just need the following:
+
+![Example Equation](/example_equation.png)
+
+Which, as you can see, turns into the following:[^3]
+
+```{=tex}
+\begin{equation}
+\mathbb{E}[Y_{i, t}(\infty) - Y_{i, t^{'}}(\infty)|G_{i} = g] = \mathbb{E}[Y_{i, t}(\infty) - Y_{i, t^{'}}(\infty)|G_{i} = g^{'}],
+\end{equation}
+```
+[^3]: Note, it should say =tex within the curly brakets in the image.
+
+# References {#sec-ref}
+
+::: {#refs}
+:::

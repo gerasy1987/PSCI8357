@@ -1,0 +1,553 @@
+---
+title: ""
+author: ""
+format:
+  pdf:
+    link-citations: true
+    number-sections: true
+    fontsize: 11pt
+    indent: true
+    keep-tex: true
+    math: true
+    documentclass: article
+bibliography: stat_paper.bib
+csl: american-political-science-association.csl
+header-includes:
+  - \usepackage{float}
+  - \usepackage{amssymb}
+  - \usepackage{graphicx}
+  - \usepackage{amsmath}
+  - \usepackage[margin=1in]{geometry}
+  - \usepackage{indentfirst}
+  - \usepackage{enumitem}
+  - \usepackage{xcolor}
+  - \usepackage{hyperref}
+  - \usepackage{titling}
+  - \usepackage{setspace}
+  - \usepackage{tabularx}
+  - \usepackage{footmisc}
+  - \usepackage{etoolbox}
+  - \renewcommand{\footnotesize}{\scriptsize} % Sets smaller font for footnotes
+  - \setlength{\footnotesep}{0.5\baselineskip}
+execute:
+  echo: false
+  warning: false
+  cache: true
+---
+
+```{=latex}
+\newpage
+\begin{titlepage}
+    \centering
+    \vspace*{1in}
+    {\Large \textbf{Does Nonstate Public Goods Provision Create Spending Slack? Quasi-Experimental Evidence from Brazil}} \\[1cm]
+    {\large Alexander Dean\footnote{Ph.D. Student, Vanderbilt University, Department of Political Science. Email: \texttt{alexander.r.dean@vanderbilt.edu}}} \\[0.5cm]
+    
+    \vspace{1cm} % Space before the abstract label
+    \today \\[0.5cm]
+    \vspace{1cm}
+    \textbf{Abstract} \\[0.5cm]
+    \begin{minipage}{0.9\textwidth}
+        \small
+        \singlespacing
+        This article explores how nonstate goods provision by Non-Governmental Organizations (NGOs) changes willingness of the state to provide public goods. I argue that when NGOs provide public goods, this gives politicians the ability to shift governmental expenditures away from public goods provision and towards spending on activities which benefit the politician while have strictly lower benefits for overall societal welfare, such as rent extraction or spending on patronage— creating a phenomenon called \textit{spending slack}. I test this theory using original data on NGO projects and municipal expenditures in Brazil with a generalized Difference-in-Differences identification strategy. I find that municipal expenditures on public goods decreases following NGO goods provision in that municipality and that this shift in spending is accompanied by a rise in spending on expenditures associated with patronage spending, like municipal employment— although this relationship is not significant. The article concludes with future steps of exploring heterogenous effects.
+    \end{minipage}
+    
+    \vfill
+\end{titlepage}
+```
+\pagebreak
+
+```{r knitr_options}
+#| echo: false
+#| warning: false
+### Set working directory, load required packages, and load data
+setwd("/Users/alexdean/Documents/Research/Ongoing Projects/exogenous_dist/Writing/24F Term Paper")
+
+if (!require(tidyverse)) install.packages("tidyverse")
+if (!require(modelsummary)) install.packages("modelsummary")
+if (!require(kableExtra)) install.packages("kableExtra")
+if (!require(patchwork)) install.packages("patchwork")
+
+pacman::p_load(tidyverse, modelsummary, kableExtra, patchwork)
+```
+
+```{r load data}
+#| echo: false
+data <- read.csv("../../Data/Realized/ngo_muni_cleaned.csv")
+```
+
+\doublespacing
+
+# Introduction {#sec-intro}
+
+In the past twenty years, service provision spending by Non-Governmental Organizations (NGOs) has quadrupled across the world [@aldashevDevelopmentNGOsBasic2018]. Traditional views of NGOs highlight their role as stopgaps, providing goods provision and service delivery to augment state efforts in these tasks— or to provide in their absence.[^1] However, as this dramatic growth of NGO output has occurred, there is increasing concern that NGOs function as more than mere stopgaps, affecting state efforts at building capacity for goods provision and generating potentially negative second-order effects on society and the state.[^2] One such second-order effect that has received increasing scrutiny in recent years is whether public goods provision and service delivery from NGOs impacts standard modes of governmental goods provision and service delivery. Studies in contexts where there is low-existing state capacity to provide goods provision and service delivery have found that NGO entry into service delivery can cause the "poaching" of governmental workers, leading to materially worse health outcomes [@deserrannoImpactNGOProvidedAID2024]; that NGOs can create a "crowding out" effect, limiting local government responsiveness [@cookLocalPoliticsForest2017]; and that the state reallocate resources from areas which receive aid leading to poorer downstream outcomes for citizens [@baldwinHowPoliticalInsiders2023]. While there is growing evidence that NGO goods provision and service delivery can have adverse secondary-effects in settings where existing state capacity to provide basic goods and services is low, little is known if there are averse second-order effects from NGO production of public goods in settings where there is already existing levels of state capacity to provide basic goods and services to citizens.
+
+[^1]: Indeed, policy practitioners and scholars have historically been quite optimistic of the benefits of NGO goods provision and service delivery, with some calling the growth of these entities a "magic bullet" for development [@edwardsNGOsGlobalFuture1999]
+
+[^2]: For instance, despite the over 5.2 billion US Dollars spent by NGOs providing public goods and service provision in Haiti following the devastating 2010 earthquake, most Haitians have experienced little material increase in living standards and policy practitioners have claimed that the growth of NGO service delivery has hindered efforts of the Haitian state to build capacity [@katzBigTruckThat2013]. A few scholars have noted that NGOs can have second order effects on society, such as increasing protest mobilization [@bouldingSupportersChallengersEffects2009].
+
+I highlight a different second-order effect that NGO provision of public goods can induce— what I term "spending slack"— in both settings with existing state capacity to provide public goods and settings without this capacity. Spending slack occurs when an external actor, such as an NGO, increases the amount of spending available for public goods production in a locality that produces public goods— which should theoretically increase the total amount of public goods production— but this instead gives politicians an opportunity to siphon off government spending for activities and expenditures that, unlike public goods provision, do not broadly increase welfare of all citizens, such as rent extraction or patronage. I argue that this phenomenon of spending slack can occur when NGOs provide public goods in a locality due to imperfect information environments where citizens assign credit for all public goods projects to the incumbent politician. To test this theory of spending slack, I collect data on NGO activity and municipal budget expenditures in Brazil from the period 2005-2021 to create a panel dataset. I apply a generalized difference-in-differences (DiD) identification strategy with Two-Way Fixed Effects (TWFE) in order to gain causal leverage for a test of my theory. I find that, while there is a decline in public goods spending and an increase in municipal employment spending, that this finding is not significant at traditional levels. 
+
+However, as I detail in the context section of the paper, insignificant point estimates that are in the "right" direction should be expected. While I highlight spending slack as a general theory, only specific types of politicians are theorized to engage in spending slack in response to an external actor providing public goods provision in their locality, meaning that NGO goods provision will have a heterogenous effect on spending slack. Second, Brazilian mayors, while having broad leeway in assigning municipal budget allocations, are somewhat constrained in their ability to \textit{drastically} shift budget allocations, indicating that small shifts in budget allocations are meaningful in this context. Finally, I note that even a small $1\%$ shift in spending allocations between public goods provision and municipal employment, a patronage proxy, is large when measured in real terms. A $1\%$ decrease in the mean public goods allocations by a municipality being equivalent to a spending reduction of $R\$604,012.46$ ($\$281,288.60\text{USD}$). Conversely, a $1\%$ increase in the mean employment allocations by a municipality is equal to a spending increase of $R\$968,980.95$ ($\$452,901.696\text{USD}$). Thus, even relatively small spending shifts, in terms of relative budget allocation, has broad implications for potentially negative second-order effects on standard modes of goods provision, decreasing societal welfare (from a production of public goods perspective). All together, the results from this paper highlights the important implication that NGO goods provision and service delivery can have unintended consequnces for state and society.
+
+The paper is organized as follows. [Section 2](#sec-theory) provides the theoretical foundations and context description about NGO operations in Brazil. [Section 3](#sec-data) presents the data and the identification strategy. [Section 4](#sec-analysis) presents the results of NGO goods production on municipal budget allocations and robustness checks. [Section 5](#sec-discussion) concludes and provides initial thoughts for the next steps of this broader project.
+
+# Theory and Context {#sec-theory}
+In this paper, I introduce the concept of "spending slack", where, broadly, the introduction of "external" spending of goods production and service provision results in decreased spending by "internal" sources.^[External meaning funding from sources that are outside standard modes of goods provision and service delivery and internal meaning funding from constitutionally stipulated providers of goods provision and service delivery.] To exemplify, consider a municipality where the mayor, who seeks to be re-elected is in charge of public goods provision and service delivery and sets budget allocations. In this municipality, 95 coins are "realized" for public goods and service delivery in any given period. Typically, 100 coins are available to the politician to provide public goods. If the politician spends strictly less than 95 coins, they risk not being reelected.^[I am currently envisioning two complimentary reasons for why spending less coins can lead to the politician not being reelected. First, citizens, while preferring private transfers to public goods provision, expect a minimum level of public goods production in their locality and will sanction the politician if they don't provide this minimum level. This level of goods production is a normally distributed variable but is private information to the citizens. Second, the state expects a level of public goods provision that matches the funding transfers they make to the politician, however, they imperfectly monitor the level of goods production in the municipality. If the politician is monitored and does not provide 95 coins towards public goods provision and service delivery, they are barred from reelection by the state. Given these two probabilistic constraints, the politician knows that they can assign less than 95 coins for public goods production, but this can carry the risk of no reelection, which is highly valued by the politician.] The politician, as the budget setter, has leeway to allocate the last 5 coins as they wish, with possible allocations including investment into public goods production, rent extraction, and targeted private transfers to core supporters.^[While both the additional allocation of public goods provision and targeted private transfers increase a mayor's vote-share in this example, targeted transfers are more highly valued by citizens, who receive greater expected utility from the private transfer than the public good. However, the private transfer can only be distributed to *n* individual within a municipality of *N* people. Out of these actions, societal welfare is most increased by spending the additional 5 coins on public goods, with private transfers providing a strictly lesser increase of societal welfare, and with the rent extraction option providing a zero increase of societal welfare.] For the 5 coins, targeted transfers strictly win the politician more support than the additional public goods provision, which strictly wins the politician more support than rent extraction. 
+
+While I don't specify politician types formally in this paper, I would expect that a rents-motivated type would prefer rent extraction, a reelection-maximizing type to prefer private transfers, and an other-regarding type to prefer distributing the last 5 coins towards public goods provision.^[Note here that a politician could also prefer patronage if they wish to reward their supporters for reasons other than reelection-maximization. For instance, a politician could procure contracts from friends at inflated prices or provide municipal employment opportunities to members of the mayor's in-group in an effort to maximize their group's utility.] When an external actor, such as an NGO, provides a public good in the municipality that costs 10 coins, the total possible public goods budget in the municipality has increased to 110, while citiznes expectation for the amount of public goods provided remains at 95 coins, given they attribute NGO funding to the politician.^[Thus, when an external actor supplies 10 coins towards public goods and service provision in the municipality, the mayor only needs to supply 85 coins towards public goods and service provision. The remaining 15 coins can be distributed in any of the ways specified above.] This gives politicians more resources (15 coins rather than 5) that they can divert towards private transfers or rent extraction, or keep for public goods provision, as a result. While the overall level of spending for goods provision and service delivery in the municipality remains the same, the level of spending from standard sources (the politician and the state) decreases, leading to spending slack.
+
+I wish to note here that implications from this quasi-model are somewhat similar to those derived from Brollo and co-authors [-@brolloPoliticalResourceCurse2013] and arguments made from literature on the political resource curse more broadly. An increase of resources available to a state (or a politician) leads to an increase of corruption of the incumbent actor (a moral hazard effect) and a decline of ability of governing actors (due to a selection effect). However, while the are broad parallels between my conceptualization of spending slack and literature on political resource curses, there a few key differences. Generally, research on political resource curses examine the exogenous increases of intra-governmental transfers [@brolloPoliticalResourceCurse2013] or physical, tangible reasources like unexpected oil discoveries [@vicenteDoesOilCorrupt2010]. Contrastingly, this project focuses on the interaction of spending by civil society, such as spending from NGOs. Secondly, much of this literature highlights selection effects of running for office for governmental actors. I do not focus on selection effects with this project.^[However, this is a potential direction that I could include in future analysis. If I do include analysis on selection effects into politics in the wake of NGO goods provision, this would align this project even more with the political resource curse literature.] 
+
+Below, I highlight two assumptions that need to hold for spending slack to occur in response to NGO production of public goods in a municipality: (i) even in the absence of credit-seeking behavior, voters reward politicians for all goods provision, including non-state goods provision and (ii) politician willingness to shift budget allocations to engage in patronage or to maximize rent extraction. I draw upon previous research to argue that these assumptions are reasonable. Following this, I highlight existing research on NGO goods production and service delivery generally as well as within the context of Brazil.
+
+## Credit Giving to Politicians
+External spending on goods provision and service delivery has been highlighted as a limitating effect of accountability for politicians. While earlier scholarship primarily focused on the potential for politicians using foreign aid to coerce and coopt potential elite rivals [@buenodemesquitaPoliticalSurvivalEndogenous2009; @morrisonOilNontaxRevenue2009], more recent scholarship has focused on credit claiming, the act of politicians claiming credit for external spending on goods provision and service delivery that largely occurs independent of their effort.^[Again, recall that external spending is defined as any goods provision and service delivery that is realized outside of the standard de-jure methods of provision and delivery. This includes foreign aid and domestic NGO delivery, among other types of external actors.] Specifically, when politicians claim credit for goods provision or service delivery in which they did not help procure— or when voters give credit to politicians for such projects— this limits the ability of citizens to properly reward or sanction incumbents for performance [@ashworthElectoralAccountabilityRecent2012; @ferejohnIncumbentPerformanceElectoral1986]. Politicians can attempt to claim credit by placing billboards announcing external project funding with their name or face or by participating in ribbon-cutting ceremonies following completion of such projects, among other potential actions to influence citizen perception that the project was contingent upon their performance [@cruzForeignAidUndeserved2017]. 
+
+While overt credit claiming of external goods provision and service delivery is an obvious muddying of the clarity of responsibility for which actor (a state actor or nonstate actor) is responsible for providing a specific good or service, even in the absence of overt credit-claiming attempts, voters still often attribute responsibility to politicians [@guiterasDoesDevelopmentAid2015; @baldwinForeignAidPolitical2023]. Perhaps more troubling, others have found that citizens punish incumbent politicians for poor performance of external goods provision and service delivery— even when politicians attempt to distance themselves from the external actor [@baldwinHowPoliticalInsiders2023]. While most political scientists have found that voters generally attribute external goods provision and service delivery to incumbent politician performance, others have found that external actors providing service delivery, primarily nonstate service providers, reduces support for incumbents, namely Bueno [-@buenoBypassingEnemyDistributive2018]. However, Bueno's research design is rather different from other scholarship mentioned here in that voters were given a conjoint experiment and asked how likely they would support a mayor when welfare provision was explicitly defined to be provided by the city government versus an NGO [@buenoBypassingEnemyDistributive2018].^[In an extension of this paper, I plan on using LAPOP data on satisfaction with service provision and satisfaction with mayoral performance in Brazil, both of which can provide descriptive evidence for whether citizens attribute NGO goods provision and service delivery to politicians.] Under the perfect information of Bueno's study, citizens behave as expected to traditional accountability theory [@fearonElectoralAccountabilityControl1999; @ferejohnIncumbentPerformanceElectoral1986].
+
+I argue that this perfect information environment in Bueno's study is extremely unlikely to hold in typical political environments. Some have argued that undeserved credit giving primarily occurs in low-information environments [@baldwinForeignAidPolitical2023], and that by increasing information availability such that voters exist in a "high-information environment", undeserved credit-giving will not occur.^[Baldin and Winters deploy an information experiment where voters were informed about which actors, either external or standard, was responsible for goods provision and service delivery in their locality. In baseline condition, the control, where individuals did not receive this information, voters overwhelmingly attributed all goods provision and service delivery to the politician. In the experimental condition, voters shifted attribution from politicians to the external actor providing service delivery only when the politician had low oversight capacity [@baldwinForeignAidPolitical2023].] However, even in high-information environments, others have found that citizens have trouble attributing blame and credit to politicians and government agencies [@johnsCreditWhereIts2011; @grimmerImpressionInfluenceLegislator2014; @achenBlindRetrospectionElectoral2004]. Thus, there is a strong theoretical foundation for the assumption that when external actors, such as NGOs, provide goods provision and service delivery, they attribute such projects and spending to politicians, even in the absence of overt credit-claiming attempts unless there is perfect information about the production of goods and service delivery in a locality— which is extremely unlikely in a non-experimental political environment.
+
+## Opportunistic Politicians
+When the assumption above, that voters typically give credit to politicians for goods provision produced by external actors, I theorize that politicians are able to distribute funding away from public goods spending and towards other spending like extracting rents or by targeting core supporters with private transfers and patronage, leading to spending slack. However, given this opportunity, would politicians actually engage in the shifting of budgets? I argue that this is very probable, given a robust literature on politicians behaving opportunistically in office.^[Note here I am focusing on whether politicians would engage in this behavior, given a lack of constraints in a general sense. In the following section, I highlight the constraints that exist for mayors in Brazil, specifically, and how this affects potential changes in spending allocations in response to NGO goods provision and service delivery.] A multitude of studies show politicians behaving opportunistically, given ability to do so, at the extend of societal welfare with actions such as expropriation and rent extraction for theirself and their connections [@northConstitutionsCommitmentEvolution1989; @ferrazElectoralAccountabilityCorruption2011; @boasSpoilsVictoryCampaign2014], shirking [@snyderjrPressCoveragePolitical2010; @berneckerPoliticiansShirkWhen2014; @kaltApparentIdeologicalBehavior1990], and shifting budgets for reelection purposes [@toralCanAnticorruptionPolicies2023; @nordhausPoliticalBusinessCycle1975; @grindleJobsBoysPatronage2012]. As I discussed in the quasi-model section above, I only expect certain types of politicians to opportunistically use the provision of public goods or service delivery from external actors to their own benefit. The likelihood of politicians being of a type which would engage in spending slack is partially dependent on institutional capacity and willingness to punish corruption.
+
+## Context: NGOs, Mayors, and Budgets in Brazil
+In the preceeding sections, I introduced the concept of spending slack and have provided theoretical foundations for the primary assumptions of the concept. In this section I explore the potential of spending slack to occur in Brazil by providing context about NGO goods production and service delivery and the role of mayors in providing public goods and setting spending allocations. 
+
+Brazil is a highly decentralized, federal republic with 26 states subdivided into 5,570 municipalities (\textit{municípios}).^[The number of municipalities has expanded from 5,564 municipalities at the beginning of my panel in 2005 to 5,570 municipalities as of 2013 [@castroCom5Novos2013].] Municipalities are managed by an elected mayor (\textit{Prefeito}) and an elected municipal council (\textit{Camara dos Vereadores}). Municipal governments are responsible, as charged by the Brazilian Constitution, for providing public goods and service delivery for urban planning, land development, public transportation, garbage collection, education, health, and infrastructure projects [@ConstituicaoBrasileira1988].^[Municipal governments share some responsibility with state and federal governments for the provision of health care and education, where municipalities typically provide lower-level service delivery, such as the maintanence of primary schools, clinics, and small hospitals [@bragaLocalGovernmentSpending2017].] Due to this responsibility, municipal governments tend to have relatively large workforces, with the average municipal government employing $4.9\%$ of the local population and just over $38\%$ of individuals who are formally employed [@toralCanAnticorruptionPolicies2023]. Additionally, municipal employees experience a relative wage premium in comparison to the private sector, making municipal employment an attractive employment option for citizens [@colonnelliPatronageSelectionPublic2020]. Mayors use municipal employment as a form of patronage to increase their electoral support from citizens [@toralCanAnticorruptionPolicies2023; @mignozzettiLegislatureSizeWelfare2022]. 
+
+While municipalities have primary rsponsibility for goods provision and service delivery generally, they have relatively limited ability to raise taxes, with municipalities primarily relying upon transfers from higher levels of government [@corbiRegionalTransferMultipliers2019]. Federal transfers account for roughly $65\%$ of transfers, with federal transfers either taking the form of constitutionally mandated automatic transfers determined by municipal popuation (\textit{Fundo de Participação do Municipios}, FPM) and discretionary transfers (\textit{CONV\^ENIO}) [@brolloTyingYourEnemys2012].^[The FPM roughly accounts for $50\%$ of transfers while the discretionary transfer accounts for $15\%$ of total revenues.] State transfers account for roughly $23\%$ of municipal revenue while tax revenue from municipalities themselves only comprises about $5.5\%$ of revenue [@brolloTyingYourEnemys2012]. Municipalities are strongly constrained by institutional factors to take on debt, with restrictions on over-borrowing and running a deficit thanks to the Fiscal Responsibility Law of 2000 [@meloPoliticalEconomyFiscal2010]. On average, municipalities run a fiscal surplus of $0.2\%$ of local GDP [@corbiRegionalTransferMultipliers2019].
+
+While FPM transfers are constitutionally mandated, all other transfers that municipalities receive are discretionary in nature. Municipalities compete with one another for these other discretionary funds. Often, these funds are distributed in a manner to favor aligned mayors [@brolloTyingYourEnemys2012].^[Discretionary transfers favoring co-aligned partisans is quite common across the world, not just in Brazil [@braccoIntergovernmentalGrantsSignals2015; @fouirnaiesEnglishBaconCopartisan2015; @berryPresidentDistributionFederal2010].] However, municipalities are not the sole receivers of these discretionary transfers. For instance, federal discretionary transfers also transfer resources to state governments (roughly $30\%$ of federal discretionary transfers), NGOs (roughly $21\%$ of federal discretionary transfers), and federal agencies and publicly owned companies ($3\%$ of total federal discretionary transfers) [@buenoBypassingEnemyDistributive2018].^[This leaves municipal governments with the largest share of federal discretionary transfers, $46\%$.] In non-aligned municipalities, municipalities with a mayor who is not a co-partisan of the federal government, NGOs receive a significantly greater share of discretionary transfers than in municipalities which have an aligned mayor [@buenoBypassingEnemyDistributive2018]. 
+
+NGOs in Brazil receive funding from a wide range of sources. As mentioned above, funding for NGOs can come from the federal government. It is also common for NGOs to procure funding from other sources, including donations from domestic individuals, private companies, foreign governments, international NGOs, and donations from foreign individuals.^[The dataset created by the Brazilian government listing registered NGO projects in the country in the 2005-2022 period has a column which lists the funding source for NGO projects, although the data was not filled out for most of the entries. However, for projects that do have a funding source listed, there was a significant amount of variance for the funding principal of the project [@ListaProjetos2023].] There is a high degree overlap in the types of public goods provision and service delivery provided by NGOs and mayors [@buenoBypassingEnemyDistributive2018].^[Federal transfers for NGOs tend to be concentrated around service delivery that improves social welfare, but non-governmental funding sources are not as concentrated [@buenoBypassingEnemyDistributive2018; @ListaProjetos2023].] While Bueno argues that this dual overlap in goods provision and service delivery reduces support for mayors, I argue that this muddying of responsibility and performance does not hurt incumbent mayors whose municipality receives NGO goods provision and service delivery due to credit-giving to mayors.
+
+In this section, I provide context about the role of mayors and NGOs in providing public goods provision and service delivery in Brazil. Given the institutional setting and legal frameworks, I argue that Brazil represents a hard test of my theory and the concept of spending slack. Mayors share budgetary powers with the municipal council, and while the mayor has the most power— in comparison to any individual councilor— the addition of an additional actor in the budgetary bargaining process decreases the mayor's ability to secure their own rent extraction [@mignozzettiLegislatureSizeWelfare2022]. Additionally, due to strict the strict budgetary framework that is required of municipalities by law, spending slack, when it occurs, should be relatively modest and with the allocation shift towards private transfers and patronage rather than mayoral rent extraction.  
+
+## Hypotheses
+From the theoretical framework and context derived above, I highlight the following hypotheses:
+
+\begin{quote}
+$H_{1}$: NGO goods provision in a municipality will cause a negative shift in budgetary allocations for public goods provision in the same municipality in the following two years.
+
+$H_{2}$: NGO goods provision in a municipality will cause a positive shift in budgetary allocations for municipal employment in the same municipality in the following two years.
+\end{quote}
+
+I specify a period of two years following the implementation of public goods by an NGO because, while the fiscal budget is concurrent with the calendar year, budgets are set by municipalities prior to this date and thus, mayors won't be able to fully shift budgets in all subsequent years of NGOs providing public goods. Municipal employment is used as a proxy for patronage, or the private transfer of resources towards core supporters. I identify the data used to test these hypotheses and the concept of spending slack in the proceeding section.
+
+# Data {#sec-data}
+## Data Coverage and Sources
+To test whether spending slack occurs when NGOs provide goods provision in contexts where there is existing state capacity to produce such goods, I build a panel of data about NGO projects and activities from Brazil, municipal expenditures. The Brazilian national government has a publically available dataset of all registered NGOs and projects from these NGOs in Brazil for the period 2005-2022.[^4] I additionally collect data on municipal budget expenditures from 2005-2022 from the Brazilian government.[^5] Finally, data on potential confounders (population and municipal education quality) was collected from A Base dos Dados for the period 2005-2022.[^6] No project reported as starting in 2022 finished within the same year and so the final panel comprises of data from all Brazilian municipalities for the period 2005-2021. Descriptive statistics are reported on in [Appendix A](#appendixa3).
+
+[^4]: This data was obtained from the Open Data Portal, [Dados Abertos Portal](https://dados.gov.br/dados/conjuntos-dados/mapaosc), and is collected by the Brazilian Institue of Applied Economic Research (Instituto de Pesquisa Econômica Aplicada— IPEA) under its map of civil society organizations (Mapa das Organizações da Sociedade Civil).
+
+[^5]: This data was obtained through the IPEA [website](http://www.ipeadata.gov.br/Default.aspx).
+
+[^6]: [A Base dos Datos](https://basedosdados.org) is a non-governmental organization in Brazil which publishes cleaned data outputs relating to government performance, citizen wellbeing, and elections.
+
+## NGO Projects
+
+The published information about NGO projects was downloaded as raw text, which requires substantial refinement in order to quantitatively measure the type of project the NGO is providing.[^7] In order to provide the quantitative indicator variables for the NGO project, I rely upon structural topic modeling (STM), an unsupervised learning algorithm, to classify the project descriptions.[^8] STM uses word frequency and word distribution across separate documents (descriptions) to allocate the descriptions into a pre-specified number (8 for this project) of topics [@robertsStmPackageStructural2019].[^9] From the 8 topics created from the STM, I manually examined the 50 top word frequencies from each topic to manually assign words into 6 topic categories, health, education, culture, youth, development, and other, with each NGO project assigned to one of 6 categories through an exact match function from the identified words from the STM.[^10] The distribution of topics can be seen in @fig-topic_by_STM.
+
+[^7]: While the Brazilian government has publicly available indicator variables for the registered category for all NGOs, similar data is not available for individual projects. It is probable that most goods provision and service delivery projects undertaken by NGOs will fall under their registered legal category (such as a registered development NGO, a registered religious NGO, etc.), I cannot substantiate that this is fully true and so I rely upon structural topic modeling to classify NGO projects instead. Additionally, some of the registered legal categories do not map well onto project types, namely a registered religious NGO, which could plausibly execute projects across a number of project types.
+
+[^8]: This model builds upon previous topic models, namely Latent Dirichlet Allocation (LDA). STM builds upon LDA by allowing topics to correlate with one another and the ability to assign "meta" variables which supersede topics [@robertsStructuralTopicModels2014].
+
+[^9]: See [Appendix B](#stm_ngo) for reporting on tradeoffs for modeling the number of topics.
+
+[^10]: Admittedly, this is not an ideal process for discovering trends and themes in textual data, however I plan to further automate the text analysis in a future version of this project.
+
+Cultural projects are the most form of goods provision and service delivery that NGOs contribute to in Brazil, making up roughly 22.5% of the executed projects from NGOs in Brazil in the panel period.[^11] Other topics not directly related to public goods provision, Youths and Other, make up just over 50% of the finished projects in the panel period. Topics coded as Education, Development, and Health are defined as public goods projects in this panel and represent the treatment variable.
+
+[^11]: [Table 1](#appendixa1) reports on typical project descriptions and their mapping into these categories. I also touch upon projects that are in the "Other" category and whether these projects should potentially be classified into a different category.
+
+## Budget Expenditures
+The IBGE collects data on yearly budgets from Brazilian municipalities and classifies expenditures into 21 categories.[^12] From these 21 initial categories, I created a spending ratio function which allows for budget spending comparison across years without accounting for differences in the real value of the Brazilian Real.[^13] The 21 categories were then collapsed into 3 spending categories, (i) Public Goods Spending, (ii) Employment and Administration Spending, and (iii) Other Spending. @fig-change_spending showcases the pooled expenditure averages for Brazilian municipalities across the panel period. On average, Brazilian municipalities allocate between 60-65% of spending for categories relating to municipal administration and employment, which I proxy for  spending on patronage. Spending in categories relating to public goods and service delivery in Brazilian municipalities comes to roughly 35% in the panel period and spending in other categories like "Foreign Affairs" and "Scientific Expenditures" account to less than 5% of total expenditures on any given year. The change in budget expenditures across these three categories is the dependent variable of this study.
+
+[^12]: I report on the categories in [Appendix A](#appendixa2), including reporting on the summary statistics and expanding on the coding scheme.
+
+[^13]: This spending ratio takes the proportion of the expense category relative to total spending and multiplies it by 100, $\left(\frac{Category}{Total}\right)*(100)$.
+
+## Covariates
+
+The three covariates included in this study are municipal population size, education quality, and a binary variable indicating being treated in a previous period. All three covariates represent potential confounders which can affect the nature of the relationship of the two theoretical variables of interest. The locations of NGOs in Brazil, as elsewhere, is not exogenously given. NGO projects are concentrated in more populous municipalities. Additionally, municipalities with higher populations also have higher spending allocations for public goods budget categories, on average. @fig-descriptive_munis reports on these trends. Without controlling for municipal population, given that population correlates with NGO presence and spending allocations, this could positively bias the point estimate for the causal relationship of this study. Education quality in a municipality is another potential confounder in the relationship between NGO goods production and municipal budget allocations for goods production. Education quality and spending on public goods, namely education, are positively related. Conversely, education quality and NGO project presence may similarly be related, albeit in a negative direction. Given that NGO goods production and service delivery are (at least theoretically) efforts to augment the state's effort at goods production and service delivery where needed, then NGO projects should tend to be in municipalities with relatively lower levels of goods production and service delivery, both in terms of raw production and in material outcomes. The final covariate in this study is previous treatment. While there is ongoing debate about best practices with estimating causal relationships with panel data, methodologists generally agree that controlling for previous treatment can aid in limiting potential confounding from spillover effects [@imaiWhenShouldWe2019; @wingDesigningDifferencedifferenceStudies2024].
+
+
+## Identification Strategy and Model Specification
+
+In order to provide causal leverage in my test of the relationship between NGO goods production and municipal budget allocations, I use two-way fixed effects (TWFE), with a generalized difference-in-differences (DiD) design in order to recover the effect of NGO goods provision on municipal budget allocations. The setting of this study lends itself to a DiD design because I am able to compare municipalities where NGOs provide goods provision and municipalities where no NGO goods provision occurred over time. With a DiD design, unobserved confounders are allowed to vary across units and time, given that unobserved time confounders move in parallel with one another in the absence of treatment [@angristMostlyHarmlessEconometrics2009].[^15] While TWFE with panel data allows for time-dependent unobserved covariates to vary (in parallel), econometrics research highlights several methodological limitations of TWFE generally, and specifically for a multi-period panel with staggered treatment timing (i.e., different units become "treated"— receive NGO goods production— at different times). I focus here on the latter methodological limitation of TWFE.[^16]
+
+[^15]: This is the parallel trends assumption that is generally needed for a DiD design. While "proving" the existence of parallel trends is difficult insofar that there is no specific statistical test that can be implemented, traditional fixed effects on panel data, where unobserved confounders may vary across unit but not time $(U_{it} = U_{i})$, requires a similarly heroic, if not more so, assumption about the nature of the unobserverable confounding variables for the causal relationship of interest.
+
+[^16]: Of course, other potential methodological issues arise with multi-period panel data, such as serial correlation of variables over time [@bertrandHowMuchShould2004], but statistical tests, such as the placebo test, can be conducted to determine the severity of this issue, unlike the issue of negative weighting, as discussed above. I report on the placebo test in the robustness check section.
+
+In 2021, Goodman-Bacon noted that TWFE with multiple periods and a staggered treatment, is actually the summed and weighted average of all possible two-period canonical DiDs in the panel [-@goodman-baconDifferencedifferencesVariationTreatment2021]. The weighting scheme prioritizes units which are treated close to the middle period of the panel, which gives maximum variation and leverage of pre- and post-treatment periods. These weights can actually be negative, and thus the ATT, the typical estimation of interest with DiD, and an interpretable causal estimate can only be recovered under certain, specific circumstances— such as parallel trends not being violated and constant treatment effects over time [@goodman-baconDifferencedifferencesVariationTreatment2021]. In the past half-decade, there have been a number of newly proposed estimation strategies which attempt to surpass the problem of negative weights with the proto-typical estimation strategy.[^17]
+
+[^17]: Some notable proposed estimation strategies include ones from Imai, Kim, and Wang [-@imaiMatchingMethodsCausal2023], Callaway and Sant'Anna [-@callawayDifferencedifferencesMultipleTime2021]; Sun and Abraham -[@sunEstimatingDynamicTreatment2021], and De Chaisemartin and D’haultfœuille [-@dechaisemartinTwowayFixedEffects2023], among other estimators.
+
+In this study, my primary analysis relies upon the estimator proposed by Imai, Kim, and Wang [-@imaiMatchingMethodsCausal2023]. I use this estimator because it allows for units to go in-and-out of treatment [@imaiMatchingMethodsCausal2023], unlike other popular estimators [@callawayDifferencedifferencesMultipleTime2021]. Theoretically, using the Callaway and Sant'Anna estimator is problematic for this study. Their estimator requires treated units to remain treated, i.e., a unit cannot become treated and then become untreated in a future period [@callawayDifferencedifferencesMultipleTime2021]. However, there is no theoretical basis in this study to assume that treated units remain treated for the rest of the duration of the panel. The effects are hypothesized to affect the next two periods of budgeting allocation for goods provision and administrative employment in a municipality. My theory highlights the role of spending slack, which is, by nature, temporary. Other estimation strategies of generalized DiD and TWFE limit the use of covariates entirely [@sunEstimatingDynamicTreatment2021] or necessitate the assumption that the treatment effect is homogenous when included [@dechaisemartinTwowayFixedEffects2023].
+
+The Imai, Kim, and Wang estimator uses a matching scheme to refine the comparison between a treated unit and an untreated unit such that the two units have an identical treatment history for a specified period, $\ell$, prior to the current treatment period, *t*.[^18] Chosing the number of lag periods involves a consideration of a bias tradeoff. A larger $\ell$ increases the credibility of no carryover effects, which is strictly required by the estimator, while also reducing the number of matched observations available and potentially yielding less precise estimates [@imaiMatchingMethodsCausal2023]. Their estimator additionally has a lead parameter $F$, which specifies the number of periods for which the treatment has a carryover effect. The authors highlight that the period selection for $F$ should be motivated by specific case context and whether short-term effects or long-term effects are theorized. I rely upon an $F$ parameter of 4 periods, a short-term effect, which captures the theorized period where the treatment will affect the outcome measure as well as two periods after. The estimator recovers the Average Treatment on the Treated (ATT) as specified below:
+
+[^18]: Thus, the lag is measured as being from $t - \ell$ wherein the treated and control unit must have the same treatment history besides the current period, $t$.
+
+```{=tex}
+\begin{equation}
+\begin{aligned}
+\delta(F, L) = \mathbb{E} \bigg\{ & Y_{i, t+F} \left( X_{it} = 1, X_{i, t-\ell} = 0, \{X_{i, t-\ell}\}_{\ell}^L \right) \\
+& - Y_{i, t+F} \left( X_{it} = 0, X_{i, t-\ell} = 0, \{X_{i, t-\ell}\}_{\ell}^L \right) \\
+& \bigg| X_{it} = 1, X_{i, t-\ell} = 0 \bigg\},
+\end{aligned}
+\end{equation}
+```
+\noindent where $Y_{i, t+F}(X_{it} = 1, X_{i, t-\ell} = 0, \{X_{i, t-\ell}\}_{\ell}^{L})$ is the potential outcome with treatment. The matching process relies upon one of three estimators, the Mahalanobis distance measure, propensity score weighting, and propensity score matching— I rely upon the Mahalanobis distance measure.[^19]
+
+[^19]: The Mahalanobis distance computes the average between each treated and control observation over time: $S_{it}(i^{'}) = \frac{1}{L} \sum_{\ell = 1}^{L}\sqrt{(\textbf{V}_{i, t - \ell} - \textbf{V}_{i^{'}, t - \ell})^{\top} \sum_{i, t - \ell}^{-1}(\textbf{V}_{i, t - \ell} - \textbf{V}_{i^{'}, t - \ell})}$. See [Appendix C](#robust1) for reporting on alternative matching estimators.
+
+The primary model specification for this study is as follows:
+
+```{=tex}
+\begin{equation}
+Y_{i, t + F} = \alpha_{i} + D_{it}\tau_{i} + \gamma_{t} + \textbf{X}^{'}_{it} + \epsilon_{it}, \tag{2}
+\end{equation}
+```
+
+\noindent where Y is the outcome of interest, the change in municipal budget allocations, $\alpha_{1}$ are unit-level fixed effects, $D_{it}$ is a binary variable that indicates treatment for each unit and time period, $\tau_{i}$ is the ATT, $\gamma_{t}$ are time-varying effects, $\textbf{X}_{it}^{'}$ are the covariates, and $\epsilon_{it}$ the error term, with mean zero. I implement a lag of 5 periods ($30\%$ of the total sample period) and a lead variable for the subsequent 4 periods after treatment. 
+
+# Analysis {#sec-analysis}
+In this section, I turn to the analysis of the research design and theory that I have outlined above. I argue that mayors will use their budgetary powers to engage in what I term spending slack when NGOs provide goods provision and service delivery in their municipalities, moving budgetary allocations away from public goods spending and towards spending that is associated with municipal employment, a proxy for patronage. I first explore whether parallel trends and no anticipation holds, followed by reporting of the main results, and several robustness checks to determine the sensitivity of the results. 
+
+## Parallel Trends and No Anticipation
+A critical assumption for recovering the estimand of the DiD estimator, the ATT, both for the canonical version and the generalized version, is for parallel trends, the parallel movement of the outcome of interest absent treatment between the treatment units and the control units, to hold [@rothWhatsTrendingDifferencedifferences2023]. Formally, for all $t \neq t^{'}$ and $g \neq g^{'}$, 
+
+```{=tex}
+\begin{equation}
+\mathbb{E}[Y_{i, t}(\infty) - Y_{i, t^{'}}(\infty)|G_{i} = g] = \mathbb{E}[Y_{i, t}(\infty) - Y_{i, t^{'}}(\infty)|G_{i} = g^{'}],
+\end{equation}
+```
+
+\noindent where $g$ represents the period of first treatment.^[While there has been recent work which relaxes the strict form of parallel trends to instead only impose this assumption for years after some years are treated [@callawayDifferencedifferencesMultipleTime2021], the relaxed assumption can only be assumed with the Callaway and Sant'Anna estimator, which I do not use in this paper.] In addition to an assumption of parallel trends, an assumption of no anticipation, that municipalities do not shift budgets prior to the end of an NGO project providing goods provision in anticipation of receiving treatment, is additionally needed to recover the ATT as an interpretable, causal estimand of interest. I rely upon a form of sensitivity analysis, introduced by Rambachan and Roth [-@rambachanMoreCredibleApproach2023], to determine the plausibility of parallel trends holding for this analysis. This sensitivity analysis involves the construction of a parameter *M*, which represents the robustness of the pre-existing trend line to increasing degrees of variation away from the pre-trend estimate. Essentially *M* is a nuisance parameter which provides a partial identification to how much of a deviation from the pre-existing difference in the trends between control and treatment is needed for the null to be rejected. Formally, 
+
+```{=tex}
+\begin{equation}
+\theta^{ub}(\beta, \Delta) = \text{max}_{\tau_{\text{post}}}l^{'}\tau_{\text{post}}, s.t. -A_{(\cdot, \text{post})}\tau_{\text{post}} \leq d - A\beta,
+\end{equation}
+```
+where the maximization of this inequality represents the upper-bound of the severity of a violation of the parallel trends assumptions which would return an unbiased point estimate. I rely upon this sensitivity analysis for a "test" of the parallel trends assumption due to its methodological improvements upon the standard methods of "testing" parallel trends in the discipline.^[While the assumption of parallel trends is untestable in a strict, empirical sense, there are common tools used by social scientists which can provide inference if the parallel trends assumption is violated.] 
+
+Standard methods of testing for violations of parallel trends— testing whether pre-treatment period coefficients are statistically significant or visually interpreting pre-treatment trend lines to determine if point estimates cross zero— can provide misleading inferences about violations of parallel trends due to low power and exacerbating the bias of point estimates and under-coverage of confidence intervals [@rothPretestCautionEventStudy2022], as well as having a high probability of missing parallel trends assumption violations [@bilinskiNothingSeeHere2020]. Performing a sensitivity analysis using Rambachan and Roth's [-@rambachanMoreCredibleApproach2023] nuisance parameter estimator derives near-optimal local asymptotic power ($1 - \beta \xrightarrow{p} 1$) under sufficient condition.^[The sufficiency condition holds if the gradiant of the binding constraints of $\tau_{\text{post}}, -A(\cdot, \text{post})$ has full rank. In practice, with the `HonestDiD` package in `R` [@rambachanHonestDiDRobustInference2024], this condition is always met when the sensitivity analysis is returned.] 
+
+```{r parallel_trends}
+#| label: fig-parallel_trends
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "60%"
+#| fig-cap: "Sensitivity of Pre-Trends to M Nuisance Parameter"
+
+knitr::include_graphics(here::here("figures", "sensitivity.png"))
+```
+
+@fig-parallel_trends shows the results of the sensitivity analysis with nuisance parameter *M*. The analysis suggests that the pre-treatment trends in my data is robust to a violation of parallel trends for control and treatment units in pre-treatment periods up to a roughly $35\%$ shift of the point estimates. This suggests that my model specification is robust to a violation of parallel trends.
+
+The second assumption that I discuss here is that of no anticipation, that an unosberved change in the treated group prior to actually being treated is not driving the effect of the treatment, but the anticipation of the treatment. In context of my theory and design, if an anticipation effect were to be present, it would appear where a mayor, who knows that an NGO is providing a public good or service delivery in a municipality, begins to engage in spending slack prior to the completition of the NGO good being finished. Theoretially, I argue that spending slack is unlikely to be subject to an anticipatory effect if there is a ``floor" level of public goods provision^[This floor is such that if less public goods are provided, the politician is subject to sanctioning by voters for under-performance.] that the politician must meet in a municipality, because the politician is limited in their ability to move spending around prior to the actual completition of the good.^[However, there is a potential argument to be made that because voters might perceive some public goods being provided while the project is still ongoing prior to completition, such as the building of a football pitch, that this would give politicians leeway to engage in spending slack in a manner that would be consistent with an anticipatory effect. I note that this is a limitation with the current identification strategy.]
+
+## Main Test
+I now turn to the main analysis of this study. I argue that, in response to NGOs providing public goods and service delivery, mayors will shift budgetary allocations away from providing public goods and towards municipal employment allocations, a common form of patronage for core supporters. @fig-main_plot illustrates the impact of NGOs providing public goods provision on municipal budget allocations. \
+
+```{r main_plot}
+#| label: fig-main_plot
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "90%"
+#| fig-cap: "ATT for Receiving NGO Goods Provision on Spending Slack"
+
+knitr::include_graphics(here::here("figures", "main_plot.png"))
+```
+
+The magnitude of the effect does not reach traditional statistical significance in periods $t + 1$ and $t + 2$, although the relationship is in the theorized direction, with municipalities increasing budget allocations for employment and decreasing budget allocations for public goods provision. The theorized effect appears strongest in the second period after treatment, while periods 3 and 4, which were not hypothesized to be affected by shifts in spending allocations, are closer, as point estimates, to a zero-mean difference between treated units and control units. As I mentioned in the context section, I view this case as a hard test for the concept of spending slack due to strict budgetary limitations that municipalities must abide by and shared responsibilities in allocating budgets that the mayor has with the municipal council. Additionally, a $1\%$ budget shift, while seemingly small, is quite massive when estimated in monetary terms. A $1\%$ decrease in the mean public goods allocations by a municipality is equal to a spending reduction of $R\$604,012.46$ ($\$281,288.60\text{USD}.$). A $1\%$ increase in the mean employment allocations by a municipality is equal to a spending increase of $R\$968,980.95$ ($\$452,901.696\text{USD}.$).^[I applied the conversion between the Brazilian Real and the US Dollar at the approximate middle period of the panel, June 2013.] When viewed in "real" terms, rather than a change in the ratio of spending, the implications of spending slack are heightened, as are the risks of second-order effects of NGOs providing public goods provision and service delivery in settings where there is already existing state capacity to provide public goods.
+
+## Robustness Checks
+This section applies several robustness checks to the primary findings. First, I report on a placebo test results and the extent of set refinement from employing matching in my estimation strategy. With panel datasets, there is a problem of serial correlation in the measurement of the variables due to repeated measurement over time [@bertrandHowMuchShould2004]. Without implementing corrections, standard errors can be too narrow, causing the standard deviation of DiD estimates to be too conservative, leading to an increased probability of recovering a Type I error. Betrand and coauthors suggest two strategies, bootstrapping standard errors and generating "placebo" laws with known distribution and effect size [-@bertrandHowMuchShould2004]. While some have cautioned against bootstrapping standard errors when working with matching estimators, because a standard bootstrap procedure yields invalid inferences [@abadieFailureBootstrapMatching2008], when conditioning on the matching weights— rather than recomputing weights for each bootstrapped sample— standard errors with a standard boostrap procedure yields a valid inference [@otsuBootstrapInferenceMatching2017]. I bootstrap my standard errors with 1000 simulations. @fig-placebo_main plots the results from this placebo test, and my results are not significantly different from zero, allowing me to reject the null hypothesis of Betrand and coauthors' [-@bertrandHowMuchShould2004] placebo "law" test.^[While it appears that the placebo law null hypothesis is not rejected for the period $t-5$, when computing p-values, this was not significant $(p = 0.13)$. I report on the placebo tests for all generated panels in [Appendix C](#robust)]
+
+Covariate matching is a crucial part of the Imai et al. estimator in order to generate more precise estimates. @fig-covbalance_main shows a scatterplot detailing the covariate balance of the refined matched set. The red diagonal line indicates any matching that occured which did not gain any precision by refining the matching process. With a Mahalanobis distance matching estimator, the matched set is more refined and balanced between covariates. @fig-alt_match_results examine the robustness of my main analysis to the use of other matching estimators with a lag of 5 periods. A Propensity Score Matching estimator derives a similar estimand and the relationship is in the same direction. A Propensity Score Weighting estimator, however, produces results with point estimates closer to the null than either a Mahalanobis Distance estimator or the P.S. Matching estimator. The difference is potentially explained by Propensity Score Weighting performing worse, on average, in the matching refinement when compared to the other estimators, leading to more imprecise estimates.^[I report on this in [Appendix C](#robust)]
+
+# Conclusion {#sec-discussion}
+In this paper, I conceptualize "spending slack" to describe a potential second-order effect of NGOs providing public goods provision and service delivery in settings where there is existing state capacity to provide both. Existing research is primarily focused on settings where state capacity is limited [@deserrannoImpactNGOProvidedAID2024; @cookLocalPoliticsForest2017; @baldwinForeignAidPolitical2023]. I argue that while similar second-order effects are unlikely to carry over from settings with low-existing capacity, where entry of NGO goods provision causes a reduction in capacity through "poaching" of government workers and decreased governmental responsiveness to citizens, that when NGOs provide goods provision and service delivery in settings with existing state capacity for both, that this gives politicians the ability to engage in spending slack. I apply my theory to a panel of all Brazilian municipalities in the period 2005-2021, and examine whether there is a decline in spending on public goods allocations, and a rise in spending allocations associated with municipal administration and employment, proxies for private transfers (patronage) towards core supporters of mayors. I use TWFE and a generalized DiD estimator to causally test this theory. While I find results that are in the anticipated direction, this relationship does not reach traditional levels of statistical significance. However, I argue that only specific types of politicians are theorized to actually engage in spending slack in response to an externalactor providing public goods provision in their locality, meaning that NGO goods provision will have a heterogenous effect on spending slack. Second, Brazilian mayors, while having broad leeway inassigning municipal budget allocations, are somewhat constrained in their ability to shift budget allocations significantly from one year to the next, indicating that small shifts in budget allocations are meaningful in this context. Because of the two preceeding points, I argue that my results are still highly suggestive and emphasize the need for future research on nonstate service provision and its effects on state service provision as well as research on the relationship between NGOs, state, and society. In the next section, I highlight the next steps that I plan on undertaking for this project.
+
+## Next Steps
+I have (uncleaned) data on random corruption audits from the Brazilian Comptroller General (\textit{Controladoria Geral da União}) with full temporal coverage of my panel. I plan on running a simple estimation of the difference-in-means of how many corruption violations are charged against municipalities in the treatment group versus municipalities in the control group for this panel. I hypothesize that this spending slack shift is associated with an increase of corruption violations. If I find evidence which indicates that, following NGO goods production in a municipality, corruption increases, this would be suggestive that politicians of certain types (rent extracting and patronage-types) use the spending slack to increase their own welfare and their in-group at the expense of increasing societal welfare through public goods provision.
+
+Additionally, I plan on rerunning the analysis with a more automated structural topic model at all steps of classification process of NGO project types. As seen in @fig-topic_by_STM, there are a relatively high proportion of projects classified as "Other". While I do not expect that the "Other" category to completely be "erased" by projects being classified into other topics, I anticipate that I can have a better estimate of project type in a future attempt at using structural topic modeling.^[The reason I don't anticipate the "Other" category totally disappearing is because some of the project descriptions are relatively poor in quality, providing only a sentence detailing the projects registered id number.] 
+
+In addition to running the analysis again with a more robust structural topic model, I plan on refining the theoretical foundation for spending slack. Through several conversations, it is clear that I should further engage with the sanctioning mechanism for the politician and whether spending slack is conceptually different from that of windfalls in the resource curse literature. Further engagement with the theoretical core of my argument can help drive how I proceed with empirical analysis, as I discuss in the following paragraphs.
+
+Another avenue for next steps for this project is exploring heterogeneous effects in the primary analysis. Specifically, I plan on investigating if municipal education quality or being an unaligned mayor are moderating variables. For spending slack to occur, I assume that citizens generally give credit to politicians for goods provision from external actors. However, as the amount of information increases, up to being in a perfect-information environment where citizens know exactly who provides all goods in a municipality, such as in Bueno's conjoint experiment [-@buenoBypassingEnemyDistributive2018], there should be a decrease in the ability of mayors to engage in spending slack. If I assume that municipal education quality is a proxy for a richer information environment, then I expect to find that in municipalities with higher education quality, mayors are even more constrained in being able to engage in system slack when NGOs provide public goods. Alternatively, if I expect spending slack to be strongly correlated by politician type, with specific types using spending slack to shift budgets while other politicians do not, then I would expect that spending slack to occur with greater probability in municipalities where such politicians are ex ante more likely to be elected. 
+
+Another heterogeneous effect that I highlight here is whether unaligned mayors, mayors with a different partisan affiliation than the national government, are more likely to engage in spending slack than mayors who are aligned. As mentioned previously, Bueno found that discretionary transfers are given at significantly higher rates in municipalities with unaligned mayors and she argues this is an attempt to limit the chance of reelection for the unaligned mayor [-@buenoBypassingEnemyDistributive2018]. I theorize that this could cause unaligned mayors to more readily resort to providing patronage to core supporters in an attempt to win reelection. 
+
+The final heterogeneous effect that I touch upon here is how the incentives to engage in spending slack differs in election versus non-election years. As noted previously, there is a general increase in patronage in election years as part of a political business cycle [@toralCanAnticorruptionPolicies2023], where individuals are hired for short-term contracts. Given this empirical phenomenon, it seems highly probable that spending slack will occur with greater frequency in electoral years than non-electoral years.  
+
+When I implement heterogeneous effects would impact the theoretical relationship I have defined in this article, I am considering switching my primary estimator that I use for the identification strategy. The Imai et al. estimator, while having the benefit of allowing units to go in and out of treatment, does not allow for a continuous independent variable [@imaiMatchingMethodsCausal2023]. Other estimators, namely the De Chaisemartin and d'Haut\oe uille estimator, allows for a continuous variable and could allow me to ``un-binarize" my independent variable of NGO projects, since I have data as well on the spending amount for the NGO project [-@dechaisemartinTwowayFixedEffects2023].
+
+Finally, I note that I will need to conduct additional testing to better determine that spending slack is resulting in worse societal welfare rather than an alternative explanation occuring. One potential alternative explanation is that, while this causal relationship occurs, this is actually allowing municipalities to invest in bureaucratic capacity because their budgets are being augmented by external actors for goods provision and service delivery. A potential empirical test which could provide evidence that municipalities that have received NGO goods provision and service delivery is to conduct an audit experiment, similar to the one conducted by Slough [-@sloughSqueakyWheelsInequality2021] to test bureaucratic capacity of Colombian municipalities.^[Slough's audit experiment is concerned with inequality in service delivery, but there are many parallels with how I could adapt her audit experiment.] A separate method of determining where spending for the additional municipal employment is occuring within the budget category is to use data on formal employment, the RAIS dataset, in Brazil. All registered formal workers are listed in this dataset and, for municipalities, their contract status (either short-term or long-term). Spending slack would be associated with an increase in short-term contracts and a generally negative societal effect of NGO service delivery, while an increase of long-term contracts would be more suggestive of an increase in bureaucratic capacity, instead. 
+
+\pagebreak
+
+# References
+\singlespacing
+::: {#refs}
+:::
+
+\pagebreak
+
+\doublespacing
+
+# Appendix A: Descriptive Statistics {#appendixa}
+## NGO Project Descriptions {#appendixa1}
+```{=latex}
+\begin{table}[H]
+\centering
+\makebox[\textwidth]{%
+\begin{tabularx}{1.2\textwidth}{|X|X|X|}
+\hline
+\textbf{Topic Category} & \textbf{Sample Description} & \textbf{Translation} \\ \hline
+Education & impressão e distribuição gratuita de 5000 exemplares de cartilha com quebra-cabeças acessórios para escolas públicas em todos os níveis no estado de mato grosso. o tema central do produto é a história dos patrimônios materiais tombados pelo iphan no estado. os quebra-cabeças serão ilustrados com as fotografias dos bens. serão aproximadamente 50 bens de referências utilizados na impressão dos quebra-cabeças. & printing and free distribution of 5,000 copies of a booklet with puzzle accessories for public schools at all levels in the state of Mato Grosso. The central theme of the product is the history of the material heritage listed by IPHAN in the state. The puzzles will be illustrated with photographs of the assets. Approximately 50 reference assets will be used in printing the puzzles.  \\ \hline
+Health & aquisição de equipamento e material permanente para unidade de atenção especializar em saúde & acquisition of permanent equipment and material for a specialized health care unit \\ \hline
+Development & implantação e desenvolvimento da cadeia produtiva do sururu de cultivo de produção sustentável e de base comunitária na região do complexo lagunar mundaú - manguaba, em alagoas, gerando trabalho e renda para a comunidade local. & implementation and development of production chain for sururu ito create sustainable and community-based production in the Mundaú - Manguaba lagoon complex region, in Alagoas, generating work and income for the local community. \\ \hline
+Youths & implantação de núcleo de futebol e desenvolvimento do projeto: dentro e fora das 4 linhas, em samambaia, distrito federal, com a participação de 100 (cem) alunos, nas faixas etárias de 06 (seis) aos 17 (dezessete) anos, naipe feminino e masculino & implementation of a football center and development of the project: on and off the field, in Samambaia, Federal District, with the participation of 100 (one hundred) students, aged 6 (six) to 17 (seventeen), male and female. \\ \hline
+Culture & a finalidade é criar um ambiente musical na cidade ao contribuir com o acesso a um universo musical mais rico e criativo, com a formação de platéia e a oportunidade de experienciar a música mas, sobretudo, criar uma agenda de eventos musicais na cidade de morretes. & The purpose is to create a musical environment in the city by contributing to access to a richer and more creative musical universe, with the formation of an audience and the opportunity to experience music but, above all, to create an agenda of musical events in the city of Morretes. \\ \hline
+\end{tabularx}%
+}
+\caption{Topic Keywords Used in Project Classification}
+\label{tab:project_classification}
+\end{table}
+```
+```{r}
+#| label: "fig-topic_by_STM"
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "90%"
+#| fig-cap: "Distribution of NGO Project Types by STM Topic"
+
+knitr::include_graphics(here::here("figures", "figure_7_1.png"))
+```
+
+```{=latex}
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{|X|X|X|}
+\hline
+\textbf{Topic} & \textbf{Keyword (Portuguese)} & \textbf{Keyword (English)} \\ \hline
+Education & educação, escola, ensino, aprendizagem, institução, livro, livros, escolas, ensinos, pedagógico & education, school(s), teaching(s), learning, institution, book(s), pedagogy \\ \hline
+Health  & saúde, hospital, médico, clínica, equipamento médico, vulnerabilidade social, idoso & health, hospital, medic, clinic, medical equipment, socially vulnerable, ederly \\ \hline
+Development & água, trabalho, rio, clima, estrada, rua, via, calçada, infraestructura, engergia, sustentabilidade, meio ambiente, trânsito, sociobiodiversidade, sustentável & water, work, river, climate, street, road, sidewalk, infrastructure, energy, sustanability, sustainable, environment, transit, socio-biodiversity \\ \hline
+Youths & jovem, criança, esports, esportivo, adolescente, adolescentes, crianças, jovens, futebol, nadar, atleta & youth, children, sports, adolescent(s), child, soccer, swimming, athlete \\ \hline
+Culture & arte, cinema, música, festival, concerto, concertos, cultura, teatro, museu, artista, banda, baile, instrumento musical, festivais & art, movie, music, festival(s), concert(s), culture, theater, museum, artist, band, dance, musical instrument \\ \hline
+\end{tabularx}
+\caption{Word Classifications for Each Topic}
+\label{tab:budget_coding}
+\end{table}
+```
+
+
+## Budget Expenditures {#appendixa2}
+```{=latex}
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{|X|X|}
+\hline
+\textbf{Supra-Category} & \textbf{Individual Category} \\ \hline
+Public Goods Spending & Education \& Culture, Energy, Health \& Sanitation, Housing, Public Security, Social Assistance, and Transportation \\ \hline
+Patronage-Proxy Spending & Administration, Labor, Legislative Expenses, Operating, Personnel, and Special Charges \\ \hline
+Other Spending & Commerce, Communications, Environment \& Agriculture, Foreign Relations, Judicial, Justice, Science \& Technology, Sports \& Leisure, and Transfers \\ \hline
+\end{tabularx}
+\caption{Public Goods and Patronage-Proxy Spending by Municipal Expenditure Type.}
+\label{tab:budget_coding}
+\end{table}
+```
+
+```{r}
+#| label: "fig-change_spending"
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "90%"
+#| fig-cap: "Changes in Municipal Spending by Broad Budget Category, 2005-2021"
+
+knitr::include_graphics(here::here("figures", "figure_7_2a.png"))
+```
+
+```{r}
+#| label: "fig-spending_indiv_category"
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "90%"
+#| fig-cap: "Average Municipal Spending By Expenditure Category, 2005-2021"
+
+knitr::include_graphics(here::here("figures", "figure_7_2c.png"))
+```
+
+## Covariate Descriptive Statistics {#appendixa3}
+```{r}
+#| label: "fig-descriptive_munis"
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "90%"
+#| fig-cap: "NGO and Public Goods Descriptive Stats by Municipal Population"
+
+knitr::include_graphics(here::here("figures", "combined_plot_7_3ab.png"))
+```
+
+
+## Treatment Plot
+```{r}
+#| label: fig-treatment_plot
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "90%"
+#| fig-cap: "Treatment Plot"
+
+knitr::include_graphics(here::here("figures", "treatmentplot.png"))
+```
+
+# Appendix B: Structural Topic Modeling {#stm_ngo}
+```{r}
+#| label: fig-topic_tradeoffs
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "90%"
+#| fig-cap: "Plot of Tradeoffs for k Topics in STM"
+
+knitr::include_graphics(here::here("figures", "topic_tradeoff_graph.png"))
+```
+
+```{r}
+#| label: fig-perplexity_plot
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "90%"
+#| fig-cap: "Plot of Perplexity Tradeoff by Topic Number"
+
+knitr::include_graphics(here::here("figures", "perplexity_plot.png"))
+```
+
+```{=latex}
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{|X|X|X|}
+\hline
+\textbf{Topic Category} & \textbf{Key Term} & \textbf{Translation} \\ \hline
+Education & educação, escola, ensino, aprendizagem, instituição, libro, livros, escolas, ensinos, pedagógico & education, school, teaching, learning, institution, book, books, schools, teachings, pedagogy \\ \hline
+Health & saúde, hospital, médico, clínica, equipamento médico, vulnerabilidade social, idoso & health, hospital, medical, clinic, medical equipment, socially vulnerable, elderly \\ \hline
+Development & água, trabalho, rio, clima, estrada, rua, via, calçada, infraestrutura, energia, sustentabilidade, meio ambiente, trânsito, sociobiodiversidade, sustentável & water, job, river, climate, road, sidewalk, infrastructure, energy, sustainability, environment, transit, socio-biodiversity, sustainable \\ \hline
+Youths & jovem, criança, esports, esportivo, adolescente, adolescentes, crianças, jovens, futebol, nadar, atleta & youth(s), child, children, sport(s), adolescence, adolescent, football, swimming, atheletics \\ \hline
+Culture & arte, cinema, música, festival, concerto, concertos, cultura, teatro, museu, artista, banda, baile, instrumento musical, festivais & art, cinema, music, festival(s), concert(s), culture, theater, museum, artist, band, dance, musical instruments \\ \hline
+\end{tabularx}
+\caption{Topic Keywords Used in Project Classification}
+\end{table}
+```
+
+# Appendix C: Robustness Checks {#robust}
+## Main Paper Robustness Checks
+```{r}
+#| label: fig-placebo_main
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "90%"
+#| fig-cap: "Plot of Placebo Estimates"
+
+knitr::include_graphics(here::here("figures", "placebo_main.png"))
+```
+
+```{r}
+#| label: fig-covbalance_main
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "90%"
+#| fig-cap: "Covariance Plot and Matching Refinement"
+
+knitr::include_graphics(here::here("figures", "covbalance_main.png"))
+```
+
+```{r}
+#| label: fig-alt_match_results
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "90%"
+#| fig-cap: "Robustness to Alternative Matching Estimators (Lag = 5)"
+
+knitr::include_graphics(here::here("figures", "alt_matching_analysis.png"))
+```
+
+## Alternative Matching Specification {#robust1}
+```{r}
+#| label: fig-match_covariate_pgs
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "90%"
+#| fig-cap: "Plot of Covariate Matching for Public Goods Outcome"
+
+knitr::include_graphics(here::here("figures", "covbalance_plot_pgs.png"))
+```
+
+```{r}
+#| label: fig-match_covariate_emp
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "90%"
+#| fig-cap: "Plot of Covariate Matching for Patronage Proxy Outcome"
+
+knitr::include_graphics(here::here("figures", "covbalance_plot_emp.png"))
+```
+
+## Alternative Lag Periods {#robust2}
+```{r}
+#| label: fig-alt_lag2
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "90%"
+#| fig-cap: "Plot of ATT with Lag = 2"
+
+knitr::include_graphics(here::here("figures", "figure_9_3_lag2.png"))
+```
+
+```{r}
+#| label: fig-alt_lag3
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "90%"
+#| fig-cap: "Plot of ATT with Lag = 3"
+
+knitr::include_graphics(here::here("figures", "figure_9_3_lag3.png"))
+```
+
+```{r}
+#| label: fig-alt_lag5
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "90%"
+#| fig-cap: "Plot of ATT with Lag = 5"
+
+knitr::include_graphics(here::here("figures", "figure_9_3_lag5.png"))
+```
+
+```{r}
+#| label: fig-alt_lag10
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "90%"
+#| fig-cap: "Plot of ATT with Lag = 10"
+
+knitr::include_graphics(here::here("figures", "figure_9_3_lag10.png"))
+```
+
+## Placebo Test for All Generated Panels
+```{r}
+#| label: fig-placebo_all
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "90%"
+#| fig-cap: "Plot of Placebo Tests for All Generated Panels"
+
+knitr::include_graphics(here::here("figures", "placebo_test.png"))
+```
