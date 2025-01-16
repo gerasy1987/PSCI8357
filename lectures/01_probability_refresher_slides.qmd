@@ -18,7 +18,7 @@ format:
     html-math-method: mathjax
     self-contained-math: true
     css: ../_supp/styles.css
-    theme: serif
+    theme: [serif,"../_supp/custom.scss"]
     incremental: false
     self-contained: true
     citations-hover: true
@@ -26,24 +26,29 @@ format:
     scrollable: false
     transition: fade
     reference-location: document
-    include-before: 
-      [ '<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {enableAssistiveMml: true}});</script>', 
-      '$$
-      \def\E{{\mathbb{E}}}
-      \def\Pr{{\textrm{Pr}}}
-      \def\var{{\mathbb{V}}}
-      \def\cov{{\mathrm{cov}}}
-      \def\corr{{\mathrm{corr}}}
-      \def\argmin{{\arg\!\min}}
-      \def\argmax{{\arg\!\max}}
-      \def\qedknitr{{\hfill\rule{1.2ex}{1.2ex}}}
-      \def\given{{\:\vert\:}}
-      \def\indep{{\mbox{$\perp\!\!\!\perp$}}}
-      $$' ]
-fontsize: 30px
+fontsize: 28px
 editor: source
 bibliography: ../_supp/psci8357.bib
 ---
+
+## {data-visibility="hidden"}
+
+```css
+<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {enableAssistiveMml: true}});</script>
+```
+
+\(
+\def\E{{\mathbb{E}}}
+\def\Pr{{\textrm{Pr}}}
+\def\var{{\mathbb{V}}}
+\def\cov{{\mathrm{cov}}}
+\def\corr{{\mathrm{corr}}}
+\def\argmin{{\arg\!\min}}
+\def\argmax{{\arg\!\max}}
+\def\qedknitr{{\hfill\rule{1.2ex}{1.2ex}}}
+\def\given{{\:\vert\:}}
+\def\indep{{\mbox{$\perp\!\!\!\perp$}}}
+\)
 
 # Expectations
 
@@ -180,9 +185,9 @@ $$
 
   $$
   \begin{align*}
-  \E [X \given Y = 1] &\class{fragment}{{}= \sum_{x \in \mathcal{X}} x \left(\frac{p_{X,Y}(x, 1)}{p_Y(1)}\right) \quad \text{$\because$ definition}} \\
-  &\class{fragment}{{}= \sum^{7}_{x = 2} x \left(\frac{p_{X,Y}(x, 1)}{\frac{1}{6}}\right) \quad \text{$\because$ reducing support}} \\
-  &\class{fragment}{{}= \left(\frac{1}{6}\right)\sum^{7}_{x = 2} x \quad \text{$\because$ distributive}} \\
+  \E [X \given Y = 1] &\class{fragment}{{}= \sum_{x \in \mathcal{X}} x \left(\frac{p_{X,Y}(x, 1)}{p_Y(1)}\right) \quad \text{($\because$ definition)}} \\
+  &\class{fragment}{{}= \sum^{7}_{x = 2} x \left(\frac{p_{X,Y}(x, 1)}{\frac{1}{6}}\right) \quad \text{($\because$ reducing support)}} \\
+  &\class{fragment}{{}= \left(\frac{1}{6}\right)\sum^{7}_{x = 2} x \quad \text{($\because$ distributive)}} \\
   &\class{fragment}{{}= \frac{27}{6} = 4.5} 
   \end{align*}
   $$
@@ -231,10 +236,10 @@ $$
 $$
 \begin{align*}
 \E [\E [X \given Y]] &\class{fragment}{{}= \sum_{y \in \mathcal{Y}} \E [X \given Y = y] p_{Y} (y)} \\
-&\class{fragment}{{}= \sum_{y \in \mathcal{Y}} \left[\sum_{x \in \mathcal{X}} x \frac{p_{X,Y} (x, y)}{p_{Y} (y)} \right] p_Y (y) \quad \text{$\because$ cond. expectation definition}} \\
-&\class{fragment}{{}= \sum_{y \in \mathcal{Y}} \sum_{x \in \mathcal{X}} x p_{X,Y} (x, y) \quad \text{$\because$ distribute and cancel $p_{Y} (y)$}} \\
-&\class{fragment}{{}= \sum_{x \in \mathcal{X}} x \sum_{y \in \mathcal{Y}} p_{X,Y} (x, y) \quad \text{$\because$ reorder sums}} \\
-&\class{fragment}{{}= \sum_{x \in \mathcal{X}} x p_X(x) \quad \text{$\because$ marginalize over $Y$}} \\
+&\class{fragment}{{}= \sum_{y \in \mathcal{Y}} \left[\sum_{x \in \mathcal{X}} x \frac{p_{X,Y} (x, y)}{p_{Y} (y)} \right] p_Y (y) \quad \text{($\because$ definition)}} \\
+&\class{fragment}{{}= \sum_{y \in \mathcal{Y}} \sum_{x \in \mathcal{X}} x p_{X,Y} (x, y) \quad \text{($\because$ distribute and cancel $p_{Y} (y)$)}} \\
+&\class{fragment}{{}= \sum_{x \in \mathcal{X}} x \sum_{y \in \mathcal{Y}} p_{X,Y} (x, y) \quad \text{($\because$ reorder sums)}} \\
+&\class{fragment}{{}= \sum_{x \in \mathcal{X}} x p_X(x) \quad \text{($\because$ marginalize over $Y$)}} \\
 &\class{fragment}{{}= \E [X]}
 \end{align*}
 $$
@@ -481,37 +486,10 @@ $$
 
 - Potential Outcomes Framework
 
-- ATE under SUTVA and strong ignorability
-
 - Causal effects with potential outcomes
+
+- ATE under SUTVA and strong ignorability
 
 - Causal effects with DAGs
 
 ## References
-
-
-<!-- ## Interactivity: Try it Yourself!
-
-- **Explore Sampling Distributions:** 
-  - Change the sample size, mean, and standard deviation using sliders to see how the shape of the sampling distribution changes.
-  - Visualize how the confidence interval narrows with increasing sample size.
-
-```{r interactivePlot}
-# R code to create interactive plots using packages like 'shiny' or 'plotly' to visualize sampling distributions
-# Simulating how sample size affects the sampling distribution for a normal distribution
-library(plotly)
-sampleSize <- seq(1, 10000, by = 10)
-meanValue <- 0
-stdDev <- 1
-set.seed(123)
-
-plot_ly(
-  x = sampleSize, y = rnorm(1000, mean = meanValue, sd = stdDev / sqrt(sampleSize)),
-  type = "scatter", mode = "lines"
-) %>%
-  layout(
-    title = "Change in Sampling Distribution with Sample Size",
-    xaxis = list(title = "Sample Size"),
-    yaxis = list(title = "Sampling Distribution of Sample Mean")
-  )
-``` -->
