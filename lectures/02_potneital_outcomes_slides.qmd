@@ -128,7 +128,7 @@ $Y_i$: Variable of interest whose value may be affected by the treatment
 . . .
 
 :::{.callout-important icon="false" title="DEFINITION: Potential Outcome"}
-$Y_{i} (t)$: Value of the outcome that *would be* realized if unit $i$ received the treatment $d$, where $d = 0$ or $1$
+$Y_{i} (t)$: Value of the outcome that *would be* realized if unit $i$ received the treatment $t$, where $t \in \{ 0, 1\}$
 
 $$
 Y_{i} (t) = 
@@ -189,6 +189,8 @@ $$
   $$
   \tau_i = \underbrace{Y_{i}}_{\text{observed}} - \underbrace{Y_{i}(0)}_{\text{unobserved}}
   $$
+
+. . .
 
 - [Intuition]{.note}: We want to "impute" [counterfactual]{.highlight} outcome $Y_i(0)$ for treated units
 
@@ -313,7 +315,7 @@ $$
 - [Note]{.note}: that $\tau_{ATE}$ is still unidentified
 
 - In the rest of this course, we will consider various assumptions under
-which τATE can be identified from observed information
+which $\tau_{ATE}$ can be identified from observed information
 
 
 ## Causal Quantities of Interest, or Causal Estimands

@@ -448,7 +448,7 @@ $$
   - Natural Experiments
   - Instrumental Variables (IV)
   - Matching and Propensity Scores
-  - Differences-in-difference
+  - Difference-in-Differences
   - _many more_
   :::
 
