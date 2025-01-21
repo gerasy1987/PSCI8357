@@ -328,7 +328,7 @@ Let $N_1 \equiv \sum_{i=1}^N T_i$, then
 
 $$
 \begin{align*}
-\tau_{ATT} &= \frac{1}{N_1}\sum_{i=1}^N T_i\left\{Y_{1i} - Y_{0i} \right\} &&\textit{(finite-population)}\\
+\tau_{ATT} &= \frac{1}{N_1}\sum_{i=1}^N T_i\left\{Y_{i} (1) - Y_{i} (0) \right\} &&\textit{(finite-population)}\\
 \tau_{ATT} &= \E [Y_{i}(1) - Y_{i}(0) \mid T_i = 1] &&\textit{(super-population)}
 \end{align*}
 $$
@@ -380,14 +380,14 @@ $$
 | 3 | 0 | 0 | ? | 0 | ? |
 | 4 | 0 | 1 | ? | 1 | ? |
 | $\E[Y_{i}(1) \given T_i = 1]$                |      |      | 2 |      |   |
-| $\E[Y_{i}(1) \given T_i = 0]$                |      |      |   | 0.5  |   |
+| $\E[Y_{i}(0) \given T_i = 0]$                |      |      |   | 0.5  |   |
 
 : {tbl-colwidths="[30,15,15,15,15,15]"}
 :::
 
 <br>
 
-- Observed difference in means is $\hat\tau = \E[Y_{i}(1) \given T_i = 1] - \E[Y_{i}(1) \given T_i = 0] = 1.5$.
+- Observed difference in means is $\hat\tau = \E[Y_{i}(1) \given T_i = 1] - \E[Y_{i}(0) \given T_i = 0] = 1.5$.
 
 . . .
 
@@ -445,7 +445,7 @@ $$
 
 . . .
 
-- Why is $\tau_{ATT} \neq \hat\tau$? When would they be equal?
+- Why is $\tau_{ATT} = \hat\tau$? When would they not be equal?
 
 . . .
 
@@ -473,7 +473,7 @@ $$
 \begin{align*}
 \hat\tau &= \E[Y_i \given T_i=1]-\E[Y_i \given T_i=0] &&\\
         &= \E[Y_{i} (1) \given T_i=1]-\E[Y_{i} (0) \given T_i=0] \quad \text{($\because$ switching equation)}\\
-        &= \underbrace{\E[Y_{i} (1) - Y_{i} (0) \given T_i=1]}_{\tau_{ATT}} + \underbrace{\E[Y_{i} (0) \given T_i=1]-\E[Y_{i} (0) \given T_i=0]}_{\text{Selection bias}} \quad \text{($\because \pm \E[Y_{i} (0) \given T_i=1]$)}
+        &= \underbrace{\E[Y_{i} (1) - Y_{i} (0) \given T_i=1]}_{\tau_{ATC}} + \underbrace{\E[Y_{i} (0) \given T_i=1]-\E[Y_{i} (0) \given T_i=0]}_{\text{Selection bias}} \quad \text{($\because \pm \E[Y_{i} (0) \given T_i=1]$)}
 \end{align*}
 $$
 
@@ -507,7 +507,7 @@ $$
 $$
 \begin{align*}
 \hat\tau &= \E[Y_i \given T_i = 1]-\E[Y_i \given T_i = 0] \\
-    &= \underbrace{\E[Y_{i} (1) - Y_{i} (0) \given T_i = 1]}_{\tau_{ATT}} +\underbrace{\E[Y_{i} (1) \given T_i=1]-\E[Y_{i} (1) \given T_i=0]}_{\text{Selection bias wrt $Y_i(1)$}}
+    &= \underbrace{\E[Y_{i} (1) - Y_{i} (0) \given T_i = 1]}_{\tau_{ATC}} +\underbrace{\E[Y_{i} (1) \given T_i=1]-\E[Y_{i} (1) \given T_i=0]}_{\text{Selection bias wrt $Y_i(1)$}}
 \end{align*}
 $$
 
@@ -600,7 +600,7 @@ $$
 - and we can show that
 
 $$
-E[Y_{i} (1) | T_i = 1, X_i = x] - E[Y_{i} (0) | T_i = 1, X_i = x] = \tau_{CATE} (x)
+E[Y_{i} | T_i = 1, X_i = x] - E[Y_{i} | T_i = 0, X_i = x] = \tau_{CATE} (x)
 $$
 
 - **How?**
