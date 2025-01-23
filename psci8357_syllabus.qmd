@@ -186,7 +186,7 @@ Readings, lectures, assignments, and news for the course will be posted on the c
         
 *   - **1/23 1/28**
     - Regression and Causality
-    - CES and its properties, selection on observables, conditional ignorability
+    - CEF and its properties, selection on observables, conditional ignorability
     -   - @angrist2009mostly [Ch. 3.1-3.2.2]
         - @morgan2015counterfactuals [Ch. 6.1-6.2]
         - @cinelli2024crash

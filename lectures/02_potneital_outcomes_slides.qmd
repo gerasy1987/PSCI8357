@@ -234,7 +234,7 @@ $$
 
 - This _implicitly_ makes an assumption that potential outcomes for unit $i$ do not depend on other units treatment status
 
-:::{.callout-important icon="false" title="ASSUMPTION: SUTVA (No Interference)"}
+:::{.callout-important icon="false" title="ASSUMPTION: SUTVA"}
 $$ 
 Y_{i} (\mathbf{t}) = Y_{i} (\mathbf{t^{\prime}}) \quad \text{if } t_{i} = t_{i}^{\prime}
 $$
@@ -246,10 +246,10 @@ $$
 - SUTVA consists of two sub-assumptions:
   
   :::{.incremental .small-font}
-  1. Potential outcomes for a unit must not be affected by treatment for any other units.
+  1. [No interference]{.highlight}: Potential outcomes for a unit must not be affected by treatment for any other units.
     [Violations]{.note}: spillover effects, contagion, dilution, displacement, communication
   
-  2. Nominally identical treatments are in fact identical. [Violations]{.note}: Variable levels of treatment, technical errors, fertilizer on plot yield
+  2. [Consistency]{.highlight}: Nominally identical treatments are in fact identical. [Violations]{.note}: Variable levels of treatment, technical errors, fertilizer on plot yield
   :::
 
 ## Causal Inference without SUTVA
@@ -387,7 +387,7 @@ $$
 
 <br>
 
-- Observed difference in means is $\hat\tau = \E[Y_{i}(1) \given T_i = 1] - \E[Y_{i}(0) \given T_i = 0] = 1.5$.
+- Observed difference in means is $\hat\tau_{DiM} = \E[Y_{i}(1) \given T_i = 1] - \E[Y_{i}(0) \given T_i = 0] = 1.5$.
 
 . . .
 
@@ -420,7 +420,7 @@ $$
 
 . . .
 
-- Why is $\tau_{ATE} \neq \hat\tau$? When would they be equal?
+- Why is $\tau_{ATE} \neq \hat\tau_{DiM}$? When would they be equal?
 
 ## Illustration: Average Treatment Effect on the Treated {visibility="uncounted"}
 
@@ -445,7 +445,7 @@ $$
 
 . . .
 
-- Why is $\tau_{ATT} = \hat\tau$? When would they not be equal?
+- $\tau_{ATT} = \hat\tau_{DiM}$, but would that always be the case?
 
 . . .
 
@@ -600,7 +600,7 @@ $$
 - and we can show that
 
 $$
-E[Y_{i} | T_i = 1, X_i = x] - E[Y_{i} | T_i = 0, X_i = x] = \tau_{CATE} (x)
+\E [Y_{i} | T_i = 1, X_i = x] - \E [Y_{i} | T_i = 0, X_i = x] = \tau_{CATE} (x)
 $$
 
 - **How?**

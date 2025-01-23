@@ -288,7 +288,7 @@ role="doc-biblioref">1986</a>)</span></li>
 <tr>
 <th style="text-align: center;"><strong>1/23 1/28</strong></th>
 <td style="text-align: left;">Regression and Causality</td>
-<td style="text-align: left;">CES and its properties, selection on
+<td style="text-align: left;">CEF and its properties, selection on
 observables, conditional ignorability</td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="angrist2009mostly">Angrist and
