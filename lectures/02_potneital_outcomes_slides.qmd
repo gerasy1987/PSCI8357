@@ -473,7 +473,7 @@ $$
 \begin{align*}
 \hat\tau &= \E[Y_i \given T_i=1]-\E[Y_i \given T_i=0] &&\\
         &= \E[Y_{i} (1) \given T_i=1]-\E[Y_{i} (0) \given T_i=0] \quad \text{($\because$ switching equation)}\\
-        &= \underbrace{\E[Y_{i} (1) - Y_{i} (0) \given T_i=1]}_{\tau_{ATC}} + \underbrace{\E[Y_{i} (0) \given T_i=1]-\E[Y_{i} (0) \given T_i=0]}_{\text{Selection bias}} \quad \text{($\because \pm \E[Y_{i} (0) \given T_i=1]$)}
+        &= \underbrace{\E[Y_{i} (1) - Y_{i} (0) \given T_i=1]}_{\tau_{ATT}} + \underbrace{\E[Y_{i} (0) \given T_i=1]-\E[Y_{i} (0) \given T_i=0]}_{\text{Selection bias}} \quad \text{($\because \pm \E[Y_{i} (0) \given T_i=1]$)}
 \end{align*}
 $$
 
@@ -1010,7 +1010,7 @@ $$
 
 . . .
 
-- The average treatment effect of $T$ on $Y$, $\tau_ATE$, can be defined as the average difference in $Y$ between two intervention regimes: 
+- The average treatment effect of $T$ on $Y$, $\tau_{ATE}$, can be defined as the average difference in $Y$ between two intervention regimes: 
 
 $$
 \E [Y \given do(t_1)] - \E [Y \given do(t_0)]
