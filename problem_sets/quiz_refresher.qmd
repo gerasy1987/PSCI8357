@@ -30,8 +30,9 @@ citations-hover: true
 ```{=tex}
 \newcommand{\E}{\mathbb{E}}
 \newcommand{\Prob}{\textrm{Pr}}
-\newcommand{\Var}{\mathrm{Var}}
-\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\var}{\mathbb{V}}
+\newcommand{\cov}{\mathrm{cov}}
+\newcommand{\corr}{\mathrm{corr}}
 \newcommand{\argmin}{\arg\!\min}
 \newcommand{\argmax}{\arg\!\max}
 \newcommand{\qedknitr}{\hfill\rule{1.2ex}{1.2ex}}
@@ -61,7 +62,7 @@ b. $\E [X \given Y]$ can sometimes equal $\E [X]$.
 c. $\E [X \given Y]$ is always greater than  $\E [X]$.  
 d. It provides the expected value of  $X$ given the value of  $Y$.
 
-**Question 3.** The variance  $V(X)$ of a random variable is:
+**Question 3.** The variance  $\var [X]$ of a random variable is:
 
 a. $\E [X^2] - (\E [X])^2$.  
 b. $(\E [X])^2 - \E [X^2]$.  
@@ -80,7 +81,7 @@ d.  $X$ and  $Y$ have the same variance.
 a. $\E [XY] = \E [X] \E [Y]$.
 b. $\E [f(X)Y] = \E [f(X)] \E [Y]$ for any function $f(X)$.
 c. $\E [X \given Y] = \E [X]$.
-d. $\Cov [X, Y] \neq 0$.
+d. $\cov (X, Y) \neq 0$.
 
 ---
 
