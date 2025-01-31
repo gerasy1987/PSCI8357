@@ -239,9 +239,9 @@ distributed through Brightspace ahead of each class.*
 <tr>
 <th style="text-align: center;"><strong>1/7</strong></th>
 <td style="text-align: left;">Welcome</td>
-<td style="text-align: left;"></td>
 <td style="text-align: left;"><a
 href="problem_sets/quiz_refresher.pdf">probability quiz</a></td>
+<td style="text-align: left;"></td>
 </tr>
 <tr>
 <th style="text-align: center;"><strong>1/9</strong></th>
@@ -289,7 +289,8 @@ role="doc-biblioref">1986</a>)</span></li>
 <th style="text-align: center;"><strong>1/23 1/28</strong></th>
 <td style="text-align: left;">Regression and Causality</td>
 <td style="text-align: left;">CEF and its properties, selection on
-observables, conditional ignorability</td>
+observables, conditional ignorability, <a
+href="problem_sets/ps1.pdf">problem set 1</a></td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="angrist2009mostly">Angrist and
 Pischke (<a href="#ref-angrist2009mostly" role="doc-biblioref">2009</a>,
