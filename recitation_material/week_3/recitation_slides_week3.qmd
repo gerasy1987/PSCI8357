@@ -1,0 +1,80 @@
+---
+title: "The Magic of Bootstrapping"
+author: "Alexander Dean"
+subtitle: "Recitation Period 1"
+institute: "Vanderbilt University"
+email: "alexander.r.dean@vanderbilt.edu"
+date: today
+format: 
+  revealjs:
+    theme: dark
+    footer: "Alexander Dean (Vanderbilt University)"
+    slide-number: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    self-contained-math: true
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+fontsize: 32px
+editor: source
+---
+
+
+# Introductory Spiel
+
+## What We Will Cover Today
+1. What is bootstrapping as a statistical technique
+2. What are its use cases 
+3. Implementation of bootstrapping into your own workflow
+
+## Why You Should Care About Bootstrapping
+1. Many use cases (std. errors, calculating statistics) in political science work!
+
+# What is Bootstrapping?
+## Definition
+
+Procedure for estimating the distribution of an estimator by resampling existing data or a model estimated from data
+
+## Description
+1. An inference about a population from sample data (the sample $\rightarrow$ population) can be modeled by resampling the sample data and performing inference about a sample from resampled data (resampled $\rightarrow$ sample)
+2. The population is unknown and thus the true error of the sample statistic (against its true population parameter) is also unknown
+3. Bootstrapping techniques treat the sample as the population and thus the parameter is known, allowing for the measurement of the quality of inference of the "true" sample from the resampled data
+
+## Visual Explanation
+
+![](/bootstrap.png)
+
+## Applications in Political Science
+1. Small sample sizes
+2. Autocorrelated standard errors
+3. Std. errors from imputed data
+4. Permutation tests (sharp nulls)
+5. Std. errors when using matching
+
+## Our Focus Today
+1. **Small sample sizes**
+2. **Autocorrelated standard errors**
+
+## Why bootstrap for small sample sizes
+1. Small sample sizes have strict assumptions about data, like...
+
+. . . 
+
+- Normal distribution of the data
+
+. . . 
+
+- Unless we can rely on the CLT!
+
+## Why bootstrap for autocorrelated standard errors
+1. First, autocorrelation is: The residuals are correlated across time or space and this violates assumptions of independence in standard OLS
+2. Std. errors are biased downwards, decreasing probability of not rejecting the null
+3. Bootstrapping generally outperforms clustering standard errors in this setting (Bertrand et al. 2004)
+
+# Implementation in R
