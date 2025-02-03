@@ -57,7 +57,9 @@ bibliography: ../_supp/psci8357.bib
 #|  include: false
 
 # load necessary libraries
-pacman::p_load(tidyverse)
+pacman::p_load(tidyverse, future, future.apply, pbapply)
+
+future::plan(multisession, workers = parallel::detectCores() - 4)
 
 # set theme for plots
 thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
@@ -86,6 +88,38 @@ get_bias <- function(tau = .5, delta = 0.3, gamma = 0.3) {
       unbiased = unname(model_unbiased$coefficients[2] - tau)
     )
   )
+}
+
+get_bias_het <- function(tau_base = .5,
+                         assignment_fun = function(x) .5 + 0.01 * x,
+                         het_fun = function(x) tau_base + 0.01 * x) {
+  n <- 1000 # sample size
+  gamma <- 0.1 # effect of X on outcome
+
+  X <- sample(x = 1:100, replace = T, size = n) # some covariate
+  tau_total <- sum(het_fun(1:100) / 100) # total treatment effect (assuming heterogeneity)
+
+  # democratic institutions (correlated with confounder)
+  democracy_high <- rbinom(n, size = 1, prob = .5)
+  democracy_high_2 <-
+    rbinom(n, size = 1, prob = sapply(X, assignment_fun))
+
+  # economic growth (influenced by both investment and democratic institutions)
+  growth <-
+    het_fun(X) * democracy_high +
+    gamma * X + rnorm(n, mean = 0, sd = 5)
+
+  growth_2 <-
+    het_fun(X) * democracy_high_2 +
+    gamma * X + rnorm(n, mean = 0, sd = 5)
+
+  # regression ignoring the confounder
+  bias1 <- lm(growth ~ democracy_high + factor(X))$coefficients[2] - tau_total
+
+  # regression ignoring the confounder
+  bias2 <- lm(growth_2 ~ democracy_high_2 + factor(X))$coefficients[2] - tau_total
+
+  return(c(het1 = unname(bias1), het2 = unname(bias2)))
 }
 ```
 
@@ -741,14 +775,13 @@ democracy_score <- delta * confounder + rnorm(n, mean = 0, sd = 5)
 # economic growth (influenced by both investment and democratic institutions)
 growth <- tau * democracy_score + gamma * confounder + rnorm(n, mean = 0, sd = 5)
 
-# regression ignoring the confounder
-model_biased <- lm(growth ~ democracy_score)
-
 # true regression including the confounder
 model_unbiased <- lm(growth ~ democracy_score + confounder)
+cat(unname(model_unbiased$coefficients[2]) - tau) # error in unbiased model
 
-cat(unname(model_unbiased$coefficients[2]) - 0.5) # error in unbiased model
-cat(unname(model_biased$coefficients[2]) - 0.5) # error in biased model
+# regression ignoring the confounder
+model_biased <- lm(growth ~ democracy_score)
+cat(unname(model_biased$coefficients[2]) - tau) # error in biased model
 ```
 
 ## OVB: High $\gamma$, High $\delta$
@@ -761,7 +794,7 @@ cat(unname(model_biased$coefficients[2]) - 0.5) # error in biased model
 
 # Convert sims matrix to long format dataframe
 sims_df <-
-  replicate(1000, get_bias(delta = 0.5, gamma = 0.5)) |>
+  pbapply::pbreplicate(1000, get_bias(delta = 0.5, gamma = 0.5), cl = "future") |>
   t() |>
   as.data.frame() |>
   rename(Biased = biased, Unbiased = unbiased) |>
@@ -795,7 +828,7 @@ ggplot(sims_df, aes(x = Value, fill = Type)) +
 
 # Convert sims matrix to long format dataframe
 sims_df <-
-  replicate(1000, get_bias(delta = 0.1, gamma = 0.5)) |>
+  pbapply::pbreplicate(1000, get_bias(delta = 0.1, gamma = 0.5), cl = "future") |>
   t() |>
   as.data.frame() |>
   rename(Biased = biased, Unbiased = unbiased) |>
@@ -829,7 +862,7 @@ ggplot(sims_df, aes(x = Value, fill = Type)) +
 
 # Convert sims matrix to long format dataframe
 sims_df <-
-  replicate(1000, get_bias(delta = 0.5, gamma = 0.1)) |>
+  pbapply::pbreplicate(1000, get_bias(delta = 0.5, gamma = 0.1), cl = "future") |>
   t() |>
   as.data.frame() |>
   rename(Biased = biased, Unbiased = unbiased) |>
@@ -863,7 +896,7 @@ ggplot(sims_df, aes(x = Value, fill = Type)) +
 
 # Convert sims matrix to long format dataframe
 sims_df <-
-  replicate(1000, get_bias(delta = 0.1, gamma = 0.1)) |>
+  pbapply::pbreplicate(1000, get_bias(delta = 0.1, gamma = 0.1), cl = "future") |>
   t() |>
   as.data.frame() |>
   rename(Biased = biased, Unbiased = unbiased) |>
@@ -1474,6 +1507,357 @@ digraph G {
 
 - Be also mindful of the sizes of the effects of potential confounders. If the effect on main independent and dependent variable can be proven to be limited, the OVB is small!
 
+# Regression with Heterogeneous Treatments
+
+## Effect Heterogeneity
+
+<br>
+
+- Thus far we have simplified things by assuming [constant effects]{.highlight} ($\tau_i = \tau$ for all $i$) and [linearity]{.highlight} ($\E [\eta_i \given X_i] = X'_i \gamma$).
+
+. . .
+
+- These are strong assumptions!
+
+- What if they are false? Let’s see.
+
+. . .
+
+- Suppose 
+
+  - $\mathcal{T} = \{0,1\}$,
+  - Potential outcomes $(Y_{i} (0), Y_{i} (1))$, 
+  - Heterogeneous treatment effects, $\tau_i = Y_{i} (1) - Y_{i} (0)$,
+  - $\E [\eta_i \given X_i] = f(X_i)$
+
+- Let [conditional independence]{.highlight} assumption (CIA) hold: $(Y_{i} (0), Y_{i} (1)) \indep T_i \given X_i$.
+
+## Effect Heterogeneity
+
+- In this case the effect of interest is still 
+
+  $$
+  \begin{align*}
+  \tau_{ATE} &= \E_{X} [\E [Y_i (1) \given X_i] - \E [Y_i (0) \given X_i]] \\
+  &= \E_{X} [\E [Y_i (1) \given T_i = 1, X_i] - \E [Y_i (0) \given T_i = 0, X_i]] \\
+  &= \sum_{X} \tau_x \Pr (X_i = x),
+  \end{align*}
+  $$
+
+  where $\tau_x \equiv \E [Y_i (1) \given X_i = x] - \E [Y_i (0) \given X_i = x]$
+
+. . .
+
+- How would we estimate this using regression?
+
+. . .
+
+- We can use [_saturated_]{.highlight} (or one-way fixed effects) OLS regression model
+
+  $$
+  Y_i = \alpha_0 + \tau T_i + \mathbb{1} [X_i = x_2] \alpha_{x_2} + \dots + \mathbb{1} [ X_i = x_L ] \alpha_{x_L} +   \varepsilon_i,
+  $$
+
+  where $\mathbb{1} [\cdot]$ denotes indicator of event $\cdot$; $x_2, \dots, x_L$ exhausts all possible $X_i$ values omitting one (?) from the specification.
+
+. . .
+
+- This is the best we can do with OLS regression with controls. (Why?)
+
+## Regression Anatomy
+
+- Recall [regression anatomy]{.highlight}: $\hat{\tau} = \frac{\cov(\tilde{Y}_i, \tilde{T}_i)}{\var(\tilde{T}_i)}$, where $\tilde{T}_i$ is residuals from regression of $T_i$ on other regressors
+
+- Let's see if it actually works
+
+. . .
+
+```{r}
+#| label: regression_anatomy
+#| echo: true
+#| code-line-numbers: "1-5|7-8|10-12|14-18"
+#| output-location: column-fragment
+
+# simulate data
+n <- 1000
+X <- rnorm(n)
+D <- 0.5 * X + rnorm(n) # do not use T!!!
+Y <- 2 * T + 1 * X + rnorm(n)
+
+# standard regression
+standard <- coef(lm(Y ~ D + X))["D"]
+
+# make Y tilde and D tilde
+tilde_Y <- lm(Y ~ X)$residuals
+tilde_D <- lm(D ~ X)$residuals
+
+# regression anatomy
+anatomy <- coef(lm(tilde_Y ~ tilde_D))["tilde_D"]
+
+# simplified regression anatomy
+anatomy_simp <- coef(lm(Y ~ tilde_D))["tilde_D"]
+
+data.frame(
+  Method = c(
+    "Standard", "Regression Anatomy",
+    "Regression Anatomy (Simplified)"
+  ),
+  Coefficient = c(standard, anatomy, anatomy_simp)
+) |> knitr::kable(digits = 3)
+```
+
+## Regression Anatomy
+
+- Recall that $\hat{\tau} = \frac{\cov(Y_i, \tilde{T_i})}{\var(\tilde{T_i})}$, where $\tilde{T_i}$ is residuals from regression of $T_i$ on other regressors
+
+  $$
+  \begin{align*}
+  \hat{\tau} &= \frac{\cov(Y_i, \tilde{T_i})}{\var(\tilde{T_i})}\\
+  &= \frac{\E [\E [Y_i \given T_i, X_i](T_i - \E [T_i \given X_i])] - \textcolor{#d65d0e}{\E [Y_i \given T_i, X_i]\E [T_i - \E [T_i   \given X_i]} ] }{\E [(T_i - \E [T_i \given X_i])^2]}\\
+  &= \frac{\E [\E [Y_i \given T_i, X_i](T_i - \E [T_i \given X_i])]}{\E [(T_i - \E [T_i \given X_i])^2]}.  \quad  \text{($\because$ independence of residuals)}
+  \end{align*}
+  $$
+
+. . .
+
+- Now let's look at the first term in the numerator
+
+  $$
+  \begin{align*}
+  \E [Y_i \given T_i, X_i] &= T_i\E [Y_{i} (1) - Y_{i} (0) \given T_i, X_i]  + \textcolor{#458588}{\E [Y_{i} (0) \given T_i, X_i]} \quad \text{($\because$ switching equation)}\\
+  &= T_i\E [Y_{i} (1) - Y_{i} (0) \given T_i, X_i]  + \E [\textcolor{#458588}{Y_{i} (0)} \given T_i = 0, X_i] \quad \text{($\because$  CIA)}\\
+  &= T_i \textcolor{#458588}{\E [Y_{i} (1) - Y_{i} (0) \given T_i, X_i]}  + \E [Y_{i} \given T_i = 0, X_i] \quad \text{($\because$  switching equation)}\\
+  &= T_i \tau_X  + \E [Y_{i} \given T_i = 0, X_i] \quad \text{($\because$ definition of $\tau_X$)}
+  \end{align*}
+  $$
+
+## Regression Anatomy
+
+$$
+  \begin{align*}
+  \hat{\tau} &= \frac{\E [\E [Y_i \given T_i, X_i](T_i - \E [T_i \given X_i])]}{\E [(T_i - \E [T_i \given X_i])^2]} \\
+  &= \frac{\E [\textcolor{#458588}{\left( T_i \tau_X  + \E [Y_{i} \given T_i = 0, X_i] \right)} (T_i - \E [T_i \given X_i])]}{\E [(T_i - \E [T_i \given X_i])^2]} \quad \text{($\because$ plug in result)}\\
+  &\class{fragment}{{}= \frac{\E [ \textcolor{#458588}{T_i \tau_X} (T_i - \E [T_i \given X_i])  + \textcolor{#458588}{\E [Y_{i} \given T_i = 0, X_i]} (T_i - \E [T_i \given X_i]) ]}{\E [(T_i - \E [T_i \given X_i])^2]}  \quad \text{($\because$ distribute)}} \\
+  &\class{fragment}{{}= \frac{\E [ \textcolor{#d65d0e}{T_i} \tau_X \textcolor{#d65d0e}{(T_i - \E [T_i \given X_i])} ]}{\E [(T_i - \E [T_i \given X_i])^2]}  \quad \text{($\because$ independence of residuals)}} \\
+  &\class{fragment}{{}= \frac{\E [ \tau_X \textcolor{#d65d0e}{(T_i - \E [T_i \given X_i])^2} ]}{\E [(T_i - \E [T_i \given X_i])^2]}  \quad \text{($\because \pm \E [T_i \given X_i$ and CIA )}} \\
+  &\class{fragment}{{}= \frac{\E_X [ \tau_X \textcolor{#d65d0e}{\E [ (T_i - \E [T_i \given X_i])^2 \given X_i]} ]}{\E_X [ \textcolor{#d65d0e}{\E [ (T_i - \E [T_i \given X_i])^2 \given X_i ]} ]}  \quad \text{($\because$ iterated $\E$ )}} \\
+  &\class{fragment}{{}= \frac{\E_X [ \tau_X \textcolor{#d65d0e}{\var (T_i \given X_i)} ]}{\E_X [ \textcolor{#d65d0e}{\var (T_i \given X_i)} ] }  \quad \text{($\because$ definition of $\var$ )}}\\
+  &\class{fragment}{{}= \frac{\sum_X \tau_X \textcolor{#d65d0e}{\Pr (T_i = 1 \given X_i = x) (1 - \Pr (T_i = 1 \given X_i = x))} \Pr(X_i = x)}{\sum_X \textcolor{#d65d0e}{\Pr(T_i = 1 \given X_i = x) (1 - \Pr (T_i = 1 \given X_i = x))} \Pr(X_i = x)}.  \quad \text{($\because$ binary $T_i$)}}
+  \end{align*}
+$$
+
+## What Was This?
+
+![](../_images/phew.png){fig-align="center"}
+
+## Effect Heterogeneity
+
+<br>
+
+- Compare
+
+  $$
+  \tau_{ATE} = \sum_{X} \tau_x \Pr (X_i = x),
+  $$
+
+  versus
+
+  $$
+  \hat{\tau} = \frac{\sum_X \tau_X \textcolor{#d65d0e}{\Pr (T_i = 1 \given X_i = x) (1 - \Pr (T_i = 1 \given X_i = x))} \Pr(X_i = x)}  {\sum_X \textcolor{#d65d0e}{\Pr(T_i = 1 \given X_i = x) (1 - \Pr (T_i = 1 \given X_i = x))} \Pr(X_i = x)}
+  $$
+
+. . .
+
+- $\hat{\tau}$ aggregates via [conditional variance weighting]{.highlight} with respect to $T_i$ instead of just probability.
+
+- If $\tau_i$ was **constant** over $X_i$, the precision weighting _could_ be good from an efficiency standpoint. But this is probably irrelevant.
+
+- If $T_i \indep X_i$, then $\hat{\tau}$ reduces to weighting by the number of units with $X_i = x$.
+
+## Effect Heterogeneity
+
+<br>
+
+- Logic carries through to continuous treatments [@angrist2009mostly, 77–80; @aronow2016does].
+
+- @aronow2016does show that for arbitrary $T_i$ and $X_i$,
+
+  $$
+  \hat{\tau} \xrightarrow{p} \frac{\E [w_i \tau_i]}{\E [w_i]}, \quad \text{where } w_i = (T_i - \E [T_i | X_i])^2,
+  $$
+
+  in which case
+
+  $$
+  \E [w_i | X_i] = \var [T_i \given X_i].
+  $$
+
+. . .
+
+- The ["effective sample"]{.highlight} is weighted by $\hat{w}_i = (T_i - \hat{\E}[T_i | X_i])^2$  (squared residual from regression of $T_i$ on control).
+
+- Even with a representative sample, regression estimates may not aggregate effects in a representative manner. Regression estimates are **"local"** to an effective sample.
+
+
+## Let's Try a Simulation
+
+<br>
+
+```{r}
+#| echo: true
+#| eval: true
+#| output: asis
+#| code-line-numbers: "1-5|7-11|13-25|27-31"
+set.seed(20250202) # set seed
+
+n <- 1000 # sample size
+tau_base <- 0.5
+gamma <- 0.1 # effect of X on outcome
+
+# some discrete covariate
+X <- sample(x = 1:100, size = n, replace = T)
+
+# total treatment effect (assuming possible heterogeneity)
+tau_total <- sum((tau_base + 0.01 * 1:100) / 100)
+
+# democratic institutions (correlated with confounder)
+democracy_high <- rbinom(n, size = 1, prob = .5)
+democracy_high_2 <-
+  rbinom(n, size = 1, prob = sapply(X, function(x) .5 + 0.01 * x))
+
+# economic growth (influenced by both investment and democratic institutions)
+growth <-
+  (tau_base + 0.01 * X) * democracy_high +
+  gamma * X + rnorm(n, mean = 0, sd = 5)
+
+growth_2 <-
+  (tau_base + 0.01 * X) * democracy_high_2 +
+  gamma * X + rnorm(n, mean = 0, sd = 5)
+
+# regression ignoring the confounder
+bias1 <- lm(growth ~ democracy_high + factor(X))$coefficients[2] - tau_total
+
+# regression ignoring the confounder
+bias2 <- lm(growth_2 ~ democracy_high_2 + factor(X))$coefficients[2] - tau_total
+```
+
+## Heterogeneous $\tau$ and Assignment
+
+```{r}
+#| label: tau_het_treat_tau
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 5
+
+sims_df <-
+  pbapply::pbreplicate(
+    n = 1000,
+    get_bias_het(),
+    cl = "future"
+  ) |>
+  t() |>
+  as.data.frame() |>
+  dplyr::rename(`Heterogeneous` = het2, `Homogeneous` = het1) |>
+  pivot_longer(cols = c(Heterogeneous, Homogeneous), names_to = "Assignment", values_to = "Value")
+
+# Plot using ggplot2
+ggplot(sims_df, aes(x = Value, fill = Assignment)) +
+  geom_histogram(alpha = 0.5, position = "identity", bins = 100) +
+  scale_fill_manual(values = c("#458588", "#cc241d")) +
+  geom_vline(
+    data = summarize(group_by(sims_df, Assignment), mean_val = mean(Value)),
+    aes(xintercept = mean_val, color = Assignment),
+    linetype = "dashed", size = 1
+  ) +
+  scale_color_manual(values = c("#458588", "#cc241d")) +
+  scale_x_continuous(limits = c(-2, 2)) +
+  labs(
+    x = "Bias (Deviation from True Value)",
+    y = "Frequency"
+  ) +
+  theme_minimal()
+```
+
+## Heterogeneous $\tau$ Only
+
+```{r}
+#| label: tau_het_treat
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 5
+
+sims_df <-
+  pbapply::pbreplicate(
+    n = 1000,
+    get_bias_het(assignment_fun = function(x) .6),
+    cl = "future"
+  ) |>
+  t() |>
+  as.data.frame() |>
+  dplyr::rename(`Heterogeneous` = het2, `Homogeneous` = het1) |>
+  pivot_longer(cols = c(Heterogeneous, Homogeneous), names_to = "Assignment", values_to = "Value")
+
+# Plot using ggplot2
+ggplot(sims_df, aes(x = Value, fill = Assignment)) +
+  geom_histogram(alpha = 0.5, position = "identity", bins = 100) +
+  scale_fill_manual(values = c("#458588", "#cc241d")) +
+  geom_vline(
+    data = summarize(group_by(sims_df, Assignment), mean_val = mean(Value)),
+    aes(xintercept = mean_val, color = Assignment),
+    linetype = "dashed", size = 1
+  ) +
+  scale_color_manual(values = c("#458588", "#cc241d")) +
+  scale_x_continuous(limits = c(-2, 2)) +
+  labs(
+    x = "Bias (Deviation from True Value)",
+    y = "Frequency"
+  ) +
+  theme_minimal()
+```
+
+## Heterogeneous Assignment Only
+
+```{r}
+#| label: tau_het_tau
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 5
+
+sims_df <-
+  pbapply::pbreplicate(
+    n = 1000,
+    get_bias_het(het_fun = function(x) tau_base),
+    cl = "future"
+  ) |>
+  t() |>
+  as.data.frame() |>
+  dplyr::rename(`Heterogeneous` = het2, `Homogeneous` = het1) |>
+  pivot_longer(cols = c(Heterogeneous, Homogeneous), names_to = "Assignment", values_to = "Value")
+
+# Plot using ggplot2
+ggplot(sims_df, aes(x = Value, fill = Assignment)) +
+  geom_histogram(alpha = 0.5, position = "identity", bins = 100) +
+  scale_fill_manual(values = c("#458588", "#cc241d")) +
+  geom_vline(
+    data = summarize(group_by(sims_df, Assignment), mean_val = mean(Value)),
+    aes(xintercept = mean_val, color = Assignment),
+    linetype = "dashed", size = 1
+  ) +
+  scale_color_manual(values = c("#458588", "#cc241d")) +
+  scale_x_continuous(limits = c(-2, 2)) +
+  labs(
+    x = "Bias (Deviation from True Value)",
+    y = "Frequency"
+  ) +
+  theme_minimal()
+```
+
+
+
+## Lessons
+
+- Regression works for estimating average treatment effect or its best linear approximation 
+
 # Appendix
 
 ## Frisch-Waugh-Lovell Theorem [🔙](#ovb) {#fwl-theorem visibility="uncounted"}
@@ -1496,4 +1880,4 @@ digraph G {
   - The Frisch-Waugh-Lovell theorem decomposes the estimation process.
   - Adjusts $Y_i$ and $T_i$ for covariates $X_i$ separately, highlighting the direct effect of $T_i$.
 
-## References
+## References {visibility="uncounted"}
