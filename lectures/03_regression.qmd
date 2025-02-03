@@ -1670,11 +1670,11 @@ $$
 
 - $\hat{\tau}$ aggregates via [conditional variance weighting]{.highlight} with respect to $T_i$ instead of just probability.
 
-- If $\tau_i$ was **constant** over $X_i$, the precision weighting _could_ be good from an efficiency standpoint. But this is probably irrelevant.
+- If $\tau_i$ was constant _wrt_ $X_i$, the precision weighting _could_ be good from an efficiency standpoint.
 
 - If $T_i \indep X_i$, then $\hat{\tau}$ reduces to weighting by the number of units with $X_i = x$.
 
-## Effect Heterogeneity
+## Truth about Regression
 
 <br>
 
@@ -1694,9 +1694,9 @@ $$
 
 . . .
 
-- The ["effective sample"]{.highlight} is weighted by $\hat{w}_i = (T_i - \hat{\E}[T_i | X_i])^2$  (squared residual from regression of $T_i$ on control).
+- The [effective sample]{.highlight} is weighted by $\hat{w}_i = (T_i - \hat{\E}[T_i | X_i])^2$  (squared residual from regression of $T_i$ on control).
 
-- Even with a representative sample, regression estimates may not aggregate effects in a representative manner. Regression estimates are **"local"** to an effective sample.
+- Even with a representative sample, regression estimates may not aggregate effects in a representative manner. Regression estimates are _local_ to an effective sample.
 
 
 ## Let's Try a Simulation
@@ -1856,7 +1856,23 @@ ggplot(sims_df, aes(x = Value, fill = Assignment)) +
 
 ## Lessons
 
-- Regression works for estimating average treatment effect or its best linear approximation 
+- Regression is a useful tool for estimating causal effects and accounting for CIA:
+  - **Binary treatments**: regression can provide consistent estimates of $ATE$.
+  - **Discrete or continuous treatments**: Estimates provide a best linear approximation when relationship is non-linear.
+  - **Heterogeneous treatments**: Regression estimates are weighted by conditional variance and could be biased. Also apply to [effective sample]{.highlight} only
+
+. . .
+
+- Beware of [OVB]{.highlight}:
+  - Avoid _"bad controls"_ that may introduce post-treatment bias or inadvertently open [back-door paths]{.highlight}.
+
+. . .
+
+- Ensure model congruity with data and research context:
+  - Be explicit about the assumption you need to make to make regression _causal_.
+  - Use DAGs and the back-door criterion to identify covariates to control for.
+  - Check for heterogeneous effects, interpreting results accordingly.
+  - Use simulations or robustness checks to validate model assumptions and relationships.
 
 # Appendix
 
