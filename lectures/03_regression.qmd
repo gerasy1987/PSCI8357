@@ -72,7 +72,10 @@ get_bias <- function(tau = .5, delta = 0.3, gamma = 0.3) {
   democracy_score <- delta * confounder + rnorm(n, mean = 0, sd = 5)
 
   # Economic growth (influenced by both investment and democratic institutions)
-  growth <- tau * democracy_score + gamma * confounder + rnorm(n, mean = 0, sd = 5)
+  growth <- tau *
+    democracy_score +
+    gamma * confounder +
+    rnorm(n, mean = 0, sd = 5)
 
   # Regression ignoring the confounder
   model_biased <- lm(growth ~ democracy_score)
@@ -90,14 +93,15 @@ get_bias <- function(tau = .5, delta = 0.3, gamma = 0.3) {
   )
 }
 
-get_bias_het <- function(tau_base = .5,
-                         assignment_fun = function(x) .5 + 0.01 * x,
-                         het_fun = function(x) tau_base + 0.01 * x) {
+get_bias_het <- function(
+    tau_base = .5,
+    assignment_fun = function(x) .5 + 0.01 * x,
+    het_fun = function(x) tau_base + 0.01 * x) {
   n <- 1000 # sample size
   gamma <- 0.1 # effect of X on outcome
 
   X <- sample(x = 1:100, replace = T, size = n) # some covariate
-  tau_total <- sum(het_fun(1:100) / 100) # total treatment effect (assuming heterogeneity)
+  tau_total <- sum(sapply(1:100, het_fun) / 100) # total treatment effect (assuming heterogeneity)
 
   # democratic institutions (correlated with confounder)
   democracy_high <- rbinom(n, size = 1, prob = .5)
@@ -106,18 +110,17 @@ get_bias_het <- function(tau_base = .5,
 
   # economic growth (influenced by both investment and democratic institutions)
   growth <-
-    het_fun(X) * democracy_high +
-    gamma * X + rnorm(n, mean = 0, sd = 5)
+    het_fun(X) * democracy_high + gamma * X + rnorm(n, mean = 0, sd = 5)
 
   growth_2 <-
-    het_fun(X) * democracy_high_2 +
-    gamma * X + rnorm(n, mean = 0, sd = 5)
+    het_fun(X) * democracy_high_2 + gamma * X + rnorm(n, mean = 0, sd = 5)
 
   # regression ignoring the confounder
   bias1 <- lm(growth ~ democracy_high + factor(X))$coefficients[2] - tau_total
 
   # regression ignoring the confounder
-  bias2 <- lm(growth_2 ~ democracy_high_2 + factor(X))$coefficients[2] - tau_total
+  bias2 <- lm(growth_2 ~ democracy_high_2 + factor(X))$coefficients[2] -
+    tau_total
 
   return(c(het1 = unname(bias1), het2 = unname(bias2)))
 }
@@ -233,7 +236,12 @@ $$
 
 cef_df <- data.frame(
   X = rep(0:20, each = 100),
-  Y = unlist(lapply(0:20, function(x) rnorm(100, mean = 6 + x * runif(1, 0.15, 0.25), sd = 0.5)))
+  Y = unlist(
+    lapply(
+      0:20,
+      function(x) rnorm(100, mean = 6 + x * runif(1, 0.15, 0.25), sd = 0.5)
+    )
+  )
 )
 
 # Summarize data for the CEF line
@@ -251,9 +259,25 @@ ggplot(cef_df, aes(x = X, y = Y)) +
     position = position_nudge(x = .15),
     alpha = 0.8
   ) +
-  geom_jitter(size = 1, alpha = 0.3, width = .1, height = 0, color = "#458588") + # Scatter of data points
-  geom_line(data = cef_line, aes(x = X, y = mean_Y), color = "black", size = 1) + # CEF line
-  geom_point(data = cef_line, aes(x = X, y = mean_Y), color = "black", size = 1.5) + # CEF line
+  geom_jitter(
+    size = 1,
+    alpha = 0.3,
+    width = .1,
+    height = 0,
+    color = "#458588"
+  ) + # Scatter of data points
+  geom_line(
+    data = cef_line,
+    aes(x = X, y = mean_Y),
+    color = "black",
+    size = 1
+  ) + # CEF line
+  geom_point(
+    data = cef_line,
+    aes(x = X, y = mean_Y),
+    color = "black",
+    size = 1.5
+  ) + # CEF line
   labs(
     x = "X",
     y = "Y"
@@ -337,7 +361,12 @@ If CEF $\E [Y_i \given X_i]$ is linear in $X_i$, then the the population regress
 
 cef_bin_df <- data.frame(
   X = rep(0:1, each = 100),
-  Y = unlist(lapply(0:1, function(x) rnorm(100, mean = 6 + x * runif(1, 0.15, 0.25), sd = 0.5)))
+  Y = unlist(
+    lapply(
+      0:1,
+      function(x) rnorm(100, mean = 6 + x * runif(1, 0.15, 0.25), sd = 0.5)
+    )
+  )
 )
 
 # Summarize data for the CEF line
@@ -347,12 +376,28 @@ cef_bin_line <- cef_bin_df |>
 
 # Create plot
 ggplot(cef_bin_df, aes(x = X, y = Y)) +
-  geom_jitter(size = 1, alpha = 0.3, width = .05, height = 0, color = "#458588") +
+  geom_jitter(
+    size = 1,
+    alpha = 0.3,
+    width = .05,
+    height = 0,
+    color = "#458588"
+  ) +
   # same line
   stat_smooth(method = "lm", se = FALSE) +
   # same line
-  geom_line(data = cef_bin_line, aes(x = X, y = mean_Y), color = "black", size = 1) +
-  geom_point(data = cef_bin_line, aes(x = X, y = mean_Y), color = "black", size = 1.5) +
+  geom_line(
+    data = cef_bin_line,
+    aes(x = X, y = mean_Y),
+    color = "black",
+    size = 1
+  ) +
+  geom_point(
+    data = cef_bin_line,
+    aes(x = X, y = mean_Y),
+    color = "black",
+    size = 1.5
+  ) +
   scale_x_continuous(breaks = c(0, 1)) +
   labs(
     x = "T",
@@ -408,10 +453,26 @@ $$
 
 # Create plot
 ggplot(cef_df, aes(x = X, y = Y)) +
-  geom_jitter(size = 1, alpha = 0.3, width = .1, height = 0, color = "#458588") + # Scatter of data points
+  geom_jitter(
+    size = 1,
+    alpha = 0.3,
+    width = .1,
+    height = 0,
+    color = "#458588"
+  ) + # Scatter of data points
   stat_smooth(method = "lm", se = FALSE, color = "#cc241d") +
-  geom_line(data = cef_line, aes(x = X, y = mean_Y), color = "black", size = 1) + # CEF line
-  geom_point(data = cef_line, aes(x = X, y = mean_Y), color = "black", size = 1.5) + # CEF line
+  geom_line(
+    data = cef_line,
+    aes(x = X, y = mean_Y),
+    color = "black",
+    size = 1
+  ) + # CEF line
+  geom_point(
+    data = cef_line,
+    aes(x = X, y = mean_Y),
+    color = "black",
+    size = 1.5
+  ) + # CEF line
   labs(
     x = "X",
     y = "Y"
@@ -773,7 +834,10 @@ confounder <- rnorm(n, mean = 50, sd = 10)
 democracy_score <- delta * confounder + rnorm(n, mean = 0, sd = 5)
 
 # economic growth (influenced by both investment and democratic institutions)
-growth <- tau * democracy_score + gamma * confounder + rnorm(n, mean = 0, sd = 5)
+growth <- tau *
+  democracy_score +
+  gamma * confounder +
+  rnorm(n, mean = 0, sd = 5)
 
 # true regression including the confounder
 model_unbiased <- lm(growth ~ democracy_score + confounder)
@@ -794,11 +858,19 @@ cat(unname(model_biased$coefficients[2]) - tau) # error in biased model
 
 # Convert sims matrix to long format dataframe
 sims_df <-
-  pbapply::pbreplicate(1000, get_bias(delta = 0.5, gamma = 0.5), cl = "future") |>
+  pbapply::pbreplicate(
+    1000,
+    get_bias(delta = 0.5, gamma = 0.5),
+    cl = "future"
+  ) |>
   t() |>
   as.data.frame() |>
   rename(Biased = biased, Unbiased = unbiased) |>
-  pivot_longer(cols = c(Biased, Unbiased), names_to = "Type", values_to = "Value")
+  pivot_longer(
+    cols = c(Biased, Unbiased),
+    names_to = "Type",
+    values_to = "Value"
+  )
 
 # Plot using ggplot2
 ggplot(sims_df, aes(x = Value, fill = Type)) +
@@ -807,7 +879,8 @@ ggplot(sims_df, aes(x = Value, fill = Type)) +
   geom_vline(
     data = summarize(group_by(sims_df, Type), mean_val = mean(Value)),
     aes(xintercept = mean_val, color = Type),
-    linetype = "dashed", size = 1
+    linetype = "dashed",
+    size = 1
   ) +
   scale_color_manual(values = c("#458588", "#cc241d"), name = "Model") +
   scale_x_continuous(limits = c(-0.15, 0.8)) +
@@ -828,11 +901,19 @@ ggplot(sims_df, aes(x = Value, fill = Type)) +
 
 # Convert sims matrix to long format dataframe
 sims_df <-
-  pbapply::pbreplicate(1000, get_bias(delta = 0.1, gamma = 0.5), cl = "future") |>
+  pbapply::pbreplicate(
+    1000,
+    get_bias(delta = 0.1, gamma = 0.5),
+    cl = "future"
+  ) |>
   t() |>
   as.data.frame() |>
   rename(Biased = biased, Unbiased = unbiased) |>
-  pivot_longer(cols = c(Biased, Unbiased), names_to = "Type", values_to = "Value")
+  pivot_longer(
+    cols = c(Biased, Unbiased),
+    names_to = "Type",
+    values_to = "Value"
+  )
 
 # Plot using ggplot2
 ggplot(sims_df, aes(x = Value, fill = Type)) +
@@ -841,7 +922,8 @@ ggplot(sims_df, aes(x = Value, fill = Type)) +
   geom_vline(
     data = summarize(group_by(sims_df, Type), mean_val = mean(Value)),
     aes(xintercept = mean_val, color = Type),
-    linetype = "dashed", size = 1
+    linetype = "dashed",
+    size = 1
   ) +
   scale_color_manual(values = c("#458588", "#cc241d"), name = "Model") +
   scale_x_continuous(limits = c(-0.15, 0.8)) +
@@ -862,11 +944,19 @@ ggplot(sims_df, aes(x = Value, fill = Type)) +
 
 # Convert sims matrix to long format dataframe
 sims_df <-
-  pbapply::pbreplicate(1000, get_bias(delta = 0.5, gamma = 0.1), cl = "future") |>
+  pbapply::pbreplicate(
+    1000,
+    get_bias(delta = 0.5, gamma = 0.1),
+    cl = "future"
+  ) |>
   t() |>
   as.data.frame() |>
   rename(Biased = biased, Unbiased = unbiased) |>
-  pivot_longer(cols = c(Biased, Unbiased), names_to = "Type", values_to = "Value")
+  pivot_longer(
+    cols = c(Biased, Unbiased),
+    names_to = "Type",
+    values_to = "Value"
+  )
 
 # Plot using ggplot2
 ggplot(sims_df, aes(x = Value, fill = Type)) +
@@ -875,7 +965,8 @@ ggplot(sims_df, aes(x = Value, fill = Type)) +
   geom_vline(
     data = summarize(group_by(sims_df, Type), mean_val = mean(Value)),
     aes(xintercept = mean_val, color = Type),
-    linetype = "dashed", size = 1
+    linetype = "dashed",
+    size = 1
   ) +
   scale_color_manual(values = c("#458588", "#cc241d"), name = "Model") +
   scale_x_continuous(limits = c(-0.15, 0.8)) +
@@ -896,11 +987,19 @@ ggplot(sims_df, aes(x = Value, fill = Type)) +
 
 # Convert sims matrix to long format dataframe
 sims_df <-
-  pbapply::pbreplicate(1000, get_bias(delta = 0.1, gamma = 0.1), cl = "future") |>
+  pbapply::pbreplicate(
+    1000,
+    get_bias(delta = 0.1, gamma = 0.1),
+    cl = "future"
+  ) |>
   t() |>
   as.data.frame() |>
   rename(Biased = biased, Unbiased = unbiased) |>
-  pivot_longer(cols = c(Biased, Unbiased), names_to = "Type", values_to = "Value")
+  pivot_longer(
+    cols = c(Biased, Unbiased),
+    names_to = "Type",
+    values_to = "Value"
+  )
 
 # Plot using ggplot2
 ggplot(sims_df, aes(x = Value, fill = Type)) +
@@ -909,7 +1008,8 @@ ggplot(sims_df, aes(x = Value, fill = Type)) +
   geom_vline(
     data = summarize(group_by(sims_df, Type), mean_val = mean(Value)),
     aes(xintercept = mean_val, color = Type),
-    linetype = "dashed", size = 1
+    linetype = "dashed",
+    size = 1
   ) +
   scale_color_manual(values = c("#458588", "#cc241d"), name = "Model") +
   scale_x_continuous(limits = c(-0.15, 0.8)) +
@@ -1599,11 +1699,13 @@ anatomy_simp <- coef(lm(Y ~ tilde_D))["tilde_D"]
 
 data.frame(
   Method = c(
-    "Standard", "Regression Anatomy",
+    "Standard",
+    "Regression Anatomy",
     "Regression Anatomy (Simplified)"
   ),
   Coefficient = c(standard, anatomy, anatomy_simp)
-) |> knitr::kable(digits = 3)
+) |>
+  knitr::kable(digits = 3)
 ```
 
 ## Regression Anatomy
@@ -1707,7 +1809,7 @@ $$
 #| echo: true
 #| eval: true
 #| output: asis
-#| code-line-numbers: "1-5|7-11|13-25|27-31"
+#| code-line-numbers: "1-5|7-11|13-29|31-35#| "
 set.seed(20250202) # set seed
 
 n <- 1000 # sample size
@@ -1727,12 +1829,16 @@ democracy_high_2 <-
 
 # economic growth (influenced by both investment and democratic institutions)
 growth <-
-  (tau_base + 0.01 * X) * democracy_high +
-  gamma * X + rnorm(n, mean = 0, sd = 5)
+  (tau_base + 0.01 * X) *
+  democracy_high +
+  gamma * X +
+  rnorm(n, mean = 0, sd = 5)
 
 growth_2 <-
-  (tau_base + 0.01 * X) * democracy_high_2 +
-  gamma * X + rnorm(n, mean = 0, sd = 5)
+  (tau_base + 0.01 * X) *
+  democracy_high_2 +
+  gamma * X +
+  rnorm(n, mean = 0, sd = 5)
 
 # regression ignoring the confounder
 bias1 <- lm(growth ~ democracy_high + factor(X))$coefficients[2] - tau_total
@@ -1758,7 +1864,11 @@ sims_df <-
   t() |>
   as.data.frame() |>
   dplyr::rename(`Heterogeneous` = het2, `Homogeneous` = het1) |>
-  pivot_longer(cols = c(Heterogeneous, Homogeneous), names_to = "Assignment", values_to = "Value")
+  pivot_longer(
+    cols = c(Heterogeneous, Homogeneous),
+    names_to = "Assignment",
+    values_to = "Value"
+  )
 
 # Plot using ggplot2
 ggplot(sims_df, aes(x = Value, fill = Assignment)) +
@@ -1767,7 +1877,8 @@ ggplot(sims_df, aes(x = Value, fill = Assignment)) +
   geom_vline(
     data = summarize(group_by(sims_df, Assignment), mean_val = mean(Value)),
     aes(xintercept = mean_val, color = Assignment),
-    linetype = "dashed", size = 1
+    linetype = "dashed",
+    size = 1
   ) +
   scale_color_manual(values = c("#458588", "#cc241d")) +
   scale_x_continuous(limits = c(-2, 2)) +
@@ -1795,7 +1906,11 @@ sims_df <-
   t() |>
   as.data.frame() |>
   dplyr::rename(`Heterogeneous` = het2, `Homogeneous` = het1) |>
-  pivot_longer(cols = c(Heterogeneous, Homogeneous), names_to = "Assignment", values_to = "Value")
+  pivot_longer(
+    cols = c(Heterogeneous, Homogeneous),
+    names_to = "Assignment",
+    values_to = "Value"
+  )
 
 # Plot using ggplot2
 ggplot(sims_df, aes(x = Value, fill = Assignment)) +
@@ -1804,7 +1919,8 @@ ggplot(sims_df, aes(x = Value, fill = Assignment)) +
   geom_vline(
     data = summarize(group_by(sims_df, Assignment), mean_val = mean(Value)),
     aes(xintercept = mean_val, color = Assignment),
-    linetype = "dashed", size = 1
+    linetype = "dashed",
+    size = 1
   ) +
   scale_color_manual(values = c("#458588", "#cc241d")) +
   scale_x_continuous(limits = c(-2, 2)) +
@@ -1832,7 +1948,11 @@ sims_df <-
   t() |>
   as.data.frame() |>
   dplyr::rename(`Heterogeneous` = het2, `Homogeneous` = het1) |>
-  pivot_longer(cols = c(Heterogeneous, Homogeneous), names_to = "Assignment", values_to = "Value")
+  pivot_longer(
+    cols = c(Heterogeneous, Homogeneous),
+    names_to = "Assignment",
+    values_to = "Value"
+  )
 
 # Plot using ggplot2
 ggplot(sims_df, aes(x = Value, fill = Assignment)) +
@@ -1841,7 +1961,8 @@ ggplot(sims_df, aes(x = Value, fill = Assignment)) +
   geom_vline(
     data = summarize(group_by(sims_df, Assignment), mean_val = mean(Value)),
     aes(xintercept = mean_val, color = Assignment),
-    linetype = "dashed", size = 1
+    linetype = "dashed",
+    size = 1
   ) +
   scale_color_manual(values = c("#458588", "#cc241d")) +
   scale_x_continuous(limits = c(-2, 2)) +
@@ -1868,11 +1989,11 @@ ggplot(sims_df, aes(x = Value, fill = Assignment)) +
 
 . . .
 
-- Ensure model congruity with data and research context:
-  - Be explicit about the assumption you need to make to make regression _causal_.
-  - Use DAGs and the back-door criterion to identify covariates to control for.
-  - Check for heterogeneous effects, interpreting results accordingly.
-  - Use simulations or robustness checks to validate model assumptions and relationships.
+- Steps to take:
+  1. Be explicit about the assumption you need to make to make regression _causal_.
+  2. Use DAGs and the back-door criterion to identify covariates to control for.
+  3. Make sure you know how to iterpret regression coefficients.
+  4. Use simulations to validate model assumptions and relationships.
 
 # Appendix
 

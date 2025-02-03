@@ -184,14 +184,14 @@ Readings, lectures, assignments, and news for the course will be posted on the c
         - @morgan2015counterfactuals [Ch. 1-2]
         - @holland1986statistics
         
-*   - **1/23 1/28**
+*   - **1/23 1/30**
     - Regression and Causality
     - CEF and its properties, selection on observables, conditional ignorability, [problem set 1](problem_sets/ps1.pdf)
     -   - @angrist2009mostly [Ch. 3.1-3.2.2]
         - @morgan2015counterfactuals [Ch. 6.1-6.2]
         - @cinelli2024crash
 
-*   - **1/30**
+*   - **2/4**
     - The Truth about Regression
     - regression anatomy, omitted variable bias, positivity assumption
     -   - @angrist2009mostly [Ch. 3.2.3-3.5]
@@ -202,12 +202,12 @@ Readings, lectures, assignments, and news for the course will be posted on the c
 *   -
     - []{colspan=3} **EXPERIMENTAL DESIGNS**
 
-*   - **2/4 2/6**
+*   - **2/6 2/11**
     - Basics of Experimental Design
     - target quantities (SATE, PATE), inference for the SATE and PATE in an idealized experiment, randomization inference
     -   - @gerber2012field [Ch. 3]
 
-*   - **2/11**
+*   - **2/13**
     - Complex Experimental Designs and Power Analysis
     - MDE and power analysis, clustering, stratification and block randomization, factorial designs
     -   - @gerber2012field [Ch. 4]
@@ -215,7 +215,7 @@ Readings, lectures, assignments, and news for the course will be posted on the c
 *   - 
     - []{colspan=3} **OBSERVATIONAL DESIGNS FOR CAUSAL INFERENCE**
 
-*   - **2/13 2/18**
+*   - **2/18 2/20**
     - Matching
     - exact matching, coarsened exact matching, nearest neighbor matching and bias correction, balance checking, propensity score theorem
     -   - @angrist2009mostly [Ch. 3]
@@ -223,7 +223,7 @@ Readings, lectures, assignments, and news for the course will be posted on the c
         - @sekhon2009opiates
         - @caliendo2008some
 
-*   - **2/20 2/25**
+*   - **2/25 2/27**
     - Instrumental Variables
     - IV estimator, 2SLS, variance estimation
     -   - @angrist2009mostly [Ch. 4.1-4.2]
@@ -231,13 +231,13 @@ Readings, lectures, assignments, and news for the course will be posted on the c
         - @angrist1996identification
         - @sovey2011instrumental
 
-*   - **2/27**
+*   - **3/4**
     - Local Average Treatment Effects
     - IV with heterogeneous effects, one-/two-sided non-compliance
     -   - @angrist2009mostly [Ch. 4.3-4.7]
         - @morgan2015counterfactuals [Ch. 9.3]
 
-*   - **3/4 3/6**
+*   - **3/6**
     - Panel Data
     - fixed and random effects, within estimator, LSDV
     -   - @angrist2009mostly [Ch. 5.1, 5.4]

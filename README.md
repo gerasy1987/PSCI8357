@@ -286,7 +286,7 @@ role="doc-biblioref">1986</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>1/23 1/28</strong></th>
+<th style="text-align: center;"><strong>1/23 1/30</strong></th>
 <td style="text-align: left;">Regression and Causality</td>
 <td style="text-align: left;">CEF and its properties, selection on
 observables, conditional ignorability, <a
@@ -304,7 +304,7 @@ role="doc-biblioref">2024</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>1/30</strong></th>
+<th style="text-align: center;"><strong>2/4</strong></th>
 <td style="text-align: left;">The Truth about Regression</td>
 <td style="text-align: left;">regression anatomy, omitted variable bias,
 positivity assumption</td>
@@ -328,7 +328,7 @@ role="doc-biblioref">2016</a>)</span></li>
 DESIGNS</strong></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>2/4 2/6</strong></th>
+<th style="text-align: center;"><strong>2/6 2/11</strong></th>
 <td style="text-align: left;">Basics of Experimental Design</td>
 <td style="text-align: left;">target quantities (SATE, PATE), inference
 for the SATE and PATE in an idealized experiment, randomization
@@ -340,7 +340,7 @@ inference</td>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>2/11</strong></th>
+<th style="text-align: center;"><strong>2/13</strong></th>
 <td style="text-align: left;">Complex Experimental Designs and Power
 Analysis</td>
 <td style="text-align: left;">MDE and power analysis, clustering,
@@ -357,7 +357,7 @@ stratification and block randomization, factorial designs</td>
 FOR CAUSAL INFERENCE</strong></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>2/13 2/18</strong></th>
+<th style="text-align: center;"><strong>2/18 2/20</strong></th>
 <td style="text-align: left;">Matching</td>
 <td style="text-align: left;">exact matching, coarsened exact matching,
 nearest neighbor matching and bias correction, balance checking,
@@ -377,7 +377,7 @@ role="doc-biblioref">2008</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>2/20 2/25</strong></th>
+<th style="text-align: center;"><strong>2/25 2/27</strong></th>
 <td style="text-align: left;">Instrumental Variables</td>
 <td style="text-align: left;">IV estimator, 2SLS, variance
 estimation</td>
@@ -398,7 +398,7 @@ role="doc-biblioref">2011</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>2/27</strong></th>
+<th style="text-align: center;"><strong>3/4</strong></th>
 <td style="text-align: left;">Local Average Treatment Effects</td>
 <td style="text-align: left;">IV with heterogeneous effects,
 one-/two-sided non-compliance</td>
@@ -412,7 +412,7 @@ role="doc-biblioref">2015</a>, Ch. 9.3)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>3/4 3/6</strong></th>
+<th style="text-align: center;"><strong>3/6</strong></th>
 <td style="text-align: left;">Panel Data</td>
 <td style="text-align: left;">fixed and random effects, within
 estimator, LSDV</td>
