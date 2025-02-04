@@ -86,3 +86,13 @@
 .heatMap tr:nth-child(5) { background: #d5c4a1; }
 .heatMap tr:nth-child(6) { background: #d5c4a1; }
 .heatMap tr:nth-child(7) { background: #d5c4a1; }
+
+
+.center-xy {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translateY(-50%), translateX(-50%);
+  transform: translateY(-50%), translateX(-50%);
+}
