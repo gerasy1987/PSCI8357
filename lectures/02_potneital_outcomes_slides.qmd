@@ -103,7 +103,7 @@ bibliography: ../_supp/psci8357.bib
 
 ## Neyman Urn Model
 
-![](../_images/potential_outcomes_2.png){fig-align="center" .center width="90%"}
+![](../_images/potential_outcomes_2.png){fig-align="center" width="90%"}
 
 ## More Formally
 
