@@ -1957,7 +1957,7 @@ $$
 
 . . .
 
-- The [effective sample]{.highlight} is weighted by $\widehat{w}_i = (T_i - \widehat{\E}[T_i | X_i])^2$  (squared residual from regression of $T_i$ on control).
+- The [effective sample]{.highlight} is weighted by $\widehat{w}_i = (T_i - \widehat{\E}[T_i | X_i])^2$  (squared residual from regression of $T_i$ on covariates).
 
 - Even with a representative sample, regression estimates may not aggregate effects in a representative manner. Regression estimates are _local_ to an effective sample.
 
@@ -1970,7 +1970,8 @@ $$
 #| echo: true
 #| eval: true
 #| output: asis
-#| code-line-numbers: "1-5|7-11|13-29|31-35#| "
+#| code-line-numbers: "1-5|7-11|13-29|31-35"
+
 set.seed(20250202) # set seed
 
 n <- 1000 # sample size
@@ -2141,7 +2142,7 @@ ggplot(sims_df, aes(x = Value, fill = Assignment)) +
 - Regression is a useful tool for estimating causal effects and accounting for CIA:
   - **Binary treatments**: regression can provide consistent estimates of $ATE$.
   - **Discrete or continuous treatments**: Estimates provide a best linear approximation when relationship is non-linear.
-  - **Heterogeneous treatments**: Regression estimates are weighted by conditional variance and could be biased. Also apply to [effective sample]{.highlight} only
+  - **Heterogeneous treatments**: Regression estimates are weighted by conditional variance and could be biased and apply to [effective sample]{.highlight} only.
 
 . . .
 
@@ -2154,7 +2155,7 @@ ggplot(sims_df, aes(x = Value, fill = Assignment)) +
   1. Be explicit about the assumption you need to make to make regression _causal_.
   2. Use DAGs and the back-door criterion to identify covariates to control for.
   3. Make sure you know how to iterpret regression coefficients.
-  4. Use simulations to validate model assumptions and relationships.
+  4. Use simulations and/or [Dagitty](https://www.dagitty.net) to validate model assumptions and relationships.
 
 # Appendix
 
