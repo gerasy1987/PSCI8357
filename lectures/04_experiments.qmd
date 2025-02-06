@@ -346,8 +346,8 @@ $$
   \begin{align*}
   \var [\widehat{\tau}_{DiM} \given \mathcal{O}_N] &= \var [\bar{Y}_1 \given \mathcal{O}_N] + \var [\bar{Y}_0 \given \mathcal{O}_N] - 2 \cov(\bar{Y}_1, \bar{Y}_0 \given \mathcal{O}_N) \\
   &= \frac{S_1^2}{N_1} \frac{N - N_1}{N} + \frac{S_0^2}{N_0} \frac{N - N_0}{N} + 2 \frac{S_{10}}{N} \\
-  &= \frac{S_1^2}{N_1} + \frac{S_0^2}{N_0} + \frac{S_1^2 + S_0^2 -2 S_{10}}{N} \\
-  &= \frac{S_1^2}{N_1} + \frac{S_0^2}{N_0} + \frac{S_{\tau}^2}{N}
+  &= \frac{S_1^2}{N_1} + \frac{S_0^2}{N_0} - \frac{S_1^2 + S_0^2 -2 S_{10}}{N} \\
+  &= \frac{S_1^2}{N_1} + \frac{S_0^2}{N_0} \textcolor{#d65d0e}{- \frac{S_{\tau}^2}{N}}
   \end{align*}
   $$
 
@@ -374,7 +374,7 @@ $$
 
   where $\widehat{S}_{t}^2 = \frac{1}{N_t - 1} \sum_{i=1}^N \mathbb{1} [T_i = t] (Y_i - \overline{Y}_t)^2$, and in turn $\overline{Y}_t = \frac{1}{N_t} \sum_{j=1}^N \mathbb{1} [T_i = t]  Y_j$.
   :::
-  
+
 . . .
 
 - This estimator achieves its highest value, i.e. $\var [\widehat{\tau}_{DiM} \given \mathcal{O}_N]$ when... [treatment effects are constant across units.]{.fragment}
@@ -1113,15 +1113,18 @@ ggplot(tibble(x = sim_dim[4,]), aes(x = x)) +
 <br>
 
 - **Practical Considerations**
+
+
+
   - In most experiments, researchers focus on the $ATE$ and use the Neyman approach to construct confidence intervals.
   
   - Because a sharp null hypothesis is often not interesting to social scientists.
   
   - Consider the Fisherian exact test
-    
-    1. when you have a small sample size (avoid if possible!), or
-    2. when you have a complex treatment assignment mechanism (e.g., natural experiment).
 
+  1. when you have a small sample size (avoid if possible!), or
+   
+  2. when you have a complex treatment assignment mechanism (e.g., natural experiment).
 
 . . .
 
@@ -1191,27 +1194,111 @@ $$
 
 - [Intuition]{.note}: Demeaning covariates ensures that the interaction terms $(X_i - \bar{X})' \delta$ are orthogonal to the treatment indicator $T_i$. This orthogonality helps in isolating the treatment effect $\tau$ from the covariate effects, reducing multicollinearity and improving the precision of the estimator. As the sample size increases, the bias introduced by this method diminishes, leading to a consistent estimator of the average treatment effect.
 
-## @lin2013agnostic Covariate Adjustment 
+## @lin2013agnostic Covariate Adjustment
+
+<br>
 
 ```{r}
-# Simulate data
-set.seed(123)
+#| label: lin_adjustment
+#| echo: true
+#| output-location: column
+#| code-line-numbers: "1-11|13-14|16-23"
+
+# simulate data
+set.seed(20250206)
 
 N <- 100
-X <- rnorm(N)
-T <- rbinom(N, 1, 0.5)
-Y <- 2 + 3 * T + 1.5 * X + rnorm(N)
+X <- rnorm(N, mean = -1)
+D <- rbinom(N, 1, 0.5)
+Y <- -2 + 3 * D + X + .5 * D * X + 0.5 * X^2 + 0.25 * D * X^2 + rnorm(N)
 
 # unadjusted model
-unadjusted_model <- lm(Y ~ T)
-summary(unadjusted_model)
+unadjusted_model <-
+  estimatr::lm_robust(Y ~ D + X) |> estimatr::tidy()
 
-# adjusted model with centered covariates and interaction
+# demean covariates
 X_centered <- X - mean(X)
-adjusted_model <- lm(Y ~ T * X_centered)
 
 # adjusted model with centered covariates and interaction
-estimatr::lm_lin(Y ~ T, covariates = ~X)
+adjusted_model <-
+  estimatr::lm_robust(Y ~ D * X_centered) |> estimatr::tidy()
+
+# adjusted model with centered covariates and interaction
+adjusted_model2 <-
+  estimatr::lm_lin(Y ~ D, covariates = ~X) |>
+  estimatr::tidy()
+
+bind_rows(
+  unadjusted_model, adjusted_model, adjusted_model2
+) |>
+  dplyr::filter(term == "D") |>
+  dplyr::mutate(model = c("unadj", "adj_hand", "adj_estimatr")) |>
+  dplyr::select(model, term, estimate, std.error) |>
+  knitr::kable(digits = 5, align = "lccc") |>
+  kableExtra::kable_minimal(font_size = 20)
+
+```
+
+## @lin2013agnostic Covariate Adjustment
+
+<br>
+
+```{r}
+#| label: lin
+#| fig-align: center
+#| fig-width: 5
+#| fig-height: 5
+#| fig-subcap:
+#|   - "w/o adjustement"
+#|   - "w/ adjustement"
+#| layout-ncol: 2
+
+# plot X against Y coloring by D
+plot_data <- tibble(X, Y, D)
+
+ggplot(plot_data, aes(x = X, y = Y, color = factor(D), shape = factor(D))) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, size = .5, linetype = "dashed") +
+  geom_function(fun = function(x) {
+    unadjusted_model[1, 2] + unadjusted_model[2, 2] + x * unadjusted_model[3, 2]
+  }, color = "#cc241d", size = 1) +
+  geom_function(fun = function(x) {
+    unadjusted_model[1, 2] + x * unadjusted_model[3, 2]
+  }, color = "#458588", size = 1) +
+  scale_color_manual(values = c("#458588", "#cc241d")) +
+  scale_shape_manual(values = c(17, 1)) +
+  labs(
+    subtitle = bquote(hat(tau)[SATE] ~ "is" ~ .(round(unadjusted_model[2, 2], 4))),
+    x = "X",
+    y = "Y",
+    color = "D = ",
+    shape = "D = "
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+ggplot(plot_data, aes(x = X, y = Y, color = factor(D), shape = factor(D))) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, size = .5, linetype = "dashed") +
+  geom_function(fun = function(x) {
+    adjusted_model2[1, 2] + adjusted_model2[2, 2] + x * (adjusted_model2[3, 2] + adjusted_model2[4, 2])
+  }, color = "#cc241d", size = 1) +
+  geom_function(fun = function(x) {
+    adjusted_model2[1, 2] + x * adjusted_model2[3, 2]
+  }, color = "#458588", size = 1) +
+  scale_color_manual(values = c("#458588", "#cc241d")) +
+  scale_shape_manual(values = c(17, 1)) +
+  labs(
+    subtitle = bquote(hat(tau)[SATE] ~ "is" ~ .(round(adjusted_model2[2, 2], 4))),
+    x = "X",
+    y = "Y",
+    color = "D = ",
+    shape = "D = "
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+
 ```
 
 # Appendix {visibility="uncounted"}
