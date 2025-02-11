@@ -446,11 +446,11 @@ $$
 
 - Now let's characterize total uncertainty (sampling + design) for _SATE_, $\var[\widehat{\tau}_{DiM}]$.
 
-- [Law of Total Variance]{.highlight}: $\underbrace{\var(Y)}_{\text{total variance}} \ = \ \underbrace{\E[\var(Y\mid X)]}_{\text{(mean of) "within" variance}} \ + \ \underbrace{\var(\E[Y\mid X])}_{\text{"between" variance}}$ [see @angrist2009mostly, Ch. 3].
+- [Law of Total Variance]{.highlight}: $\underbrace{\var(Y)}_{\text{total variance}} = \underbrace{\E[\var(Y\mid X)]}_{\text{(mean of) "within" variance}} + \underbrace{\var(\E[Y\mid X])}_{\text{"between" variance}}$ [see @angrist2009mostly, Ch. 3].
 
 . . .
 
-- Applying the LTV we get:
+- Applying the LTV and denoting the _population_ variance of $Y_i(t)$ and $\tau$ as $\sigma_{t}^2$ and $\sigma_{\tau}^2$:
 
   $$
   \begin{align*}
@@ -460,15 +460,13 @@ $$
   &= \E \left[\frac{S_{Y_1}^2}{N_1} + \frac{S_{Y_0}^2}{N_0} - \frac{S_{\tau}^2}{N}\right] + \frac{\sigma_{\tau}^2}{N} \\
   &= \frac{\sigma_{1}^2}{N_1} + \frac{\sigma_{0}^2}{N_0}.
   \end{align*}
-  $$
-
-  where $\sigma_{t}^2$ and $\sigma_{\tau}^2$ are the _population_ variance of $Y_i(t)$ (for $t \in \{ 0, 1 \}$) and $\tau$.
+  $$ 
 
 ## Variance for _PATE_
 
 <br>
 
-- [Note]{.note}: The same variance estimator is unbiased for the variance of the difference-in-means as an estimator for the PATE 
+- [Note]{.note}: The same variance estimator is unbiased for the variance of the difference-in-means as an estimator for the _PATE_. 
   $$
     \E [\widehat{\sigma}^2] = \var [\widehat{\tau}_{DiM}] = \frac{1}{N_1} \sigma_{1}^2 + \frac{1}{N_0} \sigma_{0}^2
   $$
@@ -483,7 +481,7 @@ $$
 
 - [Intuition]{.note}: This variance estimator was always too large for _SATE_--we overestimated the variability.
 
-- But for _PATE_, because we have additional uncertainty, this becomes an unbiased estimator
+- But for _PATE_, because we have additional uncertainty, this becomes an unbiased estimator.
 
   - Further reading: @imbens2015causal [Ch. 6].
 
@@ -491,7 +489,7 @@ $$
 
 ## Weak Null
 
-- ["Weak" null hypothesis]{.highlight} (Neyman):
+- ["Weak" null hypothesis (for _PATE_)]{.highlight} (Neyman):
 
   $$
   H_0^{\text{weak}}: \E [Y_i(1) - Y_i(0)] = 0 \quad \text{vs.} \quad H_a^{\text{weak}}: \E [Y_i(1) - Y_i(0)] \neq 0 \quad (\text{two-sided})
@@ -920,13 +918,13 @@ ggplot(data.frame(results), aes(x = results)) +
 
 . . .
 
-- The null ($\approx$ _sampling_) distribution of the test statistic $\{\widehat{\tau}_k\}_{k=1}^K$, where
+- The null ($\approx$ _sampling_) distribution of the test statistic is $\{\widehat{\tau}_k\}_{k=1}^K$, where
   $$
   \widehat{\tau}_k = \frac{\sum_{i=1}^N \widetilde{T}^k_i  Y_i}{\sum_{i=1}^N \widetilde{T}^k_i} -
   \frac{\sum_{i=1}^N (1-\widetilde{T}^k_i)  Y_i}{\sum_{i=1}^N (1-\widetilde{T}^k_i)}
   $$
 
-- Exact $p$-value is $p = \frac{1}{K} \sum_{k=1}^K \mathbb{1} \left[ |\widehat{\tau}_k| > |\widehat{\tau}|\right]$, where $\widehat{\tau}$ is the observed test statistic
+- Exact (two-sided) $p$-value is $p = \frac{1}{K} \sum_{k=1}^K \mathbb{1} \left[ |\widehat{\tau}_k| > |\widehat{\tau}|\right]$, where $\widehat{\tau}$ is the observed test statistic
 
 . . .
 
@@ -1090,7 +1088,7 @@ ggplot(tibble(x = sim_dim[4,]), aes(x = x)) +
 
 <br>
 
-1. **Difference-in-Means** (or an estimator of the _ATE_)  
+1. **Difference-in-Means** (or an estimator of the _ATE_):
    
    - Under the sharp null, this test statistic has mean zero.
    - Easy to interpret.
@@ -1098,7 +1096,7 @@ ggplot(tibble(x = sim_dim[4,]), aes(x = x)) +
 
 . . .
 
-2. **Difference-in-Mean-Ranks**: (for continuous outcomes)  
+2. **Difference-in-Mean-Ranks** (for continuous outcomes):
    
    $$
    S = \left|\frac{\sum_{i=1}^N T_i R_i}{\sum_{i=1}^N T_i} - \frac{\sum_{i=1}^N (1-T_i) R_i}{\sum_{i=1}^N (1-T_i)} \right|
@@ -1378,47 +1376,6 @@ ggplot(plot_data, aes(x = X, y = Y, color = factor(D), shape = factor(D))) +
 
 ```
 
-# Practical Concern: External Validity
-
-## External Validity
-
-<br>
-
-- When it is possible, a randomized experiment is the best approach for estimating causal effects
-
-- Identification is justified by design + Estimation & Inference are simple
-
-- High Internal Validity: we can estimate the _SATE_ without bias, without making strong modeling assumptions
-
-- Common concern: [External Validity]{.highlight}
-
-- @egami2023elements propose a framework for systematic sources of external validity: 
-  
-  - [$X$-validity]{.highlight}: Generalizability of units.
-  - [$T$-validity]{.highlight}: Generalizability of treatments.
-  - [$Y$-validity]{.highlight}: Generalizability of outcomes.
-  - [$C$-validity]{.highlight}: Generalizability of contexts.
-
-## Addressing External Validity
-
-- **Statistical Adjustment**: Employ covariate adjustment techniques such as regression adjustment, matching (e.g., propensity score matching), and stratification to address differences in the distributions of $X$, $T$, $Y$, and $C$ between the study sample and the target population.
-
-. . .
-
-- **Weighting Methods**: Utilize inverse probability weighting (IPW) and propensity score weighting to reweight the study sample to mirror the target population. Methods include stabilized weights and entropy balancing.
-
-. . .
-
-- **Sensitivity Analysis**: Perform sensitivity analyses using methods like Rosenbaum bounds, $E$-values, and tipping point analysis to evaluate the robustness of findings to potential assumption violations.
-
-. . .
-
-- **Multilevel Modeling**: Apply hierarchical models such as mixed-effects models, random effects models, and Bayesian hierarchical models to account for clustering and variation at different levels (e.g., individual, group, context).
-
-. . .
-
-- **External Validation**: Replicate the study in various settings using techniques like cross-validation, split-sample validation, and external dataset validation to confirm the generalizability of the findings.
-
 # Cluster Randomized Experiments
 
 ## Cluster Randomization
@@ -1643,7 +1600,7 @@ $$
 
 . . .
 
-- Finite sample variance of the blocked (_{BR}R_) estimator:
+- Finite sample variance of the blocked (_BR_) estimator:
 
 $$
 \var [\widehat{\tau}_{BR} \given \mathcal{O}] = \left(\frac{N_\text{v}}{N}\right)^2 \var [\widehat{\tau}_\text{v} \given \mathcal{O}] + \left(\frac{N_\text{nv}}{N}\right)^2 \var [\widehat{\tau}_\text{nv} \given \mathcal{O}]
@@ -2031,6 +1988,48 @@ Example: Standard deviation is \$500 dollars, and average earnings are \$2,500 d
 
 - What is the target minimum ES? Depends on what the benchmark is (theoretical expectations, intervention costs, etc.)
 - Popular benchmark for gauging standardized ES is Cohen's (1977) prescription (based on little empirical evidence) that values of 0.20, 0.50, and 0.80 be considered small, moderate, and large. -->
+
+# External Validity
+
+## External Validity
+
+<br>
+
+- When it is possible, a randomized experiment is the best approach for estimating causal effects
+
+- Identification is justified by design + Estimation & Inference are simple
+
+- High Internal Validity: we can estimate the _SATE_ without bias, without making strong modeling assumptions
+
+- Common concern: [External Validity]{.highlight}
+
+- @egami2023elements propose a framework for systematic sources of external validity: 
+  
+  - [$X$-validity]{.highlight}: Generalizability of units.
+  - [$T$-validity]{.highlight}: Generalizability of treatments.
+  - [$Y$-validity]{.highlight}: Generalizability of outcomes.
+  - [$C$-validity]{.highlight}: Generalizability of contexts.
+
+## Addressing External Validity
+
+- **Statistical Adjustment**: Employ covariate adjustment techniques such as regression adjustment, matching (e.g., propensity score matching), and stratification to address differences in the distributions of $X$, $T$, $Y$, and $C$ between the study sample and the target population.
+
+. . .
+
+- **Weighting Methods**: Utilize inverse probability weighting (IPW) and propensity score weighting to reweight the study sample to mirror the target population. Methods include stabilized weights and entropy balancing.
+
+. . .
+
+- **Sensitivity Analysis**: Perform sensitivity analyses using methods like Rosenbaum bounds, $E$-values, and tipping point analysis to evaluate the robustness of findings to potential assumption violations.
+
+. . .
+
+- **Multilevel Modeling**: Apply hierarchical models such as mixed-effects models, random effects models, and Bayesian hierarchical models to account for clustering and variation at different levels (e.g., individual, group, context).
+
+. . .
+
+- **External Validation**: Replicate the study in various settings using techniques like cross-validation, split-sample validation, and external dataset validation to confirm the generalizability of the findings.
+
 
 # Appendix {visibility="uncounted"}
 
