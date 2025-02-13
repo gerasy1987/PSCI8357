@@ -300,7 +300,7 @@ $$
 
 . . .
 
-- Unbiased for the _SATE_ under [complete randomization]{.highlight}.
+- Unbiased for the _SATE_ under [complete randomization]{.highlight} (as opposed to simple random assignment).
 
   - First suppose, $\mathcal{O}_N = \{Y_i(1), Y_i(0)\}_{i=1}^N$, then:
   
@@ -313,35 +313,36 @@ $$
     \end{aligned}
   $$
 
-## Unbiasedness of _IPW_ {#ipw-unbiased}
+## _IPW_ Estimator as Generalization {#ipw-unbiased}
 
-<br>
-
-- [Inverse Probability Weighting Estimator]{.highlight} (Horvitz–Thompson estimator) is unbiased for the _SATE_ under [simple randomization]{.highlight}
+- [Inverse Probability Weighting Estimator]{.highlight} (Horvitz–Thompson estimator) for the _SATE_:
   
   $$
-  \widehat{\tau}_{IPW} \equiv \frac{1}{N} \sum_{i=1}^N \left\{\frac{T_iY_i}{p} - \frac{(1 - T_i) Y_i}{(1 - p)}\right\},
+  \widehat{\tau}_{IPW} \equiv \frac{1}{N} \sum_{i=1}^N \left\{\frac{T_iY_i}{p_i} - \frac{(1 - T_i) Y_i}{(1 - p_i)}\right\},
   $$
   
-  where $p = \Pr(T_i = 1 \given \mathcal{O}_N)$.
+  where $p_i = \Pr(T_i = 1 \given \mathcal{O}_N)$.
 
 . . .
 
-- Can prove that $\E [ \widehat{\tau}_{IPW} \given \mathcal{O}_N ] = \tau_{SATE}$. (_How?_) ([proof](#proof-ipw-unbiased)) 
-
+- Can prove that under [_simple randomization_]{.highlight} ($\forall i:\: p_i = p$) we have $\E [ \widehat{\tau}_{IPW} \given \mathcal{O}_N ] = \tau_{SATE}$. (_How?_) ([proof](#proof-ipw-unbiased)) 
 
 . . .
 
-- This estimator is general:
+- This estimator is **general**:
 
-  1. _DiM_ is a special case of _IPW_ estimator when... [$p = N_1/N$]{.fragment}
-  2. _IPW_ estimator will show up in observational studies as well.
+  :::incremental
+  1. _DiM_ is a special case of _IPW_ estimator when... [$\forall i:\: p_i = N_1/N$...]{.fragment} [note that p does not have to be $0.5$!]{.fragment}
+  2. _IPW_ allows to account for complex designs with unequal probabilities of assignment _across_ units.
+  3. _IPW_ estimator will show up in observational studies as well.
+  :::
 
 ## What about Variance of _DiM_?
 
-<br>
+- Under complete random assignment, probabilities of assignment vary and hence we have to use [$FPC$]{.highlight} to account for that.
 
-- First given the definition of variance of sum of two variables and recalling the $FPC$, we have:
+- Then we can show:
+
   $$
   \begin{align*}
   \var [\widehat{\tau}_{DiM} \given \mathcal{O}_N] &= \var [\overline{Y}_1 \given \mathcal{O}_N] + \var [\overline{Y}_0 \given \mathcal{O}_N] - 2 \cov(\overline{Y}_1, \overline{Y}_0 \given \mathcal{O}_N) \\
@@ -371,7 +372,6 @@ $$
   $$
   \widehat{\sigma}^2= \frac{1}{N_1} \widehat{S}_{1}^2 + \frac{1}{N_0} \widehat{S}_{2}^2
   $$
-
   where $\widehat{S}_{t}^2 = \frac{1}{N_t - 1} \sum_{i=1}^N \mathbb{1} [T_i = t] (Y_i - \overline{Y}_t)^2$, and in turn $\overline{Y}_t = \frac{1}{N_t} \sum_{j=1}^N \mathbb{1} [T_i = t]  Y_j$.
   :::
 
@@ -402,7 +402,7 @@ $$
   
   1. $N$ units are randomly sampled from the population.
   2. $N_1$ units are then randomly assigned to the treatment.
-
+  
     $\rightsquigarrow$ Focus on [Population _ATE_]{.highlight}.
 
 . . .
@@ -550,7 +550,6 @@ $$
   1. Regress $Y_i$ on $T_i$ (w/ intercept) and get the coefficient on $T_i$.
   2. Calculate the robust standard error (`estimatr::lm_robust()`).
   3. Calculate confidence intervals, etc. as usual.
-
 
 ## Neyman in Practice: Point Estimates
 
@@ -902,6 +901,7 @@ ggplot(data.frame(results), aes(x = results)) +
 
 ## Computing the Null Distribution
 
+
 <br>
 
 :::small-font
@@ -912,7 +912,7 @@ ggplot(data.frame(results), aes(x = results)) +
 | 3          | 1             | 1             | 1                                             | 0                   | 1                   | $\ldots$ |
 | 4          | 0             | 1             | 0                                             | 1                   | 0                   | $\ldots$ |
 | 5          | 1             | 0             | 0                                             | 0                   | 1                   | $\ldots$ |
-| $\widehat{\tau}$ |             |             | $\frac{1}{6}$                                 | $\frac{1}{6}$       | $-\frac{2}{3}$         | $\ldots$ |
+| $\widehat{\tau}$ |             |             | $\frac{1}{6}$                                 | $-\frac{2}{3}$       | $1$         | $\ldots$ |
 : {tbl-colwidths="[25,25,25,25,25,25,25]"}
 :::
 
@@ -1088,7 +1088,7 @@ ggplot(tibble(x = sim_dim[4,]), aes(x = x)) +
 
 <br>
 
-1. **Difference-in-Means** (or an estimator of the _ATE_):
+1. [Difference-in-Means]{.highlight} (or an estimator of the _ATE_):
    
    - Under the sharp null, this test statistic has mean zero.
    - Easy to interpret.
@@ -1096,7 +1096,7 @@ ggplot(tibble(x = sim_dim[4,]), aes(x = x)) +
 
 . . .
 
-2. **Difference-in-Mean-Ranks** (for continuous outcomes):
+2. [Difference-in-Mean-Ranks]{.highlight} (for continuous outcomes):
    
    $$
    S = \left|\frac{\sum_{i=1}^N T_i R_i}{\sum_{i=1}^N T_i} - \frac{\sum_{i=1}^N (1-T_i) R_i}{\sum_{i=1}^N (1-T_i)} \right|
@@ -1207,7 +1207,7 @@ _"Each letter of the alphabet shall be written on a separate slip of paper, each
   
   - Can be extended to deal with non-sharp null, e.g. in the interference setting [@athey2018exact].
 
-# Pracitcal Concern: Imbalance
+# Imbalance
 
 ## Covariates in Experiments?
 
@@ -1217,13 +1217,13 @@ _"Each letter of the alphabet shall be written on a separate slip of paper, each
 
 <br>
 
-- Randomization balances both _observed_ and _unobserved_ pre-treatment covariates between the treated and untreated in large samples $\rightarrow$ [covariate imbalance]{.highlight} generally not a concern
+- Randomization balances both _observed_ and _unobserved_ pre-treatment covariates between the treated and untreated in large samples $\rightsquigarrow$ [covariate imbalance]{.highlight} is generally not a concern.
 
 . . .
 
 - **But**
   - In small samples, you may get unlucky and suffer from [imbalance]{.highlight}.
-  - In a "natural" randomized experiment, it's important to check whether randomization occurred as you thought.
+  - In a _"natural"_ randomized experiment, it's important to check whether randomization occurred as you thought.
 
 . . .
 
@@ -1232,19 +1232,20 @@ _"Each letter of the alphabet shall be written on a separate slip of paper, each
   - Compare means, standard deviations, etc., between the treated and untreated.
   - Can also regress treatment indicator on covariates.
   - Visual inspection of histograms/density plots.
-  - Many packages have balance tests, e.g. `RItools::xbalance()`
+  - Many packages have balance tests, e.g. `RItools::xbalance()`.
 
 ## What If You Found Imbalance?
 
 <br><br>
 
-- Can correct imbalance via regression, matching, weighting, etc.
+- Can correct imbalance via regression, matching, weighting, etc. (_more on matching and weighting later_).
 
-- Post-randomization adjustment can also improve [efficiency]{.highlight}--that is, reduce the randomization and sampling distribution variance of our estimate of $\tau$ while maintaining consistency (though not _unbiasedness_).
+- Post-randomization adjustment can also improve [efficiency]{.highlight}--that is, reduce the randomization/sampling distribution variance of our estimate of $\tau$ while maintaining consistency.
 
 - **But** [it may also produce bias, such as:]{.fragment}
 
   :::fragment
+  - Adjusting for predictive can bias the estimator.
   - Bias due to post-hoc analysis (**p-hacking**).
   - Bias due to incorrectly adjusting **post-treatment covariates**.
   :::
@@ -1267,7 +1268,7 @@ $$
 Y_i = \alpha + \tau T_i + (X_i - \overline{X})' \gamma + T_i (X_i - \overline{X})' \delta + \varepsilon_i
 $$
 
-- [Intuition]{.note}: Demeaning covariates ensures that the interaction terms $(X_i - \overline{X})' \delta$ are orthogonal to the treatment indicator $T_i$. This orthogonality helps in isolating the treatment effect $\tau$ from the covariate effects, reducing multicollinearity and improving the precision of the estimator. As the sample size increases, the bias introduced by this method diminishes, leading to a consistent estimator of the average treatment effect.
+- [Intuition]{.note}: De-meaning covariates ensures that the interaction terms $(X_i - \overline{X})' \delta$ are orthogonal to the treatment indicator $T_i$ and $\widehat{\tau}$ preserves interpreation. At the same time inclusion of covariates allows to improve precision if $X_i$ are predictive of outcome. As $N \rightarrow \infty$ the bias introduced by this method diminishes (consistency).
 
 ## @lin2013agnostic Covariate Adjustment
 
@@ -1277,15 +1278,17 @@ $$
 #| label: lin_adjustment
 #| echo: true
 #| output-location: column
-#| code-line-numbers: "1-11|13-14|16-23"
+#| code-line-numbers: "1-9|11-13|15-25"
 
 # simulate data
 set.seed(20250206)
 
 N <- 100
-X <- rnorm(N, mean = -1)
-D <- rbinom(N, 1, 0.5)
-Y <- -2 + 3 * D + X + .5 * D * X + 0.5 * X^2 + 0.25 * D * X^2 + rnorm(N)
+X <- rnorm(N, mean = 0)
+D <- randomizr::complete_ra(N)
+Y <- 
+  2 + 1.5 * D + 0.5 * X + 
+  0.5 * D * X + rnorm(N, sd = 0.5)
 
 # unadjusted model
 unadjusted_model <-
@@ -1376,6 +1379,73 @@ ggplot(plot_data, aes(x = X, y = Y, color = factor(D), shape = factor(D))) +
 
 ```
 
+# Complex Experimental Designs
+
+## Unequal Probabilities of Assignment
+
+<br><br>
+
+- In some experiments, units may have different probabilities of being assigned to the treatment group.
+
+- This can occur due to:
+  
+  - Block (stratified) randomization with different probabilities within strata.
+  
+  - Practical constraints or ethical considerations.
+  
+  - Adaptive designs where probabilities change over time [@offer2021adaptive].
+
+. . .
+
+- **Problem**: Unequal probabilities can bias the Difference-in-Means (_DiM_) estimator.
+
+- **Solution**: Use the [Inverse Probability Weighting (IPW)]{.highlight} that we introduced before estimator to account for unequal probabilities.
+
+## Bias in Difference-in-Means
+
+- Recall the _DiM_ estimator: $\widehat{\tau}_{DiM} = \frac{1}{N_1} \sum_{i=1}^N T_i Y_i - \frac{1}{N_0} \sum_{i=1}^N (1 - T_i) Y_i$
+
+- Suppose $p_i = \Pr(T_i = 1)$ varies across units (but is still chosen at random!).
+
+. . .
+
+- The expected value of the _DiM_ estimator is:
+
+$$
+\begin{align*}
+\E[\widehat{\tau}] &= \E \left[ \frac{1}{N_1}\sum_{i=1}^N T_i Y_i(1) \right] - \E \left[ \frac{1}{N_0}\sum_{i=1}^N (1 - T_i) Y_i(0) \right] \\
+&= \sum_{i=1}^N \E \left[\frac{T_i}{N_1}\right] Y_i(1) - \sum_{i=1}^N \E \left[\frac{(1 - T_i)}{N_0}\right] Y_i(0) \\
+&= \frac{\sum_{i=1}^N p_i\,Y_i(1)}{\sum_{j=1}^N p_j} - \frac{\sum_{i=1}^N (1-p_i)\,Y_i(0)}{\sum_{j=1}^N (1-p_j)} \\
+&\neq \tau_{ATE}.
+\end{align*}
+$$
+
+- [Intuition]{.note}: The _DiM_ over-weights observations with  is not equal to the true _ATE_ unless $p_i$ is constant for all units or $\tau_i$ is constant.
+
+## Inverse Probability Weighting (IPW)
+
+<br>
+
+- The [IPW estimator]{.highlight} corrects for unequal probabilities:
+
+$$
+\widehat{\tau}_{IPW} = \frac{1}{N} \sum_{i=1}^N \left( \frac{T_i Y_i}{p_i} - \frac{(1 - T_i) Y_i}{1 - p_i} \right)
+$$
+
+. . .
+
+- **Properties**: 
+  - The IPW estimator is unbiased for the _ATE_: $\E [\widehat{\tau}_{IPW}] = \tau_{ATE}$
+  - Can be used for estimation of _SATE_ or _PATE_.
+
+- [Intuition]{.note}: Weights each unit by the inverse of its probability of receiving the observed treatment to compensate for over-weighting.
+
+- [Note]{.note}: The IPW estimator is consistent if the treatment assignment mechanism is known and correctly specified.
+
+## Example: Bias of DiM vs IPW Estimator
+
+![](../_images/ipw_dim_bias.gif){fig-align="center" width="90%"}
+
 # Cluster Randomized Experiments
 
 ## Cluster Randomization
@@ -1413,7 +1483,7 @@ ggplot(plot_data, aes(x = X, y = Y, color = factor(D), shape = factor(D))) +
 
 - Recall the [Law of Total Variance]{.highlight}: $\var(Y) = \E[\var(Y\mid X)] + \var(\E[Y\mid X])$
 
-- This implies the decomposition of heterogeneity in potential outcomes:
+- This implies the decomposition of heterogeneity in outcomes:
 
 $$
 \underbrace{\sum_{j=1}^G \sum_{i=1}^{N_j} (Y_{ij} - \overline{Y})^2}_{\text{overall variance, } \sigma^2} = \underbrace{\sum_{j=1}^G \sum_{i=1}^{N_j} (Y_{ij} - \overline{Y}_{j})^2}_{\text{within-cluster variance, } \sigma^2_W} + \underbrace{\sum_{j=1}^G N_{j}(\overline{Y}_{j} - \overline{Y})^2,}_{\text{between-cluster variance, } \sigma^2_B}
@@ -1432,10 +1502,10 @@ where $\overline{Y_{j}}$ is mean of $Y_{ij}$ in cluster $j$ and $\overline{Y}$ i
 - We can show cluster randomization **inflates** the sampling variance (compared to complete randomization) approximately by [Moulton factor]{.highlight} (design effect):
 
 $$
-\frac{\var(\hat\tau_{CL})}{\var(\hat\tau_{CR})} = 1 + (\overline{N} - 1)\rho, \quad \text{where} \quad \bar{N} = \frac{1}{G} \sum_{j=1}^G N_j
+\frac{\var(\hat\tau_{CL})}{\var(\hat\tau_{R})} = 1 + (\overline{N} - 1)\rho, \quad \text{where} \quad \bar{N} = \frac{1}{G} \sum_{j=1}^G N_j
 $$
 
-- [Intuition]{.note}: Correlation within clusters means that there is less independent information in the data than if all observations were independent. As a result, the _effective sample_ size is smaller, leading to larger standard errors.
+- [Intuition]{.note}: When $\rho = 1$, outcomes do not vary within clusters ($\sigma^2_{W} = 0$), making units essentially the identical within clusters. As a result, the _effective sample_ size is number of clusters and variance is inflated. When $\rho = 0$ all clusters are _similar_ to the whole sample.
 
 . . .
 
@@ -1443,9 +1513,9 @@ $$
 
   - OLS and _DiM_ estimators are unbiased for $\tau_{ATE}$ if clusters are _equally_ sized.
   - Possible bias if cluster sizes vary and are correlated with potential outcomes.
-  - Standard error estimates via **cluster-robust standard errors** (_CR2_) or randomization inference.
+  - Rely on [cluster-robust standard errors]{.highlight} (_CR2_) or randomization inference.
 
-- [Note]{.note}: When $G$ is small, $\rho$ will be poorly estimated and cluster SEs will be unreliable $\rightsquigarrow$ prefer increasing the number of clusters over sample size per cluster.
+- [Note]{.note}: When $G$ is small, $\rho$ will be poorly estimated and cluster SEs will be unreliable $\rightsquigarrow$ prefer increasing $G$ over sample size per cluster ($N_j$).
 
 ## Simulation: Ignoring Clustering in SE Estimates
 
@@ -1454,11 +1524,11 @@ $$
 :::{.columns}
 
 :::{.column width="50%"}
-- Ignoring clustering in standard error estimates can result in overly optimistic confidence intervals and increased [Type I]{.highlight} error (_false-positives_) rates.
+- Ignoring clustering in standard error estimates can result in overly _"optimistic"_ confidence intervals and increased [Type I]{.highlight} error (_false-positives_) rates.
 
-- The simulation on the right shows the [coverage]{.highlight}--probability of 95% confidence intervals including the true effect:
+- The simulation on the right shows the [coverage]{.highlight}--probability of 95% confidence intervals including the true _ATE_:
 
-  - We would expect the these CIs will include _true_ effect in 95% of the cases.
+  - We would expect the these CIs will include true _ATE_ in 95% of the cases.
   - _HC2_ are CIs based on heteroskedastisity robust standard errors.
   - _CR2_ are CIs based on cluster robust standard errors.
 
@@ -1670,6 +1740,8 @@ $$
 
 ## How to Block
 
+<br><br>
+
 - **Discrete covariates** $\rightsquigarrow$ blocks by unique combinations.
 
 - **Alternative**: create blocks by forming homogeneous groups in $\mathbf{X}$.
@@ -1768,7 +1840,7 @@ out[[1]]; out[[2]]; out[[3]]
 - **$p_j = p$**: Use [OLS with block dummies]{.highlight} (or fixed effects) to get an **unbiased estimate** of the _ATE_:
 
 $$
-Y_i = \alpha + \tau T_i + \sum_{j=2}^{M} \beta_j B_{ij} + \epsilon_i, \quad \text{where} \quad \mathbb{E}[\hat{\tau}_{OLS}] = \tau
+Y_i = \alpha + \tau T_i + \sum_{j=2}^{M} \beta_j B_{ij} + \epsilon_i, \quad \text{where} \quad \E[\widehat{\tau}_{OLS}] = \tau
 $$
 
 - Valid uncertainty estimates can then be obtained via [HC2 standard errors]{.highlight} (or **clustered SE** if randomization was clustered within blocks).
