@@ -1245,22 +1245,22 @@ _"Each letter of the alphabet shall be written on a separate slip of paper, each
 - **But** [it may also produce bias, such as:]{.fragment}
 
   :::fragment
-  - Adjusting for predictive can bias the estimator.
+  - Adjusting for covariates can bias the estimator.
   - Bias due to post-hoc analysis (**p-hacking**).
   - Bias due to incorrectly adjusting **post-treatment covariates**.
   :::
 
 ## Covariate Adjustment with Regression
 
-$$
-Y_i = \alpha + \beta T_i + X_i' \gamma + \varepsilon_i
-$$
-
 - So, is it a good idea to control for pre-treatment covariates via linear regression in a randomized experiment?
 
 . . .
 
 - We need to look at [bias-variance tradeoff]{.highlight}.
+
+. . .
+
+- Generally speaking, in large samples, the bias introduced by simple covariate adjustment is negligible.
 
 - @lin2013agnostic shows that demeaning covariates and including interaction terms yields biased but consistent estimators of _ATE_:
 
