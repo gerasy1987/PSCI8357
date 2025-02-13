@@ -1,0 +1,144 @@
+---
+title: "Much Ado about Matching"
+author: "Alexander Dean"
+subtitle: "Recitation Period 5"
+institute: "Vanderbilt University"
+email: "alexander.r.dean@vanderbilt.edu"
+date: today
+format: 
+  revealjs:
+    theme: dark
+    footer: "Alexander Dean (Vanderbilt University)"
+    slide-number: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    self-contained-math: true
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+fontsize: 32px
+editor: source
+---
+
+# Introductory Spiel
+
+## What We Will Cover Today
+
+1. Implementing matching methods in $\texttt{R}$
+2. A crash course for best practices with proofs
+
+## Why you should pay attention
+
+1. You might implement matching into your own research!
+2. The proof crash course will help you not lose points for questions relating to proofs on problem sets.
+
+## Matching
+
+1. Download [matching_practicum.R](https://github.com/gerasy1987/PSCI8357/tree/main/recitation_material/week_5) in our GitHub
+2. Follow along!
+
+# Proofing your proofs and other points about the problem set
+
+## Guidelines for future problem sets
+
+1. Proofs need definitions!
+2. Proofread what you turn in, please check spelling and un-rendered code
+3. Please write your name on your problem set
+4. Please write out (i.e. don't write with code comments) your answers
+
+## Solving question 1 from pset 1
+
+**Problem 1**
+
+Suppose that X, Y, and Z are random variables. Prove the following:
+
+$$ 
+cov(X+Y, Z) = cov(X, Z) + cov(Y, Z)
+$$
+
+. . . 
+
+- What ingredients do we need to solve this proof?
+
+## Proof ingredients (w.r.t. problem 1)
+
+1. What $cov(X+Y, Z)$ is equal to
+2. What $cov(X,Z) + cov(Y, Z)$ is equal to (outside of its equivalence to $cov(X+Y,Z)$!
+3. The steps of showing that $cov(X+Y, Z) = cov(X,Z) + cov(Y, Z)$
+
+## Why we need all 3 parts
+
+1. Without explicitly defining $cov(X,Z) + cov(Y, Z)$, your proof is incomplete (and almost tautological)
+
+## Why this is so?
+
+**Theorem**: Political science is a social science.
+
+*Proof*:
+
+
+Recall the definition of political science.
+
+It follows then that political science is a social science since political science studies humans. QED
+
+. . . 
+
+What is social science? It's only hinted at and defined through political science $\in$ social science
+
+You need to explictly define what a social science is independently of your assertation that political science is a social science.
+
+## Returning to our example
+
+**Answer** (5 points for recalling covariance + 5 points for showing the equality):
+
+Recall the formula for the covariance of two random variables:
+
+$$
+\begin{aligned}
+\operatorname{cov}(X, Z) &= \mathbb{E} [(X - \mathbb{E} [X])(Z - \mathbb{E} [Z])] \\
+&= \mathbb{E} [XZ - X\mathbb{E} [Z] - Z\mathbb{E} [X] + \mathbb{E} [X]\mathbb{E} [Z]] \\
+&= \mathbb{E} [XZ] - \mathbb{E} [X\mathbb{E} [Z]] - \mathbb{E} [Z\mathbb{E} [X]] + \mathbb{E} [\mathbb{E} [X]\mathbb{E} [Z]] \\
+&= \mathbb{E} [XZ] - 2\mathbb{E} [X]\mathbb{E} [Z] + \mathbb{E} [X]\mathbb{E} [Z] \\
+&= \mathbb{E} [XZ] -\mathbb{E} [X]\mathbb{E} [Z]
+\end{aligned}
+$$
+
+## Returning to our example (pt. 2)
+
+Similarly, 
+
+$$
+\operatorname{cov}(Y, Z) = \mathbb{E} [YZ] -\mathbb{E} [Y]\mathbb{E} [Z].
+$$
+
+Together, 
+
+$$
+\operatorname{cov}(X, Z) + \operatorname{cov}(Y, Z) = \mathbb{E} [XZ] -\mathbb{E} [X]\mathbb{E} [Z] + \mathbb{E} [YZ] -\mathbb{E} [Y]\mathbb{E} [Z].
+$$
+
+## Returning to our example (pt. 3)
+
+Now, using the same formula for the covariance, we can show:
+
+$$
+\begin{aligned}
+\operatorname{cov}((X + Y), Z) &= \mathbb{E} [(X + Y)Z] - (\mathbb{E} [X + Y])\mathbb{E} [Z] \\
+&= \mathbb{E} [XZ + YZ] - (\mathbb{E} [X] + \mathbb{E} [Y])\mathbb{E} [Z] \\
+&= \mathbb{E} [XZ] + \mathbb{E} [YZ] - \mathbb{E} [X]\mathbb{E} [Z] - \mathbb{E} [Y]\mathbb{E} [Z] \\
+&= \operatorname{cov}(X, Z) + \operatorname{cov}(Y, Z) \quad QED
+\end{aligned}
+$$
+
+## Grading
+
+- A last aside before I give back your problem sets:
+
+1. You may request a regrade from Gosha if you feel that my grading was unfair
+2. Please email him the specific part of the problem set you believe was unfairly graded
+3. He will regrade the entire problem set and your grade may go up (or down)
