@@ -1,0 +1,467 @@
+---
+title: "Problem Set 1 Answer Key"
+author: "STAT II (Spring 2025)"
+format-links: false
+format:
+   pdf:
+      toc: false
+      margin-left: "2cm"
+      margin-top: "2cm"
+      margin-right: "2cm"
+      margin-bottom: "2cm"
+      pdf-engine: pdflatex
+      include-in-header: 
+         text: |
+            \usepackage{multicol}
+            \usepackage{enumitem}
+            \usepackage{ragged2e}
+            \usepackage{amssymb}
+            \usepackage{amsmath}
+            \usepackage{amsthm}
+            \usepackage{tikz}
+            \usetikzlibrary{positioning}
+            \usetikzlibrary{shapes}
+      # include-in-header: ../_supp/mystyle.sty
+editor: source
+fontsize: 11pt
+bibliography: ../_supp/psci8357.bib
+# csl: _supp/chicago_syllabus.csl
+bibliographystyle: chicago
+suppress-bibliography: true
+link-citations: true
+citations-hover: true
+---
+
+```{=tex}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\textrm{Pr}}
+\newcommand{\var}{\mathbb{V}}
+\newcommand{\cov}{\mathrm{cov}}
+\newcommand{\corr}{\mathrm{corr}}
+\newcommand{\argmin}{\arg\!\min}
+\newcommand{\argmax}{\arg\!\max}
+\newcommand{\qedknitr}{\hfill\rule{1.2ex}{1.2ex}}
+\newcommand{\given}{\:\vert\:}
+\newcommand{\indep}{\mbox{$\perp\!\!\!\perp$}}
+```
+
+***Disclaimer:** These answers are not necessarily the only correct way to answer the question. Some problems have multiple ways to answer the question and receive full credit. Even if your answer differs from the answers here, this does not mean you will necessarily receive points off for the answer.*
+
+## Problem 1 (10 points)
+
+Suppose that $X$, $Y$, and $Z$ are random variables. Prove the following:
+
+$$
+\cov(X + Y, Z) = \cov(X, Z) + \cov(Y, Z)
+$$
+
+```{=tex}
+{\color{blue}
+\textbf{Answer} (5 points for recalling covariance + 5 points for showing the equality):
+
+Recall the formula for the covariance of two random variables:
+
+\begin{align*}
+\cov(X, Z) &= \E [(X - \E [X])(Z - \E [Z])] \\
+&= \E [XZ - X\E [Z] - Z\E [X] + \E [X]\E [Z]] \\
+&= \E [XZ] - \E [X\E [Z]] - \E [Z\E [X]] + \E [\E [X]\E [Z]] \\
+&= \E [XZ] - 2\E [X]\E [Z] + \E [X]\E [Z] \\
+&= \E [XZ] -\E [X]\E [Z]
+\end{align*}
+
+Similarly, $\cov(Y, Z) = \E [YZ] -\E [Y]\E [Z]$. Together, 
+
+$$
+\cov(X, Z) + cov(Y, Z) = \E [XZ] -\E [X]\E [Z] + \E [YZ] -\E [Y]\E [Z].
+$$
+
+Now, using the same formula for the covariance, we can show:
+
+
+\begin{align*}
+\cov((X + Y), Z) &= \E [(X + Y)Z] - (\E [X + Y])\E [Z] \\
+&= \E [XZ + YZ] - (\E [X] + \E [Y])\E [Z] \\
+&= \E [XZ] + \E [YZ] + \E [X]\E [Z] + \E [Y]\E [Z] \\
+&= \cov(X + Z) + \cov(Y + Z) \quad \qed
+\end{align*}
+
+}
+```
+
+## Problem 2 (10 points)
+
+Suppose that you flip two fair coins. Define the random variables $A$, $B$, and $C$ as follows:
+
+```{=tex}
+\begin{align*}
+A &= \begin{cases} 
+1 & \text{if the first coin is heads} \\
+0 & \text{otherwise} 
+\end{cases}\\
+B &= \begin{cases} 
+1 & \text{if the second coin is heads} \\
+0 & \text{otherwise} 
+\end{cases}\\
+C &= \begin{cases} 
+1 & \text{if one coin is heads and the other is tails} \\
+0 & \text{otherwise} 
+\end{cases}
+\end{align*}
+```
+
+Note that $A \indep B$. Is it true that $A \indep B \given C$? Make sure to use the definition of conditional independence to offer a formal justification for your answer.
+
+```{=tex}
+{\color{blue}
+\textbf{Answer} (5 points for stating what conditional independence implies + 5 points for showing that conditional expectation does not hold):
+
+We can use a proof by contradiction to demonstrate that this is not true.
+
+Assume that conditional independence holds, then we know that:
+
+$$
+\Pr(A, B \given C = c) = \Pr(A \given C = c) \Pr(B \given C=c)
+$$
+
+Note that since the coins are fair we have
+
+$$
+\Pr(A = 1) = 0.5, \qquad \Pr(B = 1) = 0.5, \qquad \Pr(C = 1) = 0.5 \cdot 0.5 + 0.5 \cdot 0.5 = 0.5.
+$$
+
+Next, using Bayes' rule and the probabilities above, we can express the conditional probabilities as follows:
+
+\begin{align*}
+\Pr(A = 1 \given C = 1) &= \frac{\Pr(C = 1 \given A = 1) \Pr(A = 1)}{\Pr(C = 1)} = \frac{0.5 \cdot 0.5}{0.5} = 0.5 \\
+\Pr(B = 1 \given C = 1) &= \frac{\Pr(C = 1 \given B = 1) \Pr(B = 1)}{\Pr(C = 1)} = \frac{0.5 \cdot 0.5}{0.5} = 0.5
+\end{align*}
+
+Hence we know that:
+
+\begin{align*}
+&= \Pr(A = 1 \given C =1) \Pr(B = 1 \given C = 1) \\
+&= (0.5) \cdot (0.5) = 0.25 
+\end{align*}
+
+However, $p(A = 1, B = 1 \given C = 1) = 0 \neq 0.25$. $A \indep B$ but not $A \indep B \given C$. $\qed$
+
+}
+```
+
+## Problem 3 (30 points)
+
+This problem aims to help you get familiar with the potential outcomes notation. Throughout the problem, you can assume that the Stable Unit Treatment Value Assumption (SUTVA) holds.
+
+(a) Explain in words what the notation $Y_i(0)$ represents.
+
+    \textcolor{blue}{\textbf{Answer} (3 points): $Y_{i}(0)$ denotes the potential outcome for unit $i$ under no treatment, i.e., when $t_{i}=0$.}
+
+(b) Contrast the meaning of $Y_i(0)$ with the meaning of $Y_i$.
+
+    \textcolor{blue}{\textbf{Answer} (3 points): The first is the potential outcome for subject $i$ if this subject were untreated. The second is simply the observed outcome for subject $i$.}
+
+(c) Contrast the meaning of $Y_i(0)$ with the meaning of $Y_i(1)$. Is it ever possible to observe both at the same time for unit $i$? Why?
+
+    \textcolor{blue}{\textbf{Answer} (4 points): The first is the potential outcome for $i$ under control. The second is the potential outcome for $i$ under treatment. In any moment, only one of the two potential outcomes for $i$ can be realized. A subject cannot be under control and treatment simultaneously, so observing both potential outcomes is not possible. This is known as the ``fundamental problem of causal inference.''}
+
+(d) Explain the notation $\E [Y_i(0) \given T_i = 1]$, where $T_i$ is a binary variable that gives the treatment status for subject $i$, $1$ if treated, $0$ if control.
+
+    \textcolor{blue}{\textbf{Answer} (5 points): $\E [Y_i(0) \given T_i = 1]$ is the expected value of the potential outcome for subject $i$ if the subject were untreated, given that this subject actually receives treatment. Another way to put it: the expected value of the untreated potential outcome for a subject in the treatment group.}
+
+(e) Contrast the meaning of $\E [Y_i(0)]$ with the meaning of $\E [Y_i \given T_i = 0]$.
+
+    \textcolor{blue}{\textbf{Answer} (5 points): The difference between these two terms is that the former term is the expectation of untreated potential outcome for all units, regardless of assignment to treatment, while the latter, $\E[Y_{i} \given T_{i} = 0]$, is the expectated observed outcome for among untreated units. The two terms may differ if there is selection into \emph{not} receiving (and by extension into receiving) treatment.}
+
+(f) Contrast the meaning of $\E [Y_i(0) \given T_i = 1]$ with the meaning of $\E [Y_i(0) \given T_i = 0]$.
+
+    \textcolor{blue}{\textbf{Answer} (5 points): $\E [Y_i(0) \given T_i = 1]$ is the expected untreated potential outcome among treated units ($T_{i}=1$). Conversely, $\E [Y_i(0) \given T_i = 0]$ is the expectated untreated potential outcome among untreated units ($T_{i}=0$). Similarly to the previous question the two expectations might differe when there is selection into treatment.}
+
+(g) Which of the following four expectations (that you explained in the previous questions) can be identified from the observed data?
+    
+    **Note:** Identification means that an expression can be reduced to a function that contains only observed variables and no potential outcomes. Do not make any additional assumptions about the distributions of the variables, except that there is at least one observation with $T_i = 1$, and at least one with $T_i = 0$ in the observed data.
+
+    ```{=tex}
+    \begin{align*}
+    &\E [Y_i (0) \given T_i = 1]\\
+    &\E [Y_i (0)] \\
+    &\E [Y_i \given T_i = 0] \\
+    &\E [Y_i (0) \given T_i = 0]
+    \end{align*}
+    ```
+
+    \textcolor{blue}{\textbf{Answer} (5 points): We can identify (3) $\E [Y_i \given T_i = 0]$ and (4) $\E[Y_i(0) \given T_i=0]$. Note also that under the Stable Unit Treatment Value Assumption (SUTVA), these two quantities are equal.}
+
+## Problem 4 (10 points)
+
+Consider the following population of six individuals, with respective treatment assignments and potential outcomes represented in the table below:
+
+| $i$ | $T_i$ | $Y_{i}$ | $Y_{i} (1)$ | $Y_{i} (0)$ |
+|:---:|:---:|:---:|:---:|:---:|
+| 1 | 1 | 4 | 4 | 3 |
+| 2 | 0 | 4 | 8 | 4 |
+| 3 | 1 | 2 | 2 | 0 |
+| 4 | 1 | 3 | 3 | 0 |
+| 5 | 0 | 8 | 7 | 8 |
+| 6 | 0 | 7 | 6 | 7 |
+
+Answer the following questions about this population.
+
+(a) If you naively compare _observed_ differences between treatment and control groups (difference in means estimator, $\tau_{DiM}$), what is your estimate of the average treatment effect? In other words, compute the value of: 
+
+    $$
+    \E [Y_i | T_i = 1] - \E [Y_i | T_i = 0]
+    $$
+
+    ```{=tex}
+    {\color{blue}
+    \textbf{Answer} (3 points):
+
+    \begin{align*}
+    \tau &= \E[Y_{i} \given T_{i} = 1] - \E[Y_{i} \given T_{i} = 0] \\
+    &= \frac{4 + 2 + 3}{3} - \frac{4 + 8 + 7}{3} \\
+    &= 3 - 6\frac{1}{3} = -3\frac{1}{3} 
+    \end{align*}
+    }
+    ```
+
+(b) What is the value of selection bias with respect to $Y_i(1)$ in this example? _Hint: recall the formula of the difference in means estimator with respect to Average Treatment Effect on the Control (ATC)_
+
+    ```{=tex}
+    {\color{blue}
+    \textbf{Answer} (3 points):
+    
+    \begin{align*}
+    \ SB &= E[Y_{i} (1) | T_{i} = 1] - E[Y_{i} (1) |T_{i} = 0] \\
+    &= E\left[\frac{4 + 2 + 3}{3}\right] - E\left[\frac{8 + 7 + 6}{3}\right] \\
+    &= 3 - 7 = -4
+    \end{align*}
+    }
+    ```
+
+(c) Calculate value of the average treatment effect. Is it the same as the naive comparison of observed means you calculated in part (a)? Explain why or why not.
+
+    ```{=tex}
+    {\color{blue}
+    \textbf{Answer} (4 points):
+
+    \begin{align*}
+    \tau_{ATE} &= \E[\tau_{i}] = \frac{1}{N} \sum_{i = 1}^{N} (Y_{i} (1) - Y_{i} (0)) \\
+    &= \frac{1}{N}[(4-3) + (8-4) + (2-0) + (3-0) + (7-8) + (6-7)] \\
+    &= \frac{1}{N}[1 + 4 + 2 + 3 - 1 -1] \\
+    &= \frac{8}{6} = 1\frac{1}{3}
+    \end{align*}
+
+    This is different from the naïve difference-in-means estimate calculated in part (a). With that estimator we cannot calculate the true average treatment effect since we cannot observe both potential outcomes for any subject $i$. Thus, the true average treatment effect at the individual level is unattainable. Naïve difference-in-means estimate can return the true average treatment effect in expectation if, for example we know that potential outcomes are independent of the treatment assignment.
+    }
+    ```
+
+## Problem 5 (10 points)
+
+Recall the strong ignorability assumption we discussed in class, $(Y_{i} (1), Y_{i} (0)) \indep T_i$. Now suppose that we weaken it instead assuming that only $Y_{i} (0) \indep T_i$. In this case, it is not possible to identify the $ATE$ by naively comparing the difference in means of $Y_i$ between treatment and control (untreated) groups. Can you identify the average treatment effect on the treated ($ATT$) with a naive comparison of means? Offer formal justification for your answer.
+
+```{=tex}
+{\color{blue}
+\textbf{Answer} (3 points for substituting POs + 4 points for $\pm$ trick + 3 for the rest of the proof):
+
+With only the assumption that $Y_{i} (0) \indep T_{i}$, we can derive the average treatment effect on the treated ($\E[Y_{i} (1) - Y_{i} (0) \given T_{i} = 1]$) with a naïve difference-in-means estimator. To do so we can recall first that under $X \indep Y$ we have $\E[X \given Y = y] = \E[X]$.
+
+\begin{align*}
+\E[Y_{i} \given T_{i}=1] - \E[Y_{i} \given T_{i}=0] &= \E[Y_{i} (1) - Y_{i} (0) + Y_{i} (0)  \given  T_{i} = 1] - \E[Y_{i} (0)  \given  T_{i} = 0] \\
+&= \E[Y_{i} (1) - Y_{i} (0) \given T_{i} = 1] + \E[Y_{i} (0) \given T_{i} = 1] - \E[Y_{i} (0) \given T_{i}=0] \\
+&= \E[Y_{i} (1) - Y_{i} (0) \given T_{i} = 1] + \E[Y_{i} (0)] - \E[Y_{i} (0)] \\
+&= \E[Y_{i} (1) - Y_{i} (0) \given T_{i} = 1] \quad \qed
+\end{align*}
+}
+```
+
+## Problem 6 (30 points)
+
+Suppose you are interested in understanding the causal relationship between incumbency (binary) and vote share (share on a scale between $0$ and $1$) of a candidate in local elections.
+
+(a) Identify at least one covariate that should be included in a causal regression of vote share on incumbency status. Explain why this variable should be included?
+
+    ```{=tex}
+    {\color{blue}\textbf{Answer} (5 points): For this problem, let the election take place at time $t$ and the incumbent politician was elected in period \textit{t-1}. One covariate that should be included in a causal regression of vote share on incumbency status is vote share for the election at $t-1$. This should be included because it affects incumbency and it also affects vote share in election $t$ independently of incumbency status. Specifically, vote share in election $t-1$ can serve as a proxy measure for candidate quality, where higher quality candidates routinely win a larger vote margin, making them more likely to be incumbents and have a higher vote share in elections. Conditioning on this variable can allow us to causally measure the effect of incumbency on vote share in an election at time $t$ (if we assume there are no other confounding variables).}
+    ```
+
+(b) Consider a variable that measures media coverage on candidate (e.g., number of stories about candidate per week), which can be influenced by both incumbency status and the vote share of a candidate. Discuss whether you should control for this variable in your analysis. Explain the potential implications of including or excluding this variable in your model, and whether it may introduce any biases.
+
+    ```{=tex}
+    {\color{blue}\textbf{Answer} (5 points): Media coverage in the current election should not be included as a covariate in a causal regression of vote share on incumbency status. As mentioned in the question, media coverage is influenced by incumbency status and by the vote share of a candidate in the election at time period $t$, which makes it a collider. Controlling for a post-treatment variable could induce collider (selection) bias.}
+    ```
+
+(c) Should you include a control variable for campaign spending in the election prior to the one being studied? Explain whether including this variable might help or hinder causal identification, and offer reasoning to support your decision.
+
+    ```{=tex}
+    {\color{blue}\textbf{Answer} (5 points): Yes, you should include a control variable for campaign spending in the election prior to the one being studied. This is because previous campaign spending can be affect both incumbency status through the share in the past elections as well as the current vote share (e.g. through current campaign spendings). In other words, the past campaign spending could be another confounder.}
+    ```
+
+(d) Draw a Directed Acyclic Graph (DAG) that illustrates the main relationship between incumbency status and vote share as well as relationships between these variables and the variables you discussed in parts (a)-(c) of this problem. Describe the directions (positive or negative) of causal relationships implied by your DAG.
+
+    ```{=tex}
+    {\color{blue}
+    \textbf{Answer} (4 points):}
+    ```
+
+\begin{figure}[H]
+\centering
+\resizebox{0.7\textwidth}{!}{%
+\begin{tikzpicture}[>=stealth, node distance=3cm and 2.5cm, auto]
+    % Nodes
+    \node[draw, rectangle, minimum width=2.5cm, minimum height=1cm] (x) {Incumbency};
+    \node[draw, rectangle, minimum width=2.5cm, minimum height=1cm, right=of x] (y) {Vote Share ($t$)};
+    \node[draw, rectangle, minimum width=2.5cm, minimum height=1cm, below=of x] (u) {Candidate Quality};
+    \node[draw, rectangle, minimum width=2.5cm, minimum height=1cm, below left=of u] (z1) {Vote Share ($t-1$)};
+    \node[draw, rectangle, minimum width=2.5cm, minimum height=1cm, below right=of u] (z2) {Spending ($t-1$)};
+    \node[draw, rectangle, minimum width=2.5cm, minimum height=1cm, above right=of x] (col) {Media Coverage};
+
+    % Arrows
+    \draw[->, thick] (x) -- (y);
+    \draw[->, thick] (u) -- (x);
+    \draw[->, thick] (u) to (y);
+    \draw[->, thick] (u) -- (z1);
+    \draw[->, thick] (z2) -- (z1);
+    \draw[->, thick] (z1) -- (x);
+    \draw[->, thick] (z2) -- (y);
+    \draw[->, bend right] (x) -- (col);
+    \draw[->, bend right] (y) -- (col);
+\end{tikzpicture}%
+}
+\caption{DAG}
+\label{fig:DAG}
+\end{figure}
+
+  ```{=tex}
+  {\color{blue}
+  Voteshare ($t-1$) and campaign spending ($t-1$) both have a positive relationship with candidate quality and incumbency. Candidate quality has a positive relationship with incumbency and voteshare ($t$). Incumency has a positive relationship with voteshare ($t$).
+  }
+  ```
+
+(e) In [R]{.proglang} simulate a dataset with $1000$ observations that reflects the DAG structure you presented in part (d), including potential variables such as campaign spending, electoral success, other relevant covariates you described in part (a), and variables discussed in parts (b)-(c).
+
+    ```{=tex}
+    {\color{blue}\textbf{Answer} (5 points):}
+    ```
+
+```{r}
+#| eval: TRUE
+#| echo: TRUE
+
+### Setup
+# Set seed
+set.seed(20250208)
+
+# Number of observations
+n <- 1000
+
+### Step 1: Simulate candidate quality (U) as a confounder
+# Candidate quality influences both spending at t-1 and vote share at t-1
+can_qual <- truncnorm::rtruncnorm(n, a = 0, b = 1, mean = 0.5, sd = 0.5)
+
+### Step 2: Simulate spending in t-1 (not used directly later, but a potential covariate)
+spend_t1 <- truncnorm::rtruncnorm(n, a = 0, b = 100, mean = 10, sd = 5)
+
+### Step 3: Simulate vote share (t-1)
+# Candidate quality and spending affect vote share at t-1
+vs_t1 <- truncnorm::rtruncnorm(n,
+  a = 0, b = 1,
+  mean = 0.5 + 0.01 * can_qual + 0.05 * spend_t1,
+  sd = 0.2
+)
+
+### Step 4: Simulate incumbency (collider variable)
+# Incumbency is determined by candidate quality and previous vote share.
+incumbency <- rbinom(n, size = 1, prob = 0.5 + 0.2 * can_qual + 0.3 * vs_t1)
+
+### Step 5: Simulate vote share at t
+# Vote share in the current period is influenced by candidate quality and incumbency.
+vs_t <- truncnorm::rtruncnorm(n, a = 0, b = 1, mean = 0.5 + 0.1 * can_qual + 0.1 * incumbency + 0.005 * spend_t1, sd = 0.1)
+
+### Step 6: Simulate Media Coverage (Collider)
+# Media coverage is influenced by both vote share and incumbency.
+media <- 0.5 * incumbency + 0.5 * vs_t + rnorm(n, sd = .5)
+
+# This makes media a **collider variable**: if we condition on media coverage in analysis,
+# we could induce spurious relationships between incumbency and vote share (t)
+# since media is affected by both.
+
+### Step 7: Create the final simulated dataset
+simulated_data <- data.frame(
+  candidate_quality = can_qual, # Confounder
+  spending_t_minus_1 = spend_t1,
+  voteshare_t_minus_1 = vs_t1, # Confounder
+  incumbency = incumbency, # Collider
+  media_coverage = media, # Collider
+  voteshare_t = vs_t # Outcome
+)
+
+
+```
+
+(f) Using `lm()` function in [R]{.proglang} estimate the base regression model of incumbency status on the vote share. Next, run the regression that you think will perform the best in terms of getting estimates close to the true effect (that you assumed when simulating the data). Finally run regression that includes media coverage variable and campaign spending in the election prior (parts (b) and (c)). Briefly discuss differences or similarities in estimates between campaign spending and the vote share you observe across these models.
+
+    ```{=tex}
+    {\color{blue}\textbf{Answer} (5 points):}
+    ```
+
+```{r}
+#| eval: TRUE
+#| echo: TRUE
+
+# Baseline model
+model_1 <- lm(
+  voteshare_t ~ incumbency,
+  data = simulated_data
+)
+
+# Best perfomring model (under assumptions from above)
+model_2 <- lm(
+  voteshare_t ~
+    incumbency +
+    spending_t_minus_1 +
+    candidate_quality,
+  data = simulated_data
+)
+
+# The "kitchen sink" model
+model_3 <- lm(
+  voteshare_t ~
+    incumbency +
+    candidate_quality +
+    spending_t_minus_1 +
+    voteshare_t_minus_1 +
+    media_coverage,
+  data = simulated_data
+)
+
+# Let's see our model outputs!
+summary(model_1)
+summary(model_2)
+summary(model_3)
+```
+
+The three models produce fairly different results. While it is hard to say for sure based on the single draw of data (to prove presense of the bias we would need to run the Monte Carlo simulations and compare the resulting estimates with the true $\tau$) we would expect that the first model would over- and the third model would under-estimate the _true_ relationship between incumbency and vote share in period $t$ ($\tau = 0.1$). The former difference would be induced by the confounder bias due to candidate quality and past campaign spending, while the latter would be due to collider bias induced by controlling for media coverage. 
+
+(g) (BONUS - 10 points) Which regression model will provide estimates of the relationship between incumbency and vote share that are close to the true relationship you assumed but also have highest precision of those estimates (i.e. lowest standard error). Show this regression model output and briefly explain why you think the standard errors will be the lowest in this case.
+
+    ```{=tex}
+    {\color{blue}\textbf{Answer} (10 points):}
+
+    A model in which there is some Z term which affects Y but is not causally connected to X, such as economic conditions at election t could increase the precision of the regression. This is because adding covariates that reduce variation in Y results in higher precision of the regression and thereby reduces the size of the standard errors. Such a model would look like the one below. It would be expected to have a lower standard error compared to model 2 for the reason listed above.
+    ```
+
+```{r}
+#| eval: FALSE
+#| echo: TRUE
+
+model_4 <- lm(
+  voteshare_t ~
+    incumbency +
+    candidate_quality +
+    spending_t_minus_1 +
+    voteshare_t_minus_1 +
+    incumbency +
+    econ_condition_t,
+  data = simulated_data
+)
+```
