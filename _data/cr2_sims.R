@@ -80,7 +80,7 @@ p <-
       aes(yintercept = rel),
       linetype = "dashed",
       alpha = .5,
-      size = .25
+      linewidth = .25
     ) +
     geom_point(size = 4, alpha = 1) +
     labs(
@@ -99,6 +99,6 @@ p <-
 gganimate::animate(
   p,
   renderer = gifski_renderer(file = "_images/cr2_coverage.gif"),
-  fps = 15,
+  nframes = 40,
   duration = 15
 )

@@ -1197,9 +1197,9 @@ _"Each letter of the alphabet shall be written on a separate slip of paper, each
   
   - Consider the Fisherian exact test
 
-  1. when you have a small sample size (avoid if possible!), or
+  1. When you have a small sample size (avoid if possible!), or
    
-  2. when you have a complex treatment assignment mechanism (e.g., natural experiment).
+  2. When you have a complex treatment assignment mechanism (e.g., natural experiment).
 
 . . .
 
@@ -1379,7 +1379,7 @@ ggplot(plot_data, aes(x = X, y = Y, color = factor(D), shape = factor(D))) +
 
 ```
 
-# Complex Experimental Designs
+# Experimental Design Considerations
 
 ## Unequal Probabilities of Assignment
 
@@ -1868,8 +1868,11 @@ $$
 
 . . .
 
-- Size of the test is the probability of Type 1 error (Usually $\alpha = 0.05$).
-- Power of a test is one minus the probability of a Type II error, i.e. the probability of rejecting the null if the null hypothesis is false.
+- [Statistical power]{.highlight} of a design + test $\equiv$ the test's **probability of rejecting the null** in favor of the alternative when **the alternative is indeed true**, given the design.
+
+- [Example]{.note}: $H_0:\: \beta = 0$ and $H_a:\: |\beta| = \tau > 0$, giving rise to a two sided test. [Then power is given by, $\kappa = \Pr [\text{Reject} H_0 \given H_a \text{is true; design, test}]$]{.fragment}.
+
+. . .
 
 - What does power depend on?
 
@@ -1881,8 +1884,6 @@ $$
   - Number of treatments,
   - Randomization scheme (simple, complete, clustered, blocked, etc.)
   :::
-
-- [Power analysis]{.highlight}: How would my power change if I changed my experimental design in terms of $p$, $N$, etc.?
 
 ## Choice of Relative Treatment Group Size ($p$)
 
@@ -1921,7 +1922,7 @@ $$
 \frac{1-p^*}{p^*} = \frac{\sigma_0}{\sigma_1} \implies p^* = \frac{\sigma_1}{\sigma_1+\sigma_0}=\frac{1}{1+\sigma_0/\sigma_1}
 $$
 
-- [Intuition]{.note}: A "rule of thumb", assuming $\sigma_1\approx \sigma_0$, is $p^{*}=0.5$
+- [Intuition]{.note}: A "rule of thumb" if you can assume $\sigma_1\approx \sigma_0$ is to have $p^{*}=0.5$
 
 - For _practical_ reasons it is sometimes better to choose unequal sample sizes (even if $\sigma_1\approx \sigma_0$).
 
@@ -1992,9 +1993,9 @@ $$
 
 ## Choice of Overall Sample Size ($N$)
 
-<br>
+<br><br>
 
-- The power, i.e. $\Pr\left(\text{reject } \mu_1 - \mu_0 = 0 | \mu_1 - \mu_0 = \tau \right)$ is:
+- The power, i.e. $\Pr\left(\text{reject } \mu_1 - \mu_0 = 0 | \mu_1 - \mu_0 = \tau \right)$ is then given by:
 
 $$
 \begin{align*}
@@ -2005,61 +2006,165 @@ $$
 \end{align*}
 $$
 
-<!-- ## Power Functions
-
-![](figs/power_function.pdf)
-
-(Power assuming $\sigma^2 = 1$ and $p=0.5$)
-
-Note: increasing sample size has a diminishing return for precision.
 
 ## General Formula for the Power Function
 
+<br>
+
 $$
-\begin{aligned}
-\Pr\left(\text{reject } \mu_1-\mu_0=0 | \mu_1-\mu_0=\delta\right) &= \Phi\left(-1.96-\delta\Bigg/\sqrt{\frac{\sigma_1^2}{p N}+\frac{\sigma_0^2}{(1-p)N}}\right) \\
-&+ \left(1-\Phi\left(1.96-\delta\Bigg/\sqrt{\frac{\sigma_1^2}{p N}+\frac{\sigma_0^2}{(1-p)N}}\right)\right)
-\end{aligned}
+\begin{align*}
+\Pr(\text{reject } \mu_1-\mu_0=0 &| \mu_1-\mu_0=\tau) = \\
+& \Phi\left(-1.96-\tau\Bigg/\sqrt{\frac{\sigma_1^2}{p N}+\frac{\sigma_0^2}{(1-p)N}}\right) \\
+& \qquad + \left(1-\Phi\left(1.96-\tau\Bigg/\sqrt{\frac{\sigma_1^2}{p N}+\frac{\sigma_0^2}{(1-p)N}}\right)\right)
+\end{align*}
 $$
 
-To choose $N$ we need to specify:
+. . .
 
-1. $\delta$: Effect magnitude
-2. Power value (denoted $1- \psi$) (usually 0.80 or higher)
-3. $\sigma_1^2$ and $\sigma_0^2$ (usually $\sigma_1^2=\sigma_0^2$) (e.g. using previous measures)
-4. $p$: proportion of observations in the treatment group (if $\sigma_1=\sigma_0$, then the power is maximized by $p=0.5$)
+- **To choose $N$ we need to specify:**
+
+  1. $\tau$: usually $0.25 \sigma_0$,
+  2. Target power value ($1- \psi$): usually 0.80 or higher,
+  3. $\sigma_1^2$ and $\sigma_0^2$: e.g. using previous measures,
+  4. $p$: proportion of observations in the treatment group
+
+## Power Functions
+
+<br>
+
+:::{.columns}
+
+::: {.column width="50%"}
+
+<br>
+
+- Power calculations for sample size assuming
+
+  - $\sigma^2 = \sigma_1^2 = \sigma_2^2 = 1$,
+  - $p=0.5$ and complete random assignment.
+
+:::fragment
+- [Intuition]{.note}: Larger sample size allows to detect smaller effect sizes. Increasing sample size has a diminishing return for precision.
+:::
+:::
+
+::: {.column width="50%"}
+![](../_images/power.gif)
+:::
+:::
 
 ## Minimum Detectable Effect
 
-Assuming $\sigma^2=\sigma_1^2=\sigma_0^2$, we can solve for the **minimum detectable effect**:
-$$
-MDE = M_{n-2} \sqrt{\frac{\sigma^2}{N p(1-p)}}
-$$
-where $M_{n-2}=t_{1-\alpha/2}+t_{1-\psi}$ is called the **multiplier**
+![](../_images/mde1.png){fig-align="center" height=350}
 
-- $t_{1-\alpha/2}$: critical t-value to reject the null (two-tailed, $df=n-2$)
-- $t_{1-\psi}$: t-value for t-distribution of the alternative. Depends on desired power ($1-\psi$) where $\psi$ is Pr(type II error)
-- E.g. for a two-tailed test with .80 power and $df>20$ we have: $M_{n-2}=t_{0.975}+t_{0.8}=2+0.8=2.8$
+. . .
 
-We can also consider the **standardized mean difference effect size** (ES), $\frac{\delta}{\sigma}$, which gives the minimum detectable ES in standard deviation units:
-$$
-MDES = M_{n-2} \sqrt{\frac{1}{N p(1-p)}}
-$$
+- Testing $H_0 : \beta = 0$ relative to $H_a : |\beta| = \mu > 0$.
+
+- Large-sample distribution of $\hat{\beta}$ under $H_0$, denoted by $F_{\hat{\beta}}\bigl(\cdot \mid \beta = 0\bigr)$.
+
+- For a test at $100\bigl(1 - \alpha\bigr)\%$ confidence, the distribution under $H_0$ defines the "rejection region."
 
 ## Minimum Detectable Effect
 
-Example: Standard deviation is \$500 dollars, and average earnings are \$2,500 dollars. Here is what we can expect to detect for a given sample size and power.
+![](../_images/mde2.png){fig-align="center" height=350}
 
-| MDE   | MDES | N   | SD  | Sig | Po  | mean Y |
-|-------|------|-----|-----|-----|-----|--------|
-| 88.68 | 0.18 | 1000| 500 | 0.05| 0.8 | 2500   |
-| 125.54| 0.25 | 500 | 500 | 0.05| 0.8 | 2500   |
-| 282.98| 0.57 | 100 | 500 | 0.05| 0.8 | 2500   |
-| 404.44| 0.81 | 50  | 500 | 0.05| 0.8 | 2500   |
-| 585.24| 1.17 | 25  | 500 | 0.05| 0.8 | 2500   |
+. . .
 
-- What is the target minimum ES? Depends on what the benchmark is (theoretical expectations, intervention costs, etc.)
-- Popular benchmark for gauging standardized ES is Cohen's (1977) prescription (based on little empirical evidence) that values of 0.20, 0.50, and 0.80 be considered small, moderate, and large. -->
+- Large-sample distribution of $\hat{\beta}$ under $H_a$, denoted by $F_{\hat{\beta}}\bigl(\cdot \given \beta = b_{H_a}\bigr)$.
+
+- Power is the probability of falling in the "rejection region":
+  
+  $$
+  \kappa = 1 - F_{\hat{\beta}}\bigl(t_{\alpha/2} \sigma_{\hat{\beta}} \mid \beta = b_{H_A}\bigr)
+  $$
+
+- For a test with power $\kappa$, need $b_{H_a}$ as in the picture.
+
+## Minimum Detectable Effect
+
+<br>
+
+- [Minimum detectable effect]{.highlight} [@bloom1995minimum] is
+
+$$
+\left| \beta_{\alpha, \kappa, \sigma_{\hat{\beta}}^{(0)}, \sigma_{\hat{\beta}}^{(a)}} \right| = t_{\alpha/2} \sigma_{\hat{\beta}}^{(0)} + t_{1-\kappa} \sigma_{\hat{\beta}}^{(a)}
+$$
+
+where,
+
+- $\alpha$ is the type I error rate (false positive rate),
+- $\kappa$ is the power of the test ($1 -$ false negative rate),
+- $\sigma_{\hat{\beta}}^{(h)}$ is the standard error for $\hat{\beta}$ (i.e., $\sqrt{\var[\hat{\beta}]}$), under hypothesis $h$, with $\sigma_{\hat{\beta}}^{(h)}$ a function of sample size ($N$ and $p$),
+- $t_{\alpha/2}$ and $t_{1-\kappa}$ are the absolute values of the $\alpha/2$ and $1 - \kappa$ quantiles of the reference distribution (e.g., large sample distribution of $(\hat{\beta} - \beta)/\sigma_{\hat{\beta}}^{(h)}$).
+
+## Minimum Detectable Effect
+
+- Let $\sigma_{\hat{\beta}} = \max\bigl(\sigma_{\hat{\beta}}^{(0)}, \sigma_{\hat{\beta}}^{(a)}\bigr)$.
+
+- Then define a conservative _MDE_ as
+
+$$
+\underbrace{\left| \beta_{\alpha, \kappa, \sigma_{\hat{\beta}}} \right|}_{MDE} = \bigl(t_{\alpha/2} + t_{1-\kappa} \bigr) \sigma_{\hat{\beta}}.
+$$
+
+. . .
+
+- Suppose we test against $\mathcal{N} (0,1)$ with $\alpha = 0.05$ and $\kappa = 0.80$. _These are the standards in social science._ Then We have, $t_{\alpha/2} + t_{1-\kappa} = |z_{.025}| + |z_{.2}| = 1.96 + 0.84 = 2.80$.
+
+- Therefore, the _MDE_ is **2.8 times the conservative standard error of the effect estimator** for *any* study for which we use
+  
+  1. a two-sided test,  
+  2. a standard normal distribution as our reference distribution,  
+  3. $\alpha = .05$ and $\kappa = .80$
+
+- In all applications we have studied, the normal or $t$ distribution is a good approximation so long as the sample size is not too small.
+
+## Minimum Detectable Effect
+
+- Under complete random assignment we have,
+
+$$
+\var [\hat{\beta}] = \frac{1}{N} \left( \frac{\sigma^2_{1}}{p} + \frac{\sigma^2_{0}}{1 - p} \right)
+$$
+
+. . .
+
+- Plug into the expression for _MDE_ to get [sample size determination formula]{.highlight}.
+
+$$
+\begin{align*}
+MDE &= \bigl(t_{\alpha/2} + t_{1-\kappa} \bigr) \sqrt{\frac{1}{N} \left( \frac{\sigma^2_{1}}{p} + \frac{\sigma^2_{0}}{1 - p} \right)} \\
+\implies N &= \frac{\bigl(t_{\alpha/2} + t_{1-\kappa} \bigr)^2 \left( \frac{\sigma^2_{1}}{p} + \frac{\sigma^2_{0}}{1 - p} \right)}{MDE^2}.
+\end{align*}  
+$$
+
+. . .
+
+- [Note]{.note} Use standardized effect sizes to avoid ["power fallacy"]{.highlight}! 
+
+  - E.g., Effect size relative to the control group standard deviation, [*Glass's* $\Delta$]{.highlight}, $\Delta = MDE / \sigma_{0}$ (_normalize standard deviations too!_)
+
+  ## Conclusion on Power
+
+  - [Statistical power]{.highlight}  is the probability of correctly rejecting the null hypothesis when it is false.
+  
+    - It depends on _design_ and _test_!
+  
+  . . .
+
+  - **Optimal design considerations**:
+    - Balance treatment and control groups ($p \approx 0.5$)
+    - Increase sample size to detect smaller effects
+    - Use blocking or stratification to improve precision
+  
+  - **Practical considerations**:
+    
+    - Ensure sufficient power to detect meaningful effects.
+    - Consider trade-offs between sample size and costs/harm.
+    - Use power analysis to plan experiments effectively (e.g. EGAP's [power calculators](https://egap.shinyapps.io/power-app/)).
+
+  - Further reading: @blair2023research [Ch. 10-11].
 
 # External Validity
 
