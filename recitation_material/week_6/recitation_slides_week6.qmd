@@ -1,0 +1,284 @@
+---
+title: "Exercising Caution: Beware of Problems of Multiple Comparisons"
+author: "Alexander Dean"
+subtitle: "Recitation Period 5"
+institute: "Vanderbilt University"
+email: "alexander.r.dean@vanderbilt.edu"
+date: today
+format: 
+  revealjs:
+    theme: dark
+    footer: "Alexander Dean (Vanderbilt University)"
+    slide-number: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    self-contained-math: true
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+    code-fold: true
+fontsize: 32px
+editor: source
+---
+
+# Introductory Spiel
+
+## What We Will Cover Today
+1. Multiple comparisons:
+    - What it is in relation to statistical testing
+    - Why we must be cautious with multiple comparisons 
+    - Statistical methods for correcting for this issue
+
+
+# Multiple Comparisons
+
+## What is multiple comparisons?
+
+Broad definition: "The 'Multiple Comparisons Problem' is the problem that standard statistical procedures can be misleading when researchers conduct a large group of hypothesis tests. When a researcher does more than one test of a hypothesis (or set of closely related hypotheses), the chances are that some finding will appear “significant” even when there’s nothing going on." [EGAP](https://egap.org/resource/10-things-to-know-about-multiple-comparisons/)
+
+## What is multiple comparisons? (cont.)
+
+- Intuitivey, this makes sense
+- Recall what *p*-values say
+
+. . . 
+
+- Loosely, $p = 0.05$ is the probability of obtaining a statistical test result as extreme (or more than) the observed result from your statistical test when assuming that the null hypothesis is actuall correct.
+
+. . . 
+
+- Thus, if you test many hypotheses, you have an increasing probability of a Type I error
+- The probability of at least one Type I error is $1 – (1 – \alpha)^n$ 
+
+## Conceptualizing Type I Error 
+
+- We have two methods of conceptualizing the Type I Error here:
+
+1. Family-Wise Error Rate (FWER)
+     - Probability of incorrectly rejecting even 1 null hypothesis
+2. False Discovery Rate (FDR)
+     - Expected proportion of false discoveres among all discoveries $\mathbb{E}[\frac{FP}{Discovery}]$ 
+
+## When multiple comparisons becomes a problem
+
+1. Many hypothesis tests
+2. Many tests of heterogeneous effects
+3. Many treatment arms (experiments)
+4. Multiple estimators for the same dataset (such as difference-in-means and covariate-adjusted)
+
+# Correcting for multiple comparisons
+
+## A list of possibilities
+
+FWER Correction:
+
+1. Bonferroni Correction (most well-known)
+2. Holm’s Sequential Bonferroni Method (more powerful than Bonferroni Correction)
+3. Simulation of the sharp null!
+
+FDR Correction:
+
+1. Benjamini-Hochberg control for FDR (Less stringent in stipulations)
+
+## Benefit of Simulating vs other methods
+
+"The trouble with the corrections above is that they struggle to address the extent to which the multiple comparisons are correlated with one another. A straightforward method of addressing this problem is simulation under the sharp null hypothesis of no effect for any unit on any dependent variable. Note that this is a family-wise sharp null." [EGAP Website](https://egap.org/resource/10-things-to-know-about-multiple-comparisons/)
+
+# Two visualized Examples
+
+## Correcting Multiple Comparisons
+```{r}
+#| echo: true
+#| eval: false
+#| code-line-numbers: "18-21|42-54"
+
+# Set seed for reproducibility
+set.seed(37212)
+ 
+# Generating 50 test statistics
+# Half are drawn from a normal with mean 0
+# The other half are drawn from a normal with mean 3
+x <- rnorm(50, mean = c(rep(0, 25), rep(3, 25)))
+ 
+# Obtaining 50 p-values
+p <- round(2*pnorm(sort(-abs(x))), 3)
+ 
+# Setting our alpha level
+alpha <- 0.05
+ 
+# Without any corrections
+sig <- p < alpha
+ 
+# Conducting three corrections and compare to target alpha
+bonferroni_sig <- p.adjust(p, "bonferroni") < alpha
+holm_sig <- p.adjust(p, "holm") < alpha
+BH_sig <- p.adjust(p, "BH") <alpha
+
+# Putting all of this into a df
+df <- data.frame(
+  p_value = c(p, p, p, p),
+  method  = c(rep("No Correction", length(p)),
+              rep("Benjamini-Hochberg", length(p)),
+              rep("Holm", length(p)),
+              rep("Bonferroni", length(p))),
+  sig_flag = c(sig, BH_sig, holm_sig, bonferroni_sig)
+)
+
+# Creating a significance variable
+df$significance <- ifelse(df$sig_flag, 
+                          "Statistically Significant", 
+                          "Not Statistically Significant")
+
+# Subsetting p-values < 0.1 for graph
+df_subset <- df |>
+    filter(p_value < 0.1)
+
+# Plotting with ggplot
+ggplot(df_subset, aes(x = p_value, y = method, color = significance)) +
+  geom_point(position = position_jitter(height = 0.2), size = 2) +
+  scale_color_manual(values = c("Statistically Significant" = "Goldenrod", 
+                                "Not Statistically Significant" = "Navy")) +
+  labs(
+    x = "Uncorrected p-values",
+    y = NULL,
+    color = NULL,
+    title = "Multiple Comparisons Corrections Compared"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom")
+```
+
+## Visualizing Multiple Comparisons
+```{r}
+#| echo: false
+#| eval: true
+
+# Set seed for reproducibility
+set.seed(37212)
+ 
+# Loading tidyverse
+if(!require(tidyverse)) install.packages("tidyverse")
+
+# Generating 50 test statistics
+# Half are drawn from a normal with mean 0
+# The other half are drawn from a normal with mean 3
+x <- rnorm(50, mean = c(rep(0, 25), rep(3, 25)))
+ 
+# Obtaining 50 p-values
+p <- round(2*pnorm(sort(-abs(x))), 3)
+ 
+# Setting our alpha level
+alpha <- 0.05
+ 
+# Without any corrections
+sig <- p < alpha
+ 
+# Conducting three corrections and compare to target alpha
+bonferroni_sig <- p.adjust(p, "bonferroni") < alpha
+holm_sig <- p.adjust(p, "holm") < alpha
+BH_sig <- p.adjust(p, "BH") <alpha
+
+# Putting all of this into a df
+df <- data.frame(
+  p_value = c(p, p, p, p),
+  method  = c(rep("No Correction", length(p)),
+              rep("Benjamini-Hochberg", length(p)),
+              rep("Holm", length(p)),
+              rep("Bonferroni", length(p))),
+  sig_flag = c(sig, BH_sig, holm_sig, bonferroni_sig)
+)
+
+# Creating a significance variable
+df$significance <- ifelse(df$sig_flag, 
+                          "Statistically Significant", 
+                          "Not Statistically Significant")
+
+# Subsetting p-values < 0.1 for graph
+df_subset <- df |>
+    filter(p_value < 0.1)
+
+# Plotting with ggplot
+ggplot(df_subset, aes(x = p_value, y = method, color = significance)) +
+  geom_point(position = position_jitter(height = 0.2), size = 2) +
+  scale_color_manual(values = c("Statistically Significant" = "Goldenrod", 
+                                "Not Statistically Significant" = "Navy")) +
+  labs(
+    x = "Uncorrected p-values",
+    y = NULL,
+    color = NULL,
+    title = "Multiple Comparisons Corrections Compared"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom")
+```
+
+## Simulation Exercise
+
+```{r}
+#| eval: false
+#| echo: true
+
+# Loading the necessary packages
+if(!require(mvtnorm)) install.packages(mvtnorm)
+if(!require(randomizr)) install.packages(randomizr)
+
+pacman::p_load(mvtnorm, randomizr)
+
+# Helper functions (adapted from EGAP)
+do_t_test <- function(Y, Z){
+  t.test(Y[Z==1], Y[Z==0])$p.value
+}
+permute_treat <- function(){
+  treatment_sim <- complete_ra(n, m=n/2)
+  ps_sim <- apply(outcomes, 2, do_t_test, Z = treatment_sim)
+  return(ps_sim)
+}
+threshold_finder<- function(threshold){
+  mean(apply(many_ps, 2, x <- function(x) sum(x <= threshold) > 0 ))
+}
+
+# Seed for reproducibility
+set.seed(37212)
+
+# Generate correlated outcomes
+# Outcomes are unrelated to treatment
+# All null hypotheses are true
+n <- 1000
+k <- 100; r <- .7; s <- 1
+sigma <- matrix(s*r, k,k)
+diag(sigma) <- s
+outcomes <- rmvnorm(n=n, mean=rep(0, k), sigma=sigma)
+
+# Performing Random Assignment
+treatment <- complete_ra(n, m=n/2)
+
+# Conducting k hypothesis tests
+p_obs <- apply(outcomes, 2, do_t_test, Z = treatment)
+
+# Simulating under the sharp null
+many_ps <- replicate(1000, permute_treat(), simplify = TRUE)
+
+# Obtianing the Type I error rate across multiple thresholds
+thresholds <- seq(0, 0.05, length.out = 1000)
+type_I_rate <- sapply(thresholds, threshold_finder)
+
+# Finding the largest threshold that yields an alpha type I error rate
+target_p_value <- thresholds[max(which(type_I_rate <=0.05))]
+
+# Applying that target p_value to the observed p_values
+sig_simulated <- p_obs <= target_p_value
+
+# Compare to raw p-values
+sigs <- p_obs <= 0.05
+```
+
+## Outcomes of Simulation Exercise
+
+1. The target $p$-value is $0.002$.
+2. Only hypothesis tests with "raw" $p$-values below 0.002 are significant from this simulation. 
+3. Under the Bonferroni method, $\frac{0.05}{100} = 0.0005$ is the updated threshold for significance, so this is an improvement
