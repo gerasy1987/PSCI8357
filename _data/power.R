@@ -69,8 +69,9 @@ p <-
       color = "black",
       size = 4
     ) +
-    geom_point() +
+    geom_point(alpha = .75, size = .75) +
     scale_y_continuous(breaks = seq(0, 1, 0.1), limits = c(0, 1)) +
+    scale_color_manual(values = c("#cc241d", "#98971a")) +
     labs(
       title = "Power when sample size is N={closest_state}",
       x = "Effect Size",

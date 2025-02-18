@@ -113,6 +113,6 @@ p <-
 gganimate::animate(
   p,
   renderer = gifski_renderer(file = "_images/ipw_dim_bias.gif"),
-  nframes = 11,
+  nframes = 100,
   duration = 15
 )

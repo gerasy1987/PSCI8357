@@ -1389,7 +1389,7 @@ ggplot(plot_data, aes(x = X, y = Y, color = factor(D), shape = factor(D))) +
 
 - This can occur due to:
   
-  - Block (stratified) randomization with different probabilities within strata.
+  - Block (stratified) randomization with different probabilities within strata or unequal sized clusters.
   
   - Practical constraints or ethical considerations.
   
@@ -1405,7 +1405,7 @@ ggplot(plot_data, aes(x = X, y = Y, color = factor(D), shape = factor(D))) +
 
 - Recall the _DiM_ estimator: $\widehat{\tau}_{DiM} = \frac{1}{N_1} \sum_{i=1}^N T_i Y_i - \frac{1}{N_0} \sum_{i=1}^N (1 - T_i) Y_i$
 
-- Suppose $p_i = \Pr(T_i = 1)$ varies across units (but is still chosen at random!).
+- Suppose $p_i = \Pr(T_i = 1)$ varies across units, but we have complete random assignment ($N_1$ and $N_0$ are fixed).
 
 . . .
 
@@ -1420,7 +1420,7 @@ $$
 \end{align*}
 $$
 
-- [Intuition]{.note}: The _DiM_ over-weights observations with  is not equal to the true _ATE_ unless $p_i$ is constant for all units or $\tau_i$ is constant.
+- [Intuition]{.note}: The _DiM_ over-weights observations with higher assignment probabilities and is generally not equal to the true _ATE_ (unless $p_i$ is constant for all units or $\tau_i$ is constant).
 
 ## Inverse Probability Weighting (IPW)
 
@@ -1437,10 +1437,11 @@ $$
 - **Properties**: 
   - The IPW estimator is unbiased for the _ATE_: $\E [\widehat{\tau}_{IPW}] = \tau_{ATE}$
   - Can be used for estimation of _SATE_ or _PATE_.
+  - Can be obtained using regression with inverse probability weights (e.g. `estimatr::lm_robust()` with `weights` argument).
 
-- [Intuition]{.note}: Weights each unit by the inverse of its probability of receiving the observed treatment to compensate for over-weighting.
+- [Intuition]{.note}: Weight each unit by the inverse of its probability of receiving the observed treatment to compensate for over-weighting.
 
-- [Note]{.note}: The IPW estimator is consistent if the treatment assignment mechanism is known and correctly specified.
+- [Note]{.note}: The IPW estimator is unbiased and consistent if the treatment assignment mechanism is known and correctly specified.
 
 ## Example: Bias of DiM vs IPW Estimator
 
@@ -1477,6 +1478,23 @@ $$
 
 ![](../_images/potential_outcomes_cluster.png){fig-align="center" width="90%"}
 
+## Bias of DiM in Cluster-Randomized Experiments
+
+<br>
+
+- When clusters have **unequal sizes**, the _DiM_ estimator can produce biased estimates of $\tau_{ATE}$ if the cluster sizes are correlated with the potential outcomes.
+
+  - [Example]{.note}: If larger clusters tend to have higher potential outcomes, the _DiM_ estimator will overestimate the treatment effect.
+
+- [Intuition]{.note}: The _DiM_ estimator gives equal weight to each cluster, regardless of size, which can lead to biased estimates if cluster sizes are not balanced.
+
+. . .
+
+- To address the issue, as before, we can:
+
+  - Use weighted estimators, such as the [IPW estimator]{.highlight}, or 
+  - Regression weighted by inverse of probabilities of assignment to account for unequal cluster sizes.
+
 ## Intracluster Correlation
 
 <br>
@@ -1505,7 +1523,7 @@ $$
 \frac{\var(\hat\tau_{CL})}{\var(\hat\tau_{R})} = 1 + (\overline{N} - 1)\rho, \quad \text{where} \quad \bar{N} = \frac{1}{G} \sum_{j=1}^G N_j
 $$
 
-- [Intuition]{.note}: When $\rho = 1$, outcomes do not vary within clusters ($\sigma^2_{W} = 0$), making units essentially the identical within clusters. As a result, the _effective sample_ size is number of clusters and variance is inflated. When $\rho = 0$ all clusters are _similar_ to the whole sample.
+- [Intuition]{.note}: When $\rho = 1$, outcomes do not vary within clusters ($\sigma^2_{W} = 0$), each cluster is essentially one observation. As a result, the _effective sample_ size is number of clusters, not number of units, and variance is inflated. When $\rho = 0$ all clusters are _similar_ to the whole sample.
 
 . . .
 
@@ -1519,14 +1537,14 @@ $$
 
 ## Simulation: Ignoring Clustering in SE Estimates
 
-<br>
+
 
 :::{.columns}
 
 :::{.column width="50%"}
-- Ignoring clustering in standard error estimates can result in overly _"optimistic"_ confidence intervals and increased [Type I]{.highlight} error (_false-positives_) rates.
+- Ignoring clustering in standard error estimates can result in overly _"optimistic"_ confidence intervals and increased [Type I error]{.highlight} (_false-positives_) rates.
 
-- The simulation on the right shows the [coverage]{.highlight}--probability of 95% confidence intervals including the true _ATE_:
+- The simulation shows how [coverage]{.highlight}--probability of 95% CIs including the true _ATE_ across replications of the experiment--is affected by ratio of between- to within-cluster variance:
 
   - We would expect the these CIs will include true _ATE_ in 95% of the cases.
   - _HC2_ are CIs based on heteroskedastisity robust standard errors.
@@ -1535,6 +1553,8 @@ $$
 :::
 
 ::: {.column width="50%"}
+<br>
+
 ![](../_images/cr2_coverage.gif){fig-align="center" width="90%"}
 :::
 
@@ -1681,7 +1701,7 @@ $$
 - Use the conservative variance estimators from each strata to get:
 
 $$
-\widehat{\sigma}_{BR} = \left(\frac{N_\text{v}}{N}\right)^2 \left(\frac{\widehat{\sigma}^2_{1,\text{v}}}{N_{1,\text{v}}} + \frac{\widehat{\sigma}^2_{0,\text{v}}}{N_{0,\text{v}}}\right) + \left(\frac{N_\text{nv}}{N}\right)^2 \left(\frac{\widehat{\sigma}^2_{1,w}}{N_{1,w}} + \frac{\widehat{\sigma}^2_{0,w}}{N_{0,w}}\right),
+\widehat{\sigma}_{BR} = \left(\frac{N_\text{v}}{N}\right)^2 \left(\frac{\widehat{\sigma}^2_{1,\text{v}}}{N_{1,\text{v}}} + \frac{\widehat{\sigma}^2_{0,\text{v}}}{N_{0,\text{v}}}\right) + \left(\frac{N_\text{nv}}{N}\right)^2 \left(\frac{\widehat{\sigma}^2_{1,\text{nv}}}{N_{1,\text{nv}}} + \frac{\widehat{\sigma}^2_{0,\text{nv}}}{N_{0,\text{nv}}}\right),
 $$
 
 where $\widehat{\sigma}^2_{t,\text{v}}$ are the within-strata **observed outcome variances**.
@@ -1870,7 +1890,7 @@ $$
 
 - [Statistical power]{.highlight} of a design + test $\equiv$ the test's **probability of rejecting the null** in favor of the alternative when **the alternative is indeed true**, given the design.
 
-- [Example]{.note}: $H_0:\: \beta = 0$ and $H_a:\: |\beta| = \tau > 0$, giving rise to a two sided test. [Then power is given by, $\kappa = \Pr [\text{Reject} H_0 \given H_a \text{is true; design, test}]$]{.fragment}.
+- [Example]{.note}: $H_0:\: \beta = 0$ and $H_a:\: |\beta| = \tau > 0$, giving rise to a two sided test. [Then power is given by, $\kappa = \Pr [\text{Reject } H_0 \given H_a \text{ is true; design, test}]$]{.fragment}.
 
 . . .
 
@@ -1995,7 +2015,7 @@ $$
 
 <br><br>
 
-- The power, i.e. $\Pr\left(\text{reject } \mu_1 - \mu_0 = 0 | \mu_1 - \mu_0 = \tau \right)$ is then given by:
+- The power, i.e. $\Pr\left(\text{Reject } \mu_1 - \mu_0 = 0 \given \mu_1 - \mu_0 = \tau \right)$ is then given by:
 
 $$
 \begin{align*}
