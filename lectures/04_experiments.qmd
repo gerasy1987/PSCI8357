@@ -2165,28 +2165,67 @@ $$
 
   - E.g., Effect size relative to the control group standard deviation, [*Glass's* $\Delta$]{.highlight}, $\Delta = MDE / \sigma_{0}$ (_normalize standard deviations too!_)
 
-  ## Conclusion on Power
+## Conclusion on Power
 
-  - [Statistical power]{.highlight}  is the probability of correctly rejecting the null hypothesis when it is false.
-  
-    - It depends on _design_ and _test_!
-  
-  . . .
+<br>
 
-  - **Optimal design considerations**:
-    - Balance treatment and control groups ($p \approx 0.5$)
-    - Increase sample size to detect smaller effects
-    - Use blocking or stratification to improve precision
+- [Statistical power]{.highlight}  is the probability of rejecting the null hypothesis when it is indeed false.
   
-  - **Practical considerations**:
+  - It depends on _design_ and _test_!
+  
+. . .
+
+- **Optimal design considerations**:
+  - Balance treatment and control groups ($p \approx 0.5$) if you do not expect differences in potential outcomes variability.
+  - Increase sample size to detect smaller effects.
+  - Use blocking or stratification to improve precision.
+  
+- **Practical considerations**:
     
-    - Ensure sufficient power to detect meaningful effects.
-    - Consider trade-offs between sample size and costs/harm.
-    - Use power analysis to plan experiments effectively (e.g. EGAP's [power calculators](https://egap.shinyapps.io/power-app/)).
+  - Ensure sufficient power to detect meaningful effects.
+  - Consider trade-offs between sample size and costs/harm.
+  - Use power analysis to plan experiments effectively (e.g. EGAP's [power calculators](https://egap.shinyapps.io/power-app/)).
 
-  - Further reading: @blair2023research [Ch. 10-11].
+- Further reading: @blair2023research [Ch. 10-11].
 
-# External Validity
+
+# Appendix {visibility="uncounted"}
+
+
+## Proof of $\E [ \widehat{\tau}_{IPW} \given \mathcal{O}_N ] = \tau_{SATE}$ [🔙](#ipw-unbiased) {#proof-ipw-unbiased visibility="uncounted"}
+
+<br>
+
+$$
+\begin{aligned}
+&\E [ \widehat{\tau}_{IPW} \given \mathcal{O}_N ] \\
+&= \E \left[ \frac{1}{N} \sum_{i=1}^N \left\{\frac{T_iY_i}{p} - \frac{(1 - T_i) Y_i}{(1 - p)}\right\} \Bigg| \mathcal{O}_N \right] \\
+&= \frac{1}{N} \sum_{i=1}^N \left\{ \E \left[ \frac{T_i Y_i (1)}{p} \given \mathcal{O}_N \right] - \E \left[ \frac{(1 - T_i) Y_i (0)}{(1 - p)} \given \mathcal{O}_N \right] \right\} \quad \text{($\because$ distribute $\E$/random assignment)}\\
+&= \frac{1}{N} \sum_{i=1}^N \left\{ \frac{Y_i(1)}{p} \E [ T_i \given \mathcal{O}_N ] - \frac{Y_i(0)}{1 - p} \E [ 1 - T_i \given \mathcal{O}_N ] \right\} \quad \text{($\because$ POs are fixed)}\\
+&= \frac{1}{N} \sum_{i=1}^N \left\{ \frac{Y_i (1)}{p} \cdot p - \frac{Y_i (0)}{1 - p} \cdot (1 - p) \right\} \quad \text{($\because$ definition of $\E$)}\\
+&= \frac{1}{N} \sum_{i=1}^N Y_i(1) - Y_i(0) = \tau_{SATE}
+\end{aligned}
+$$
+
+## Cluster Robust SEs
+
+- Assume the following model:  $Y_i = \tau T_i + \varepsilon_i, \E[\varepsilon_i] = 0$ where
+
+$$
+\var[\hat \tau ] = \var \left [\sum_i T_i \varepsilon_i \right ] / \left ( \sum_i T_i^2 \right )^2
+$$
+
+- If we assume:
+
+  - $\cov[\varepsilon_i,\varepsilon_j] = 0$, $\var[\varepsilon_i] = \sigma^2$, then $\var[\hat \tau ] = \sigma^2 / \sum_i T_i^2$ (**homoskedasticity**)
+  - $\cov[\varepsilon_i,\varepsilon_j] = 0, \var_{\textrm{HC2}}[\hat \tau] = \left ( \sum_i T_1^2 \cdot \var[\varepsilon_i] \right ) / \left ( \sum_i T_i^2 \right )^2$ (**heteroskedasticty**)
+  - $\cov[\varepsilon_i,\varepsilon_j] = 0$ *unless* observations $i$ and $j$ share the same cluster:
+
+$$
+\var_{\textrm{CR}}[\hat \tau] = \left (\sum_i \sum_j \textcolor{blue}{T_i T_j} \textcolor{red}{\cov[\varepsilon_i, \varepsilon_j]} \mathbb{1}[i,j \textrm{ in the same cluster}] \right) / \left(\sum_i T_i^2 \right )^2
+$$
+
+- $\var_{\textrm{CR}}[\hat \tau] > \var_{\textrm{HC2}}[\hat \tau]$ i.f.f $T_i$ and $T_j$ are correlated within clusters and $\cov[\varepsilon_i, \varepsilon_j] > 0$.
 
 ## External Validity
 
@@ -2227,43 +2266,5 @@ $$
 
 - **External Validation**: Replicate the study in various settings using techniques like cross-validation, split-sample validation, and external dataset validation to confirm the generalizability of the findings.
 
-
-# Appendix {visibility="uncounted"}
-
-
-## Proof of $\E [ \widehat{\tau}_{IPW} \given \mathcal{O}_N ] = \tau_{SATE}$ [🔙](#ipw-unbiased) {#proof-ipw-unbiased visibility="uncounted"}
-
-<br>
-
-$$
-\begin{aligned}
-&\E [ \widehat{\tau}_{IPW} \given \mathcal{O}_N ] \\
-&= \E \left[ \frac{1}{N} \sum_{i=1}^N \left\{\frac{T_iY_i}{p} - \frac{(1 - T_i) Y_i}{(1 - p)}\right\} \Bigg| \mathcal{O}_N \right] \\
-&= \frac{1}{N} \sum_{i=1}^N \left\{ \E \left[ \frac{T_i Y_i (1)}{p} \given \mathcal{O}_N \right] - \E \left[ \frac{(1 - T_i) Y_i (0)}{(1 - p)} \given \mathcal{O}_N \right] \right\} \quad \text{($\because$ distribute $\E$/random assignment)}\\
-&= \frac{1}{N} \sum_{i=1}^N \left\{ \frac{Y_i(1)}{p} \E [ T_i \given \mathcal{O}_N ] - \frac{Y_i(0)}{1 - p} \E [ 1 - T_i \given \mathcal{O}_N ] \right\} \quad \text{($\because$ POs are fixed)}\\
-&= \frac{1}{N} \sum_{i=1}^N \left\{ \frac{Y_i (1)}{p} \cdot p - \frac{Y_i (0)}{1 - p} \cdot (1 - p) \right\} \quad \text{($\because$ definition of $\E$)}\\
-&= \frac{1}{N} \sum_{i=1}^N Y_i(1) - Y_i(0) = \tau_{SATE}
-\end{aligned}
-$$
-
-## Cluster Robust SEs
-
-- Assume the following model:  $Y_i = \tau T_i + \varepsilon_i, \E[\varepsilon_i] = 0$ where
-
-$$
-\var[\hat \tau ] = \var \left [\sum_i T_i \varepsilon_i \right ] / \left ( \sum_i T_i^2 \right )^2
-$$
-
-- If we assume:
-
-  - $\cov[\varepsilon_i,\varepsilon_j] = 0$, $\var[\varepsilon_i] = \sigma^2$, then $\var[\hat \tau ] = \sigma^2 / \sum_i T_i^2$ (**homoskedasticity**)
-  - $\cov[\varepsilon_i,\varepsilon_j] = 0, \var_{\textrm{HC2}}[\hat \tau] = \left ( \sum_i T_1^2 \cdot \var[\varepsilon_i] \right ) / \left ( \sum_i T_i^2 \right )^2$ (**heteroskedasticty**)
-  - $\cov[\varepsilon_i,\varepsilon_j] = 0$ *unless* observations $i$ and $j$ share the same cluster:
-
-$$
-\var_{\textrm{CR}}[\hat \tau] = \left (\sum_i \sum_j \textcolor{blue}{T_i T_j} \textcolor{red}{\cov[\varepsilon_i, \varepsilon_j]} \mathbb{1}[i,j \textrm{ in the same cluster}] \right) / \left(\sum_i T_i^2 \right )^2
-$$
-
-- $\var_{\textrm{CR}}[\hat \tau] > \var_{\textrm{HC2}}[\hat \tau]$ i.f.f $T_i$ and $T_j$ are correlated within clusters and $\cov[\varepsilon_i, \varepsilon_j] > 0$.
 
 ## References {visibility="uncounted"}
