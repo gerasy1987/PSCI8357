@@ -2257,16 +2257,13 @@ $$
 - If we assume:
 
   - $\cov[\varepsilon_i,\varepsilon_j] = 0$, $\var[\varepsilon_i] = \sigma^2$, then $\var[\hat \tau ] = \sigma^2 / \sum_i T_i^2$ (**homoskedasticity**)
-  - $\cov[\varepsilon_i,\varepsilon_j] = 0, \var_{\textrm{het}}[\hat \tau] = \left ( \sum_i T_1^2 \cdot \var[\varepsilon_i] \right ) / \left ( \sum_i T_i^2 \right )^2$ (**heteroskedasticty**)
+  - $\cov[\varepsilon_i,\varepsilon_j] = 0, \var_{\textrm{HC2}}[\hat \tau] = \left ( \sum_i T_1^2 \cdot \var[\varepsilon_i] \right ) / \left ( \sum_i T_i^2 \right )^2$ (**heteroskedasticty**)
   - $\cov[\varepsilon_i,\varepsilon_j] = 0$ *unless* observations $i$ and $j$ share the same cluster:
 
 $$
-\var_{\textrm{CL}}[\hat \tau] = \left (\sum_i \sum_j \textcolor{blue}{T_i T_j} \textcolor{red}{\cov[\varepsilon_i, \varepsilon_j]} \mathbb{1}[i,j \textrm{ in the same cluster}] \right) / \left(\sum_i T_i^2 \right )^2
+\var_{\textrm{CR}}[\hat \tau] = \left (\sum_i \sum_j \textcolor{blue}{T_i T_j} \textcolor{red}{\cov[\varepsilon_i, \varepsilon_j]} \mathbb{1}[i,j \textrm{ in the same cluster}] \right) / \left(\sum_i T_i^2 \right )^2
 $$
 
-- $\var_{\textrm{clu}}[\hat \tau] > \var_{\textrm{het}}[\hat \tau]$ if **both** are true:
-
-  - $T_i$ and $T_j$ are correlated within clusters.
-  - $\cov[\varepsilon_i, \varepsilon_j] > 0$.
+- $\var_{\textrm{CR}}[\hat \tau] > \var_{\textrm{HC2}}[\hat \tau]$ i.f.f $T_i$ and $T_j$ are correlated within clusters and $\cov[\varepsilon_i, \varepsilon_j] > 0$.
 
 ## References {visibility="uncounted"}
