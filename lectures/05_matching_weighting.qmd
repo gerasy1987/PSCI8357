@@ -69,23 +69,25 @@ thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 
 - In observational studies we can use regression based estimator under **CIA**.
 
-- **Pros**: Very easy to use! Many theoretical guarantees. 
+  - **Pros**: Very easy to use! Many theoretical guarantees. 
 
-- **Cons**: Assumed the correct model specification
+  - **Cons**: Assumed the correct model specification
   
-  - Only allow for modeled treatment effect heterogeneity 
-  - If we include $T_{i} \cdot X_{i1}$, no interaction with $X_{i2}$!
+    - Only allow for modeled treatment effect heterogeneity 
+    - If we include $T_{i} X_{i1}$, we assume no interaction with $X_{i2}$!
 
 . . .
 
-- **Goal**: Allow for unmodeled treatment effect heterogeneity
+- [Goal]{.note}: Allow for unmodeled treatment effect heterogeneity
 
-- Approach 1: [Matching]{.highlight}
+- **Approach 1**: [Matching]{.highlight}
   - [Idea]{.note}: Impute missing potential outcomes using observed outcomes of "closest" units. - For each treated unit, we just find "similar" control unit(s).
 
-- Approach 2: [Weighting]{.highlight}
+- **Approach 2**: [Weighting]{.highlight}
   - [Idea]{.note}: weight treated and control units such that they look similar 
   - a general, continuous version of matching
+
+- [Note]{.note}: Both approaches still need **CIA** assumption!
 
 # Motivating Example
 
@@ -124,20 +126,20 @@ thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 
 <br><br>
 
-- [Matching]{.highlight}: Nonparametric approaches  
+- Regression-based Estimator (Parametric approaches)
 
-  $\Longleftrightarrow$ Regression-based Estimator (Parametric approaches)
-
-. . .
-
-- **Key idea**: Impute missing potential outcomes using observed outcomes of ["nearest neighbors"]{.highlight}
+  $\Longrightarrow$ [Matching]{.highlight}: Nonparametric approaches.
 
 . . .
 
-- For units in the treatment group:
+- **Key idea**: Impute missing potential outcomes using observed outcomes of ["nearest neighbors"]{.highlight}.
+
+- E.g. for units in the treatment group:
   
   - We observe $Y_i(1)$, which is the observed outcome $Y_i$.
-  - We need to estimate $Y_i(0)$, which we will "impute" using units in the control group
+  - We need to estimate $Y_i(0)$, which we will "impute" using units in the control group.
+
+- [Note]{.note}: Can do the opposite for units in the control group.
 
 
 ## Basic Setup and Causal Estimand
@@ -149,7 +151,7 @@ thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 - **Potential outcomes**: $Y_i(0)$ and $Y_i(1)$
 - **Observed outcome**: $Y_i = T_i Y_i(1) + (1 - T_i) Y_i(0)$ (consistency)
 - **Observed pre-treatment covariates**: $\mathbf{X}_i$
-- **Data**: $n$ i.i.d samples of $\{Y_i, T_i, \mathbf{X}_i\}_{i=1}^n$
+- **Data**: $N$ i.i.d samples of $\{Y_i, T_i, \mathbf{X}_i\}_{i=1}^N$
 - **Causal Estimand**: $\tau_{ATT} = \E[ Y_i(1) - Y_i(0) \given T_i = 1]$
 
 . . .
@@ -175,7 +177,7 @@ thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
    $$
    \hat{\tau}_{\rm match} 
    \equiv 
-   \frac{1}{n_1}\sum_{i: T_i = 1} 
+   \frac{1}{N_1}\sum_{i: T_i = 1} 
    \bigl( Y_i - \widetilde{Y}_i \bigr),
    $$
    
@@ -185,12 +187,12 @@ thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 
 <br><br>
 
-- **Intuition**: $\widetilde{Y}_i \approx Y_i(0)$ under conditional ignorability, thus
+- [Intuition]{.note}: $\widetilde{Y}_i \approx Y_i(0)$ under conditional ignorability, thus
   
   $$
   \hat{\tau}_{\rm match} 
   \approx 
-  \frac{1}{n_1}\sum_{i: T_i = 1} 
+  \frac{1}{N_1}\sum_{i: T_i = 1} 
   \bigl( Y_i(1) - Y_i(0) \bigr).
   $$
 
@@ -199,7 +201,7 @@ thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
   $$
   \hat{\tau}_{\rm match} 
   = 
-  \frac{1}{n_1} \sum_{i:T_i=1} 
+  \frac{1}{N_1} \sum_{i:T_i=1} 
   \biggl\{
     Y_i 
     - 
@@ -245,17 +247,10 @@ thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 - Using [one-to-one matching with replacement]{.highlight}:
 
 $$
-\hat{\tau}_{\rm match} 
-= 
-\frac{1}{3}
-\Bigl\{ \bigl(6 - \textcolor{#458588}{9}\bigr) + \bigl(1 - \textcolor{#b16286}{0}\bigr) +
-  \bigl(0 - \textcolor{#458588}{9}\bigr)
-\Bigr\}
-=
--3.7
+\hat{\tau}_{\rm match} = \frac{1}{3} \Bigl\{ \bigl(6 - \textcolor{#458588}{9}\bigr) + \bigl(1 - \textcolor{#b16286}{0}\bigr) + \bigl(0 - \textcolor{#458588}{9}\bigr) \Bigr\} \approx -3.7
 $$
 
-# Distance Metrics (Matching on Multiple Variables)
+# Distance Metrics (Multiple Covariates)
 
 ## The Curse of Dimensionality
 
@@ -271,7 +266,7 @@ $$
 
 ## Distance Metrics for Matching
 
-- With many covariates, use a low-dimensional [distance metric]{.highlight}:
+- [Idea]{.note}: With many covariates, we can use some [distance metric]{.highlight}... [but which one?]{.fragment}
 
   :::fragment
   1. [Euclidean distance]{.highlight}:
@@ -304,7 +299,7 @@ $$
 ::: {.column width="60%"}
 
 :::{.center}
-|       | index | $\mathbf{X}_1$ | $\mathbf{X}_2$ |
+|       | index | $\mathbf{X}_{1}$ | $\mathbf{X}_{2}$ |
 |-------|:-----:|:--------------:|:--------------:|
 | Treated | $i$   | 0              | 0              |
 | Control A | $A$   | 5              | 5              |
@@ -524,11 +519,11 @@ p1 + p2 + p3 + plot_layout(ncol = 3, guides = "collect") & theme(legend.position
 
 <br>
 
-- As we just saw Mahalanobis distance does not work well with many covariates
+- As we just saw Mahalanobis distance does not work well with many covariates.
 
-- Another (very very) important metric: [Propensity Score]{.highlight}   
+- Another (very very) important metric: [Propensity Score]{.highlight}.
   
-  - [Preview]{.note}: We will show that we just need to match on one variable, propensity score 
+  - [Preview]{.note}: We will show that we just need to match on one variable, propensity score.
 
 - [Propensity Score]{.highlight}: Probability of receiving the treatment given $\mathbf{X}_i$
   $$
@@ -542,7 +537,7 @@ p1 + p2 + p3 + plot_layout(ncol = 3, guides = "collect") & theme(legend.position
   T_i \ \indep \ \mathbf{X}_i \ \given \ \pi(\mathbf{X}_i)
   $$
   
-  - [Note]{.note}: This holds only based on the definition of the propensity score (without the conditional ignorability!)
+  - [Note]{.note}: This holds only based on the definition of the propensity score (without the conditional ignorability!).
 
 ## Proof: Balancing Property
 
@@ -831,8 +826,6 @@ summary(match_out_ps)
 
 ## Example: Checking Covariate Balance
 
-<br>
-
 ```{r}
 #| label: matching_balance_plot
 #| echo: true
@@ -866,30 +859,31 @@ cobalt::love.plot(
 
 . . .
 
-3.  Decide how to match [@stuart2010matching]:
+3. Choose balance metrics: standardized mean difference, KS test, etc.
+
+. . .
+
+4.  Decide how to match [@stuart2010matching]:
   
     :::{.small-font}
     - One-to-one, one-to-many.
     - w/ and w/o replacement.
     - Caliper (choose distance).
-    - Optimal matching [@rosenbaum1989optimal]
-    - Full matching [@hansen2004full; @savje2021generalized]
-    - Genetic matching [@diamond2013genetic]
+    - Optimal matching: minimize sum of distances [@rosenbaum1989optimal]
+    - Full matching: subclassification with variable strata size [@hansen2004full; @savje2021generalized]
+    - Genetic matching: maximize minimum p-value [@diamond2013genetic]
     - Many others...
     :::
   
 . . .
 
-4.  Check covariate balance:
+5.  Repeat step 4 if necessary:
 
     :::{.small-font}
     - Fit different matching estimators until you get a good covariate balance.
     - Is this data snooping? [**No, because inference remains blind to $Y$.**]{.fragment}    
     :::
 
-. . .
-
-- **Q**: Which matching method is best? [**A**: Whichever gives you the best balance!]{.fragment}
 
 # Estimation and Inference of Causal Effects After Matching
 
@@ -903,7 +897,7 @@ cobalt::love.plot(
 
 - **Approach 1**: [Difference-in-Means after Matching]{.highlight} [@rubin1973use]
   $$
-  \hat{\tau}_{\rm match} = \frac{1}{n_1} \sum_{i:T_i=1} \left\{Y_i - \left(\frac{1}{|\mathcal{M}_i|}\sum_{j \in \mathcal{M}_i} Y_{j}\right)\right\},
+  \hat{\tau}_{\rm match} = \frac{1}{N_1} \sum_{i:T_i=1} \left\{Y_i - \left(\frac{1}{|\mathcal{M}_i|}\sum_{j \in \mathcal{M}_i} Y_{j}\right)\right\},
   $$    
   where $\mathcal{M}_i$ is the "matched set" for treated unit $i$.
 
@@ -1006,9 +1000,220 @@ knitr::kable(
   results,
   digits = 3,
   align = "lcc",
-  caption = "ATT Estimates for Abduction"
+  caption = "ATT Estimates of Effect of Abduction"
 ) |>
   kableExtra::kable_minimal(font_size = 20)
+```
+
+# Sensitivity Analysis
+
+## Sensitivity Analysis
+
+- **Question**: How robust our results to violation of CIA?
+
+. . .
+
+- **Idea**: Conduct analysis of sensitivity to violations of the CIA ([sensitivity analysis]{.highlight}).
+
+- Sensitivity analysis takes the following general form:
+  
+  1. Quantify the degree of violation of the key assumption by a sensitivity parameter ($\Gamma$, $\delta$, $\gamma$).
+  2. Set parameter to various values and derive what the true value of the quantity of interest would be
+  3. See at what point the eﬀect would go away completely (or become statistically insigniﬁcant)
+
+. . .
+
+- **Approach 1**: Parametric, based on the OVB formula we discussed before [@imbens2003sensitivity].
+  
+- **Approach 2**: Non-parametric, based on the differences in probability of treatment assignment [@rosenbaum2002sensitivity].
+
+## OVB Sensitivity Analysis
+
+<br>
+
+- Recall the [OVB]{.highlight} = $\gamma^\prime \delta$, where
+
+  - $\gamma$ is the vector of effects of [confounders]{.highlight} on the outcome.
+  - $\delta$ is the vector of confounder imbalance across treatments.
+
+. . .
+
+- @imbens2003sensitivity proposed a sensitivity analysis by setting $\delta$ and $\gamma$ (sensitivity
+parameters) to diﬀerent values and see what the implied true $\tau$ would be.
+
+- [Notes]{.highlight}:
+  
+  - Observed covariates ($X_i$) can be incorporated with minor extension.
+  - We need additional parametric assumptions to accommodate $X$, non-binary $U$ or $D$, etc.
+  - Extended to partial $R^2$ by @cinelli2020making.
+
+## Example: Blattman and Annan on Child Soldiers in Uganda
+
+![](../_images/blattman_annan_2010_sensitivity.png){width=80% fig-align="center"}
+
+## Non-Parametric Sensitivity Analysis
+
+- Alternative (non-parametric) sensitivity analyses approach was proposed by @rosenbaum2002sensitivity:
+  
+  - Uses a single sensitivity parameter $\Gamma\geq1$ representing departure from unconfoundedness.
+  - Unlike Imbens's approach which targets _ATE_, Rosenbaum considers **sharp null** tests and $p$-values from randomization inference.
+
+. . .
+
+- [Example]{.note}: One-to-one exact matching without replacement
+
+  - Consider two matched units $i$ and $j$ with $X_i= X_j$
+  
+  - Under **CIA**:
+    - Both units must have the same treatment probability given $X$: $\pi(X_i) = \pi(X_j)$.
+    - Within the pair the treatment is as-if randomized.
+  
+  - Without **CIA**:
+    - The true treatment probability is a function of both $X$ and unobserved confounders.
+    - That is, $\pi(X_i) \gtrless \pi(X_j)$ even if $X_i = X_j$.
+
+## Rosenbaum's $\Gamma$
+
+- Quantify the degree of confounding by bounding the **odds ratio** by $\Gamma$:
+  $$
+  \frac{1}{\Gamma} \ \leq \ \frac{\pi(X_i)/(1-\pi(X_i))}{\pi(X_j)/(1-\pi(X_j))} \ \leq \ \Gamma
+  $$
+  $\Gamma=1$ no hidden bias, but if $\Gamma=2$ unit $i$ can be up to twice/half as likely to be treated than unit $j$ (despite identical $X$)
+
+. . .
+
+- Sensitivity analysis procedure for pair matching:
+  
+  1.  Set $\Gamma$ to a certain level.
+  
+  2.  Calculate the max/min treatment assignment probabilities for the $\Gamma$:
+  $$
+  \frac{1}{1+\Gamma} \ \leq \ \pi(X_i) \ \leq \ \frac{\Gamma}{1 + \Gamma}.
+  $$
+  
+  3.  With $\pi(X_i)$ set to values most in favor of the null for each $i$, do a randomization test and record the $p$-value.
+  
+  4.  Iterate through 1-3 with different $\Gamma$ values.
+
+## Wilcoxon's Signed Rank Test
+
+<br>
+
+- [Wilcoxon's Signed Rank Test]{.highlight}: A test of the difference in matched pair data that (under the sharp null, $W$ is uniformly distributed):
+
+  1.  Calculate the absolute difference $|\Delta_i|$ between $Y_i$ and matched pair $Y_j$.
+  
+  2.  Rank the pairs in ascending order of absolute difference, $R_i = 1,2,...,N_R$.
+      
+      - Drop pairs with $\Delta_i = 0$.
+      - Break ties by assigning the average of the pairs' ranks if not tied.
+  
+  3.  Sign the ranks with the sign of $Y_i - Y_j$, or $\textrm{sgn}(\Delta_i)R_i$
+  
+  4.  Calculate the sum of the **positive** signed ranks as a test statistic $W$: $W = \sum_{i=1}^{N_{R^+}} R_i \quad \forall R_i > 0$.
+  
+  5.  Compare $W$ to a critical value.
+
+. . .
+
+- Compute this test and corresponding randomization $p$-value for different $\Gamma$ values under _best_ and _worst_ case scenario to construct bounds.
+
+## Example: Exact Pair Matching w/o Replacement
+
+Under conditional ignorability: $\Gamma = 1$, $\max\pi(X_i) = \min\pi(X_i) = 0.5$
+
+| $i$ | $Y_i$ | $Y_j$ | $\Delta_i$ | $|\Delta_i|$ | $R_i$ | $\textrm{sgn}(\Delta_i)R_i$ | $\Gamma$ | $\text{worst} \ \pi(X_i)$ |
+|:---:|:-----:|:-----:|:----------:|:------------:|:-----:|:--------------------------:|:-------:|:-------------------------:|
+| 1   | 13    | -3    | 16         | 16           | 4     | 4                          | 1       | .5                       |
+| 2   | 15    | 7     | 8          | 8            | 3     | 3                          | 1       | .5                       |
+| 3   | -1    | -4    | 3          | 3            | 2     | 2                          | 1       | .5                       |
+| 4   | 5     | 7     | -2         | 2            | 1     | -1                         | 1       | .5                       |
+
+- Wilcoxon statistic: $W = 4 + 3 + 2  = 9$
+- Randomization distribution of $W$:
+  $$
+  W \ \in \ \{0,1,2, ...9, 10\} \ \text{with probability} \ \frac{1}{16} \ \text{for each event}
+  $$
+- p-value for the sharp null is: $p = \Pr(W \geq 9 \mid H_0) = 0.125$
+
+## Example: Exact Pair Matching w/o Replacement
+
+With unobserved confounding: $\Gamma = 2$, $\max\pi(X_i) = 0.67$,  $\min\pi(X_i) = 0.33$
+
+| $i$ | $Y_i$ | $Y_j$ | $\Delta_i$ | $|\Delta_i|$ | $R_i$ | $\textup{sgn}(\Delta_i)R_i$ | $\Gamma$ | $\text{worst} \ \pi(X_i)$ |
+|:---:|:-----:|:-----:|:----------:|:------------:|:-----:|:--------------------------:|:-------:|:-------------------------:|
+| 1   | 13    | -3    | 16         | 16           | 4     | 4                          | 2       | .67                      |
+| 2   | 15    | 7     | 8          | 8            | 3     | 3                          | 2       | .67                      |
+| 3   | -1    | -4    | 3          | 3            | 2     | 2                          | 2       | .67                      |
+| 4   | 5     | 7     | -2         | 2            | 1     | -1                         | 2       | .33                      |
+
+- Wilcoxon statistic: $W = 4 + 3 + 2  = 9$
+
+- Randomization distribution of $W$:
+  $$
+  W \ \in \ \{0,1,2, ...9, 10\}
+  $$
+  with probabilities
+  $$
+  \left(\frac{1}{3}\right)^4, \ \left(\frac{2}{3}\right)\left(\frac{1}{3}\right)^3, \ ..., \ \left(\frac{1}{3}\right)\left(\frac{2}{3}\right)^3, \ \left(\frac{2}{3}\right)^4
+  \ = \ \frac{1}{81}, \ \frac{2}{81}, \ ..., \ \frac{8}{81}, \ \frac{16}{81}.
+  $$
+
+- Maximum $p$-value for the **sharp null** is: $p = \Pr(W \geq 9 \mid H_0) = 0.296$.
+
+## Example: Exact Pair Matching w/o Replacement
+
+With unobserved confounding: $\Gamma = 2$, $\max\pi(X_i) = 0.67$,  $\min\pi(X_i) = 0.33$
+
+| $i$ | $Y_i$ | $Y_j$ | $\Delta_i$ | $|\Delta_i|$ | $R_i$ | $\textup{sgn}(\Delta_i)R_i$ | $\Gamma$ | $\text{best} \ \pi(X_i)$ |
+|:---:|:-----:|:-----:|:----------:|:------------:|:-----:|:--------------------------:|:-------:|:------------------------:|
+| 1   | 13    | -3    | 16         | 16           | 4     | 4                          | 2       | .33                     |
+| 2   | 15    | 7     | 8          | 8            | 3     | 3                          | 2       | .33                     |
+| 3   | -1    | -4    | 3          | 3            | 2     | 2                          | 2       | .33                     |
+| 4   | 5     | 7     | -2         | 2            | 1     | -1                         | 2       | .67                     |
+
+- Wilcoxon statistic: $W = 4 + 3 + 2  = 9$
+- Randomization distribution of $W$:
+  $$
+  W \ \in \ \{0,1,2, ...9, 10\}
+  $$
+  with probabilities
+  $$
+  \left(\frac{2}{3}\right)^4, \ \left(\frac{1}{3}\right)\left(\frac{2}{3}\right)^3, \ ..., \ \left(\frac{2}{3}\right)\left(\frac{1}{3}\right)^3, \ \left(\frac{1}{3}\right)^4
+  \ = \ \frac{16}{81}, \ \frac{8}{81}, \ ..., \ \frac{2}{81}, \ \frac{1}{81}
+  $$
+- min p-value for the sharp null is: $p = \Pr(W \geq 9 \mid H_0) = 0.037$
+
+## Example: Blattman and Annan on Child Soldiers in Uganda
+
+```{r}
+#| label: matching_sensitivity
+#| echo: true
+#| eval: true
+#| output-location: "column"
+
+pacman::p_load(rbounds)
+
+x <-
+  matched_df_ps2 |>
+    dplyr::arrange(subclass) |>
+    (
+      \(.)
+        psens(
+          x = matched_df_ps2$educ[matched_df_ps2$abd == 0],
+          y = matched_df_ps2$educ[matched_df_ps2$abd == 1],
+          Gamma = 2,
+          GammaInc = .1
+        )
+    )()
+
+x$bounds |>
+  knitr::kable(
+    digits = 4,
+    caption = "Sensitivity Analysis for Effect of Abduction on Education"
+  ) |>
+  kableExtra::kable_minimal(font_size = 20)
+
 ```
 
 # Weighting
@@ -1025,11 +1230,8 @@ knitr::kable(
 - Weighting as a general, continuous version of matching: 
   $$
   \begin{align*}
-  \hat\tau_{\rm match} &= \frac{1}{n_1} \sum_{i=1}^n T_i\left(Y_i -
-    \frac{1}{|\mathcal{M}_i|}\sum_{j \in \mathcal{M}_i}Y_{j}\right) \\
-    &= \frac{1}{n_1} \sum_{i: T_i = 1}  Y_i - \frac{1}{n_0}
-          \sum_{i: T_i=0} \underbrace{\left(\frac{n_0}{n_1}\sum_{j: T_{j
-          = 1}}\frac{\mathbf{1}\{i \in \mathcal{M}_{j} \}}{|\mathcal{M}_{j}|} \right)}_{W_i} Y_i
+  \hat\tau_{\rm match} &= \frac{1}{N_1} \sum_{i=1}^n T_i\left(Y_i - \frac{1}{ |\mathcal{M}_i| }\sum_{j \in \mathcal{M}_i}Y_{j}\right) \\
+  &= \frac{1}{N_1} \sum_{i: T_i = 1}  Y_i - \frac{1}{N_0} \sum_{i: T_i=0} \underbrace{\left(\frac{N_0}{N_1}\sum_{j: T_{j = 1}}\frac{\mathbb{1}\{i \in \mathcal{M}_{j} \}}{|\mathcal{M}_{j}|} \right)}_{W_i} Y_i
   \end{align*}
   $$
 
@@ -1045,16 +1247,15 @@ knitr::kable(
 - Originally used for surveys: down-weight over-sampled respondents
 - Sampling weights inversely proportional to sampling probability
 
-- [Horvitz-Thompson estimator]{.highlight}:
+  - [Horvitz-Thompson estimator]{.highlight}:
   
-  $$
-  \widehat{\E}(Y_i) = \frac{1}{n} \sum_{i=1}^n \frac{S_i Y_i}{\Pr(S_i = 1)}
-  $$
+    $$
+    \widehat{\E}(Y_i) = \frac{1}{N} \sum_{i=1}^N \frac{S_i Y_i}{\Pr(S_i = 1)}
+    $$
 
-- [IPW estimator]{.highlight}: weight by the inverse of propensity score:
+- [IPW estimator]{.highlight}: weight by the inverse of propensity score
   $$
-  \widehat{\tau}_{IPW} = \frac{1}{n}\sum_{i=1}^n \left\{ \frac{T_iY_i}{\hat\pi(\mathbf{X}_i)} -
-                                 \frac{(1-T_i)Y_i}{1-\hat\pi(\mathbf{X}_i)}\right\} 
+  \widehat{\tau}_{IPW} = \frac{1}{N}\sum_{i=1}^N \left\{ \frac{T_iY_i}{\hat\pi(\mathbf{X}_i)} - \frac{(1-T_i)Y_i}{1-\hat\pi(\mathbf{X}_i)}\right\} 
   $$
 
 - Identical propensity scores $\rightsquigarrow$ Difference-in-Means estimator.
@@ -1063,7 +1264,7 @@ knitr::kable(
 
 - Unbiased if PS is known (not unbiased if PS is estimated!).
   
-  - _IPW_ estimator in randomized experiment is unbiased because we know PS by the design! 
+  - _IPW_ estimator in randomized experiment is unbiased because we know PSs by the design! 
 
 ## Proof: Identification of $\E\{Y_i(1)\}$
 
@@ -1079,8 +1280,7 @@ $$
 \end{align*}
 $$
 
-- Averaging $\tau_1(\mathbf{x})$ over the distribution of $\mathbf{x}$, $f(\mathbf{x})$, 
-yields $\E\{Y_i(1)\}$. $\qquad \qed$
+- Averaging $\tau_1(\mathbf{x})$ over the distribution of $\mathbf{x}$, $f(\mathbf{x})$, yields $\E\{Y_i(1)\}$. $\qquad \qed$
 
 # Appendix {visibility="uncounted"}
 
