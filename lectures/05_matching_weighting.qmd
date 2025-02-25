@@ -551,13 +551,14 @@ $$
 \begin{align*}
   \Pr(T_i=1 \given \pi(\mathbf{X}_i), \mathbf{X}_i) & = \E(T_i \given  \pi(\mathbf{X}_i), \mathbf{X}_i) \\
   & = \E(T_i \given \mathbf{X}_i) \quad (\because \mathbf{X}_i \text{ contains all information in } \pi(\mathbf{X}_i)) \\
-  & = \Pr(T_i=1 \given \mathbf{X}_i) \ = \ \pi(\mathbf{X}_i) \ \quad (\because \text{ definition!}) 
+  & = \Pr(T_i=1 \given \mathbf{X}_i) \ = \ \pi(\mathbf{X}_i) \ \quad (\because \text{ definition}) 
 \end{align*}
 $$
 
 . . .
 
 - We can also show:
+
 $$
 \begin{align*}
   \Pr(T_i=1 \given \pi(\mathbf{X}_i))& = \E(T_i| \pi(\mathbf{X}_i )) \\
@@ -596,7 +597,7 @@ $$
 - [Two-step procedure to estimate causal effects]{.highlight}:
   
   1. Estimate $\pi(\mathbf{X}_i)$ with a model for a binary response (e.g. logit, probit).
-  2. Do matching (or weighting --- see next section) on $\pi(\mathbf{X}_i)$.
+  2. Do matching (or weighting --- later in this lecture) on $\pi(\mathbf{X}_i)$.
 
 ## Proof of the Identification Result
 
@@ -621,7 +622,7 @@ $$
 \Pr(T_i=1\given \pi(X_i)) = \pi(X_i)
 $$
 
-- Therefore, $\Pr(T_i=1\given Y_i(1),Y_i(0),\pi(X_i)) = \Pr(T_i=1\given \pi(X_i))$, which implies $\{Y_i(1), Y_i(0)\} \ \indep \ T_i \given \pi(X_i)$, CIA just given $\pi(X_i). \qquad \qed$
+- Therefore, $\Pr(T_i=1\given Y_i(1),Y_i(0),\pi(X_i)) = \Pr(T_i=1\given \pi(X_i))$, which implies $\{Y_i(1), Y_i(0)\} \ \indep \ T_i \given \pi(X_i)$--**CIA** just given $\pi(X_i). \qquad \qed$
 
 ## Example: Matching with Propensity Score
 
@@ -758,7 +759,7 @@ p_before +
 
 . . .
 
-- [Balance test tautology]{.highlight} [@imai2008misunderstandings]
+- [Balance test fallacy/tautology]{.highlight} [@imai2008misunderstandings]
 
   - Balance on observed covariates $\ne$ balance on unobserved covariates!
   - Failure to reject the null $\ne$ covariate balance.
@@ -781,9 +782,9 @@ Hansen (2004), *Journal of the American Statistical Association*. -->
 :::{.columns}
 ::: {.column width="65%"}
 
-- Consider $n$ observations of two random variables, $X_0$ and $X_1$.
+- Consider $N$ observations of two random variables, $X_0$ and $X_1$.
 
-- The (two-sample) KS statistic: $$D \ = \ \sup_{x} \left| \widehat{F}_1(x) - \widehat{F}_0(x) \right|,$$ where $\widehat{F}_0(x)$, $\widehat{F}_1(x)$ is the **empirical CDF** of $X_0$, $X_1$.
+- **The (two-sample) KS statistic**: $$D \ = \ \sup_{x} \left| \widehat{F}_1(x) - \widehat{F}_0(x) \right|,$$ where $\widehat{F}_0(x)$, $\widehat{F}_1(x)$ is the **empirical CDF** of $X_0$, $X_1$.
 
 :::
 ::: {.column width="30%"}
@@ -798,7 +799,7 @@ Hansen (2004), *Journal of the American Statistical Association*. -->
 
 - **The KS null hypothesis**: $F_1(x) = F_0(x)$ (no difference in true distributions).
 
-- Under the null, $D$ has the **Kolmogorov distribution** as $n\to\infty$. $\implies$ Reject the null at level $\alpha$ if $D \ > \ c_\alpha \sqrt{\frac{n_1 + n_0}{n_1 n_0}}$.
+- Under the null, $D$ has the **Kolmogorov distribution** as $n\to\infty$. $\implies$ Reject the null at level $\alpha$ if $D \ > \ c_\alpha \sqrt{\frac{N_1 + N_0}{N_1 N_0}}$.
 
 ## Example: Balance [@lyall2009does]
 
@@ -1013,7 +1014,7 @@ knitr::kable(
 
 . . .
 
-- **Idea**: Conduct analysis of sensitivity to violations of the CIA ([sensitivity analysis]{.highlight}).
+- **Idea**: Conduct analysis of sensitivity to violations of the **CIA** ([sensitivity analysis]{.highlight}).
 
 - Sensitivity analysis takes the following general form:
   
@@ -1065,18 +1066,18 @@ parameters) to diﬀerent values and see what the implied true $\tau$ would be.
   - Consider two matched units $i$ and $j$ with $X_i= X_j$
   
   - Under **CIA**:
-    - Both units must have the same treatment probability given $X$: $\pi(X_i) = \pi(X_j)$.
+    - Both units must have the same treatment probability given $X$: $\pi_i(X_i) = \pi_j(X_j)$.
     - Within the pair the treatment is as-if randomized.
   
   - Without **CIA**:
     - The true treatment probability is a function of both $X$ and unobserved confounders.
-    - That is, $\pi(X_i) \gtrless \pi(X_j)$ even if $X_i = X_j$.
+    - That is, $\pi_i(X_i) \gtrless \pi_j(X_j)$ even if $X_i = X_j$.
 
 ## Rosenbaum's $\Gamma$
 
 - Quantify the degree of confounding by bounding the **odds ratio** by $\Gamma$:
   $$
-  \frac{1}{\Gamma} \ \leq \ \frac{\pi(X_i)/(1-\pi(X_i))}{\pi(X_j)/(1-\pi(X_j))} \ \leq \ \Gamma
+  \frac{1}{\Gamma} \ \leq \ \frac{\pi_i(X_i)/(1-\pi_i(X_i))}{\pi_j(X_j)/(1-\pi_j(X_j))} \ \leq \ \Gamma
   $$
   $\Gamma=1$ no hidden bias, but if $\Gamma=2$ unit $i$ can be up to twice/half as likely to be treated than unit $j$ (despite identical $X$)
 
@@ -1088,10 +1089,10 @@ parameters) to diﬀerent values and see what the implied true $\tau$ would be.
   
   2.  Calculate the max/min treatment assignment probabilities for the $\Gamma$:
   $$
-  \frac{1}{1+\Gamma} \ \leq \ \pi(X_i) \ \leq \ \frac{\Gamma}{1 + \Gamma}.
+  \frac{1}{1+\Gamma} \ \leq \ \pi_i(X_i) \ \leq \ \frac{\Gamma}{1 + \Gamma}.
   $$
   
-  3.  With $\pi(X_i)$ set to values most in favor of the null for each $i$, do a randomization test and record the $p$-value.
+  3.  With $\pi_i(X_i)$ set to values most in favor of the null for each $i$, do a randomization test and record the $p$-value.
   
   4.  Iterate through 1-3 with different $\Gamma$ values.
 
@@ -1120,7 +1121,7 @@ parameters) to diﬀerent values and see what the implied true $\tau$ would be.
 
 ## Example: Exact Pair Matching w/o Replacement
 
-Under conditional ignorability: $\Gamma = 1$, $\max\pi(X_i) = \min\pi(X_i) = 0.5$
+Under **CIA**: $\Gamma = 1$, $\max\pi(X_i) = \min\pi(X_i) = 0.5$
 
 | $i$ | $Y_i$ | $Y_j$ | $\Delta_i$ | $|\Delta_i|$ | $R_i$ | $\textrm{sgn}(\Delta_i)R_i$ | $\Gamma$ | $\text{worst} \ \pi(X_i)$ |
 |:---:|:-----:|:-----:|:----------:|:------------:|:-----:|:--------------------------:|:-------:|:-------------------------:|
@@ -1191,6 +1192,7 @@ With unobserved confounding: $\Gamma = 2$, $\max\pi(X_i) = 0.67$,  $\min\pi(X_i)
 #| echo: true
 #| eval: true
 #| output-location: "column"
+#| code-line-numbers: "1-14"
 
 pacman::p_load(rbounds)
 
@@ -1283,7 +1285,9 @@ $$
 \end{align*}
 $$
 
-- Averaging $\tau_1(\mathbf{x})$ over the distribution of $\mathbf{x}$, $f(\mathbf{x})$, yields $\E\{Y_i(1)\}$. $\qquad \qed$
+- Averaging $\E(\widehat{Y}_i (1) \given \mathbf{X}_i = \mathbf{x})$ over the distribution of $\mathbf{x}$, $f(\mathbf{x})$, yields $\E\{Y_i(1)\}$. $\qquad \qed$
+
+- [Note]{.note}: We can do the same for $\E(\widehat{Y}_i (1))$ and hence $\E\{Y_i(1) - Y_i(0)\}$.
 
 
 ## Horvitz-Thompson for Treatment Effects
@@ -1298,7 +1302,7 @@ $$
 
 - **Result**: Under no unmeasured confounders (**CIA**), $\E[\widehat{\tau}_{IPW}] \xrightarrow{p} \tau_{ATE}$ (consistent).
 
-  - [Important]{.note}: Would be unbiased if we knew the true propensity scores, $\pi(\mathbf{X}_i)$.
+  - [Important]{.alert}: Would be unbiased if we knew the true propensity scores, $\pi(\mathbf{X}_i)$.
 
 . . .
 
@@ -1319,7 +1323,7 @@ $$
 
 . . .
 
-- [Hajek estimator]{.highlight} normalizes the denominator so the weights sum up to $1$:
+- [Hájek estimator]{.highlight} normalizes the denominator so the weights sum up to $1$:
 
 $$
 \widehat{\tau}_{HA} = \frac{\sum_{i=1}^n \frac{T_i Y_i}{\widehat{\pi}(\mathbf{X}_i)}}{\sum_{i=1}^n \frac{T_i}{\widehat{\pi}(\mathbf{X}_i)}} - \frac{\sum_{i=1}^n \frac{(1-T_i) Y_i}{1-\widehat{\pi}(\mathbf{X}_i)}}{\sum_{i=1}^n \frac{(1-T_i)}{1-\widehat{\pi}(\mathbf{X}_i)}}
@@ -1333,9 +1337,9 @@ $$
 (\widehat{\alpha}_{WLS}, \widehat{\tau}_{WLS}) = \argmin_{\alpha, \tau} \sum_{i=1}^n \left( \frac{T_i}{\widehat{\pi}(\mathbf{X}_i)} + \frac{1-T_i}{1-\widehat{\pi}(\mathbf{X}_i)} \right) (Y_i - \alpha - \tau T_i)^2
 $$
 
-- [Note]{.note}: This procedure can also be used for _ATT_ estimation.
+- [Note]{.note}: This procedure can also be used for _ATT_ and _ATC_ estimation with weight of $1$ given to units in treatment or control group respectively.
 
-## True vs Estimated PS; HT vs Hajek Estimator
+## True vs Estimated PS; HT vs Hájek Estimator
 
 <br>
 
@@ -1403,7 +1407,7 @@ ggplot(sims, aes(y = Estimator, x = Estimate, fill = Estimator)) +
     y = "Density",
     fill = "Estimator"
   ) +
-  theme_minimal(base_size = 20)
+  theme_minimal(base_size = 16)
 
 ```
 
@@ -1420,6 +1424,12 @@ ggplot(sims, aes(y = Estimator, x = Estimate, fill = Estimator)) +
 - True PS only adjusts for the _expected_ differences between samples.
 
 - [Note]{.note}: Only true if propensity score model is correctly specified!!
+
+. . .
+
+- **Question**: Why could the Hájek estimator be more efficient than the Horvitz-Thompson estimator?
+
+- **Intuition**: The Hájek estimator normalizes the weights so that they sum to one, which reduces the variance of the weights $\rightsquigarrow$ lower variance of the estimator. This is not generally true though.
 
 # Weighting in Practice
 
