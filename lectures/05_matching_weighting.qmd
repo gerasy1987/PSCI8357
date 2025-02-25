@@ -175,7 +175,7 @@ thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 2. Estimate _ATT_ by the average difference between these pairs:
    
    $$
-   \hat{\tau}_{\rm match} 
+   \widehat{\tau}_{\rm match} 
    \equiv 
    \frac{1}{N_1}\sum_{i: T_i = 1} 
    \bigl( Y_i - \widetilde{Y}_i \bigr),
@@ -190,7 +190,7 @@ thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 - [Intuition]{.note}: $\widetilde{Y}_i \approx Y_i(0)$ under conditional ignorability, thus
   
   $$
-  \hat{\tau}_{\rm match} 
+  \widehat{\tau}_{\rm match} 
   \approx 
   \frac{1}{N_1}\sum_{i: T_i = 1} 
   \bigl( Y_i(1) - Y_i(0) \bigr).
@@ -199,7 +199,7 @@ thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 - When there are multiple "close" units, their average can be used:
   
   $$
-  \hat{\tau}_{\rm match} 
+  \widehat{\tau}_{\rm match} 
   = 
   \frac{1}{N_1} \sum_{i:T_i=1} 
   \biggl\{
@@ -247,7 +247,7 @@ thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 - Using [one-to-one matching with replacement]{.highlight}:
 
 $$
-\hat{\tau}_{\rm match} = \frac{1}{3} \Bigl\{ \bigl(6 - \textcolor{#458588}{9}\bigr) + \bigl(1 - \textcolor{#b16286}{0}\bigr) + \bigl(0 - \textcolor{#458588}{9}\bigr) \Bigr\} \approx -3.7
+\widehat{\tau}_{\rm match} = \frac{1}{3} \Bigl\{ \bigl(6 - \textcolor{#458588}{9}\bigr) + \bigl(1 - \textcolor{#b16286}{0}\bigr) + \bigl(0 - \textcolor{#458588}{9}\bigr) \Bigr\} \approx -3.7
 $$
 
 # Distance Metrics (Multiple Covariates)
@@ -897,7 +897,7 @@ cobalt::love.plot(
 
 - **Approach 1**: [Difference-in-Means after Matching]{.highlight} [@rubin1973use]
   $$
-  \hat{\tau}_{\rm match} = \frac{1}{N_1} \sum_{i:T_i=1} \left\{Y_i - \left(\frac{1}{|\mathcal{M}_i|}\sum_{j \in \mathcal{M}_i} Y_{j}\right)\right\},
+  \widehat{\tau}_{\rm match} = \frac{1}{N_1} \sum_{i:T_i=1} \left\{Y_i - \left(\frac{1}{|\mathcal{M}_i|}\sum_{j \in \mathcal{M}_i} Y_{j}\right)\right\},
   $$    
   where $\mathcal{M}_i$ is the "matched set" for treated unit $i$.
 
@@ -1227,10 +1227,10 @@ x$bounds |>
 
 . . .
 
-- Weighting as a general, continuous version of matching: 
+- Weighting is actually a general (continuous) version of matching: 
   $$
   \begin{align*}
-  \hat\tau_{\rm match} &= \frac{1}{N_1} \sum_{i=1}^n T_i\left(Y_i - \frac{1}{ |\mathcal{M}_i| }\sum_{j \in \mathcal{M}_i}Y_{j}\right) \\
+  \widehat\tau_{\rm match} &= \frac{1}{N_1} \sum_{i=1}^n T_i\left(Y_i - \frac{1}{ |\mathcal{M}_i| }\sum_{j \in \mathcal{M}_i}Y_{j}\right) \\
   &= \frac{1}{N_1} \sum_{i: T_i = 1}  Y_i - \frac{1}{N_0} \sum_{i: T_i=0} \underbrace{\left(\frac{N_0}{N_1}\sum_{j: T_{j = 1}}\frac{\mathbb{1}\{i \in \mathcal{M}_{j} \}}{|\mathcal{M}_{j}|} \right)}_{W_i} Y_i
   \end{align*}
   $$
@@ -1241,39 +1241,42 @@ x$bounds |>
 
 # Two Weighting Estimators
 
-## Inverse Probability Weighting (IPW) Estimator
+## Survey Sampling Origin
 
-- _IPW_ estimator is the most basic estimator using weights 
-- Originally used for surveys: down-weight over-sampled respondents
-- Sampling weights inversely proportional to sampling probability
+- We will re-introduce the weighted estimator we talked about briefly before.
 
-  - [Horvitz-Thompson estimator]{.highlight}:
-  
-    $$
-    \widehat{\E}(Y_i) = \frac{1}{N} \sum_{i=1}^N \frac{S_i Y_i}{\Pr(S_i = 1)}
-    $$
+. . .
 
-- [IPW estimator]{.highlight}: weight by the inverse of propensity score
-  $$
-  \widehat{\tau}_{IPW} = \frac{1}{N}\sum_{i=1}^N \left\{ \frac{T_iY_i}{\hat\pi(\mathbf{X}_i)} - \frac{(1-T_i)Y_i}{1-\hat\pi(\mathbf{X}_i)}\right\} 
-  $$
+- Intuition for weighting comes from sampling literature.
 
-- Identical propensity scores $\rightsquigarrow$ Difference-in-Means estimator.
+- Imagine we want to estimate the population mean $\overline{Y} = \frac{1}{N} \sum_{i=1}^N Y_i$
 
-- The _IPW_ estimator is consistent.
+  - $R_i = 1$ if sampled, $R_i = 0$ if not.
+  - We only observe $Y_i$ for those with $R_i = 1$.
+  - Inclusion probability varies by person: $\Pr(R_i = 1) = \pi_i$
 
-- Unbiased if PS is known (not unbiased if PS is estimated!).
-  
-  - _IPW_ estimator in randomized experiment is unbiased because we know PSs by the design! 
+. . .
 
-## Proof: Identification of $\E\{Y_i(1)\}$
+- [Horvitz-Thompson estimator]{.highlight} is given by (treating $Y_i$ as fixed):
 
-- We begin with the estimator conditional on a specific covariate value $\mathbf{x}$:
+$$
+\widehat{\mu}_{HT} = \frac{1}{N} \sum_{i=1}^N \frac{R_i Y_i}{\pi_i}
+$$
+
+- [Intuition]{.note}: Reweight sample to be representative of the population.
+
+## Identification of $\E [Y_i(1) ]$
+
+- We can use this estimator to estimate potential outcomes!
+
+. . .
+
+- Begin with the estimator conditional on a specific covariate value $\mathbf{x}$:
 
 $$
 \begin{align*}
-  \E(\widehat{\tau}_{IPW}  \given \mathbf{X}_i = \mathbf{x}) &= \E\left( Y_i\frac{T_i}{\pi(\mathbf{X}_i)}  \given \mathbf{X}_i = \mathbf{x}\right) \\
-  &= \E\left(Y_i \frac{1}{\pi(\mathbf{X}_i)} \given \mathbf{X}_i=\mathbf{x}, T_i=1\right)\Pr(T_i=1 \given \mathbf{X}_i=\mathbf{x})  \qquad (\because \text{ Law of Total Expectation}) \\ 
+  \E(\widehat{Y}_i (1) \given \mathbf{X}_i = \mathbf{x}) &= \E\left( Y_i\frac{T_i}{\pi(\mathbf{X}_i)}  \given \mathbf{X}_i = \mathbf{x}\right) \\
+  &= \E\left(Y_i \frac{1}{\pi(\mathbf{X}_i)} \given \mathbf{X}_i=\mathbf{x}, T_i=1\right)\Pr(T_i=1 \given \mathbf{X}_i=\mathbf{x})  \qquad (\because \text{ total expectation}) \\ 
                       &= \E\left(\frac{Y_i}{\pi(\mathbf{X}_i)} \given\mathbf{X}_i=\mathbf{x}, T_i=1 \right) \pi(\mathbf{x}) \\
                       &= \E(Y_i \given\mathbf{X}_i=\mathbf{x}, T_i=1) \\ 
                       &= \E\{Y_i(1) \given \mathbf{X}_i=\mathbf{x}\} \quad (\because \text{ CIA})
@@ -1282,8 +1285,344 @@ $$
 
 - Averaging $\tau_1(\mathbf{x})$ over the distribution of $\mathbf{x}$, $f(\mathbf{x})$, yields $\E\{Y_i(1)\}$. $\qquad \qed$
 
-# Appendix {visibility="uncounted"}
+
+## Horvitz-Thompson for Treatment Effects
+
+- Applying _HT_ estimator idea to potential outcomes framework and propensity scores:
+
+$$
+\widehat{\tau}_{IPW} = \frac{1}{N} \sum_{i=1}^N \left( \frac{T_i Y_i}{\widehat{\pi}(\mathbf{X}_i)} - \frac{(1-T_i) Y_i}{1-\widehat{\pi}(\mathbf{X}_i)} \right)
+$$
+
+. . .
+
+- **Result**: Under no unmeasured confounders (**CIA**), $\E[\widehat{\tau}_{IPW}] \xrightarrow{p} \tau_{ATE}$ (consistent).
+
+  - [Important]{.note}: Would be unbiased if we knew the true propensity scores, $\pi(\mathbf{X}_i)$.
+
+. . .
+
+- Similar expression for estimator of _ATT_:
+
+$$
+\widehat{\tau}_{IPW,T} = \frac{1}{N_1} \sum_{i=1}^N \left( T_i Y_i - \frac{\widehat{\pi}(\mathbf{X}_i)(1-T_i)Y_i}{1-\widehat{\pi}(\mathbf{X}_i)} \right)
+$$
+
+- [Intuition]{.note}: Upweight units with _rare_ treatment values for their values of $\mathbf{X}_i$. A kind of "continuous" version of matching _w/ replacement_.
 
 
+## Stabilized Weights
+
+- _HT_ estimators with known weights are unbiased but can be **inefficient**.
+
+  - Large weights can lead to highly variable estimates when (not) included.
+
+. . .
+
+- [Hajek estimator]{.highlight} normalizes the denominator so the weights sum up to $1$:
+
+$$
+\widehat{\tau}_{HA} = \frac{\sum_{i=1}^n \frac{T_i Y_i}{\widehat{\pi}(\mathbf{X}_i)}}{\sum_{i=1}^n \frac{T_i}{\widehat{\pi}(\mathbf{X}_i)}} - \frac{\sum_{i=1}^n \frac{(1-T_i) Y_i}{1-\widehat{\pi}(\mathbf{X}_i)}}{\sum_{i=1}^n \frac{(1-T_i)}{1-\widehat{\pi}(\mathbf{X}_i)}}
+$$
+
+. . .
+
+- Practically, **weighted least squares gives automatic normalization**:
+
+$$
+(\widehat{\alpha}_{WLS}, \widehat{\tau}_{WLS}) = \argmin_{\alpha, \tau} \sum_{i=1}^n \left( \frac{T_i}{\widehat{\pi}(\mathbf{X}_i)} + \frac{1-T_i}{1-\widehat{\pi}(\mathbf{X}_i)} \right) (Y_i - \alpha - \tau T_i)^2
+$$
+
+- [Note]{.note}: This procedure can also be used for _ATT_ estimation.
+
+## True vs Estimated PS; HT vs Hajek Estimator
+
+<br>
+
+```{r}
+#| label: hajek_simulation
+#| echo: true
+#| eval: true
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 7
+#| output-location: slide
+#| code-line-numbers: "3-4,10-15|17-31"
+
+set.seed(20251024)
+
+N <- 1000
+true_tau <- 2
+    
+sims <-
+  pbapply::pbreplicate(
+    1000,
+    {
+      X <- sample(0:3, prob = c(.5,.4,0,.1), N, replace = TRUE)
+      probs <- 0.5 + 0.1 * X
+      D <- randomizr::simple_ra(N, prob_unit = probs)
+      Y <- true_tau * D - 10 * X + rnorm(N, sd = 5)
+      # ps <- WeightIt::weightit(D ~ X, estimand = "ATE", method = "glm")$weights
+      ps <- predict(glm(D ~ X, family = binomial), type = "response")
+      
+      ht_ate_true <- 
+        estimatr::horvitz_thompson(
+          Y ~ D, condition_prs = probs)$coefficients[["D"]]
+
+      ht_ate <- 
+        estimatr::horvitz_thompson(
+          Y ~ D, condition_prs = ps)$coefficients[["D"]]
+
+      hajek_ate <- 
+        estimatr::lm_robust(
+          Y ~ D + X, weights = (D / ps) + ((1 - D) / (1 - ps)))$coefficients[["D"]]
+      
+      tibble(
+        Estimator = c("HT True", "HT", "Hajek"), 
+        Estimate = c(ht_ate_true, ht_ate, hajek_ate))
+    },
+    simplify = FALSE
+  ) |>
+    bind_rows()
+
+
+# create density plots for HT and Hajek estimates
+ggplot(sims, aes(y = Estimator, x = Estimate, fill = Estimator)) +
+  # geom_density(alpha = 0.35) +
+  ggdist::stat_slab(aes(thickness = after_stat(pdf*n)), scale = 0.25) +
+  ggdist::stat_dotsinterval(side = "bottom", scale = 0.7, slab_linewidth = NA) +
+  geom_vline(xintercept = 2, linetype = "dashed", size = 1) +
+  scale_fill_manual(
+    values = c("HT True" = "#928374", "HT" = "#cc241d", "Hajek" = "#689d6a")) +
+  scale_color_manual(values = c("HT True" = "#928374", "HT" = "#cc241d", "Hajek" = "#689d6a")) +
+  scale_x_continuous(
+    breaks = c(seq(-2,6, by = 2)),
+    limits = c(-2,6)) +
+  labs(
+    x = "Estimates",
+    y = "Density",
+    fill = "Estimator"
+  ) +
+  theme_minimal(base_size = 20)
+
+```
+
+## Why Use Estimated Propensity Scores?
+
+<br><br>
+
+- **Question**: Why is the estimated propensity score more efficient than the _true_ propensity scores?
+
+. . .
+
+- [Intuition]{.note}: Removing chance variations usinĝ $\widehat{\pi} (\mathbf{X}_i)$ adjusts for any small imbalances that arise because of a finite sample.
+
+- True PS only adjusts for the _expected_ differences between samples.
+
+- [Note]{.note}: Only true if propensity score model is correctly specified!!
+
+# Weighting in Practice
+
+## Post-Weighting Estimation
+
+<br>
+
+- After Weighting, how do we estimate the causal effect?
+
+. . .
+
+- **Approach 1**: [Weighting Estimator]{.highlight}
+
+  - IPW estimator.
+  - Hájek Estimator.
+  - Adaptive normalization [@khan2023adaptive].
+
+- **Approach 2**: [Weighted Linear Regression]{.highlight}
+
+  - Running a regression of $Y_i$ and $T_i$ and $\mathbf{X}_i$, with weights $w_i$.
+  - Generalization of Hájek Estimator.
+
+
+## Post-Weighting Inference
+
+
+- If $\widehat{\pi}(\mathbf{X}_i)$ is estimated, how to estimate $\var(\widehat{\tau}_{IPW})$ or $\var(\widehat{\tau}_{HA})$?
+
+. . .
+
+- **Approach 1**: [Weighting as Pre-Processing]{.highlight}
+
+  - Inference will condition on weighting.
+  - The standard, but this ignores uncertainties of weighting.
+
+. . .
+
+- **Approach 2:** [Bootstrap]{.highlight}
+
+  - Clustering and weighting where needed!
+
+. . .
+
+- **Approach 3:** [Method of Moments]{.highlight} [@newey1994large]
+
+  - Treat as a joint estimation problem and use the delta method.
+    
+    - [Intuition]{.note}: How small changes in the propensity score estimates affect the overall variance.
+  
+  - Moment condition from the propensity score and for the _IPW_ estimator:
+  $$
+  \sum_{i=1}^N\left\{
+      \frac{T_i}{\pi_\theta(\mathbf{X}_i)} -
+      \frac{1-T_i}{1-\pi_\theta(\mathbf{X}_i)} \right\} \frac{\partial \pi_\theta(\mathbf{X}_i)}{\partial \theta}
+       = 0;\; \;
+       \frac{1}{N} \sum_{i=1}^N \frac{T_i Y_i}{\pi_\theta(\mathbf{X}_i)} - \mu_1  =  \frac{1}{N} \sum_{i=1}^n \frac{(1-T_i) Y_i}{1-\pi_\theta(\mathbf{X}_i)} - \mu_0  =  0
+  $$
+
+## Example: Estimation After Weighting
+
+<br>
+
+```{r}
+#| label: weighting_estimation
+#| echo: true
+#| eval: true
+#| output-location: "column"
+#| code-line-numbers: "1-9|11-27"
+
+pacman::p_load(WeightIt)
+
+ps <-
+  WeightIt::weightit(
+    formula = for_match,
+    data = data_small,
+    estimand = "ATE",
+    method = "glm"
+  )
+
+weight_asympt <-
+  WeightIt::lm_weightit(
+    main_for, data = data_small,
+    weightit = ps, vcov = "asympt"
+  )
+
+weight_boot <-
+  WeightIt::lm_weightit(
+    main_for, data = data_small,
+    weightit = ps, vcov = "BS"
+  )
+
+weight_gmm <-
+  WeightIt::lm_weightit(
+    main_for, data = data_small, 
+    vcov = "const"
+  )
+
+results <- tibble(
+  Model = c(
+    "Pre-Processing",
+    "Bootstrap",
+    "GMM"
+  ),
+  Coefficient = c(
+    tidy(weight_asympt)$estimate[2],
+    tidy(weight_boot)$estimate[2],
+    tidy(weight_gmm)$estimate[2]
+  ),
+  `Standard Error` = c(
+    tidy(weight_asympt)$std.error[2],
+    tidy(weight_boot)$std.error[2],
+    tidy(weight_gmm)$std.error[2]
+  )
+)
+
+# Print the table using knitr
+knitr::kable(
+  results,
+  digits = 3,
+  align = "lcc",
+  caption = "ATE Estimates of Effect of Abduction"
+) |>
+  kableExtra::kable_minimal(font_size = 20)
+
+```
+
+# Problems with Weighting
+
+## Covariate Balancing
+
+<br>
+
+- **Problem 1**: Modeling propensity score for covariate balance is difficult.
+
+- **Problem 2**: Highly variable/unstable weights $\rightsquigarrow$ High variance estimators.
+
+  - When there is a lack of overlap so $\pi(\mathbf{X}_i)$ is close to $0$ or $1$.
+
+. . .
+
+- **Approach 1**: Entropy balancing [@hainmueller2012entropy]
+
+  - Solve convex quadratic programming problem with loss function to find optimal weights.
+
+- **Approach 2**: [Covariate balancing propensity scores (CBPS)]{.highlight} [@imai2014covariate]
+
+  - Use GMM with balancing condition using some _moment_ of covariates.
+
+- **Many other approaches...**
+
+- [Note]{.note}: Attractive when few covariates and covariate distributions are convex and unimodal over their support, in which case balancing on a few moments should work.
+
+## Doubly Robust Estimator
+
+<br>
+
+![](../_images/doubly_robust.png){height=90% fig-align="center"}
+
+## Doubly Robust Estimator
+
+<br>
+
+- [Augmented IPW (AIPW) estimator]{.highlight}:
+
+$$
+\widehat{\tau}_{AIPW} = \frac{1}{N} \sum_{i=1}^N \left( \{\widehat{\mu}_1(\mathbf{X}_i) - \widehat{\mu}_0(\mathbf{X}_i)\} + \left\{ \frac{T_i (Y_i - \widehat{\mu}_1(\mathbf{X}_i))}{\widehat{\pi}(\mathbf{X}_i)} - \frac{(1-T_i)(Y_i - \widehat{\mu}_0(\mathbf{X}_i))}{1-\widehat{\pi}(\mathbf{X}_i)} \right\} \right)
+$$
+
+- $\widehat{\tau}_{AIPW}$ is [doubly robust]{.highlight}:
+
+  - Consistent if _either_ the **propensity score** ($\widehat{\pi}(\mathbf{X}_i)$) or the **outcome** ($\widehat{\mu}_t(\mathbf{X}_i)$) model is correct. We get two chances to be correct!
+
+. . .
+
+- This is also the estimator we need to use when we want to incorporate machine learning methods for $\widehat{\mu}_t(\mathbf{X}_i)$ and $\widehat{\pi}(\mathbf{X}_i)$.
+
+- **Further Reading:** @chernozhukov2018double, @mercatanti2014debit
+
+# Summary
+
+## Summary
+
+<br>
+
+- Matching and Weighting avoid outcome regression models and allow for unmodeled treatment eﬀect heterogeneity.
+
+- [Matching]{.highlight}
+  
+  - **Pros**: Transparent, Intuitive.
+  - **Cons**: Might be ineﬃcient because dropping observations.
+
+- [Weighting]{.highlight}
+  - **Pros**: More eﬃcient and more eﬀective.
+  - **Cons**: Sensitive to extreme weights.
+
+- **Common cons**: More diﬃcult to use with categorical and continuous treatments.
+
+. . .
+
+- Regression, Matching, and Weighting are complementary estimation methods $\rightsquigarrow$ If results are diﬀerent, we should ﬁgure out why!
+
+- In practice, we should try to be robust to the choice of estimation methods
+
+<!-- # Appendix {visibility="uncounted"} -->
 
 ## References {visibility="uncounted"}
