@@ -186,7 +186,7 @@ Readings, lectures, assignments, and news for the course will be posted on the c
         
 *   - **1/23 1/30**
     - Regression and Causality
-    - CEF and its properties, selection on observables, conditional ignorability, [problem set 1](problem_sets/ps1.pdf)
+    - CEF and its properties, selection on observables, conditional ignorability, [problem set 1](problem_sets/ps1.pdf) ([ak](problem_sets/ps1_answer_key.pdf))
     -   - @angrist2009mostly [Ch. 3.1-3.2.2]
         - @morgan2015counterfactuals [Ch. 6.1-6.2]
         - @cinelli2024crash
@@ -215,51 +215,46 @@ Readings, lectures, assignments, and news for the course will be posted on the c
 *   - 
     - []{colspan=3} **OBSERVATIONAL DESIGNS FOR CAUSAL INFERENCE**
 
-*   - **2/18 2/20**
+*   - **2/20 2/25 2/27**
     - Matching
-    - exact matching, coarsened exact matching, nearest neighbor matching and bias correction, balance checking, propensity score theorem
+    - exact matching, coarsened exact matching, nearest neighbor matching, propensity score, balancing property, sensitivity analysis [problem set 2](problem_sets/ps2.pdf)
     -   - @angrist2009mostly [Ch. 3]
         - @morgan2015counterfactuals [Ch. 5]
         - @sekhon2009opiates
         - @caliendo2008some
 
-*   - **2/25 2/27**
+*   - **3/4 3/6**
     - Instrumental Variables
-    - IV estimator, 2SLS, variance estimation
-    -   - @angrist2009mostly [Ch. 4.1-4.2]
-        - @morgan2015counterfactuals [Ch. 9.1-9.2]
+    - Local Average Treatment EffectsIV estimator, one-/two-sided non-compliance, 2SLS, variance estimation
+    -   - @angrist2009mostly [Ch. 4]
+        - @morgan2015counterfactuals [Ch. 9.1-9.3]
         - @angrist1996identification
         - @sovey2011instrumental
-
-*   - **3/4**
-    - Local Average Treatment Effects
-    - IV with heterogeneous effects, one-/two-sided non-compliance
-    -   - @angrist2009mostly [Ch. 4.3-4.7]
-        - @morgan2015counterfactuals [Ch. 9.3]
-
-*   - **3/6**
-    - Panel Data
-    - fixed and random effects, within estimator, LSDV
-    -   - @angrist2009mostly [Ch. 5.1, 5.4]
-        - @morgan2015counterfactuals [Ch. 11.3]
 
 *   - **3/11 3/13 3/18**
     - No Class
     - Spring Break/New Faces
     - 
 
-*   - **3/20 3/25**
+*   - **3/20**
+    - Panel Data
+    - fixed and random effects, within estimator, LSDV
+    -   - @angrist2009mostly [Ch. 5.1, 5.4]
+        - @morgan2015counterfactuals [Ch. 11.3]
+
+
+*   - **3/25 3/27**
     - Difference-in-Differences
-    - two-period DID, pre-trends, event study, conditional DID, triple differences, continuous treatment DID, TWFE bias with multiple events, event-by-event estimation
+    - two-period DID, pre-trends, event study, conditional DID, continuous treatment DID, TWFE bias with multiple events, event-by-event estimation
     -   - @angrist2009mostly [Ch. 5.2]
         - @bertrand2004much
 
-*   - **3/27 4/1**
+*   - **4/1 4/3**
     - Synthetic Control
     - identification, estimation and statistical inference, interactive FEs
     - TBD
 
-*   - **4/3 4/8**
+*   - **4/8 4/10**
     - Regression Discontinuity Designs
     - parametric, non-parametric local regression, optimized RD and honest inference, threats, fuzzy RDD (?)
     -   - @angrist2009mostly [Ch. 6]
@@ -270,14 +265,10 @@ Readings, lectures, assignments, and news for the course will be posted on the c
 *   - 
     - []{colspan=3} **ADDITIONAL TOPICS**
 
-*   - **4/10**
-    - Mediation Effects
-    - natural direct and indirect effects, controlled direct and indirect effects, sensitivity analysis, experimental designs
-    -   - @gerber2012field [Ch. 10]
 *   - **4/15**
-    - Moderator Effects
-    - interaction effects and non-linear conditional effect curves, decomposing effect heterogeneity, optimal treatment regimes
-    -   - @gerber2012field [Ch. 9]
+    - Mediation Effects
+    - natural direct and indirect effects, controlled direct and indirect effects, sensitivity analysis, experimental designs, interaction effects and non-linear conditional effect curves, decomposing effect heterogeneity, optimal treatment regimes
+    -   - @gerber2012field [Ch. 9-10]
 *   - **4/17**
     - Course Wrap-Up
     - 

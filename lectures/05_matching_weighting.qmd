@@ -1449,7 +1449,8 @@ ggplot(sims, aes(y = Estimator, x = Estimate, fill = Estimator)) +
 
 - **Approach 2**: [Weighted Linear Regression]{.highlight}
 
-  - Running a regression of $Y_i$ and $T_i$ and $\mathbf{X}_i$, with weights $w_i$.
+  - Running a regression of $Y_i$ on $T_i$ and $\mathbf{X}_i$, with weights $w_i$.
+  - Equivalent to running regression of $Y_i\sqrt{w_i}$ on $T_i\sqrt{w_i}$ and $\mathbf{X}_i \sqrt{w_i}$ (do not forget about intercept!).
   - Generalization of Hájek Estimator.
 
 

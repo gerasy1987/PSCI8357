@@ -290,7 +290,8 @@ role="doc-biblioref">1986</a>)</span></li>
 <td style="text-align: left;">Regression and Causality</td>
 <td style="text-align: left;">CEF and its properties, selection on
 observables, conditional ignorability, <a
-href="problem_sets/ps1.pdf">problem set 1</a></td>
+href="problem_sets/ps1.pdf">problem set 1</a> (<a
+href="problem_sets/ps1_answer_key.pdf">ak</a>)</td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="angrist2009mostly">Angrist and
 Pischke (<a href="#ref-angrist2009mostly" role="doc-biblioref">2009</a>,
@@ -357,11 +358,12 @@ stratification and block randomization, factorial designs</td>
 FOR CAUSAL INFERENCE</strong></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>2/18 2/20</strong></th>
+<th style="text-align: center;"><strong>2/20 2/25 2/27</strong></th>
 <td style="text-align: left;">Matching</td>
 <td style="text-align: left;">exact matching, coarsened exact matching,
-nearest neighbor matching and bias correction, balance checking,
-propensity score theorem</td>
+nearest neighbor matching, propensity score, balancing property,
+sensitivity analysis <a href="problem_sets/ps2.pdf">problem set
+2</a></td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="angrist2009mostly">Angrist and
 Pischke (<a href="#ref-angrist2009mostly" role="doc-biblioref">2009</a>,
@@ -377,17 +379,17 @@ role="doc-biblioref">2008</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>2/25 2/27</strong></th>
+<th style="text-align: center;"><strong>3/4 3/6</strong></th>
 <td style="text-align: left;">Instrumental Variables</td>
-<td style="text-align: left;">IV estimator, 2SLS, variance
-estimation</td>
+<td style="text-align: left;">Local Average Treatment EffectsIV
+estimator, one-/two-sided non-compliance, 2SLS, variance estimation</td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="angrist2009mostly">Angrist and
 Pischke (<a href="#ref-angrist2009mostly" role="doc-biblioref">2009</a>,
-Ch. 4.1-4.2)</span></li>
+Ch. 4)</span></li>
 <li><span class="citation" data-cites="morgan2015counterfactuals">Morgan
 and Winship (<a href="#ref-morgan2015counterfactuals"
-role="doc-biblioref">2015</a>, Ch. 9.1-9.2)</span></li>
+role="doc-biblioref">2015</a>, Ch. 9.1-9.3)</span></li>
 <li><span class="citation"
 data-cites="angrist1996identification">Angrist, Imbens, and Rubin (<a
 href="#ref-angrist1996identification"
@@ -398,21 +400,13 @@ role="doc-biblioref">2011</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>3/4</strong></th>
-<td style="text-align: left;">Local Average Treatment Effects</td>
-<td style="text-align: left;">IV with heterogeneous effects,
-one-/two-sided non-compliance</td>
-<td style="text-align: left;"><ul>
-<li><span class="citation" data-cites="angrist2009mostly">Angrist and
-Pischke (<a href="#ref-angrist2009mostly" role="doc-biblioref">2009</a>,
-Ch. 4.3-4.7)</span></li>
-<li><span class="citation" data-cites="morgan2015counterfactuals">Morgan
-and Winship (<a href="#ref-morgan2015counterfactuals"
-role="doc-biblioref">2015</a>, Ch. 9.3)</span></li>
-</ul></td>
+<th style="text-align: center;"><strong>3/11 3/13 3/18</strong></th>
+<td style="text-align: left;">No Class</td>
+<td style="text-align: left;">Spring Break/New Faces</td>
+<td style="text-align: left;"></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>3/6</strong></th>
+<th style="text-align: center;"><strong>3/20</strong></th>
 <td style="text-align: left;">Panel Data</td>
 <td style="text-align: left;">fixed and random effects, within
 estimator, LSDV</td>
@@ -426,17 +420,11 @@ role="doc-biblioref">2015</a>, Ch. 11.3)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>3/11 3/13 3/18</strong></th>
-<td style="text-align: left;">No Class</td>
-<td style="text-align: left;">Spring Break/New Faces</td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<th style="text-align: center;"><strong>3/20 3/25</strong></th>
+<th style="text-align: center;"><strong>3/25 3/27</strong></th>
 <td style="text-align: left;">Difference-in-Differences</td>
 <td style="text-align: left;">two-period DID, pre-trends, event study,
-conditional DID, triple differences, continuous treatment DID, TWFE bias
-with multiple events, event-by-event estimation</td>
+conditional DID, continuous treatment DID, TWFE bias with multiple
+events, event-by-event estimation</td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="angrist2009mostly">Angrist and
 Pischke (<a href="#ref-angrist2009mostly" role="doc-biblioref">2009</a>,
@@ -447,14 +435,14 @@ role="doc-biblioref">2004</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>3/27 4/1</strong></th>
+<th style="text-align: center;"><strong>4/1 4/3</strong></th>
 <td style="text-align: left;">Synthetic Control</td>
 <td style="text-align: left;">identification, estimation and statistical
 inference, interactive FEs</td>
 <td style="text-align: left;">TBD</td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>4/3 4/8</strong></th>
+<th style="text-align: center;"><strong>4/8 4/10</strong></th>
 <td style="text-align: left;">Regression Discontinuity Designs</td>
 <td style="text-align: left;">parametric, non-parametric local
 regression, optimized RD and honest inference, threats, fuzzy RDD
@@ -480,27 +468,17 @@ role="doc-biblioref">2016</a>)</span></li>
 TOPICS</strong></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>4/10</strong></th>
+<th style="text-align: center;"><strong>4/15</strong></th>
 <td style="text-align: left;">Mediation Effects</td>
 <td style="text-align: left;">natural direct and indirect effects,
 controlled direct and indirect effects, sensitivity analysis,
-experimental designs</td>
+experimental designs, interaction effects and non-linear conditional
+effect curves, decomposing effect heterogeneity, optimal treatment
+regimes</td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="gerber2012field">Gerber and Green
 (<a href="#ref-gerber2012field" role="doc-biblioref">2012</a>, Ch.
-10)</span></li>
-</ul></td>
-</tr>
-<tr>
-<th style="text-align: center;"><strong>4/15</strong></th>
-<td style="text-align: left;">Moderator Effects</td>
-<td style="text-align: left;">interaction effects and non-linear
-conditional effect curves, decomposing effect heterogeneity, optimal
-treatment regimes</td>
-<td style="text-align: left;"><ul>
-<li><span class="citation" data-cites="gerber2012field">Gerber and Green
-(<a href="#ref-gerber2012field" role="doc-biblioref">2012</a>, Ch.
-9)</span></li>
+9-10)</span></li>
 </ul></td>
 </tr>
 <tr>
