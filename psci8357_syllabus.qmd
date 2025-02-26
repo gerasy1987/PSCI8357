@@ -82,12 +82,14 @@ Homework will be graded for points as indicated on each assignment and count tow
 
 The primary objective of this course is to provide both a theoretical understanding and practical experience in implementing the discussed techniques. To achieve this, you are required to complete two re-analyses of existing studies: one involving a Randomized Controlled Trial (RCT) or experiment, and the other using an observational study. Each student must select a paper at least one month before the replication deadline and notify both the professor and the TA of their choice. It is crucial to ensure that replication data is available for the paper, typically through repositories like Harvard Dataverse or OSF. If the data is not readily accessible online, you may contact the authors or request assistance from the professor, but it is essential to adhere to the deadlines.
 
-Once you have selected your paper, you are expected to accomplish two main tasks. First, replicate the primary analyses reported in the paper using your own code, rather than the authors' code from the replication archive. Second, expand upon the main analyses in at least one of the following ways:
+Once you have selected your paper, you are expected to accomplish two main tasks. First, replicate the primary analyses reported in the paper using your own code, rather than the authors' code from the replication archive. Second, conduct two or more extensions of the replicated analyses. The possible extensions can be of two general types:
 
-1. Check for robustness. For example, examine how the results depend on specific estimation models or measurement techniques.
-2. Alternatively, delve deeper into the logic of the authors' theory. This may involve constructing new tests based on the implications of the authors' theory or hypotheses.
+1. Checking for robustness. For example, examine how the results depend on specific estimation models or measurement techniques, or conduct additional tests of identification assumptions.
+2. Delving deeper into the logic of the authors' theory. This may involve constructing new tests based on the implications of the authors' theory or hypotheses (e.g., subgroup analyses).
 
-For both tasks, you need to post a brief replication plan on the Brightspace forum at least one week before submitting the replication report.
+Note that you are not required to conduct both types of extensions; you can do two or more robustness checks or two or more additional theory tests.
+
+For both replication and extensions, you need to post a brief replication plan on the Brightspace forum at least one week before submitting the replication report.
 
 Your final submission should include the data files you used and a replication write-up in a reproducible [R]{.proglang} Markdown or Quarto Markdown file, enabling the professor and TA to re-run your analyses on their machines. The write-up should encompass the following:
 

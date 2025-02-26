@@ -95,18 +95,23 @@ adhere to the deadlines.
 Once you have selected your paper, you are expected to accomplish two
 main tasks. First, replicate the primary analyses reported in the paper
 using your own code, rather than the authors’ code from the replication
-archive. Second, expand upon the main analyses in at least one of the
-following ways:
+archive. Second, conduct two or more extensions of the replicated
+analyses. The possible extensions can be of two general types:
 
-1.  Check for robustness. For example, examine how the results depend on
-    specific estimation models or measurement techniques.
-2.  Alternatively, delve deeper into the logic of the authors’ theory.
-    This may involve constructing new tests based on the implications of
-    the authors’ theory or hypotheses.
+1.  Checking for robustness. For example, examine how the results depend
+    on specific estimation models or measurement techniques, or conduct
+    additional tests of identification assumptions.
+2.  Delving deeper into the logic of the authors’ theory. This may
+    involve constructing new tests based on the implications of the
+    authors’ theory or hypotheses (e.g., subgroup analyses).
 
-For both tasks, you need to post a brief replication plan on the
-Brightspace forum at least one week before submitting the replication
-report.
+Note that you are not required to conduct both types of extensions; you
+can do two or more robustness checks or two or more additional theory
+tests.
+
+For both replication and extensions, you need to post a brief
+replication plan on the Brightspace forum at least one week before
+submitting the replication report.
 
 Your final submission should include the data files you used and a
 replication write-up in a reproducible <span class="proglang">R</span>
