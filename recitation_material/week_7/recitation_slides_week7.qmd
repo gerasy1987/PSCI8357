@@ -1,0 +1,103 @@
+---
+title: "Implementing Instrumental Variable Regression in R"
+author: "Alexander Dean"
+subtitle: "Recitation Period 7"
+institute: "Vanderbilt University"
+email: "alexander.r.dean@vanderbilt.edu"
+date: today
+execute:
+  embed-resources: true 
+format: 
+  revealjs:
+    theme: dark
+    footer: "Alexander Dean (Vanderbilt University)"
+    slide-number: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    self-contained-math: true
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+    code-fold: true
+fontsize: 32px
+editor: source
+---
+
+# Introductory Spiel
+
+## What We Will Cover Today
+1. A quick introduction to what IV regression is:
+    - What is an instrument?
+    - Assumptions needed to recover LATE
+2. Implementing an instrumental variable regression in R with the AER package
+
+## The Limits of Selection-on-observales:
+1. Recall our previous lectures on selection-on-observables
+2. What can we do when there is some unobserved variable X that confounds both treatment (D) and outcome (Y)?
+
+```{r confounded_dag}
+#| label: fig-confound_dag
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "80%"
+
+knitr::include_graphics("unobserved_dag.png")
+```
+
+## Introducing Instrumental Variables
+
+1. Under certain assumptions, we can still causally estimate observational data even when we are unable to use a selection-on-observables strategy!
+2. One such approach is called an **instrumental variables** identification strategy
+
+## (Brief) Overview of Necessities for IV
+
+1. Some variable $Z_{i}$ (instrument) is correlated with $D_{i}$ (first stage assumption)
+2. $Z_{i}$ is uncorrelated with $X_{i}$ and $\nu_{i}$ (independence assumption)
+3. $Z_{i}$ **ONLY** influences $Y_{i}$ through $D_{i}$ (exclusion restriction assumption)
+
+## Visualizing IVs in a DAG
+```{r confounded_dag}
+#| label: fig-standard_iv
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "80%"
+
+knitr::include_graphics("standard_iv.png")
+```
+
+## Visualizing (Violated) IVs in a DAG
+
+:::: {.columns}
+::: {.column width="48%"}
+![](iv_confounds.png)
+:::
+
+::: {.column width="48%"}
+![](iv_exclusion.png)
+:::
+::::
+
+## Going From DAG to Data
+
+1. IV typically relies on a two-stage regression
+
+. . . 
+
+- Regress the first stage with Z on D to obtain $\hat{D}$
+- Then regress $\hat{D}$ on Y
+- You now have the local average treatment effect (The ATE among compliers)
+
+. . . 
+
+- This is a **VERY** rough overview, we will learn about IVs more formally in class
+
+# Implementing IVs in R
+
+## The AER Package and Nunn & Wantchekon (2011)
+
+Let's move to [iv_practicum.R](https://github.com/gerasy1987/PSCI8357/tree/main/recitation_material/week_7)
