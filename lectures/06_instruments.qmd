@@ -1,0 +1,1158 @@
+---
+title: "Observational Studies:<br>Instrumental Variables"
+subtitle: "PSCI 8357 - Stats II"
+author: Georgiy Syunyaev
+institute: "Department of Political Science, Vanderbilt University"
+date: today
+date-format: long
+format: 
+  revealjs:
+    toc: true
+    toc-depth: 1
+    toc-title: "Plan"
+    slide-number: c/t
+    # preview-links: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    html-math-method: mathjax
+    # logo: images/wzb_logo.png
+    self-contained-math: true
+    css: ../_supp/styles.css
+    theme: [serif,"../_supp/custom.scss"]
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    # progress: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+    slide-level: 3
+    table-cap-location: bottom
+    fig-cap-location: top
+    include-before: [ '<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {enableAssistiveMml: false}});</script>']
+fontsize: 26px
+editor: source
+aspectratio: 169
+bibliography: ../_supp/psci8357.bib
+---
+
+
+### {data-visibility="hidden"}
+
+\(
+  \def\E{{\mathbb{E}}}
+  \def\Pr{{\textrm{Pr}}}
+  \def\var{{\mathbb{V}}}
+  \def\cov{{\mathrm{cov}}}
+  \def\corr{{\mathrm{corr}}}
+  \def\argmin{{\arg\!\min}}
+  \def\argmax{{\arg\!\max}}
+  \def\qed{{\rule{1.2ex}{1.2ex}}}
+  \def\given{{\:\vert\:}}
+  \def\indep{{\mbox{$\perp\!\!\!\perp$}}}
+  \def\notindep{{\mbox{$\centernot{\perp\!\!\!\perp}$}}}
+\)
+
+```{r}
+#|  label: preamble
+#|  include: false
+
+# load necessary libraries
+pacman::p_load(
+  tidyverse,
+  future,
+  future.apply,
+  pbapply,
+  patchwork,
+  MASS,
+  estimatr,
+  rsample
+)
+
+future::plan(multisession, workers = parallel::detectCores() - 2)
+
+# set theme for plots
+thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
+```
+
+# Overview
+
+### Overview
+
+- We learned how to make causal inference under **conditional ignorability**.
+- We assumed that there is no unmeasured confounder.
+
+. . .
+
+- The remaining parts of the course aim to relax this stringent assumption.
+
+. . .
+
+- [Instrumental Variable (IV)]{.highlight}
+  
+  - [Idea]{.note}: Use a new variable called instrument to estimate causal effects
+
+- **Goal**:
+  - Understand what is the estimand in the IV framework.
+  - Understand identification assumptions in the IV framework.
+  - Understand estimation and inference (using TSLS).
+
+. . .
+
+- Two primary applications:
+  1. Noncompliance in randomized experiments
+  2. Instrumental variables in observational studies
+
+### DAG for Instrumental Variables
+
+:::{.columns}
+::: {.column width="60%"}
+
+```{dot}
+//| fig-width: 5
+//| fig-height: 7
+
+digraph causal_diagram {
+    rankdir=LR;
+    bgcolor="transparent";
+    edge [
+		  arrowsize=0.5,
+		  // fontname="Helvetica,Arial,sans-serif"
+		  labeldistance=5,
+		  // labelfontcolor="#00000080"
+		  penwidth=2
+		  // style=dotted // dotted style symbolizes data transfer
+	  ]
+    node [
+      fontsize=24,
+      penwidth=2
+    ]
+    
+    // Define nodes
+    U [label="U", shape=circle, style=dashed];
+    Z [label="Z", shape=circle, style=bold];
+    T [label="T", shape=circle, style=bold];
+    Y [label="Y", shape=circle, style=bold];
+    
+    // Define edges
+    U -> T;
+    U -> Y;
+    Z -> T;
+    T -> Y;
+    Z -> Y [dir=forward,style=dotted, color=red, label="×", fontcolor=red, fontsize=32]; // Dotted red arrow (spurious correlation)
+
+    // Blocked path marker
+    // { rank=min; Z}
+    { rank=same; Z;T;Y}
+    { rank=max; U}
+}
+
+```
+
+:::
+::: {.column width="40%"}
+
+<br><br><br><br>
+
+- **Y**: Outcome
+- **T**: Treatment 
+- **Z**: Instrument 
+
+:::
+:::
+
+# Motivating Examples
+
+## Noncompliance in Randomized Experiments {visibility="uncounted"}
+
+### Noncompliance in Randomized Experiments
+
+<br>
+
+- **Problem**: Unable to force all subjects to take up the (randomly) assigned treatment/control.
+
+  - [Intention-to-Treat (ITT) effect]{.highlight} $\ne$ **(Average) Treatment Effect**.
+
+  - [Selection bias]{.highlight}: Self-selection into the treatment/control groups.
+
+. . .
+
+- **Political information bias**: effects of campaign on voting behavior
+- **Ability bias**: effects of education on wages
+- **Healthy-user bias**: effects of exercises on blood pressure
+
+. . .
+
+- Settings: 
+
+  - [Encouragement design]{.highlight}: randomize the encouragement to receive the treatment rather than the receipt of the treatment itself.
+
+  - [Instrumental variables]{.highlight} (sort of) observational-study analogue of randomized encouragements.
+
+### Example: Perspective-Taking Experiment
+
+<br><br>
+
+- @broockman2016durably studied the effect of a door-to-door canvassing on prejudice against transgender people.
+
+. . .
+
+- **Context**: Miami-Dade county (Florida) in 2015.
+
+- **Subjects**: Voters who answered a pre-experiment baseline survey.
+
+- **Treatment**: Canvassers encouraged "perspective-taking".
+
+- **Outcome**: Attitudes towards transgender people measured by surveys.
+
+- **Finding**: The intervention substantially reduced transphobia, and the effects persisted for three months.
+
+<!-- - **Data**: 429 subjects, 225 in the control group and 204 in the treatment group (can be downloaded [here](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/WKR39N)). -->
+
+### Example: Perspective-Taking Experiment
+
+<br>
+
+
+|                      | No Perspective Taking | Perspective Taking | Total |
+|----------------------|:---------------------:|:------------------:|:-----:|
+| **Assigned to Control**  | 214                   | 11                 | 225   |
+| **Assigned to Treatment**| 42                    | 162                | 204   |
+| **Total**                | 256                   | 173                | 429   |
+
+: Noncompliance in Perspective-Taking Experiment
+
+. . .
+
+- **Reasons**:
+
+  - Often we cannot force subjects to take specific treatments.
+
+  - Units choosing to take the treatment may differ in unobserved characteristics from units that refrain from doing so.
+
+. . .
+
+- **Important**: Treatment Assignment is randomized, but the receipt of the treatment is not!
+
+- We want to estimate the effect of **receiving** treatment, not **assigning** treatment.
+
+## Instrumental Variable in Observational Studies {visibility="uncounted"}
+
+### Example: Vietnam Draft Lottery
+
+- @angrist1990lifetime study the effect of military service on civilian earnings.
+
+- Simple comparison between Vietnam veterans and non-veterans are likely to be a biased measure.
+
+. . .
+
+- **Random assignment**: Draft-eligibility, determined by the Vietnam era draft lottery, as an instrument for military service in Vietnam.
+
+- **Treatment**: Draft eligibility is random and affected the probability of enrollment.
+
+- Estimate suggest a 15% effect of veteran status on earnings in the period 1981-1984 for white veterans born in 1950-51
+
+. . .
+
+|                      | Military Service (No) | Military Service (Yes) | Total |
+|----------------------|:---------------------:|:----------------------:|:-----:|
+| **Draft Eligibility (No)**| 144                  | 28                     | 172   |
+| **Draft Eligibility (Yes)**| 120                 | 59                     | 179   |
+| **Total**                | 264                   | 87                     | 351   |
+
+: Draft Eligibility and Military service (White Male born in 1950)
+
+# Introduction to IV
+
+### Potential Outcomes Framework for IV
+
+<br><br>
+
+- **Randomized instrument**: $Z_i \in \{0,1\}$.
+
+- **Potential treatment compliance**: $T_i(1), T_i(0)$, where
+  
+  - $T_i(z) = 1$: would receive the treatment if $Z_i = z$,
+  - $T_i(z) = 0$: would not receive the treatment if $Z_i = z$.
+
+- **Observed treatment receipt indicator**: $T_i = T_i(Z_i)$.
+
+- **Potential outcomes**: $Y_i(z, t)$ for $z, t \in \{0,1\}$.
+
+- **Observed and potential outcomes**: $Y_i = Y_i(Z_i, T_i(Z_i))$.
+  
+  - Can also be written as $Y_i = Y_i(Z_i)$
+
+### Identification of Intention-to-Treat Effect
+
+- **Assumptions**:
+  - [SUTVA]{.highlight} for $T_i(z)$ and $Y_i(z, d)$
+  
+  - [Randomization of instrument]{.highlight}: (true under randomized $Z$)
+    $$
+    \{Y_i(z=1), Y_i(z=0), T_i(1), T_i(0)\} \ \indep \ Z_i
+    $$
+  
+  
+  - But $\{ Y_i(z=1), Y_i(z=0) \} \ \notindep \ T_i \given Z_i = z$.
+
+. . .
+
+- **Causal Estimand**: [Intention-to-treat (_ITT_)]{.highlight} effect given by
+  $$
+  \tau_{ITT} \equiv \E [Y_i(z=1) - Y_i(z=0)]
+  $$
+  
+  - Focus on effect of instrument itself on outcome, regardless of actual treatment.
+  
+  - If $Z_i$ is randomized (e.g., experiments), $\tau_{ITT}$ is identified by difference in means between the encouraged and unencouraged:
+  $$
+  \tau_{ITT} = \E[Y_i \given Z_i=1] - \E[Y_i\given Z_i=0]
+  $$
+  
+  - We can use the Neyman or Fisher approach to obtain the confidence intervals/standard errors.
+
+# Identification in Instrumental Variable Analysis
+
+### Compliance Types
+
+- Four **principal strata** (or **compliance types**):
+  
+  - [Compliers]{.highlight}: $T_i(1) = 1$ and $T_i(0)= 0$
+  - [Noncompliers]{.highlight}:
+    - [always-takers]{.highlight}: $T_i(1) = T_i(0) = 1$
+    - [never-takers]{.highlight}: $T_i(1) = T_i(0) = 0$
+    - [defiers]{.highlight}: $T_i(1) = 0$ and $T_i(0)=1$
+
+. . .
+
+|                  | $Z_i = 1$               | $Z_i = 0$               |
+|------------------|:-----------------------:|:---------------------:|
+| $T_i = 1$        | Complier/Always-taker   | Defier/Always-taker   |
+| $T_i = 0$          | Defier/Never-taker      | Complier/Never-taker  |
+
+. . .
+
+- [Note]{.note}: Without further assumptions, compliance types are not identified from observed strata
+
+- New causal estimand: [Complier Average Treatment Effect (Local ATE)]{.highlight}
+  $$
+  \tau_{LATE} \equiv \E[Y_i(t=1) - Y_i(t=0) \given T_i(1)=1, T_i(0)=0] = \E[Y_i(t=1) - Y_i(t=0) \given T_i(1) \gt T_i(0) ]
+  $$
+
+### Instrumental Variables Assumptions
+
+1. [Randomization of instrument]{.highlight}:
+    
+  $$
+  \{Y_i(z=1), Y_i(z=0), T_i(1), T_i(0)\} \ \indep \ Z_i.
+  $$
+
+. . .
+
+2. [Exclusion restriction]{.highlight}: $\forall\ t = 0,1: \ Y_i(1, t) \ = \ Y_i(0, t).$
+   
+   - [Intuition]{.note}: Instrument affects outcome only through treatment.
+   - [Note]{.note}: Implies zero _ITT_ effect for always-takers and never-takers.
+
+. . .
+
+3. [Monotonicity]{.highlight}: $\forall \ i:\ T_i(1) \ge T_i(0).$
+
+   - [Intuition]{.note}: **No defiers!**
+
+. . .
+
+4. [Relevance]{.highlight}: $\E[T_i(1) - T_i(0)] \neq 0.$
+   
+   - [Intuition]{.note}: Nonzero average instrument effect.
+   - [Note]{.note}: This is empirically testable!
+
+### DAG for Instrumental Variables
+
+:::{.columns}
+::: {.column width="60%"}
+
+```{dot}
+//| fig-width: 5
+//| fig-height: 7
+
+digraph causal_diagram {
+    rankdir=LR;
+    bgcolor="transparent";
+    edge [
+		  arrowsize=0.5,
+		  // fontname="Helvetica,Arial,sans-serif"
+		  labeldistance=5,
+		  // labelfontcolor="#00000080"
+		  penwidth=2
+		  // style=dotted // dotted style symbolizes data transfer
+	  ]
+    node [
+      fontsize=24,
+      penwidth=2
+    ]
+    
+    // Define nodes
+    U [label="U", shape=circle, style=dashed];
+    Z [label="Z", shape=circle, style=bold];
+    T [label="T", shape=circle, style=bold];
+    Y [label="Y", shape=circle, style=bold];
+    
+    // Define edges
+    U -> T;
+    U -> Y;
+    Z -> T;
+    T -> Y;
+    Z -> Y [dir=forward,style=dotted, color=red, label="×", fontcolor=red, fontsize=32]; // Dotted red arrow (spurious correlation)
+
+    // Blocked path marker
+    // { rank=min; Z}
+    { rank=same; Z;T;Y}
+    { rank=max; U}
+}
+
+```
+
+:::
+::: {.column width="40%"}
+
+<br><br><br><br>
+
+1. Random assignment of $Z$.
+2. Exclusion restriction.
+3. Monotonicity.
+4. Relevance.
+
+:::
+:::
+
+### Assessing Identification Assumptions
+
+1.  [Randomization of instrument]{.highlight}: 
+  
+    - True under randomized $Z$.
+    - We can only assess it with domain knowledge in observational studies.
+
+. . .
+
+2.  [Exclusion restriction]{.highlight}: 
+  
+    - Primarily assessed with domain knowledge.
+    - **Common misunderstanding**: Regress $Y$ on $T$ and $Z$ and check whether a coefficient of $Z$ is zero (invalid because the treatment is post-instrument).
+
+. . .
+
+3.  [Monotonicity]{.highlight}: 
+  
+    - We can only assess it with domain knowledge.
+    - Can be falsified if $\E [T_i(1) - T_i(0)] < 0.$
+
+. . .
+
+4.  [Relevance]{.highlight}: 
+  
+    - **Testable**: Estimate the causal effect of $Z$ on $T$ and show it is non-zero.
+    - [Note]{.note}: Correlation between $T$ and $Z$ is weak $\rightsquigarrow$ Weak instrument!
+
+### Example: Perspective-Taking Experiment
+
+- **Outcome**: Attitudes towards transgender people.
+- **Treatment**: Conversation including Perspective Taking.
+- **Instrument**: Assigned to the perspective taking group.
+
+. . .
+
+1.  [Randomization of instrument]{.highlight}:
+  
+    - True by the experimental design.
+
+2.  [Exclusion restriction]{.highlight}:
+  
+    - No direct effect of the assignment except through perspective taking.
+
+3.  [Monotonicity]{.highlight}: No defiers
+    
+    - There is no one who would receive perspective taking if and only if she is in the control group.
+    - Very unlikely due to the design.
+
+4.  [Relevance]{.highlight}: 
+  
+    - Regression of treatment on instrument: Estimate is $0.745$ ($p$-value $= 0.00$).
+    - $F$-statistic $= 579$, which is (_much_) larger than $10$ [@stock2020introduction].
+
+### Example: Relevance Assumption
+
+<br>
+
+```{r}
+#| label: relevance_transphobia
+#| echo: true
+#| eval: true
+#| output-location: fragment
+
+bk_data <- 
+  readr::read_rds("../_data/broockman_kalla_subset.rds") |> 
+  as_tibble() |> 
+  dplyr::filter(!is.na(trans.tolerance.dv.t1))
+
+first_stage <- lm(treatment.delivered ~ treat_ind, data = bk_data)
+
+summary(first_stage)
+
+```
+
+### Example: Vietnam Draft Lottery
+
+<br>
+
+- **Outcome**: Earnings.
+- **Treatment**: Military service in Vietnam.
+- **Instrument**: Draft-eligibility.
+
+. . .
+
+1.  [Randomization of instrument]{.highlight}:
+  
+    - True by the draft lottery (conditional on age and gender).
+
+2.  [Exclusion restriction]{.highlight}: No direct effect of the instrument 
+    
+    - No direct effect of the draft eligibility except through military service.
+
+3.  [Monotonicity]{.highlight}: No defiers
+    
+    - There is no one who would join military if and only if he is not draft-eligible.
+
+4.  [Relevance]{.highlight}:
+  
+    - Regression of treatment on instrument: Estimate is $0.167$ ($p$-value $= 0.00$).
+    - $F$-statistic $= 13.52$, which is larger than $10$ [@stock2020introduction].
+
+## Identification of Complier ATE {visibility="uncounted"}
+
+### Decomposing the ITT Effect
+
+- _ITT_ effect can be decomposed into combination of subgroup _ITTs_:
+  $$
+  \begin{align*}
+  \tau_{ITT} &= \tau_{\text{c}} \times \Pr(\text{compliers}) + \tau_{\text{a}} \times \Pr(\text{always-takers}) \\
+  &+ \tau_{\text{n}} \times \Pr(\text{never-takers}) + \tau_{\text{d}} \times \Pr(\text{defiers})
+  \end{align*}
+  $$
+  
+  where
+  $$
+  \begin{align*}
+  \tau_{\text{c}} &= \E[Y_i(1,T_i(1)) - Y_i(0,T_i(0)) \given T_i(1) = 1, T_i(0) = 0], \\
+  \tau_{\text{a}} &= \E[Y_i(1,T_i(1)) - Y_i(0,T_i(0)) \given T_i(1) = T_i(0) = 1], \dots
+  \end{align*}
+  $$
+
+. . .
+
+- Under [monotonicity]{.highlight} and [exclusion restriction]{.highlight}, this simplifies to
+  $$
+  \begin{align*}
+  \tau_{ITT} &= \tau_{\text{c}} \times \Pr(\text{compliers}) + \tau_{\text{a}} \times \Pr(\text{always-takers}) \\
+  &\qquad \qquad  + \tau_{\text{n}} \times \Pr(\text{never-takers}) + \tau_{\text{d}} \times 0 \qquad \text{($\because$ monotonicity)} \\
+  &= \tau_{\text{c}} \times \Pr(\text{compliers}) + 0 \times \Pr(\text{always-takers}) \\
+  &\qquad \qquad + 0 \times \Pr(\text{never-takers}) \qquad \text{($\because$ exclusion restriction)} \\
+  &= \tau_{\text{c}} \times \Pr(\text{compliers})
+  \end{align*}
+  $$
+
+- Under [relevance]{.highlight}: $\Pr(\text{compliers}) > 0$
+
+### IV Estimand and Interpretation
+
+<br>
+
+- Therefore, $\tau_{\text{c}}$ can be nonparametrically identified:
+  
+  $$
+  \tau_{\text{c}} = \frac{\tau_{ITT}}{\Pr(\text{compliers})} = \frac{\E(Y_i \given Z_i = 1) - \E(Y_i \given Z_i = 0)}{\E(T_i \given Z_i = 1) - \E(T_i \given Z_i = 0)} \\
+  = \frac{\cov(Y_i, Z_i)}{\cov(T_i, Z_i)}
+  $$
+
+. . .
+
+- $\tau_{\text{c}}$ can be interpreted as [Local Average Treatment Effect (LATE)]{.highlight} a.k.a [Complier Average Causal Effect (CACE)]{.highlight}:  
+  
+  $$
+  \tau_{\text{c}} = \tau_{LATE} = \E[Y_i(t=1) - Y_i(t=0) \given T_i(1)=1, T_i(0)=0]
+  $$                        
+
+. . .
+
+- _LATE_ has a clear causal meaning, **but** interpretation is often tricky:            
+  
+  - Compliers are defined in terms of principal strata, so we can never identify who they actually are.
+  - Different instrument (encouragement) yields different compliers.
+
+## Special Case: One-Sided Noncompliance {visibility="uncounted"}
+
+### One-Sided Noncompliance
+
+<br>
+
+- Sometimes, control units have no access to the treatment.
+
+- If so, we have [one-sided noncompliance]{.highlight} where $T_i(0) = 0$ for all $i$.
+
+. . .
+
+- One-sided noncompliance makes things easier:
+  
+  - Rules out **always-takers** and **defiers** $\Longrightarrow$ Monotonicity is **guaranteed** to hold!            
+  
+  - Some individuals can be identified to be compliers or never-takers:
+
+|                  | $Z_i = 1$               | $Z_i = 0$               |
+|------------------|:-----------------------:|:---------------------:|
+| $T_i = 1$        | Complier/~~Always-taker~~   | ~~Defier/Always-taker~~   |
+| $T_i = 0$          | ~~Defier~~/Never-taker      | Complier/Never-taker  |
+
+. . .
+
+-  The _LATE_ is then equal to the _ATT_, which is easier to interpret:
+  
+   $$
+   \tau_{LATE} = \E[Y_i(t=1) - Y_i(t=0) \given T_i(1)=1] = \tau_{ATT}
+   $$
+
+## Estimating the Size of the Complier Group {visibility="uncounted"}
+
+### Estimating the Size of the Complier Group
+
+<br><br>
+
+- Since we never observe both $T_i(0)$ and $T_i(1)$ for the same $i$, we cannot identify individual units as compliers.
+
+. . .
+
+- However, we can identify the proportion of compliers in the population using the "first stage" effect:
+  $$
+  \Pr(\text{complier}) = \Pr(T_i(1) - T_i(0) = 1) = \E[T_i(1)-T_i(0)] = \E[T_i \given Z_i=1] - \E[T_i \given Z_i=0]
+  $$
+
+. . .
+
+- Perspective-Taking Experiment: $0.75$
+- Vietnam Draft Lottery: $0.16$
+
+### Example: Size of the Complier Group
+
+<br>
+
+![](../_images/angrist_compliance.png){width=90% fig-align=center}
+
+
+# Estimation and Inference for IV
+
+## Estimation
+
+### Wald Estimator
+
+<br>
+
+- The LATE formula:
+  $$
+  \tau_{LATE} = \frac{\tau_{ITT,Y}}{\tau_{ITT,T}} = \frac{\E(Y_i \given Z_i = 1) - \E(Y_i \given Z_i = 0)}{\E(T_i \given Z_i = 1) - \E(T_i \given Z_i = 0)} = \frac{{\cov}(Y_i, Z_i)}{{\cov}(T_i, Z_i)}
+  $$
+
+. . .
+
+- A [plug-in estimator]{.highlight} is called the [Wald estimator]{.highlight}:
+  $$
+  \widehat{\tau}_{LATE} = \frac{\frac{1}{N_1}\sum_{i=1}^N Z_iY_i - \frac{1}{N_0}\sum_{i=1}^n (1-Z_i)Y_i}{\frac{1}{N_1}\sum_{i=1}^n Z_iT_i - \frac{1}{N_0}\sum_{i=1}^n (1-Z_i)T_i} = \frac{\widehat{\cov}(Y_i,Z_i)}{\widehat{\cov}(T_i,Z_i)}
+  $$
+
+. . .
+
+- Wald estimator is consistent (but not unbiased in finite samples!).
+
+- $\widehat{\tau}_{LATE}$ can also be calculated via **two-stage least squares (TSLS)**, a traditional instrumental variables method in econometrics.
+
+### TSLS: Binary Treatment and Instrument
+
+<br><br>
+
+- Consider two equations:
+  
+   $$
+   \begin{align*}
+    Y_i &= \alpha + \tau T_i + \varepsilon_i \qquad \text{(second stage)} \\
+    T_i &= \delta + \gamma Z_i + \eta_i \qquad \text{(first stage)}
+   \end{align*}
+   $$
+
+   - [Note]{.note}: Exogeneity is violated, $\E(\varepsilon_i \given T_i) \neq \E(\varepsilon_i)$.
+
+. . .
+
+- Assumptions:
+
+  - **(A1, randomized $Z$)**: $Z_i$ is exogenous; 
+  $$
+  \E(\varepsilon_i \given Z_i) = \E(\varepsilon_i), \quad \text{and} \quad \E(\eta_i \given Z_i) = \E(\eta_i)
+  $$
+
+  - **(A2, exclusion restriction)**: $Z_i$ not in the $Y_i$ model
+
+  - **(A3, relevance)**: $\gamma \neq 0$
+
+### TSLS: Binary Treatment and Instrument
+
+-  This implies the following CEF form for $Y_i$ conditional on $Z_i$:
+   
+   $$
+   \E [Y_i \given Z_i ] = \alpha + \tau \E [T_i \given Z_i ] = \alpha + \tau  (\gamma Z_i)
+   $$
+
+   <!-- - [Idea]{.note}: A regression of $Y_i$ on $\gamma Z_i$ would have $\tau$ as the slope. -->
+
+. . .
+
+-  If the CEF is linear, we have this simple relationship for slopes:
+
+   $$
+   \E[T_i \given Z_i] = \delta + \gamma Z_i \quad \implies \quad \gamma = \frac{\cov(T_i, Z_i)}{\var[Z_i]}
+   $$
+
+-  Applying this to the above CEF we have:
+
+   $$
+   \tau = \frac{\cov(Y_i, \gamma Z_i)}{\var[\gamma Z_i]} = \frac{\cov(Y_i, Z_i)}{\gamma \var[Z_i]} = \frac{\cov(Y_i, Z_i)}{\cov(T_i, Z_i)}
+   $$
+
+. . .
+
+- [Two-Stage Least Squares (2SLS/TSLS)]{.highlight} [@angrist1996identification]:
+
+  - Estimate $\widehat{\gamma}$ from regression of treatment $T_i$ on instrument $Z_i$.
+  - Estimate $\widehat{\tau}_{2SLS}$ as the slope of a regression of $Y_i$ on $\widehat{\gamma} Z_i$.
+  - Under this model, $\widehat{\tau}_{2SLS} \xrightarrow{p} \tau$ (don't use SEs from second stage!)
+
+### Example: Comparing Wald and TSLS
+
+<br>
+
+```{r}
+#| label: tsls_transphobia
+#| echo: true
+#| eval: true
+#| output-location: column-fragment
+
+# estimate proportion of compliers (first stage for 2sls)
+compliers <- estimatr::lm_robust(treatment.delivered ~ treat_ind, data = bk_data)
+
+# estimate proportion of compliers
+itt <- estimatr::lm_robust(trans.tolerance.dv.t1 ~ treat_ind, data = bk_data)
+
+# print the Wald estimate
+wald <- itt$coefficients[2] / compliers$coefficients[2]
+
+# 2sls by hand
+bk_data <- 
+  bk_data  |> 
+  mutate(fitted_treatment = predict(first_stage))
+
+tsls_hand <- 
+  estimatr::lm_robust(
+    trans.tolerance.dv.t1 ~ fitted_treatment, 
+    data = bk_data)$coefficients[2]
+
+# 2sls using iv_robust
+tsls_estimatr <- 
+  estimatr::iv_robust(
+    trans.tolerance.dv.t1 ~ treatment.delivered | treat_ind, 
+    data = bk_data)$coefficients[2]
+
+results <- tibble(
+  Model = c(
+    "Wald estimator",
+    "2sls (by hand)",
+    "2sls (estimatr)"
+  ),
+  Coefficient = c(
+    wald,
+    tsls_hand,
+    tsls_estimatr
+  )
+)
+
+# Print the table using knitr
+knitr::kable(
+  results,
+  digits = 3,
+  align = "lc",
+  caption = "LATE Estimates of Effect of Perspective-Taking on Transphobia"
+) |>
+  kableExtra::kable_minimal(font_size = 20)
+```
+
+## General TSLS Estimation
+
+### TSLS: Multi-Valued Treatments
+
+- **Generalization of these ideas:**
+
+  - Multi-valued treatment: $T_i \in \{0,1,\dots,K-1\}$.
+  - Binary instrument: $Z_i \in \{0,1\}$.
+
+- **Assumptions:**
+
+  - Randomization: $[\{Y_i(z,t)\}, \forall t, z], T_i(1), T_i(0) \indep Z_i$.
+  - Monotonicity: $T_i(1) \geq T_i(0)$ (instrument only increases treatment).
+  - Exclusion restriction: $Y_i(1,t) = Y_i(0,t),\, \forall t = 0,1,\dots,K-1$.
+
+. . .
+
+- [Example]{.note}: $K = 3$ leading to $9$ principal strata
+
+  - **Affected:** $(T_i(0), T_i(1)) \in \{(0,1), (0,2), (1,2)\}$
+  - **Unaffected:** $(T_i(0), T_i(1)) \in \{(0,0), (1,1), (2,2)\}$
+  - **Negatively affected:** $(T_i(0), T_i(1)) \in \{(1,0), (2,0), (2,1)\}$
+  
+  :::fragment
+  - _Negatively affected_ ruled out by monotonicity; Effects among _unaffected_ ruled out by exclusion restriction.
+  - Still three unknown proportions $\rightsquigarrow$ [cannot identify all causal types...]{.fragment}
+  :::
+
+### TSLS: Multi-Valued Treatments
+
+- Let $C_i = jk$ be an indicator for compliance type $T_i(1) = j$ and $T_i(0) = k$.
+
+  - People that are moved from $k$ to $j$ by the instrument.
+  - Let $\pi_{jk} = \Pr(T_i(1) = j, T_i(0) = k)$ be the strata size.
+
+. . .
+
+-  We can show that the _TSLS_ estimator converges to:
+
+   $$
+   \hat{\tau}_{2SLS} \xrightarrow{p} \sum_{k=0}^{K-1} \sum_{j=k+1}^{K-1} \omega_{jk} \E \left( \frac{Y_i(1) - Y_i(0)}{j - k} \mid C_i = jk \right)
+   $$
+
+   where $\omega_{jk} = \frac{(j - k) \pi_{jk}}{\sum_{s=0}^{K-1} \sum_{t=s+1}^{K-1} (t - s) \pi_{st}}$
+
+-  [Intuition]{.note}: a weighted average of effects per [dose]{.highlight} for each affected type.
+
+   - Weights are proportional to size of the strata and how big the effect of the instrument is for that strata.
+   - If instrument can only increase by single _dose_, then simplifies to weighted average of principal strata effects.
+
+
+### TSLS with Covariates
+
+<br><br>
+
+$$
+\begin{align*}
+Y_i &= \alpha + \tau T_i + \mathbf{X}_i \beta_y + \varepsilon_i \\
+T_i &= \delta + \gamma Z_i + \mathbf{X}_i \beta_d + \eta_i
+\end{align*}
+$$
+
+-  [Intuitions]{.note} from regular regression come through:
+
+   -  Including covariates in the first stage can improve efficiency and reduce bias:
+
+   - [Randomization of instrument]{.highlight} $\rightsquigarrow \{Y_i(z=1), Y_i(z=0), T_i(1), T_i(0)\} \ \indep \ Z_i \mid \mathbf{X}_i$.
+
+   - [Relevance]{.highlight} $\rightsquigarrow \E[T_i(1) - T_i(0) \mid \mathbf{X}_i = \mathbf{x}] \neq 0  \quad \forall \mathbf{x}$.
+
+. . .
+
+- **But**
+
+  -  We need [constant effects]{.highlight}, or $\tau$ becomes an _odd_ weighted function of causal effects and $\tau \neq \tau_{LATE}$ (recall last regression slides).
+
+### General TSLS
+
+- Linear model for each $i$:
+
+  $$
+  Y_i = \mathbf{T}_i' \beta + \varepsilon_i
+  $$
+
+  - $\mathbf{T}_i$ is $k \times 1$ and now includes $D_i$ and any pretreatment covariates.
+  - Parts of $\mathbf{T}_i$ are endogenous so that $\E [\varepsilon_i \mid \mathbf{T}_i] \neq 0$
+
+. . .
+
+- Instruments $\mathbf{Z}_i$ that is $\ell \times 1$ vector such that $\E [\varepsilon_i \mid \mathbf{Z}_i] = 0$.
+
+  - $\mathbf{Z}_i$ might include exogenous/pretreatment variables from $\mathbf{T}_i$ as well.
+  - **Rank condition:** $\E [\mathbf{Z}_i \mathbf{Z}_i']$ and $\E [\mathbf{T}_i \mathbf{Z}_i']$ have full rank.
+
+. . .
+
+- **Types of identification**:
+  - $k = \ell$: [just-identified]{.highlight}.
+  - $k < \ell$: [over-identified]{.highlight} (can test the exclusion restriction, _kinda_).
+  - $k > \ell$: [unidentified]{.highlight} (fails rank condition).
+
+### Nasty TSLS Matrix Algebra
+
+- Projection matrix projects values of $\mathbf{X}_i$ onto $\mathbf{Z}_i$:
+
+  $$
+  \begin{align*}
+  \mathbf{\Pi} &= (\E [\mathbf{Z}_i \mathbf{Z}_i'])^{-1} \E [\mathbf{Z}_i \mathbf{X}_i']
+  \quad \text{(projection matrix)} \\
+  \widetilde{\mathbf{T}}_i &= \mathbf{\Pi}' \mathbf{Z}_i
+  \quad \text{(projected values)}
+  \end{align*}
+  $$
+
+. . .
+
+- To derive the _TSLS_ estimator, take the fitted values, $\mathbf{\Pi}' \mathbf{Z}_i$ and multiply both sides of the outcome equation by them:
+
+  $$
+  \begin{align*}
+  Y_i &= \mathbf{T}_i' \beta + \varepsilon_i \\
+  \mathbf{\Pi}' \mathbf{Z}_i Y_i &= \mathbf{\Pi}' \mathbf{Z}_i \mathbf{T}_i' \beta + \mathbf{\Pi}' \mathbf{Z}_i \varepsilon_i \\
+  \E [\mathbf{\Pi}' \mathbf{Z}_i Y_i] &= \E [\mathbf{\Pi}' \mathbf{Z}_i \mathbf{T}_i'] \beta + \E [\mathbf{\Pi}' \mathbf{Z}_i \varepsilon_i] \\
+  \E [\mathbf{\Pi}' \mathbf{Z}_i Y_i] &= \E [\mathbf{\Pi}' \mathbf{Z}_i \mathbf{T}_i'] \beta + \mathbf{\Pi}' \E [\mathbf{Z}_i \varepsilon_i] \\
+  \E [\mathbf{\Pi}' \mathbf{Z}_i Y_i] &= \E [\mathbf{\Pi}' \mathbf{Z}_i \mathbf{T}_i'] \beta  \quad \text{($\because$ random instrument)} \\
+  \E [\widetilde{\mathbf{T}}_i Y_i] &= \E [\widetilde{\mathbf{T}}_i \mathbf{T}_i'] \beta \\
+  \beta &= (\E [\widetilde{\mathbf{T}}_i \mathbf{T}_i'])^{-1} \E [\widetilde{\mathbf{T}}_i Y_i]
+  \end{align*}
+  $$
+
+### TSLS Estimation
+
+- Collect $\mathbf{T}_i$ into a $n \times k$ matrix $\mathbf{T} = (\mathbf{T}_1, \dots, \mathbf{T}_n)'$
+- Collect $\mathbf{Z}_i$ into a $n \times \ell$ matrix $\mathbf{Z} = (\mathbf{Z}_1, \dots, \mathbf{Z}_n)'$
+
+- **In-sample projection matrix** produces fitted values:
+  
+   $$
+   \widehat{\mathbf{T}} = \mathbf{Z}(\mathbf{Z}'\mathbf{Z})^{-1}\mathbf{Z}'\mathbf{T}
+   $$
+
+   - Fitted values of regression of $\mathbf{T}$ on $\mathbf{Z}$.
+   - Matrix trick: $\mathbf{T}'\mathbf{Z}/n = (1/n) \sum_{i} \mathbf{T}_i \mathbf{Z}_i' \xrightarrow{p} \E [\mathbf{T}_i \mathbf{Z}_i']$.
+
+. . .
+
+- **Take the population formula for the parameters:**
+
+  $$
+  \beta = (\E [\tilde{\mathbf{T}}_i \mathbf{T}_i'])^{-1} \E [\tilde{\mathbf{T}}_i Y_i]
+  $$
+
+- **Plug in the sample values (the $n$ cancels out):**
+
+  $$
+  \widehat{\beta}_{2SLS} = (\widehat{\mathbf{T}}'\mathbf{T})^{-1} \widehat{\mathbf{T}}' y \xrightarrow{p} \beta
+  $$
+
+### Asymptotic Variance for TSLS
+
+- We can write the centered, normalized _TSLS_ estimator as:
+
+  $$
+  \sqrt{n}(\widehat{\beta}_{2SLS} - \beta) =
+  {\underbrace{\left( n^{-1} \sum_i \widehat{\mathbf{T}}_i \widehat{\mathbf{T}}_i' \right)}_{\xrightarrow{p} (\E [\widehat{\mathbf{T}}_i \widehat{\mathbf{T}}_i'])^{-1}}}^{-1}
+  \underbrace{\left( n^{-1/2} \sum_i \widehat{\mathbf{T}}_i \varepsilon_i \right)}_{\xrightarrow{d} N(0, \E [\widehat{\mathbf{T}}_i \varepsilon_i \varepsilon_i' \widehat{\mathbf{T}}_i'])}
+  $$
+
+. . .
+
+- Thus, we have that $\sqrt{n}(\widehat{\beta}_{2SLS} - \beta)$ has asymptotic variance:
+
+  $$
+  (\E [\widehat{\mathbf{T}}_i \widehat{\mathbf{T}}_i'])^{-1}
+  \E [\widehat{\mathbf{T}}_i \varepsilon_i \varepsilon_i' \widehat{\mathbf{T}}_i']
+  (\E [\widehat{\mathbf{T}}_i \widehat{\mathbf{T}}_i'])^{-1}
+  $$
+
+. . .
+
+- [Robust 2SLS variance estimator]{.highlight} with residuals $\widehat{u}_i = Y_i - \mathbf{T}_i' \widehat{\beta}$:
+
+  $$
+   \widehat{\var}(\widehat{\beta}_{2SLS}) = (\widehat{\mathbf{T}}' \mathbf{T})^{-1}
+   \left( \sum_i \widehat{u}_i^2 \widehat{\mathbf{T}}_i \widehat{\mathbf{T}}_i' \right) (\widehat{\mathbf{T}}' \mathbf{T})^{-1}
+   $$
+
+   - HC2, clustering, and autocorrelation versions exist.
+
+# Violations of Instrumental Variables Assumptions {visibility="uncounted"}
+
+### Violations of Instrumental Variables Assumptions
+
+- We can reason about the potential direction and size of the bias
+  
+  $$
+  \text{Bias} = \frac{\E(Y_i \given Z_i = 1) - \E(Y_i \given Z_i = 0)}{\E(T_i \given Z_i = 1) - \E(T_i \given Z_i = 0)} - \tau_{LATE}
+  $$
+
+. . .
+
+1.  **Exclusion restriction** is violated when there are alternative causal paths:
+    $$
+    \text{Bias} = \tau_{\text{nc}} \; \frac{\Pr(\text{noncomplier})}{\Pr(\text{complier})}
+    $$
+  
+    - [Weak instruments]{.highlight} exacerbate the bias.
+
+. . .
+
+2.  **Monotonicity** is violated when defiers exist
+    $$
+    \text{Bias} = \frac{[\tau_{\text{c}} - \tau_{\text{d}} ] \Pr(\text{defier})}{\Pr(\text{complier}) - \Pr(\text{defier})}
+    $$
+  
+    - **Bias becomes large when**: (1) the proportion of defiers is large or (2) causal effects are heterogeneous between compliers and defiers
+
+### What to do about weak instruments?
+
+- [Detecting weak instruments]{.highlight}:
+
+  - $F$-test on instruments (excluded from second stage): $H_0: \gamma = 0$.
+  - Rule of thumb: bias is small when $F$-statistic $\geq 10$ [@stock2020introduction].
+  - Correct coverage may require cutoff $F \geq 104.7$ [@lee2022valid].
+  - The latter is a worst-case, typical data maybe ok with $10$ cutoff.
+
+- @anderson1949estimation proposed test (simplified setting w/ binary $T$/$D$)
+
+  - $H_0: \tau = \tau_0$ equivalent to $H_0: \tau_{ITT,Y} - \tau_{ITT,T} \cdot \tau_0 = 0$
+  
+  - Under the null, asymptotically we have:
+  
+    $$
+    \begin{align*}
+    g(\tau_0) &= \widehat{\tau}_{ITT,Y} - \widehat{\tau}_{ITT,T} \cdot \tau_0 \sim N(0, \Omega(\tau_0)) \\
+    \Omega(\tau_0) &= \var[\widehat{\tau}_{ITT,Y}] + \tau_0^2 \var[\widehat{\tau}_{ITT,T}] - 2 \tau_0 \cov(\widehat{\tau}_{ITT,Y}, \widehat{\tau}_{ITT,T})
+    \end{align*}
+    $$
+
+  - AR test statistic: $g(\tau_0)^2 / \Omega(\tau_0) \sim \chi^2$ no matter first-stage effect.
+  
+  - Can invert the test to get confidence intervals.
+
+### Testing exclusion
+
+<br><br><br>
+
+- **Standard approaches:**
+  
+  - Placebo-type tests.
+  - Find setting in which first stage should *not* operate.
+  - Check to see if reduced form effect is still present.
+  - If so, suggestive of exclusion violation.
+
+### Testing exclusion [@pearl1995causal]
+
+<br>
+
+- For binary instrument ($Z$), treatment ($T$), and outcome ($Y$), the following must hold if $Z$ satisfies exclusion:
+
+  $$
+  \begin{align*}
+  \Pr(Y_i = 0, T_i = 0 \given Z_i = 0) + \Pr(Y_i = 1, T_i = 0 \given Z_i = 1) &\leq 1 \\
+  \Pr(Y_i = 0, T_i = 1 \given Z_i = 0) + \Pr(Y_i = 1, T_i = 1 \given Z_i = 1) &\leq 1 \\
+  \Pr(Y_i = 1, T_i = 0 \given Z_i = 0) + \Pr(Y_i = 0, T_i = 0 \given Z_i = 1) &\leq 1 \\
+  \Pr(Y_i = 1, T_i = 1 \given Z_i = 0) + \Pr(Y_i = 0, T_i = 1 \given Z_i = 1) &\leq 1 \\
+  \end{align*}
+  $$
+
+- [Intuition]{.note}: $Y$ can vary in $Z$ holding $T$ fixed, but it cannot vary *too much*.
+
+. . .
+
+- @pearl1995causal extends to more general case when $T$ and $Z$ are still discrete, but $Y$ is either discrete or continuous.
+
+- @kedagni2020generalized extend to binary outcome and treatment, but unrestricted instrument.
+
+### Testing _LATE_ assumption [@kitagawa2015test]
+
+<br>
+
+- Given LATE assumptions, the following must hold:
+
+  $$
+  \begin{align*}
+  \underbrace{\Pr(Y_i = y, T_i = 1 \given Z_i = 1)}_{a+c} &- \underbrace{\Pr(Y_i = y, T_i = 1 \given Z_i = 0)}_{\text{a}} \\
+  &= \Pr(Y_i (1) = y \given T_i(1) > T_i(0)) \geq 0 \\
+  \underbrace{\Pr(Y_i = y, T_i = 0 \given Z_i = 0)}_{\text{n+c}} &- \underbrace{\Pr(Y_i = y, T_i = 0 \given Z_i = 1)}_{\text{n}} \\
+  &= \Pr(Y_0 = y, T_i(1) > T_i(0)) \geq 0
+  \end{align*}
+  $$
+
+. . .
+
+- Holds more generally, e.g., for continuous $Y$:
+
+  - $P(y, T = 1 \given Z = 1)$ must nest $P(y, T = 1 \given Z = 0)$, and  
+  - $P(y, T = 0 \given Z = 0)$ must nest $P(y, T = 0 \given Z = 1)$.
+
+- Can test using [KS (Kolmogorov-Smirnov) statistic]{.highlight}.
+
+### Testing _LATE_ assumption [@kitagawa2015test]
+
+<br>
+
+![**Good!**](../_images/kitagawa1.png){width=80% fig-align="center"}
+
+### Testing _LATE_ assumption [@kitagawa2015test]
+
+<br>
+
+![**Bad!**](../_images/kitagawa2.png){width=80% fig-align="center"}
+
+### Testing LATE assumption [@huber2015testing]
+
+<br>
+
+- Given LATE assumptions, we have:
+
+  $$
+  \E (Y \given T = 1, Z = 1) =
+  \frac{\pi_a}{\pi_{\text{a}} + \pi_{\text{c}}} \E (Y_1 \given \text{Type = a}, Z = 1)
+  + \frac{\pi_{\text{c}}}{\pi_{\text{a}} + \pi_{\text{c}}} \E (Y_1 \given \text{Type = c}, Z = 1)
+  $$
+
+- $\E (Y_1 \given \text{Type = a}, Z = 1)$ must thus reside between the mean of two truncated distributions:
+  
+  - $P(y \given T = 1, Z = 1)$ truncated above, trimming $1 - \frac{\pi_{\text{a}}}{\pi_{\text{a}} + \pi_{\text{c}}}$.
+  
+  - $P(y \given T = 1, Z = 1)$ truncated below, trimming $1 - \frac{\pi_{\text{a}}}{\pi_{\text{a}} + \pi_{\text{c}}}$.
+
+. . .
+
+- Now, $\E (Y_1 \given \text{Type = a}, Z = 1) = \E (Y_1 \given \text{Type = a}, Z = 0)$ is observable.
+
+- So, we can check whether $\E (Y_1 \given \text{Type = a}, Z = 0)$ lies within bounds derived from truncated distributions.
+
+- Other restrictions are also implied by LATE assumptions.
+
+# Summary
+
+### Summary
+
+<br><br>
+
+- IV approach is one of the most popular and powerful identification strategies.
+
+- Important to be careful and transparent about identification assumptions.
+
+- **Exclusion restriction** and **Randomization of instrument**.
+
+- Exclusion restriction is a very strong assumption:
+  
+  - We assume that we know the entire causal mechanism connecting instrument to outcome.
+
+- If our outcome is different, we cannot simply "borrow" an instrument from another paper even when the treatment is the same:
+  
+  - Exclusion restriction needs to be re-evaluated carefully.
+
+# Appendix {visibility="uncounted"}
+
+### References {visibility="uncounted"}

@@ -76,6 +76,18 @@
  .reveal .progress {
   background: rgba(214, 93, 14, .1); }
 
+.reveal h1 {
+  font-size: 34pt
+}
+
+.reveal h2 {
+  font-size: 32pt
+}
+  
+.reveal h3 {
+  font-size: 30pt
+}
+
 .reveal .progress span {
   background: rgba(214, 93, 14, .9);
   -webkit-transition: width 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985);
