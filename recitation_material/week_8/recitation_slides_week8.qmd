@@ -1,0 +1,121 @@
+---
+title: "Broken Effects or 'Fixed' Effects?"
+author: "Alexander Dean"
+subtitle: "Recitation Period 8"
+institute: "Vanderbilt University"
+email: "alexander.r.dean@vanderbilt.edu"
+date: today
+execute:
+  embed-resources: true 
+format: 
+  revealjs:
+    theme: dark
+    footer: "Alexander Dean (Vanderbilt University)"
+    slide-number: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    self-contained-math: true
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+    code-fold: true
+fontsize: 32px
+editor: source
+---
+
+# Introductory Spiel
+
+## What We Will Cover Today
+1. The basic intuition of two way fixed effects (TWFE)
+2. When TWFE is most commonly used
+3. When a TWFE estimator is biased and inconsistent
+4. Some alternative estiamtors/statistical options for use when TWFE is biased/inconsistent
+
+## What is TWFE?
+
+$Y_{it} = \alpha_{i} + \gamma_{t} + \beta D_{it} + \textbf{X}^{'}_{it} + \epsilon_{it}$, 
+
+where:
+
+- $Y_{it} =$ outcome *Y* for unit *i* in period *t*
+- $\alpha_{i} =$ unit-fixed effects
+- $\gamma_{t} =$ time=fixed effects
+- $D_{it} =$ a binary treatment assignment variable for unit *i* in period *t*
+- $\textbf{X}^{'}_{it} =$ a matrix of covariates for unit *i* in period *t*
+- $\epsilon_{it}=$ is the error term with mean zero
+
+## Why TWFE?
+
+- Allows for controlling of time-invariant heterogeneity across units $(\alpha_{i})$ like differences in population size
+- Allows for controlling time-varying trends or shocks that affects all units at the same time $(\lambda_{t})$ like an economic shock
+- Can recover the ATE under standard assumptions with panel data
+
+# But what are the standard TWFE assumptions?
+
+## (1) Strict Exogeneity of Treatment
+
+- $\mathbb{E}[\epsilon_{it}|\mathbb{X}_{it}, \alpha_{i}, \gamma_{t}]$
+- No selection into treatment based off of unobserved time-varying factors which also affect the outcome
+
+## (2) No Anticipation
+
+- $\mathbb{E}[Y_{it} | D_{it+s} = 1, X_{it}, \alpha_i, \lambda_t] = \mathbb{E}[Y_{it} | D_{it+s} = 0, X_{it}, \alpha_i, \lambda_t] \quad \forall \quad s > 0$
+- Units don't change behavior in anticipation of receiving treatment
+
+![Ashenfelter's Dip](/ashenfelter_dip.png)
+
+## (3) Parallel Trends
+
+- $\mathbb{E}[Y_{it}(0) - Y_{it-1}(0) | D_{it} = 1] = \mathbb{E}[Y_{it}(0) - Y_{it-1}(0) | D_{it} = 0]$
+- Absent being assigned treatment, units would have the same outcome trends over time
+- Related to no anticipation
+- Allows for valid creation of the counterfactual under no treatment
+
+## (4) Homogenous Treatment
+- $\mathbb{E}[Y_{it}(1) - Y_{it}(0) | D_{it} = 1] = \mathbb{E}[Y_{i^{\prime}t^{\prime}}(1) - Y_{i^{\prime}t^{\prime}}(0) | D_{i^{\prime}t^{\prime}} = 1]$
+- Treatment must be homogenous over unit and time (very important)
+
+. . . 
+
+- We will come back to this later
+
+## (5) Monotonacity in Unit Assignment
+- $D_{it} \geq D_{it-1}$
+- No treatment reversal
+- Incompotatible with staggered treatment assignments
+
+## What if my data violates one of the TWFE Assumptions?
+
+. . . 
+
+1. Your TWFE estimator will be (i) biased and/or (ii) inconsistent (Goodmanbacon 2021; de Chaisemartin \& D'haultfœuille 2020; Gibbons et al. 2023)
+
+. . . 
+
+2. Luckily, there have been many advances in finding consistent and unbiased estimators for panel data with heterogenous treatment, staggered treatment, violation of parallel trends, etc.!
+
+# So why can TWFE be biased?
+
+## Gibbons et al. 2023 Proposition 1
+
+- We are going to solve the proof on the board
+- This will show *why* TWFE can be biased under heterogeneous treatment assignment
+
+# What Now?
+
+## Alternative Estimators:
+
+- There has been an outpouring of alternative estimators that relax the TWFE assumptions, allowing you to recover the ATT or the ATE!
+
+1. Callaway \& Sant'Anna 2021
+2. de Chaisemartin \& d'Haultfœuille 2020
+3. de Chaisemartin \& d'Haultfœuille 2023
+4. Imai et al. 2023
+5. Sun \& Abraham 2021
+6. Arkhangelsky et al. (2021)
+7. Others!
