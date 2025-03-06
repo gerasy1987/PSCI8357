@@ -201,11 +201,13 @@ digraph causal_diagram {
 
 - **Context**: Miami-Dade county (Florida) in 2015.
 
-- **Subjects**: Voters who answered a pre-experiment baseline survey.
+- **Sample**: $1825$ registered voters who answered a pre-experiment baseline survey.
+
+- **Assignment to treatment**: $913$ to treatment, $912$ - to control.
 
 - **Treatment**: Canvassers encouraged "perspective-taking".
 
-- **Outcome**: Attitudes towards transgender people measured by surveys.
+- **Outcome**: Attitudes towards transgender people measured by surveys 3 weeks, 6 weeks and 3 months after.
 
 - **Finding**: The intervention substantially reduced transphobia, and the effects persisted for three months.
 
@@ -234,7 +236,7 @@ digraph causal_diagram {
 
 . . .
 
-- **Important**: Treatment Assignment is randomized, but the receipt of the treatment is not!
+- [Important]{.alert}: Treatment assignment is randomized, but the receipt of the treatment is not!
 
 - We want to estimate the effect of **receiving** treatment, not **assigning** treatment.
 
@@ -283,7 +285,7 @@ digraph causal_diagram {
 
 - **Observed and potential outcomes**: $Y_i = Y_i(Z_i, T_i(Z_i))$.
   
-  - Can also be written as $Y_i = Y_i(Z_i)$
+  - In reduced form can be written as $Y_i = Y_i(Z_i)$.
 
 ### Identification of Intention-to-Treat Effect
 
@@ -291,16 +293,17 @@ digraph causal_diagram {
   - [SUTVA]{.highlight} for $T_i(z)$ and $Y_i(z, d)$
   
   - [Randomization of instrument]{.highlight}: (true under randomized $Z$)
+    
     $$
     \{Y_i(z=1), Y_i(z=0), T_i(1), T_i(0)\} \ \indep \ Z_i
     $$
   
   
-  - But $\{ Y_i(z=1), Y_i(z=0) \} \ \notindep \ T_i \given Z_i = z$.
+    - But $\{ Y_i(z=1), Y_i(z=0) \} \ \notindep \ T_i \given Z_i = z$.
 
 . . .
 
-- **Causal Estimand**: [Intention-to-treat (_ITT_)]{.highlight} effect given by
+- **Causal Estimand 1**: [Intention-to-treat (_ITT_)]{.highlight} effect given by
   $$
   \tau_{ITT} \equiv \E [Y_i(z=1) - Y_i(z=0)]
   $$
@@ -320,11 +323,11 @@ digraph causal_diagram {
 
 - Four **principal strata** (or **compliance types**):
   
-  - [Compliers]{.highlight}: $T_i(1) = 1$ and $T_i(0)= 0$
-  - [Noncompliers]{.highlight}:
-    - [always-takers]{.highlight}: $T_i(1) = T_i(0) = 1$
-    - [never-takers]{.highlight}: $T_i(1) = T_i(0) = 0$
-    - [defiers]{.highlight}: $T_i(1) = 0$ and $T_i(0)=1$
+  - [(c)ompliers]{.highlight}: $T_i(1) = 1$ and $T_i(0)= 0$
+  - [(n)on(c)ompliers]{.highlight}:
+    - [(a)lways-takers]{.highlight}: $T_i(1) = T_i(0) = 1$
+    - [(n)ever-takers]{.highlight}: $T_i(1) = T_i(0) = 0$
+    - [(d)efiers]{.highlight}: $T_i(1) = 0$ and $T_i(0)=1$
 
 . . .
 
@@ -337,7 +340,10 @@ digraph causal_diagram {
 
 - [Note]{.note}: Without further assumptions, compliance types are not identified from observed strata
 
-- New causal estimand: [Complier Average Treatment Effect (Local ATE)]{.highlight}
+. . .
+
+- **Causal estimand 2**: [Complier Average Treatment Effect (Local ATE)]{.highlight}
+  
   $$
   \tau_{LATE} \equiv \E[Y_i(t=1) - Y_i(t=0) \given T_i(1)=1, T_i(0)=0] = \E[Y_i(t=1) - Y_i(t=0) \given T_i(1) \gt T_i(0) ]
   $$
@@ -481,9 +487,9 @@ digraph causal_diagram {
 4.  [Relevance]{.highlight}: 
   
     - Regression of treatment on instrument: Estimate is $0.745$ ($p$-value $= 0.00$).
-    - $F$-statistic $= 579$, which is (_much_) larger than $10$ [@stock2020introduction].
+    - $F$-statistic $= 579$, which is (_much_) larger than $10$ [@stock2005asymptotic].
 
-### Example: Relevance Assumption
+### Example: Relevance
 
 <br>
 
@@ -529,7 +535,7 @@ summary(first_stage)
 4.  [Relevance]{.highlight}:
   
     - Regression of treatment on instrument: Estimate is $0.167$ ($p$-value $= 0.00$).
-    - $F$-statistic $= 13.52$, which is larger than $10$ [@stock2020introduction].
+    - $F$-statistic $= 13.52$, which is larger than $10$ [@stock2005asymptotic].
 
 ## Identification of Complier ATE {visibility="uncounted"}
 
@@ -577,13 +583,7 @@ summary(first_stage)
   = \frac{\cov(Y_i, Z_i)}{\cov(T_i, Z_i)}
   $$
 
-. . .
-
-- $\tau_{\text{c}}$ can be interpreted as [Local Average Treatment Effect (LATE)]{.highlight} a.k.a [Complier Average Causal Effect (CACE)]{.highlight}:  
-  
-  $$
-  \tau_{\text{c}} = \tau_{LATE} = \E[Y_i(t=1) - Y_i(t=0) \given T_i(1)=1, T_i(0)=0]
-  $$                        
+- $\tau_{\text{c}}$ is the [Local Average Treatment Effect (LATE)]{.highlight} a.k.a [Complier Average Causal Effect (CACE)]{.highlight}
 
 . . .
 
@@ -834,7 +834,7 @@ knitr::kable(
 -  We can show that the _TSLS_ estimator converges to:
 
    $$
-   \hat{\tau}_{2SLS} \xrightarrow{p} \sum_{k=0}^{K-1} \sum_{j=k+1}^{K-1} \omega_{jk} \E \left( \frac{Y_i(1) - Y_i(0)}{j - k} \mid C_i = jk \right)
+   \widehat{\tau}_{2SLS} \xrightarrow{p} \sum_{k=0}^{K-1} \sum_{j=k+1}^{K-1} \omega_{jk} \E \left( \frac{Y_i(1) - Y_i(0)}{j - k} \mid C_i = jk \right)
    $$
 
    where $\omega_{jk} = \frac{(j - k) \pi_{jk}}{\sum_{s=0}^{K-1} \sum_{t=s+1}^{K-1} (t - s) \pi_{st}}$
@@ -983,72 +983,254 @@ $$
 
    - HC2, clustering, and autocorrelation versions exist.
 
-# Violations of Instrumental Variables Assumptions {visibility="uncounted"}
 
-### Violations of Instrumental Variables Assumptions
+# Issues with IV Validity
 
-- We can reason about the potential direction and size of the bias
+### Bias of IV Estimators
+
+<br><br>
+
+- We can reason about the potential direction and size of the bias using the following expression (in binary case)
   
   $$
-  \text{Bias} = \frac{\E(Y_i \given Z_i = 1) - \E(Y_i \given Z_i = 0)}{\E(T_i \given Z_i = 1) - \E(T_i \given Z_i = 0)} - \tau_{LATE}
+  \begin{align*}
+  \text{bias} &= \frac{\E(Y_i \given Z_i = 1) - \E(Y_i \given Z_i = 0)}{\E(T_i \given Z_i = 1) - \E(T_i \given Z_i = 0)} - \tau_{LATE} = \\
+  &= \Big( \tau_{\text{c}} \times \Pr(\text{compliers}) + \tau_{\text{a}} \times \Pr(\text{always-takers}) \\
+  &\qquad + \tau_{\text{n}} \times \Pr(\text{never-takers}) + \tau_{\text{d}} \times \Pr(\text{defiers})\Big) \\
+  &\quad \Big/ \ \Big( \Pr(\text{compliers}) - \Pr(\text{defiers}) \Big) \\
+  &\quad - \tau_{\text{c}}
+  \end{align*}
+  $$
+
+### Non-Valid IVs
+
+<br><br>
+
+1.  If **exclusion restriction** is violated:
+    
+  $$
+  \text{bias} =  \; \frac{\tau_{\text{a}} \Pr(\text{always-taker}) + \tau_{\text{n}} \Pr(\text{never-taker})}{\Pr(\text{complier})}
   $$
 
 . . .
 
-1.  **Exclusion restriction** is violated when there are alternative causal paths:
-    $$
-    \text{Bias} = \tau_{\text{nc}} \; \frac{\Pr(\text{noncomplier})}{\Pr(\text{complier})}
-    $$
+2.  If **monotonicity** is violated when defiers exist
   
-    - [Weak instruments]{.highlight} exacerbate the bias.
+  $$
+  \text{bias} = \frac{[\tau_{\text{c}} - \tau_{\text{d}} ] \Pr(\text{defier})}{\Pr(\text{complier}) - \Pr(\text{defier})}
+  $$
+  
+  - **Bias becomes large when**: (1) the proportion of defiers is large or (2) causal effects are heterogeneous between compliers and defiers
+
+### Non-Valid IVs
+
+<br><br>
+
+3. If **relevance** is violated ([weak instruments]{.highlight}):
+
+    - Biases due to exclusion restriction and monotonicity violations blow up!
+    - Uncertainty is amplified and have to be accounted for!
 
 . . .
 
-2.  **Monotonicity** is violated when defiers exist
-    $$
-    \text{Bias} = \frac{[\tau_{\text{c}} - \tau_{\text{d}} ] \Pr(\text{defier})}{\Pr(\text{complier}) - \Pr(\text{defier})}
-    $$
+4. If **randomization** is violated:
+
+    - Standard selection issues arise, and we need to account for confounders or conduct sensitivity analyses, similar to standard **selection on observables** [@cinelli2025omitted].
+
+## Weak Instruments
+
+### Weak Instruments: $F$-statistic
+
+<br>
+
+- The standard first-stage [$F$-statistic]{.highlight} from a regression of the endogenous regressors on instruments and exogenous controls is:
+
+$$
+F = \frac{R^2_{Z}}{(1 - R^2_{Z})} \times \frac{N - k}{k - 1} = \frac{\text{TSS - RSS}}{\text{RSS}} \times \frac{N - k}{k - 1}
+$$
+
+  - where $R^2_Z$ is $R^2$ from first-stage regression, $k$ is number of instruments
+
+- [Note]{.note}: $F$-statistic in case of a single instument is equal to square of first-stage $t$-statistic.
+
+. . .
+
+- @stock2005asymptotic suggests that $F > 10$ is a good rule of thumb for instrument strength based on simulations
+  - Critical value based on bias of TSLS being 10% of OLS bias.
+
+### Weak Instruments: Effective $F$-statistic
+
+- **Regular $F$** assumes homoskedasticity and independence, leading to potential overstatement of instrument strength in complex settings.
+
+. . .
+
+- Alternative is the [effective $F$-statistic]{.highlight} is defined as:
+  $$
+  F_{\text{Eff}} = \frac{\widehat{\gamma}'\widehat{Q}_{ZZ}\widehat{\gamma}}{\text{tr}(\widehat{\Sigma}_{\gamma\gamma}\widehat{Q}_{ZZ})}
+  $$
+
+  - where$\widehat{\gamma}$ is first-stage coefficients estimates; $\widehat{Q}_{ZZ} = \frac{1}{N}\sum_{i=1}^{N} z_i z_i'$ is covariance of instruments; and $\widehat{\Sigma}_{\gamma\gamma}$ is robust variance-covariance matrix of first-stage estimates.
+
+. . .
+
+- [Intuition]{.note}: Effective $F$ can explicitly correct for **heteroskedasticity**, **clustering** and **instrument correlation**.
+
+- Provides a robust, reliable metric to assess instrument strength, especially valuable when:
+  - Instruments are numerous (over-identified scenarios).
+  - Error structures are complex (heteroskedasticity or clustering).
+
+### Weak Instruments: Bootstrap
+
+<br>
+
+- @young2022consistency recommends two bootstrap methods to compute confidence intervals (CIs) for $\widehat{\tau}_{2SLS}$ in case of weak instruments.
+
+. . .
+
+- [Bootstrap-$c$]{.highlight}:
+  1. Resample data with replacement to create $B$ bootstrap samples.
+  2. Estimate $\widehat{\tau}_{2SLS}$ in each bootstrap sample.
+  3. Compute percentiles directly from the bootstrap distribution of $\widehat{\tau}_{2SLS}$.
+
+. . .
+
+- [Bootstrap-$t$]{.highlight}:
   
-    - **Bias becomes large when**: (1) the proportion of defiers is large or (2) causal effects are heterogeneous between compliers and defiers
-
-### What to do about weak instruments?
-
-- [Detecting weak instruments]{.highlight}:
-
-  - $F$-test on instruments (excluded from second stage): $H_0: \gamma = 0$.
-  - Rule of thumb: bias is small when $F$-statistic $\geq 10$ [@stock2020introduction].
-  - Correct coverage may require cutoff $F \geq 104.7$ [@lee2022valid].
-  - The latter is a worst-case, typical data maybe ok with $10$ cutoff.
-
-- @anderson1949estimation proposed test (simplified setting w/ binary $T$/$D$)
-
-  - $H_0: \tau = \tau_0$ equivalent to $H_0: \tau_{ITT,Y} - \tau_{ITT,T} \cdot \tau_0 = 0$
+  1. Calculate bootstrap t-statistics: $t = \frac{\widehat{\tau}_{2SLS}}{\widehat{\text{SE}}(\widehat{\tau}_{2SLS})}$.
+  2. Form CIs using percentile-t adjustments:
   
-  - Under the null, asymptotically we have:
+  $$
+  \widehat{\tau}_{2SLS} \pm t^*_{\alpha/2|1-\alpha} \widehat{\text{SE}}(\widehat{\tau}_{2SLS})
+  $$
+
+### Weak Instruments: $tF$ procedure
+
+<br>
+
+- @lee2022valid propose the [$tF$ procedure]{.highlight} for inference in just-identified IV settings instead of _ad-hoc_ $F$-statistic cutoffs.
+
+- Confidence intervals do not properly reflect the true variability and potential bias in the estimates, especially in the presence of weak instruments.
+
+  - [Idea]{.note}: Adjust _TSLS_ inference **based** on the first-stage $F$-statistic.
+
+. . .
+
+- Applies a smooth adjustment factor to TSLS SEs derived from the first-stage $t$-ratio: 
+
+  $$
+  \widehat{f} = \frac{\widehat{\gamma}}{\sqrt{\widehat{V}(\widehat{\gamma})}} \quad \text{where} \widehat{f}^2 = \widehat{F}.
+  $$
+
+- [Note]{.note} Without adjustment, to maintain a correct $5$% size (two-sided $t$-test), a very large first-stage $F \approx 104.7$ may be needed!
+
+### Weak Instruments: $AR$ statistic
+
+- @anderson1949estimation and later @chernozhukov2008reduced propose [$AR$ test]{.highlight} for direct inference in **over-identified** and **just-identified** cases.
+
+- [Intuition]{.note}: Testing $H_0: \tau = 0 \implies H_0: \tau \gamma = \tau_{ITT} = 0$ $\rightsquigarrow$ **use $F$-test applied directly to the reduced-form equation!**
+
+- Procedure: For each candidate value $\tilde{\tau}$:
   
-    $$
-    \begin{align*}
-    g(\tau_0) &= \widehat{\tau}_{ITT,Y} - \widehat{\tau}_{ITT,T} \cdot \tau_0 \sim N(0, \Omega(\tau_0)) \\
-    \Omega(\tau_0) &= \var[\widehat{\tau}_{ITT,Y}] + \tau_0^2 \var[\widehat{\tau}_{ITT,T}] - 2 \tau_0 \cov(\widehat{\tau}_{ITT,Y}, \widehat{\tau}_{ITT,T})
-    \end{align*}
-    $$
+  1. Compute adjusted outcome: $Y_i - \tilde{\tau} T_i$
+  2. Regress adjusted outcome on instruments $Z_i$ to estimate $\tilde{\gamma}$ and covariance $\tilde{\var}(\tilde{\gamma})$.
+  3. Construct Wald statistic:
+     $$
+     \tilde{W}_s(\tilde{\gamma}) = \tilde{\gamma}'\tilde{V}(\tilde{\gamma})^{-1}\tilde{\gamma}
+     $$
 
-  - AR test statistic: $g(\tau_0)^2 / \Omega(\tau_0) \sim \chi^2$ no matter first-stage effect.
-  
-  - Can invert the test to get confidence intervals.
+  4. AR CI set is $\tilde{\gamma}$ satisfying:
+     $$
+     \tilde{W}_s(\tilde{\gamma}) \leq c(1 - p)
+     $$
 
-### Testing exclusion
+     where $c(1 - p)$ is the $(1 - p)$-th percentile of the $\chi^2$ distribution.
 
-<br><br><br>
+### Weak Instruments Tests in Practice
 
-- **Standard approaches:**
-  
-  - Placebo-type tests.
-  - Find setting in which first stage should *not* operate.
-  - Check to see if reduced form effect is still present.
-  - If so, suggestive of exclusion violation.
+```{r}
+#| label: iv_diag
+#| echo: true
+#| eval: true
+#| output-location: fragment
 
-### Testing exclusion [@pearl1995causal]
+pacman::p_load(ivDiag)
+
+( bk_ivdiag <-
+  ivDiag::ivDiag(
+  data = bk_data, Y = "trans.tolerance.dv.t1", 
+  D = "treatment.delivered", Z = "treat_ind") )
+
+```
+
+### Accounting for Weak Instruments in Practice
+
+```{r}
+#| label: iv_diag_plot
+#| echo: true
+#| eval: true
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+
+plot_coef(bk_ivdiag)
+
+```
+
+## Exclusion Restriction Violation
+
+### Exclusion Restriction Violation [@mellon2021rain]
+
+![](../_images/mellon2.png){width=90% fig-align=center}
+
+### Testing Exclusion: Placebo-Test and Sensitivity
+
+<br>
+
+- [Placebo tests]{.highlight}:
+
+  1. Find setting in which ﬁrst stage should not operate.
+  2. Check to see if reduced form eﬀect is still present.
+  3. If so, suggestive of exclusion violation.
+
+. . .
+
+- [Sensitivity analysis]{.highlight} [@cinelli2025omitted]:
+
+  - See how much violation of (1) randomization of instrument and (2) exclusion restriction would be needed to change the results.
+  - Use very similar approach varying the relationship between instrument/outcome and unobserved confounder/mediator.
+
+### Sensitivity Analysis in Practice
+
+```{r}
+#| label: iv_sens_plot
+#| echo: true
+#| eval: true
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+
+pacman::p_load(sensemakr)
+
+bk_ivest <-
+  estimatr::iv_robust(
+    trans.tolerance.dv.t1 ~ treatment.delivered | treat_ind,
+    data = bk_data
+  )
+
+sensemakr::sensemakr(
+  estimate = bk_ivest$coefficients[["treatment.delivered"]],
+  se = bk_ivest$std.error[["treatment.delivered"]],
+  dof = bk_ivest$df[["treatment.delivered"]],
+  r2dz.x = .1,
+  r2yz.dx = .1
+) |>
+  plot()
+
+```
+
+### Testing Exclusion: Restrictions Approach [@pearl1995causal]
 
 <br>
 
@@ -1135,6 +1317,10 @@ $$
 
 # Summary
 
+### Types of Instruments [@lal2024much]
+
+![](../_images/laletal1.png){width=90% fig-align=center}
+
 ### Summary
 
 <br><br>
@@ -1143,16 +1329,54 @@ $$
 
 - Important to be careful and transparent about identification assumptions.
 
-- **Exclusion restriction** and **Randomization of instrument**.
+- **Exclusion restriction** and **randomization of instrument** are crucial!
+
+- **Weak instruments** can lead to bias and inflated standard errors and you need to account for it.
 
 - Exclusion restriction is a very strong assumption:
   
-  - We assume that we know the entire causal mechanism connecting instrument to outcome.
+  - We assume that we know the entire causal mechanism connecting instrument to outcome...
 
-- If our outcome is different, we cannot simply "borrow" an instrument from another paper even when the treatment is the same:
+- [Important]{.alert}: If our outcome is different, we cannot simply "borrow" an instrument from another paper even when the treatment is the same:
   
   - Exclusion restriction needs to be re-evaluated carefully.
 
 # Appendix {visibility="uncounted"}
+
+### Proof LATE Equation {visibility="uncounted"}
+
+<br>
+
+Since $Z_i$ is binary, expectations can be rewritten as:
+
+$$
+\E [Y_i Z_i] = \E [Y_i \mid Z_i = 1] \Pr(Z_i = 1)
+$$
+
+$$
+\E [Y_i] = \E [Y_i \mid Z_i = 1] \Pr(Z_i = 1) + \E [Y_i \mid Z_i = 0] \Pr(Z_i = 0)
+$$
+
+Thus, the covariance is:
+
+$$
+\cov (Y_i, Z_i) = \E [Y_i \mid Z_i = 1] \Pr(Z_i = 1) - \E [Y_i] \Pr(Z_i = 1)
+$$
+
+. . .
+
+Expanding $\E [Y_i]$:
+
+$$
+\cov (Y_i, Z_i) = \Pr(Z_i = 1) (1 - \Pr(Z_i = 1)) (\E [Y_i \mid Z_i = 1] - \E [Y_i \mid Z_i = 0])
+$$
+
+Similarly, for treatment:
+
+$$
+\cov (T_i, Z_i) = \Pr(Z_i = 1) (1 - \Pr(Z_i = 1)) (\E [T_i \mid Z_i = 1] - \E [T_i \mid Z_i = 0])
+$$
+
+---
 
 ### References {visibility="uncounted"}

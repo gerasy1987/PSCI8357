@@ -345,7 +345,7 @@ $$
 
   $$
   \begin{align*}
-  \var [\widehat{\tau}_{DiM} \given \mathcal{O}_N] &= \var [\overline{Y}_1 \given \mathcal{O}_N] + \var [\overline{Y}_0 \given \mathcal{O}_N] - 2 \cov(\overline{Y}_1, \overline{Y}_0 \given \mathcal{O}_N) \\
+  \var [\widehat{\tau}_{DiM} \given \mathcal{O}_N] &= \var [\overline{Y}_1 \given \mathcal{O}_N] + \var [\overline{Y}_0 \given \mathcal{O}_N] + 2 \cov(\overline{Y}_1, \overline{Y}_0 \given \mathcal{O}_N) \\
   &= \frac{S_1^2}{N_1} \frac{N - N_1}{N} + \frac{S_0^2}{N_0} \frac{N - N_0}{N} + 2 \frac{S_{10}}{N} \\
   &= \frac{S_1^2}{N_1} + \frac{S_0^2}{N_0} - \frac{S_1^2 + S_0^2 -2 S_{10}}{N} \\
   &= \frac{S_1^2}{N_1} + \frac{S_0^2}{N_0} \textcolor{#d65d0e}{- \frac{S_{\tau}^2}{N}}

@@ -1713,7 +1713,7 @@ knitr::kable(
 
 . . .
 
-- **Approach 1**: Entropy balancing [@hainmueller2012entropy]
+- **Approach 1**: [Entropy balancing]{.highlight} [@hainmueller2012entropy]
 
   - Solve convex quadratic programming problem with loss function to find optimal weights.
 
