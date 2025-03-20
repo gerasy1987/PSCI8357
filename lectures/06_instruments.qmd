@@ -574,23 +574,25 @@ summary(first_stage)
 
 ### IV Estimand and Interpretation
 
-<br>
+<br><br>
 
-- Therefore, $\tau_{\text{c}}$ can be nonparametrically identified:
+- Therefore, $\tau_{\text{c}}$ can be nonparametrically identified (_LATE_ equation):
   
   $$
   \tau_{\text{c}} = \frac{\tau_{ITT}}{\Pr(\text{compliers})} = \frac{\E(Y_i \given Z_i = 1) - \E(Y_i \given Z_i = 0)}{\E(T_i \given Z_i = 1) - \E(T_i \given Z_i = 0)} \\
   = \frac{\cov(Y_i, Z_i)}{\cov(T_i, Z_i)}
   $$
 
-- $\tau_{\text{c}}$ is the [Local Average Treatment Effect (LATE)]{.highlight} a.k.a [Complier Average Causal Effect (CACE)]{.highlight}
+  - To see how we get the last equality see [appendix slides](#late-formula).
+
+  - $\tau_{\text{c}}$ is the [Local Average Treatment Effect (LATE)]{.highlight} a.k.a [Complier Average Causal Effect (CACE)]{.highlight}
 
 . . .
 
 - _LATE_ has a clear causal meaning, **but** interpretation is often tricky:            
   
   - Compliers are defined in terms of principal strata, so we can never identify who they actually are.
-  - Different instrument (encouragement) yields different compliers.
+  - [Note]{.note} Different instrument (encouragement) yields different compliers.
 
 ## Special Case: One-Sided Noncompliance {visibility="uncounted"}
 
@@ -659,16 +661,18 @@ summary(first_stage)
 <br>
 
 - The LATE formula:
-  $$
-  \tau_{LATE} = \frac{\tau_{ITT,Y}}{\tau_{ITT,T}} = \frac{\E(Y_i \given Z_i = 1) - \E(Y_i \given Z_i = 0)}{\E(T_i \given Z_i = 1) - \E(T_i \given Z_i = 0)} = \frac{{\cov}(Y_i, Z_i)}{{\cov}(T_i, Z_i)}
-  $$
+  
+$$
+\tau_{LATE} = \frac{\tau_{ITT,Y}}{\tau_{ITT,T}} = \frac{\E(Y_i \given Z_i = 1) - \E(Y_i \given Z_i = 0)}{\E(T_i \given Z_i = 1) - \E(T_i \given Z_i = 0)} = \frac{{\cov}(Y_i, Z_i)}{{\cov}(T_i, Z_i)}
+$$
 
 . . .
 
 - A [plug-in estimator]{.highlight} is called the [Wald estimator]{.highlight}:
-  $$
-  \widehat{\tau}_{LATE} = \frac{\frac{1}{N_1}\sum_{i=1}^N Z_iY_i - \frac{1}{N_0}\sum_{i=1}^n (1-Z_i)Y_i}{\frac{1}{N_1}\sum_{i=1}^n Z_iT_i - \frac{1}{N_0}\sum_{i=1}^n (1-Z_i)T_i} = \frac{\widehat{\cov}(Y_i,Z_i)}{\widehat{\cov}(T_i,Z_i)}
-  $$
+  
+$$
+\widehat{\tau}_{LATE} = \frac{\frac{1}{N_1}\sum_{i=1}^N Z_iY_i - \frac{1}{N_0}\sum_{i=1}^n (1-Z_i)Y_i}{\frac{1}{N_1}\sum_{i=1}^n Z_iT_i - \frac{1}{N_0}\sum_{i=1}^n (1-Z_i)T_i} = \frac{\widehat{\cov}(Y_i,Z_i)}{\widehat{\cov}(T_i,Z_i)} = \frac{\widehat{\cov}(Y_i,Z_i)/\widehat{\var}[Z]}{\widehat{\cov}(T_i,Z_i)/\widehat{\var}[Z]}
+$$
 
 . . .
 
@@ -858,7 +862,7 @@ $$
 
 -  [Intuitions]{.note} from regular regression come through:
 
-   -  Including covariates in the first stage can improve efficiency and reduce bias:
+   -  Including covariates in the first stage can improve efficiency and reduce bias
 
    - [Randomization of instrument]{.highlight} $\rightsquigarrow \{Y_i(z=1), Y_i(z=0), T_i(1), T_i(0)\} \ \indep \ Z_i \mid \mathbf{X}_i$.
 
@@ -1039,17 +1043,69 @@ $$
 
 ## Weak Instruments
 
+### $RSS$, $ESS$, and $R^2$
+
+- [Residual Sum of Squares (RSS)]{.highlight} measures **unexplained** variation in the data in regression of $Y$ on $X$: 
+
+  $$
+  RSS = \sum_N (Y_i - \widehat{Y}_i)^2
+  $$
+
+  where $\widehat{y}_i$ is the predicted value from the regression model.
+
+. . .
+
+- [Explained Sum of Squares (ESS)]{.highlight} measures variation **explained** by the regression model:
+
+  $$
+  ESS = \sum_N (\widehat{Y}_i - \bar{Y})^2
+  $$
+
+. . .
+
+- [Coefficient of Determination ($R^2$)]{.highlight} measures the proportion of variation in the dependent variable explained by the model:
+
+  $$
+  R^2_{Y \sim X} = \frac{ESS}{TSS} = 1 - \frac{RSS}{TSS}, \quad \text{where} \quad TSS = ESS + RSS = \sum_N (Y_i - \bar{Y})^2
+  $$
+
+
+### Weak Instruments: $F$ Test
+
+- The [$F$ test]{.highlight} for model $Y_i = \alpha + \beta_1 X_{1i} + \dots + \beta_k X_{ki} + \varepsilon_i$ tests the null hypothesis:
+
+$$
+H_0: \beta_1 = \beta_2 = \dots = \beta_k = 0
+$$
+
+. . .
+
+- Uses $F$-statistic calculated as:
+
+  $$
+  F = \frac{(RSS_{\text{restricted}} - RSS_{\text{full}})/(dof_{\text{restricted}} - dof_{\text{full}})}{RSS_{\text{full}}/(dof_{\text{full}})} = \frac{ESS}{RSS} \times \frac{N - k - 1}{k}
+  $$
+
+  - Full model includes more regressors than restricted $\implies RSS_{restricted} \geq RSS_{full}$
+  - $k$ number of _additional_ regressors in full vs restricted model; $n$: Sample size.
+  - In regression summary restricted model includes intercept only.
+
+- [Intuition]{.note}: A large first stage $F$-statistic indicates strong evidence against $H_0$ $\rightsquigarrow$ regressors have explanatory power.
+
+<!-- - Using definition of $R^2$ and $F$-statistic we can express $R^2$ in terms of $F$ as $R^2 = \frac{F}{F + (n - k - 1)}$. -->
+
+
 ### Weak Instruments: $F$-statistic
 
 <br>
 
 - The standard first-stage [$F$-statistic]{.highlight} from a regression of the endogenous regressors on instruments and exogenous controls is:
 
-$$
-F = \frac{R^2_{Z}}{(1 - R^2_{Z})} \times \frac{N - k}{k - 1} = \frac{\text{TSS - RSS}}{\text{RSS}} \times \frac{N - k}{k - 1}
-$$
+  $$
+  F = \frac{R^2_{Y \sim Z}}{(1 - R^2_{Y \sim Z})} \times \frac{N - k - 1}{k} 
+  $$
 
-  - where $R^2_Z$ is $R^2$ from first-stage regression, $k$ is number of instruments
+  where $R^2_{Y \sim Z}$ is $R^2$ from first-stage regression of $Y$ on $Z$ and $k$ is the number of instruments.
 
 - [Note]{.note}: $F$-statistic in case of a single instument is equal to square of first-stage $t$-statistic.
 
@@ -1060,7 +1116,7 @@ $$
 
 ### Weak Instruments: Effective $F$-statistic
 
-- **Regular $F$** assumes homoskedasticity and independence, leading to potential overstatement of instrument strength in complex settings.
+- **Regular $F$-statistic** assumes homoskedasticity and independence, leading to potential overstatement of instrument strength in complex settings.
 
 . . .
 
@@ -1111,23 +1167,25 @@ $$
 
 - Confidence intervals do not properly reflect the true variability and potential bias in the estimates, especially in the presence of weak instruments.
 
-  - [Idea]{.note}: Adjust _TSLS_ inference **based** on the first-stage $F$-statistic.
+  - [Idea]{.note}: Adjust TSLS inference **based** on the first-stage $F$-statistic.
 
 . . .
 
 - Applies a smooth adjustment factor to TSLS SEs derived from the first-stage $t$-ratio: 
 
   $$
-  \widehat{f} = \frac{\widehat{\gamma}}{\sqrt{\widehat{V}(\widehat{\gamma})}} \quad \text{where} \widehat{f}^2 = \widehat{F}.
+  \widehat{f} = \frac{\widehat{\gamma}}{\sqrt{\widehat{V}(\widehat{\gamma})}} \quad \text{where} \quad \widehat{f}^2 = \widehat{F}.
   $$
 
 - [Note]{.note} Without adjustment, to maintain a correct $5$% size (two-sided $t$-test), a very large first-stage $F \approx 104.7$ may be needed!
 
-### Weak Instruments: $AR$ statistic
+### Weak Instruments: $AR$ test
 
 - @anderson1949estimation and later @chernozhukov2008reduced propose [$AR$ test]{.highlight} for direct inference in **over-identified** and **just-identified** cases.
 
 - [Intuition]{.note}: Testing $H_0: \tau = 0 \implies H_0: \tau \gamma = \tau_{ITT} = 0$ $\rightsquigarrow$ **use $F$-test applied directly to the reduced-form equation!**
+
+. . .
 
 - Procedure: For each candidate value $\tilde{\tau}$:
   
@@ -1185,8 +1243,6 @@ plot_coef(bk_ivdiag)
 
 ### Testing Exclusion: Placebo-Test and Sensitivity
 
-<br>
-
 - [Placebo tests]{.highlight}:
 
   1. Find setting in which ﬁrst stage should not operate.
@@ -1198,7 +1254,17 @@ plot_coef(bk_ivdiag)
 - [Sensitivity analysis]{.highlight} [@cinelli2025omitted]:
 
   - See how much violation of (1) randomization of instrument and (2) exclusion restriction would be needed to change the results.
-  - Use very similar approach varying the relationship between instrument/outcome and unobserved confounder/mediator.
+  
+  - Use approach similar to @cinelli2020making varying partial $R^2$ between instrument/outcome and unobserved confounder/mediator.
+
+  - [Partial $R^2$]{.highlight} is additional $R^2$ achieved from adding $q$ predictors $Z$ in the model that already has $k$ of $X$ predictors and can be directly computed from the $F$-statistic:
+
+    $$
+    R^2_{Y \sim Z \given X} = \frac{q \ F_{Y,Z \given X} }{(n - k - q) + q \ F_{Y,Z \given X}}
+    $$
+
+    where $F_{Y,Z \given X}$: $F$-statistic for testing the joint significance of all $Z$'s in the linear model with $Z$'s and $X$'s.
+
 
 ### Sensitivity Analysis in Practice
 
@@ -1245,6 +1311,8 @@ sensemakr::sensemakr(
   \end{align*}
   $$
 
+- [Idea]{.note}: To prove these recall that $\pi_{\text{a}} + \pi_{\text{c}} + \pi_{\text{n}} + \pi_{\text{d}} = 1$ and substitute observed outcomes for potential outcomes.
+
 - [Intuition]{.note}: $Y$ can vary in $Z$ holding $T$ fixed, but it cannot vary *too much*.
 
 . . .
@@ -1253,15 +1321,17 @@ sensemakr::sensemakr(
 
 - @kedagni2020generalized extend to binary outcome and treatment, but unrestricted instrument.
 
-### Testing _LATE_ assumption [@kitagawa2015test]
+## Testing Multiple _LATE_ Assumptions
+
+### Testing _LATE_ assumptions [@kitagawa2015test]
 
 <br>
 
-- Given LATE assumptions, the following must hold:
+- Given _LATE_ assumptions, the following must hold:
 
   $$
   \begin{align*}
-  \underbrace{\Pr(Y_i = y, T_i = 1 \given Z_i = 1)}_{a+c} &- \underbrace{\Pr(Y_i = y, T_i = 1 \given Z_i = 0)}_{\text{a}} \\
+  \underbrace{\Pr(Y_i = y, T_i = 1 \given Z_i = 1)}_{\text{a+c}} &- \underbrace{\Pr(Y_i = y, T_i = 1 \given Z_i = 0)}_{\text{a}} \\
   &= \Pr(Y_i (1) = y \given T_i(1) > T_i(0)) \geq 0 \\
   \underbrace{\Pr(Y_i = y, T_i = 0 \given Z_i = 0)}_{\text{n+c}} &- \underbrace{\Pr(Y_i = y, T_i = 0 \given Z_i = 1)}_{\text{n}} \\
   &= \Pr(Y_0 = y, T_i(1) > T_i(0)) \geq 0
@@ -1272,48 +1342,82 @@ sensemakr::sensemakr(
 
 - Holds more generally, e.g., for continuous $Y$:
 
-  - $P(y, T = 1 \given Z = 1)$ must nest $P(y, T = 1 \given Z = 0)$, and  
-  - $P(y, T = 0 \given Z = 0)$ must nest $P(y, T = 0 \given Z = 1)$.
+  - $p(y, T = 1 \given Z = 1)$ must nest $p(y, T = 1 \given Z = 0)$, and  
+  - $p(y, T = 0 \given Z = 0)$ must nest $p(y, T = 0 \given Z = 1)$.
 
 - Can test using [KS (Kolmogorov-Smirnov) statistic]{.highlight}.
 
-### Testing _LATE_ assumption [@kitagawa2015test]
+### Testing _LATE_ assumption: [**Good!**]{.green}
 
 <br>
 
-![**Good!**](../_images/kitagawa1.png){width=80% fig-align="center"}
+![](../_images/kitagawa1.png){width=70% fig-align="center"}
 
-### Testing _LATE_ assumption [@kitagawa2015test]
-
-<br>
-
-![**Bad!**](../_images/kitagawa2.png){width=80% fig-align="center"}
-
-### Testing LATE assumption [@huber2015testing]
+### Testing _LATE_ assumption: [**Bad!**]{.red}
 
 <br>
 
-- Given LATE assumptions, we have:
+![](../_images/kitagawa2.png){width=70% fig-align="center"}
+
+### Testing _LATE_ assumptions [@huber2015testing]
+
+- Given the monotonicity assumption, we can estimate proportions of all principal strata:
 
   $$
-  \E (Y \given T = 1, Z = 1) =
-  \frac{\pi_a}{\pi_{\text{a}} + \pi_{\text{c}}} \E (Y_1 \given \text{Type = a}, Z = 1)
-  + \frac{\pi_{\text{c}}}{\pi_{\text{a}} + \pi_{\text{c}}} \E (Y_1 \given \text{Type = c}, Z = 1)
+  \begin{align*}
+  \pi_{\text{a}} &= \Pr(\text{always-takers}) = \Pr(T_i = 1, Z_i = 0) \\
+  \pi_{\text{n}} &= \Pr(\text{never-takers}) = \Pr(T_i = 0, Z_i = 1) \\
+  \pi_{\text{c}} &= \Pr(\text{compliers}) \\
+                 &= \Pr(T_i = 1, Z_i = 1) - \pi_{\text{a}} = \Pr(T_i = 0, Z_i = 0) - \pi_{\text{n}}
+  \end{align*}
   $$
 
-- $\E (Y_1 \given \text{Type = a}, Z = 1)$ must thus reside between the mean of two truncated distributions:
-  
-  - $P(y \given T = 1, Z = 1)$ truncated above, trimming $1 - \frac{\pi_{\text{a}}}{\pi_{\text{a}} + \pi_{\text{c}}}$.
-  
-  - $P(y \given T = 1, Z = 1)$ truncated below, trimming $1 - \frac{\pi_{\text{a}}}{\pi_{\text{a}} + \pi_{\text{c}}}$.
+- Similarly we can identify the average potential outcomes for principal strata, e.g.:
+
+$$
+\E (Y_i (1) \given \text{always-takers}) = \E (Y \given T_i = 1, Z_i = 0) 
+$$
 
 . . .
 
-- Now, $\E (Y_1 \given \text{Type = a}, Z = 1) = \E (Y_1 \given \text{Type = a}, Z = 0)$ is observable.
+- But at the same time the always-takers are also present in the group with $T_i = 1$ and $Z_i = 1$:
 
-- So, we can check whether $\E (Y_1 \given \text{Type = a}, Z = 0)$ lies within bounds derived from truncated distributions.
+  $$
+  \begin{align*}
+  \E (Y_i \given T_i = 1, Z_i = 1) &=\\
+  \frac{\pi_a}{\pi_{\text{a}} + \pi_{\text{c}}} \E (Y_i (1) &\given \text{always-taker}, Z_i = 1)
+  + \frac{\pi_{\text{c}}}{\pi_{\text{a}} + \pi_{\text{c}}} \E (Y_i (1) \given \text{complier}, Z_i = 1)
+  \end{align*}
+  $$
 
-- Other restrictions are also implied by LATE assumptions.
+  where $\E (Y_i (1) \given \text{always-taker}, Z_i = 1) = \E (Y_i (1) \given \text{always-taker})$.
+
+### Testing _LATE_ assumptions [@huber2015testing]
+
+- From these two observations we can bound the average potential outcome among always-takers using two distributions:
+  
+  - [Worst case]{.highlight}: Trim $p(y \given T_i = 1, Z_i = 1)$ below $\frac{\pi_{\text{a}}}{\pi_{\text{a}} + \pi_{\text{c}}}$ quantile, $y_q$.
+  
+  - [Best case]{.highlight}: Trim $p(y \given T_i = 1, Z_i = 1)$ above $1 - \frac{\pi_{\text{a}}}{\pi_{\text{a}} + \pi_{\text{c}}}$ quantile, $y_{1-q}$.
+
+. . .
+
+- [Idea]{.note}: Test the following
+
+  $$
+  \begin{align*}
+  \E (Y_i \given T_i = 1, Z_i = 1, Y_i \leq y_q) &\leq \E (Y_i \given T_i = 1, Z_i = 0) \\
+                                        &\quad \leq \E (Y_i \given T_i = 1, Z_i = 1, Y_i \geq y_q)
+  \end{align*}
+  $$
+
+- [Intuition]{.note}: To test LATE assumptions check whether $\E (Y_i (1) \given \text{always-taker})$ lies within bounds derived from truncated distributions. Do the same for never-takers!
+
+- @huber2015testing show bootstrap procedure for testing the inequalities.
+
+. . .
+
+- [Note]{.note}: This approach is similar to trimming bounds used in cases of attrition [Ch. 7, @gerber2012field].
 
 # Summary
 
@@ -1331,7 +1435,7 @@ sensemakr::sensemakr(
 
 - **Exclusion restriction** and **randomization of instrument** are crucial!
 
-- **Weak instruments** can lead to bias and inflated standard errors and you need to account for it.
+- **Weak instruments** can exacerbate bias and inflated standard errors and you need to account for it.
 
 - Exclusion restriction is a very strong assumption:
   
@@ -1343,7 +1447,7 @@ sensemakr::sensemakr(
 
 # Appendix {visibility="uncounted"}
 
-### Proof LATE Equation {visibility="uncounted"}
+### Proof LATE Equation {#late-formula visibility="uncounted"}
 
 <br>
 
