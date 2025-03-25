@@ -1365,10 +1365,10 @@ sensemakr::sensemakr(
 
   $$
   \begin{align*}
-  \pi_{\text{a}} &= \Pr(\text{always-takers}) = \Pr(T_i = 1, Z_i = 0) \\
-  \pi_{\text{n}} &= \Pr(\text{never-takers}) = \Pr(T_i = 0, Z_i = 1) \\
+  \pi_{\text{a}} &= \Pr(\text{always-takers}) = \Pr(T_i = 1 \given Z_i = 0) \\
+  \pi_{\text{n}} &= \Pr(\text{never-takers}) = \Pr(T_i = 0 \given Z_i = 1) \\
   \pi_{\text{c}} &= \Pr(\text{compliers}) \\
-                 &= \Pr(T_i = 1, Z_i = 1) - \pi_{\text{a}} = \Pr(T_i = 0, Z_i = 0) - \pi_{\text{n}}
+                 &= \Pr(T_i = 1 \given Z_i = 1) - \pi_{\text{a}} = \Pr(T_i = 0 \given Z_i = 0) - \pi_{\text{n}}
   \end{align*}
   $$
 
