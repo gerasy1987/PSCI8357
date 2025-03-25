@@ -882,7 +882,7 @@ $$
   Y_i = \mathbf{T}_i' \beta + \varepsilon_i
   $$
 
-  - $\mathbf{T}_i$ is $k \times 1$ and now includes $D_i$ and any pretreatment covariates.
+  - $\mathbf{T}_i$ is $k \times 1$ and now includes $T_i$ and any pretreatment covariates.
   - Parts of $\mathbf{T}_i$ are endogenous so that $\E [\varepsilon_i \mid \mathbf{T}_i] \neq 0$
 
 . . .
@@ -1102,10 +1102,10 @@ $$
 - The standard first-stage [$F$-statistic]{.highlight} from a regression of the endogenous regressors on instruments and exogenous controls is:
 
   $$
-  F = \frac{R^2_{Y \sim Z}}{(1 - R^2_{Y \sim Z})} \times \frac{N - k - 1}{k} 
+  F = \frac{R^2_{T \sim Z}}{(1 - R^2_{T \sim Z})} \times \frac{N - k - 1}{k} 
   $$
 
-  where $R^2_{Y \sim Z}$ is $R^2$ from first-stage regression of $Y$ on $Z$ and $k$ is the number of instruments.
+  where $R^2_{T \sim Z}$ is $R^2$ from first-stage regression of $T$ on $Z$ and $k$ is the number of instruments.
 
 - [Note]{.note}: $F$-statistic in case of a single instument is equal to square of first-stage $t$-statistic.
 
@@ -1241,7 +1241,7 @@ plot_coef(bk_ivdiag)
 
 ![](../_images/mellon2.png){width=90% fig-align=center}
 
-### Testing Exclusion: Placebo-Test and Sensitivity
+### "Testing" Exclusion: Placebo-Test and Sensitivity
 
 - [Placebo tests]{.highlight}:
 
@@ -1296,7 +1296,7 @@ sensemakr::sensemakr(
 
 ```
 
-### Testing Exclusion: Restrictions Approach [@pearl1995causal]
+### "Testing" Exclusion: Restrictions Approach [@pearl1995causal]
 
 <br>
 
