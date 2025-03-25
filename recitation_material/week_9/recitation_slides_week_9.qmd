@@ -1,0 +1,98 @@
+---
+title: "Implementing Difference-in-Differences"
+author: "Alexander Dean"
+subtitle: "Recitation Period 9"
+institute: "Vanderbilt University"
+email: "alexander.r.dean@vanderbilt.edu"
+date: today
+execute:
+  embed-resources: true 
+format: 
+  revealjs:
+    theme: dark
+    footer: "Alexander Dean (Vanderbilt University)"
+    slide-number: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    self-contained-math: true
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+    code-fold: true
+fontsize: 32px
+editor: source
+---
+
+# Introductory Spiel
+
+## What We Will Cover Today
+1. The basic intuition of cannonical Difference-in-Differences (DiD)
+2. When you can use DiD
+3. What options do you have with DiD
+4. Implementing DiD with the $\texttt{did}$ package in $\texttt{R}$
+
+## What is DiD?
+
+1. A causal identification strategy to recover the ATT with panel data
+2. It compares changes in treatment and control units over time as they receive treatment
+3. Becoming more popular in political science research
+
+# Why DiD Works
+## So how can we recover the ATT?
+
+- How can we estimate the ATT? It requires a counterfactual that cannot be observed $\mathbb{E}[Y_{i0}|D_{i} = 1]$
+
+. . . 
+
+- Through the assumption of parallel trends!
+
+. . . 
+
+- $E[Y_{i1}(0) - Y_{i0}(0) \mid D_i = 1] = E[Y_{i1}(0) - Y_{i0}(0) \mid D_i = 0]$
+
+## Mini Proof
+
+Let's look at this [proof](https://github.com/gerasy1987/PSCI8357/tree/main/recitation_material/week_9) I created.
+
+## Why DiD is not totally a unicorn
+
+1. When we extend beyond the canonical 2x2 setting and when we have heterogenous treatment effects can result in biased estimates (Goodman-Bacon 2021)
+2. This is similar, but worse, to the problem we discussed with Samii's paper at the beginning of the semester because instead of unevenly weighting units, some units can have negative weights!
+
+## New DiD estimators to the rescue
+
+1. Luckily, there have been a number of advancements in econometrics research to derive DiD estimators that are not biased when heterogenous treatment effects exists!
+
+2. Some examples:
+  - Callaway and Sant'Anna (2021)
+  - de Chaisemartin and d'Haultfœuille (2020; 2024)
+  - Imai et al. 2023
+  - Sun and Abraham 2021
+  - Gardner 2022
+  - Woolridge 2023
+  - Arkhangelsky et al. 2021
+  - Roth and Sant'Anna 2021
+
+. . . 
+
+## Resources
+
+Helpful Papers:
+
+- [Callaway and Sant'Anna 2021](https://www.sciencedirect.com/science/article/pii/S0304407620303948)
+- [Roth et al. 2023](https://www.sciencedirect.com/science/article/pii/S0304407623001318)
+- [Baker et al. 2025](https://arxiv.org/pdf/2503.13323)
+- [Imai et al. 2023](https://onlinelibrary.wiley.com/doi/full/10.1111/ajps.12685)
+- [Sun and Abraham 2021](https://www.sciencedirect.com/science/article/pii/S030440762030378X)
+- [de Chaisemartin and d'Haultfœuille 2020](https://www.aeaweb.org/articles?id=10.1257/aer.20181169)
+- [de Chaisemartin and d'Haultfœuille 2024](https://direct.mit.edu/rest/article/doi/10.1162/rest_a_01414/119488/Difference-in-Differences-Estimators-of)
+- [Roth and Rambachan 2023](https://academic.oup.com/restud/article/90/5/2555/7039335)
+
+## Implementing DiD with did Package
+
+Let's [move to R](https://github.com/gerasy1987/PSCI8357/tree/main/recitation_material/week_9) and look at a simple implementation
