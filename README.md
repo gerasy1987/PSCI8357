@@ -45,7 +45,7 @@ courses.
 
 ## Requirements
 
-### Homeworks (4 × 10 %)
+### Homeworks (2 × 10 % + 1 × 15 %)
 
 You will receive homework about every two weeks. You will have to submit
 your completed assignment within a week; exact deadlines will be made
@@ -127,7 +127,7 @@ the following:
 -   A report on the expansion of analyses (including code, output, and
     interpretation).
 
-### Final Exam (20%)
+### Final Exam (25%)
 
 A final exam will be scheduled during the final examination week (the
 week of April 21st). The exam aims to assess individual progress, thus
@@ -141,9 +141,9 @@ so that we can arrange an alternative time. The final will constitute
 
 ## Grading and Deadlines
 
--   **40% Homeworks** (due roughly every other week)  
+-   **35% Homeworks** (due roughly every other week)  
 -   **40% Replications** (due February 27th and April 17th)  
--   **20% Take-Home Final Exam** (Week of April 21st)
+-   **25% Take-Home Final Exam** (Week of April 21st)
 
 Late work will not be accepted without documented proof of a family or
 medical emergency.
@@ -386,7 +386,7 @@ role="doc-biblioref">2008</a>)</span></li>
 <tr>
 <th style="text-align: center;"><strong>3/4 3/6</strong></th>
 <td style="text-align: left;">Instrumental Variables</td>
-<td style="text-align: left;">Local Average Treatment EffectsIV
+<td style="text-align: left;">Local Average Treatment Effects, IV
 estimator, one-/two-sided non-compliance, 2SLS, variance estimation</td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="angrist2009mostly">Angrist and
@@ -407,29 +407,15 @@ role="doc-biblioref">2011</a>)</span></li>
 <tr>
 <th style="text-align: center;"><strong>3/11 3/13 3/18</strong></th>
 <td style="text-align: left;">No Class</td>
-<td style="text-align: left;">Spring Break/New Faces</td>
+<td style="text-align: left;">Spring Break/New Voices</td>
 <td style="text-align: left;"></td>
-</tr>
-<tr>
-<th style="text-align: center;"><strong>3/20</strong></th>
-<td style="text-align: left;">Panel Data</td>
-<td style="text-align: left;">fixed and random effects, within
-estimator, LSDV</td>
-<td style="text-align: left;"><ul>
-<li><span class="citation" data-cites="angrist2009mostly">Angrist and
-Pischke (<a href="#ref-angrist2009mostly" role="doc-biblioref">2009</a>,
-Ch. 5.1, 5.4)</span></li>
-<li><span class="citation" data-cites="morgan2015counterfactuals">Morgan
-and Winship (<a href="#ref-morgan2015counterfactuals"
-role="doc-biblioref">2015</a>, Ch. 11.3)</span></li>
-</ul></td>
 </tr>
 <tr>
 <th style="text-align: center;"><strong>3/25 3/27</strong></th>
 <td style="text-align: left;">Difference-in-Differences</td>
 <td style="text-align: left;">two-period DID, pre-trends, event study,
-conditional DID, continuous treatment DID, TWFE bias with multiple
-events, event-by-event estimation</td>
+conditional DID, continuous treatment DID, event-by-event
+estimation</td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="angrist2009mostly">Angrist and
 Pischke (<a href="#ref-angrist2009mostly" role="doc-biblioref">2009</a>,
@@ -440,14 +426,28 @@ role="doc-biblioref">2004</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>4/1 4/3</strong></th>
+<th style="text-align: center;"><strong>4/1</strong></th>
+<td style="text-align: left;">Panel Data</td>
+<td style="text-align: left;">staggered adoption design, fixed effects,
+TWFE estimator and its bias</td>
+<td style="text-align: left;"><ul>
+<li><span class="citation" data-cites="angrist2009mostly">Angrist and
+Pischke (<a href="#ref-angrist2009mostly" role="doc-biblioref">2009</a>,
+Ch. 5.1, 5.4)</span></li>
+<li><span class="citation" data-cites="morgan2015counterfactuals">Morgan
+and Winship (<a href="#ref-morgan2015counterfactuals"
+role="doc-biblioref">2015</a>, Ch. 11.3)</span></li>
+</ul></td>
+</tr>
+<tr>
+<th style="text-align: center;"><strong>4/3 4/8</strong></th>
 <td style="text-align: left;">Synthetic Control</td>
 <td style="text-align: left;">identification, estimation and statistical
 inference, interactive FEs</td>
 <td style="text-align: left;">TBD</td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>4/8 4/10</strong></th>
+<th style="text-align: center;"><strong>4/10 4/15</strong></th>
 <td style="text-align: left;">Regression Discontinuity Designs</td>
 <td style="text-align: left;">parametric, non-parametric local
 regression, optimized RD and honest inference, threats, fuzzy RDD
@@ -466,31 +466,6 @@ role="doc-biblioref">2008</a>)</span></li>
 Cuesta and Imai (<a href="#ref-de2016misunderstandings"
 role="doc-biblioref">2016</a>)</span></li>
 </ul></td>
-</tr>
-<tr>
-<th style="text-align: center;"></th>
-<td colspan="3" style="text-align: left;"> <strong>ADDITIONAL
-TOPICS</strong></td>
-</tr>
-<tr>
-<th style="text-align: center;"><strong>4/15</strong></th>
-<td style="text-align: left;">Mediation Effects</td>
-<td style="text-align: left;">natural direct and indirect effects,
-controlled direct and indirect effects, sensitivity analysis,
-experimental designs, interaction effects and non-linear conditional
-effect curves, decomposing effect heterogeneity, optimal treatment
-regimes</td>
-<td style="text-align: left;"><ul>
-<li><span class="citation" data-cites="gerber2012field">Gerber and Green
-(<a href="#ref-gerber2012field" role="doc-biblioref">2012</a>, Ch.
-9-10)</span></li>
-</ul></td>
-</tr>
-<tr>
-<th style="text-align: center;"><strong>4/17</strong></th>
-<td style="text-align: left;">Course Wrap-Up</td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
 </tr>
 </tbody>
 </table>

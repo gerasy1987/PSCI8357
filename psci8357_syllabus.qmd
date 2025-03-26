@@ -66,7 +66,7 @@ There are two prerequisits for this class. First, students should have a firm gr
 
 ## Requirements
 
-### Homeworks (4 $\times$ 10 %)
+### Homeworks (2 $\times$ 10 % + 1 $\times$ 15 %)
 
 You will receive homework about every two weeks. You will have to submit your completed assignment within a week; exact deadlines will be made clear on the assignment. You can work with others, but to receive credit, your homework must comply with the following guidelines:
 
@@ -98,7 +98,7 @@ Your final submission should include the data files you used and a replication w
 - A report on the replication of the main results (including code, output, and discussion of any diviations from original paper).
 - A report on the expansion of analyses (including code, output, and interpretation).
 
-### Final Exam (20%)
+### Final Exam (25%)
 
 A final exam will be scheduled during the final examination week (the week of April 21st). The exam aims to assess individual progress, thus allowing me to provide personalized recommendations for improving your methodological foundations. If you cannot take the exam during the scheduled period, you must provide notice at least one week in advance so that we can arrange an alternative time. The final will constitute 20% of your grade.
 
@@ -106,9 +106,9 @@ A final exam will be scheduled during the final examination week (the week of Ap
 
 ## Grading and Deadlines
 
--   **40% Homeworks** (due roughly every other week)\
+-   **35% Homeworks** (due roughly every other week)\
 -   **40% Replications** (due February 27th and April 17th)\
--   **20% Take-Home Final Exam** (Week of April 21st)
+-   **25% Take-Home Final Exam** (Week of April 21st)
 
 Late work will not be accepted without documented proof of a family or medical emergency.
 
@@ -227,7 +227,7 @@ Readings, lectures, assignments, and news for the course will be posted on the c
 
 *   - **3/4 3/6**
     - Instrumental Variables
-    - Local Average Treatment EffectsIV estimator, one-/two-sided non-compliance, 2SLS, variance estimation
+    - Local Average Treatment Effects, IV estimator, one-/two-sided non-compliance, 2SLS, variance estimation
     -   - @angrist2009mostly [Ch. 4]
         - @morgan2015counterfactuals [Ch. 9.1-9.3]
         - @angrist1996identification
@@ -235,28 +235,27 @@ Readings, lectures, assignments, and news for the course will be posted on the c
 
 *   - **3/11 3/13 3/18**
     - No Class
-    - Spring Break/New Faces
+    - Spring Break/New Voices
     - 
-
-*   - **3/20**
-    - Panel Data
-    - fixed and random effects, within estimator, LSDV
-    -   - @angrist2009mostly [Ch. 5.1, 5.4]
-        - @morgan2015counterfactuals [Ch. 11.3]
-
 
 *   - **3/25 3/27**
     - Difference-in-Differences
-    - two-period DID, pre-trends, event study, conditional DID, continuous treatment DID, TWFE bias with multiple events, event-by-event estimation
+    - two-period DID, pre-trends, event study, conditional DID, continuous treatment DID, event-by-event estimation
     -   - @angrist2009mostly [Ch. 5.2]
         - @bertrand2004much
 
-*   - **4/1 4/3**
+*   - **4/1**
+    - Panel Data
+    - staggered adoption design, fixed effects, TWFE estimator and its bias
+    -   - @angrist2009mostly [Ch. 5.1, 5.4]
+        - @morgan2015counterfactuals [Ch. 11.3]
+
+*   - **4/3 4/8**
     - Synthetic Control
     - identification, estimation and statistical inference, interactive FEs
     - TBD
 
-*   - **4/8 4/10**
+*   - **4/10 4/15**
     - Regression Discontinuity Designs
     - parametric, non-parametric local regression, optimized RD and honest inference, threats, fuzzy RDD (?)
     -   - @angrist2009mostly [Ch. 6]
@@ -264,13 +263,10 @@ Readings, lectures, assignments, and news for the course will be posted on the c
         - @imbens2008regression
         - @de2016misunderstandings
 
-*   - 
-    - []{colspan=3} **ADDITIONAL TOPICS**
-
-*   - **4/15**
+<!-- *   - **4/15**
     - Mediation Effects
     - natural direct and indirect effects, controlled direct and indirect effects, sensitivity analysis, experimental designs, interaction effects and non-linear conditional effect curves, decomposing effect heterogeneity, optimal treatment regimes
-    -   - @gerber2012field [Ch. 9-10]
+    -   - @gerber2012field [Ch. 9-10] -->
 *   - **4/17**
     - Course Wrap-Up
     - 
