@@ -614,7 +614,7 @@ summary(first_stage)
 
 |                  | $Z_i = 1$               | $Z_i = 0$               |
 |------------------|:-----------------------:|:---------------------:|
-| $T_i = 1$        | Complier/~~Always-taker~~   | ~~Defier/Always-taker~~   |
+| $T_i = 1$        | Complier/Always-taker1   | ~~Defier~~/Always-taker   |
 | $T_i = 0$          | ~~Defier~~/Never-taker      | Complier/Never-taker  |
 
 . . .

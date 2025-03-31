@@ -124,7 +124,7 @@ thematic::thematic_on(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 ```{r}
 #| label: did_estimator
 #| fig-align: center
-#| fig-width: 9
+#| fig-width: 10
 #| fig-height: 7
 
 df <- data.frame(
@@ -340,17 +340,17 @@ hist_before +
   Y_{it} = Y_{it}(0)(1 - T_{it}) + Y_{it}(1) T_{it}
   $$
 
-- Since $T_{i1} = G_i$ in the post-treatment period, we can also write  
+  - Since $T_{i1} = G_i$ in the post-treatment period, we can also write  
   
-  $$
-  Y_{i1} = Y_{i1}(0) (1 - G_i) + Y_{i1}(1) G_i
-  $$
+    $$
+    Y_{i1} = Y_{i1}(0) (1 - G_i) + Y_{i1}(1) G_i
+    $$
 
-- **Estimand:** _ATT_ in the post-treatment period  
+- **Estimand:** [_ATT_ in the post-treatment period]{.highlight}
   
-  $$
-  \tau_{ATT} = \E[Y_{i1}(1)-Y_{i1}(0) \given G_i = 1] = \E[Y_{i1}(1) \given G_i=1] - \textcolor{#cc241d}{\E[Y_{i1}(0) \given G_i=1]}
-  $$
+$$
+\tau_{ATT} = \E[Y_{i1}(1)-Y_{i1}(0) \given G_i = 1] = \E[Y_{i1}(1) \given G_i=1] - \textcolor{#cc241d}{\E[Y_{i1}(0) \given G_i=1]}
+$$
 
 ### Identification Strategies
 
@@ -361,8 +361,6 @@ hist_before +
 $$
 \tau_{ATT} = \E[Y_{i1}(1)-Y_{i1}(0) \given G_i = 1] = \E[Y_{i1}(1) \given G_i=1] - \textcolor{#cc241d}{\E[Y_{i1}(0) \given G_i=1]}
 $$
-
-. . .
 
 <br>
 
@@ -497,7 +495,7 @@ ggplot(df, aes(x = time, y = outcome, color = group, linetype = group, shape = g
 
 - **Identification Strategy**: [Treated vs. Control in Post-Period]{.highlight}
 
-  - Assume [Conditional Ignorability]{.highlight}
+  - Assume [Strict (Conditional)  Ignorability]{.highlight}
 
 $$
 \textcolor{#cc241d}{\E[Y_{i1}(0)|G_i=1]} = \textcolor{#458588}{\E[Y_{i1}(0)|G_i=0]}
@@ -605,7 +603,7 @@ ggplot(df, aes(x = time, y = outcome, color = group, linetype = group, shape = g
 
 - **Identification Strategy**: [Difference-in-Differences (DiD)]{.highlight}
 
-- [Parallel Trends Assumption]{.highlight}:  
+  - Assume [Parallel Trends]{.highlight}:  
 
 $$
 \E\Bigl[ \textcolor{#cc241d}{Y_{i1}(0)} - \textcolor{#458588}{Y_{i0}(0)} \given G_i=1 \Bigr] = \E\Bigl[ \textcolor{#458588}{Y_{i1}(0) - Y_{i0}(0)} \given G_i=0 \Bigr]
@@ -747,8 +745,8 @@ $$
 - **Question**: What type of confounding does DiD make us robust to?
   
   :::fragment
-  - Parallel trends hold if unobserved confounding is time-invariant.
-  - Parallel trends are violated if there is unobserved time-varying confounding.
+  - Parallel trends hold if [unobserved confounding is time-invariant]{.highlight}.
+  - Parallel trends are violated if there is [unobserved time-varying confounding]{.highlight}.
   :::
 
 . . .
@@ -797,15 +795,15 @@ sims <-
   pbapply::pbreplicate(1000,
     {
       
-      unit_shocks <- runif(n, 0, 0.5)
+      unit_U <- runif(n, 0, 0.5)
 
       sim_df <- 
         tibble(
           id = rep(1:n, each = 2),
           time = rep(c(0, 1), times = n),
-          treat = as.numeric(id %in% sample(1:n, size = n/2, prob = 1 / 4 + unit_shocks)),
+          treat = as.numeric(id %in% sample(1:n, size = n/2, prob = 1 / 4 + unit_U)),
           ## time-invariant confounding
-          U_ti = rep(unit_shocks, each = 2),
+          U_ti = rep(unit_U, each = 2),
           ## time-varying confounding
           U_tv = if_else(treat == 1 & time == 1, U_ti + runif(1, 0, 0.25), U_ti),
           Y_ti = lambda * time + tau * (treat * time) + beta * U_ti + rnorm(n * 2, 0, error_sd),
@@ -868,8 +866,6 @@ ggplot(sims, aes(x = est, fill = factor(correct), color = factor(correct))) +
 
 ### Panel Data and Repeated Cross-Sectional Data
 
-<br>
-
 - [Panel data]{.highlight}: The same units are sampled at two time points.
 - [Repeated cross-sectional data (RCS)]{.highlight}: Different units are sampled at different time points.
 
@@ -877,15 +873,17 @@ ggplot(sims, aes(x = est, fill = factor(correct), color = factor(correct))) +
 
 - [Examples]{.note}:
 
-  - **Panel Data** [@anzia2012election]: Examines the effect of elections on public employee salaries.
+  - **Panel Data** [@anzia2012election]: Effect of elections on public employee salaries in Texas.
     
+    - **Treatment**: Switch of school districts to on-cycle election timing in 2007.
     - **Outcome**: Average teacher salary.
-    - **Treatment**: Switch to on-cycle election timing.
+    - **Results**: School districts that were forced to switch to on-cycle elections responded by granting significantly lower salary raises to teachers.
 
   - **RCS Data** [@malesky2014impact]: Examines the impact of electoral reforms on local public services in Vietnam.
     
+    - **Treatment**: Stratified abolition of elected councils after 2009.
     - **Outcome**: Quality of local public services provision.
-    - **Treatment**: Abolition of elected councils.
+    - **Results**: Decentralization significantly improved public service delivery in policy areas important to central policy-makers.
 
 ### Plug-in Estimation for Panel Data
 
@@ -1057,9 +1055,9 @@ rcs_estimate
 
 <br>
 
-- We can fit the following interactive linear regression in both RCS and Panel case: 
+- We can fit the following [interactive linear regression]{.highlight} in both RCS and Panel case: 
   $$
-  Y_{it} =  \alpha + \theta G_i + \gamma I_t + \tau G_i I_t + \varepsilon_{it}
+  Y_{it} =  \alpha + \theta\ G_i + \gamma\ \text{Post}_t + \tau\ G_i \times \text{Post}_t + \varepsilon_{it}
   $$
 
 - We can show that $\widehat{\tau}_{OLS} = \widehat\tau_{ATT}$:
@@ -1067,11 +1065,11 @@ rcs_estimate
 . . .
 
 
-|                    | **After ($I_t=1$)**                  | **Before ($I_t=0$)**           | **After - Before** |
+|                    | **Pre ($\text{Post}_t=0$)**                    | **Post ($\text{Post}_t = 1$)**         | **Post - Pre** |
 |-----------------------|:-----------------------:|:----------------------:|:--------------------:|
-| **Treated ($G_i=1$)**  | $\widehat\alpha+\widehat\theta+\widehat\gamma+\widehat\tau$ | $\widehat\alpha + \widehat\theta$ | $\widehat\gamma + \widehat\tau$ |
-| **Control ($G_i=0$)**  | $\widehat\alpha + \widehat\gamma$        | $\widehat\alpha$              | $\widehat\gamma$   |
-| **Treated - Control**  | $\widehat\theta + \widehat\tau$          | $\widehat\theta$              | $\widehat\tau$     |
+| **Treated ($G_i=1$)**  | $\widehat\alpha + \widehat\theta$           | $\widehat\alpha+\widehat\theta+\widehat\gamma+\widehat\tau$ | $\widehat\gamma + \widehat\tau$ |
+| **Control ($G_i=0$)**  | $\widehat\alpha$                           | $\widehat\alpha + \widehat\gamma$      | $\widehat\gamma$   |
+| **Treated - Control**  | $\widehat\theta$                          | $\widehat\theta + \widehat\tau$        | $\widehat\tau$     |
 
 . . .
 
@@ -1081,28 +1079,47 @@ rcs_estimate
 
   - Recent contributions on DID inference with few groups in @mackinnon2018wild and @ferman2015inference.
 
-### Regression Estimator for RCS and Panel
+### Alternative Regression Estimator for RCS and Panel
 
-<br>
+<br><br><br>
 
 - Two additional ways produce equivalent estimates in the two-period case without controls:
 
-  - [Two-Way Fixed Effects model]{.highlight}: $Y_{it} = \alpha_i + \lambda_t + \tau G_{it} + \varepsilon_{it}$
-  - [First differences model]{.highlight} (only in panel case): $\Delta Y_i = \Delta \lambda + \tau G_i + \Delta \varepsilon_i$
+  :::incremental
+  - [Two-Way Fixed Effects (TWFE) model]{.highlight}: $Y_{it} = \alpha_i + \lambda_t + \tau\ T_{it} + \varepsilon_{it}$
+      
+      - Means for control units *in the absence of treatment*: $\left(\alpha_{(0)} + \lambda_{(0)},\;\alpha_{(0)} + \lambda_{(1)} \right)$
+
+      - Means for treated units: $\left(\alpha_{(1)} + \lambda_{(0)},\;\alpha_{(1)} + \lambda_{(1)} + \tau \right)$
+  
+  - [First-differences (FD) model]{.highlight} (only in panel case): $\Delta Y_i = \Delta \lambda + \tau\ G_i + \Delta \varepsilon_i$
+  
+      - Subtract pre-treatment from post-treatment outcomes to eliminate individual fixed effects $\alpha_i$, leaving $\tau$ as the coefficient on $G_i$.
+  :::
+
+### Estimation under Conditional Parallel Trends
+
+<br><br>
+
+- If you are assuming [conditional parallel trends]{.highlight} instead, then
+
+  :::incremental
+  1. **TWFE regression** that includes $X_{it} \times \text{Post}_k$ terms or first-differences ($\Delta Y_{i}$) regression that includes $X_i$’s.  
+    
+      - TWFE **must include interactions** with $\text{Post}_k$ (uninteracted $X_i$ will be partialled out by indiv. or group FEs).  
+      - Specification or aggregation biases are a problem (similar to classic OLS results).
+
+  2. **Inverse-propensity score weighting** using $e(X_i)$ with respect to $T_i$.
+
+  3. **Matching on $X_i$ with respect to $T_i$** [@imai2023matching].
+  :::
 
 . . .
 
-- Researchers often add covariates to TWFE or interactive specifications, e.g.:
-  $$
-  Y_{it} = \alpha + \theta G_i + \gamma I_t + \tau G_i I_t + \mathbf{X}_{it}'\rho + \epsilon_{it}
-  $$
+- [Note]{.note}: 
 
-  - This makes the following assumptions:
-
-    - [conditional parallel trends]{.highlight}.
-    - Linear model is correct.
-
-  - [Note]{.note}: Time-varying covariates ($\mathbf{X}_{it}$) should not include post-treatment variables!
+  - Conditional parallel trends requires overlap, like in standard regression setting.
+  - Time-varying covariates ($\mathbf{X}_{it}$) should not include post-treatment variables!
 
 
 ### Example: Impact of Recentralization
@@ -1249,7 +1266,7 @@ tibble(
   - [DiD]{.highlight}: time-constant unmeasured confounder creates imbalance.
   - [LDV]{.highlight}: previous outcome directly affects treatment assignment.
 
-## DID/LDV bracketing
+### DiD/LDV bracketing
 
 - **Estimator**: estimate CEF $\E[Y_{i1} \mid Y_{i0}, G_i] = \alpha + \rho Y_{i0} + \tau G_i$
 
@@ -1285,6 +1302,7 @@ $$
 - Statinarity is satisfied and $F(y_i \given G_i = 0)$ stochastically dominates $F(y_i \given G_i = 1)$.
 
 - $\widehat\tau_{DiD} = 2.446 > \widehat\tau_{LDV} = 0.302$.
+
 
 ## Diagnostics for Parallel Trends
 
@@ -1348,23 +1366,23 @@ $$
 - **Approach 2**: [Formal tests]{.highlight}
   
   1. Suppose treatment occurs in $t = 0$: Use $t = -1$ as "placebo" treatment period, and re-estimate DiD.
-  2. Estimate full $t \times G$ interactive model with $t = 0$ as reference category.
+  2. Estimate full $G \times t$ interactive model with $t = 0$ as reference category.
   3. @liu2024practical propose additional F- and t-tests implemented in `fect` package.
 
 . . .
 
 - [Note]{.note}: **this is only diagnostics**, not a direct test of the assumption!
   
-  - E.g. in 1 we test
+  - E.g. in $t = -1$ we test
     
     $$
     \begin{align*}
-      &\E[Y_{i,t_2}(0) - Y_{i, t_1}(0) \given G_i=1] = \E[Y_{i, t_2}(0)-Y_{i, t_1}(0) \given G_i=0] \\
-      &\Longleftrightarrow \E[Y_{i,t_2} - Y_{i, t_1} \given G_i=1] = \E[Y_{i, t_2} -Y_{i, t_1} \given G_i=0]
+      &\E[Y_{i,0}(0) - Y_{i, -1}(0) \given G_i=1] = \E[Y_{i, 0}(0)-Y_{i, -1}(0) \given G_i=0] \\
+      &\Longleftrightarrow \E[Y_{i,0} - Y_{i, -1} \given G_i=1] = \E[Y_{i, 0} -Y_{i, -1} \given G_i=0]
     \end{align*}
     $$
   
-  which is different from $\E[Y_{i,t_3}(0) - Y_{i, t_2}(0) \given G_i=1] = \E[Y_{i, t_3}(0)-Y_{i, t_2}(0) \given G_i=0]$
+  which is different from $\E[Y_{i,1}(0) - Y_{i, 0}(0) \given G_i=1] = \E[Y_{i, 1}(0)-Y_{i, 0}(0) \given G_i=0]$
 
 - Do not forget about [pre-trend testing fallacy]{.highlight}: failure to reject the conventional null to test for parallel trends is problematic.
 
@@ -1539,6 +1557,183 @@ anzia2012 |>
     custom_theme
 
 ```
+
+### Sensitivity Analyses for Parallel Trends
+
+<br>
+
+- Recall that the DiD estimator can be expressed as:
+
+  $$
+  \begin{align*}
+  \tau_{DiD}&= \underbrace{\E[Y_{i1}(1) \given G_i=1] - \E[Y_{i1}(0) \given G_i=1]}_{= \ \tau_{ATT}} \\
+  &\qquad + \underbrace{\Bigl\{ \E[Y_{i1}(0)-Y_{i0}(0) \given G_i=1] - \E[Y_{i1}(0)-Y_{i0}(0) \given G_i=0] \Bigr\}}_{= \ 0 \text{ under parallel trends}}
+  \end{align*}
+  $$
+
+. . .
+
+- @rambachan2023more propose to [bound the bias term with pre-trend differences]{.highlight}:
+
+  $$
+  \begin{align*}
+  &\mathbb{E}[Y_{i1} (0) - Y_{i0} (0) \mid T_i = 1] - \mathbb{E}[Y_{i1} (0) - Y_{i0} (0) \mid G_i = 0] \\
+  &\quad = \phi \left( \mathbb{E}[Y_{i0} (0) - Y_{i,-1} (0) \mid G_i = 1] - \mathbb{E}[Y_{i0} (0) - Y_{i,-1} (0) \mid G_i = 0] \right),
+  \end{align*}
+  $$
+
+  with $\phi \in [-b, b]$.
+
+## Event Study (Post-Trends)
+
+### Event Study (Post-Trends)
+
+- The classic $2 \times 2$ DiD can be extended with pre- and post-trends to study effects of event.
+
+. . .
+
+- ["Event study"]{.highlight}: Estimate effects on different post-treatment periods
+
+  $$
+  Y_{it} = \alpha + \theta G_i + \sum_{k=1}^K \left( \phi_k \text{Post}^{k}_{t} + \textcolor{#cc241d}{\tau_k} \ G_i \times \text{Post}^{k}_{t} \right) + \varepsilon_{it},
+  $$
+
+  where $\tau_k$ captures effect of $k$ periods of exposure.
+
+- Using pre- and post-trends $t = 0$ as reference period we can **evaluate parallel pre-trends**:
+
+  $$
+  Y_{it} = \alpha + \theta G_i + \sum_{j=-J}^{-1} \left( \rho_j \text{Pre}^{j}_{t} + \textcolor{#cc241d}{\pi_j} \ G_i \times \text{Pre}^{j}_{t} \right) + \sum_{k=1}^K \left( \phi_k \text{Post}^{k}_{t} + \textcolor{#cc241d}{\tau_k} \ G_i \times \text{Post}^{k}_{t} \right) + \varepsilon_{it}.
+  $$
+
+. . .
+
+- [Note]{.note}: Using _only individual_ fixed effects is algebraically equivalent!
+
+
+## Triple (...) Differences 😵‍💫
+
+### Example: Cycling to School
+
+<br><br>
+
+- [Triple differences]{.highlight} or "difference in differences in differences":
+
+  - Use a _placebo_ DiD to relax the parallel trends assumption!
+
+. . .
+
+::: {.columns}
+
+::: {.column style="margin-top: 0em; width:60%;"}
+- @muralidharan2017cycling: Effects of Cycling to School on educational outcomes among girls in India
+
+  - Reform: Only in Bihar in 2007, all girls aged 14/15 are given a free bicycle.
+
+  - **1st DID**: $G_i \in \{\text{girl, boy}\}$ and $T_i \in \{\text{2005, 2009}\}$ in Bihar.
+  - **2nd DID (placebo)**: $G_i \in \{\text{girl, boy}\}$ and $T_i \in \{\text{2005, 2009}\}$ in Jharkhand.
+:::
+
+::: {.column style="margin-top: 2em; width:40%;"}
+
+{{< video https://youtu.be/6nG63ISt_Ek?si=YhfNN90Sjki1cezn&t=26 width="450" height="250" >}}
+
+:::
+
+:::
+
+
+### DDD Estimator
+
+<br>
+
+- The [DDD estimator]{.highlight}:
+
+  $$
+  \begin{align*}
+  \widehat{\tau}_{DDD} =& \bigl\{ \widehat{\E}[Y_i \given \text{girl, 2005, B}] - \widehat{\E}[Y_i \given \text{girl, 2009, B}] \bigr\} \\
+  &- \bigl\{ \widehat{\E}[Y_i \given \text{boy, 2005, B}] - \widehat{\E}[Y_i \given \text{boy, 2009, B}] \bigr\} \\
+  &\quad - \Bigl(
+  \bigl\{ \widehat{\E}[Y_i \given \text{girl, 2005, J}] - \widehat{\E}[Y_i \given \text{girl, 2009, J}] \bigr\} \\
+  &\phantom{\quad - \Bigl(} - \bigl\{ \widehat{\E}[Y_i \given \text{boy, 2005, J}] - \widehat{\E}[Y_i \given \text{boy, 2009, J}] \bigr\}
+  \Bigr)
+  \end{align*}
+  $$
+
+- [Estimation]{.highlight}: Can use regression with a triple interaction, cluster at unit level again (villages in the example).
+
+- [Intuition]{.note}: May eliminate time-varying confounding that is common across states (e.g., girls change more from grade 9 to 10 than boys).
+
+### Example: Cycling to School
+
+<br>
+
+![](../_images/muralidharan_prakash_2017.png){width="75%" fig-align="center"}
+
+### Extending DDD: Cycling to School
+
+<br>
+
+![](../_images/muralidharan_prakash_2017_2.png){width="75%" fig-align="center"}
+
+
+
+## Continuous Treatment
+
+### Continuous Treatment DID
+
+- Suppose a slightly cleaner and more generic DGP:
+
+  $$
+  Y_{it} = \alpha_i + \lambda_t + \tau G_i \times f(T_i) \times \text{Post}_t + \epsilon_{it},
+  $$
+
+  meaning we have a pure control group ($G_i = 0$).
+
+. . .
+
+- **Potential outcomes**: $Y_{it}(d)$ for dose $T_i = d$.
+
+- Revise the usual **parallel trend assumption** to identify the "level" _ATT_ effect:
+
+  $$
+  \E [Y_{i1}(0) - Y_{i0}(0) \given T_i = d] = \E [Y_{i1}(0) - Y_{i0}(0) \given T_i = 0],
+  $$
+
+  identifies $ATT(d) \equiv \E [Y_{i1}(d) - Y_{i0}(0) \given T_i = d]$.
+
+. . .
+
+- **Estimation**: First-difference regression with flexible specification for $T_{i}$:
+
+$$
+\Delta Y_i = \Delta \lambda + f(T_i) + \Delta \varepsilon_i.
+$$
+
+- @de2024difference use similar identifying assumption and an imputation-based estimator.
+
+
+## Summary
+
+### Takeaways
+
+<br><br>
+
+- [DiD]{.highlight}: An extremely popular strategy when there is longitudinal data (panel or repeated cross-sections) and the treatment is one-shot.
+
+- [Parallel Trends Assumption]{.highlight} = If the treatment group had not received the treatment in the second period, its outcome trend would have been the same as the trend of the outcome in the control group.
+  
+  - We can deal with time-invariant unmeasured confounding.
+
+- Always investigate the parallel trends assumption using pre-treatment data.
+
+. . .
+
+- We have focused on the basic DID design (the treatment is one-shot).
+
+- Next we will generalize this to Staggered Adoption Design:
+  
+  - Diﬀerent units can receive the treatment in diﬀerent time periods
 
 # Appendix {visibility="uncounted"}
 
