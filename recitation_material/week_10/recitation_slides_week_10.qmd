@@ -1,0 +1,139 @@
+---
+title: "Implementing Synthetic Control"
+author: "Alexander Dean"
+subtitle: "Recitation Period 10"
+institute: "Vanderbilt University"
+email: "alexander.r.dean@vanderbilt.edu"
+date: today
+execute:
+  embed-resources: true 
+format: 
+  revealjs:
+    theme: dark
+    footer: "Alexander Dean (Vanderbilt University)"
+    slide-number: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    self-contained-math: true
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+    code-fold: true
+fontsize: 32px
+editor: source
+---
+
+# Introductory Spiel
+
+## What We Will Cover Today
+
+1. What Synthetic Control is
+2. When you can use Synthetic Control (and when you can't)
+3. Listing some popular Synthetic Control Estimators
+4. Implementing the Synth package in R
+
+## What is Synthetic Control?
+
+1. A causal inference method for repeated panel observational data
+2. Allows the construction of the "counterfactual" measure for the unit(s) exposed to the intervention/treatment
+3. A quantitative approach to the traditional qualitative case comparison approach in comparative politics
+
+## Initial Intent of Synthetic Control
+1. "Synthetic control methods were originally proposed in Abadie and Gardeazabal (2003) and Abadie et al. (2010) with the aim to estimate the eﬀects of aggregate interventions, that is, interventions that are implemented at an aggregate level aﬀecting a small number of large units (such as a cities, regions, or countries), on some aggregate outcome of interest"- Abadie 2020
+2. Today, Synthetic control can be applied even with a large number of treated units
+
+# An Intuitive Example
+
+## Abadie & Gardeazabal 2003 (AG)
+
+- Let's consider the first use of Synthetic control:
+
+. . . 
+
+- AG ask "What is the economic effect of terrorism?"
+- Uses a case study of Basque nationalist terrorism in País Vasco in Spain
+- Ater outbreak of terrorism, per capita GDP in the Basque Country declined about 10 percentage points **relative to a synthetic control region without terrorism**.
+
+## How do we create the synthetic control region?
+
+- Synthetic control involves creating a "synthetic" Basque country, a Basque country which never experienced widespread terrorism
+- The nontreated units in the panel represent the "donor pool" from which we construct the counterfactual
+- Using weighting, some convex combination of the donor units will create the "close" synthetic counterfactual such that:
+    - Synth mirrors the pre-treatment outcomes of the treated unit
+    - Synth is similar in terms of observed covariates
+
+## Formalization
+
+- Suppose we have data for $J+1$ units: $1, 2, \dots, J, J+1$. Assume the first unit is treated $j=1$ and the set of potential comparisons are units $2, \dots, J, J+1$ that are untreated. The treated unit, unit $1$ becomes treated in some period t, where $t_{0} < t < t_{f}$.
+
+. . .
+
+- For each unit $j$, a set of $k$ predictors, $X_{1j}, \dots, X_{kj}$, that also include the pre-predictor values of $Y_{jt}$ are observed and unaffected by the intervention. The set is a vector for each unit that is represented by a $k \times j$ matrix, $\textbf{X}_{0} = [\textbf{X}_{2} \dots \textbf{X}_{J+1}]$
+
+. . . 
+
+- Finally, let $Y^{N}_{jt}$, the potential response without intervention, be some convex combination of matrix x and $Y_{jt}^{I}$ be the potential response with intervention. Thus, the effect of the intervention of interest in period t is:
+
+$\tau_{1t} = Y_{1t}^{I} - Y_{1t}^{N}$
+
+## Formulating $Y_{it}^{I}$
+
+- Let the synthetic control be a vector of $J \times 1$ weights, $\textbf{W} = (w_{2}, \dots, w_{J+1})^{'}$. Given these weights, the synthetic control estimator $Y^{N}_{1t}$ and $\tau_{1t}$ are:
+
+. . .
+
+- $\hat{Y}_{1t}^{N} = \Sigma_{j=2}^{J+1} w_{j} Y_{jt}$
+- $\hat{\tau}_{1t} = Y_{1t} - \hat{Y}^{N}_{1t}$,
+
+## Visualization of Weighting
+
+![Visualization of Setting Up the Weights](/synth_convex.png)
+
+## Assumptions & Requirements for Synthetic Control
+
+1. Some pre-treatment periods with data (aggregate data and sufficiant pre-intervention information)
+2. Some post-treatment periods with data (sufficiant post-intervention information)
+3. Size of the effect and volatility of the outcome
+4. Availability of a comparison group
+5. No anticipation
+6. No interference (SUTVA)
+7. Convex hull condition
+
+## Assorted Benefits of Using Synthetic Control
+
+- Abadie's 2020 review article lists 5 benefits of using Synthetic control
+
+. . .
+
+1. No extrapolation outside support of the data
+    - Weights non-negative and sum to one, unlike regression weights
+2. Transparency of the fitting of weights, unlike regression weights
+3. Safeguarding against specification searches
+4. Transparency of the counterfactual
+5. Sparsity 
+    - Makes interpreting the counterfactual more interpretable
+
+## A list of some popular Synthetic Control estimators
+
+- [synth](https://www.jstatsoft.org/article/view/v042i13)
+- [synthdid](https://www.aeaweb.org/articles?id=10.1257/aer.20190159)
+- [augsynth](https://stat.paperswithcode.com/paper/the-augmented-synthetic-control-method)
+- [gsynth](https://www.cambridge.org/core/journals/political-analysis/article/generalized-synthetic-control-method-causal-inference-with-interactive-fixed-effects-models/B63A8BD7C239DD4141C67DA10CD0E4F3)
+
+## Resources for learning and understanding
+
+- [Abadie (2020)](https://www.aeaweb.org/content/file?id=12409)
+- [Kasy (2022) lecture notes](https://maxkasy.github.io/home/files/teaching/Nonlineareconometrics_MIT_2022/synthetic_control_slides.pdf)
+- [Abadie & Gardeazabal 2003](https://pubs.aeaweb.org/doi/pdfplus/10.1257/000282803321455188)
+- [Wikipedia article on convex hulls for algorithms](https://en.wikipedia.org/wiki/Convex_hull_algorithms)
+- [Cunningham Texbook](https://mixtape.scunning.com/10-synthetic_control)
+- [Recent advances in Synthetic control](https://christinecai.github.io/PublicGoods/applied_micro_methods.pdf)
+
+## Implementation of Synthetic Control in R
+
+- Let's [move to R](https://github.com/gerasy1987/PSCI8357/tree/main/recitation_material/week_10) and look at an implementation
