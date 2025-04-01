@@ -894,7 +894,7 @@ ggplot(sims, aes(x = est, fill = factor(correct), color = factor(correct))) +
 - [Causal Estimand]{.highlight}:
 
   $$
-  \tau_{ATT} = \left\{ \mathbb{E}[Y_{i1}|G_i=1]- \mathbb{E}[Y_{i1}|G_i=0]\right\} - \left\{ \mathbb{E}[Y_{i0}|G_i=1]- \mathbb{E}[Y_{i0}|G_i=0] \right\}
+  \tau_{ATT} = \left\{ \E [Y_{i1}|G_i=1]- \E [Y_{i1}|G_i=0]\right\} - \left\{ \E [Y_{i0}|G_i=1]- \E [Y_{i0}|G_i=0] \right\}
   $$
 
 - [Plug-in estimator]{.highlight} (difference in difference-in-means):
@@ -916,7 +916,7 @@ ggplot(sims, aes(x = est, fill = factor(correct), color = factor(correct))) +
 
 - **Inference**: Standard errors from standard difference in means.
 
-### Example: Impact of Election Timing Effect
+### Example: Impact of Election Timing
 
 <br>
 
@@ -1256,7 +1256,7 @@ tibble(
   - Benefit over parallel trends: It is scale-free. i.e. it does not depend on absolute levels.
   - Equivalent to parallel trends if 
     $$
-    \mathbb{E}[Y_{i0} \mid G_i = 1] = \mathbb{E}[Y_{i0} \mid G_i = 0]
+    \E [Y_{i0} \given G_i = 1] = \E [Y_{i0} \given G_i = 0]
     $$
 
 . . .
@@ -1268,7 +1268,7 @@ tibble(
 
 ### DiD/LDV bracketing
 
-- **Estimator**: estimate CEF $\E[Y_{i1} \mid Y_{i0}, G_i] = \alpha + \rho Y_{i0} + \tau G_i$
+- **Estimator**: estimate CEF $\E[Y_{i1} \given Y_{i0}, G_i] = \alpha + \rho Y_{i0} + \tau G_i$
 
 $$
 \begin{align*}
@@ -1507,6 +1507,8 @@ bind_rows(out1, out2) |>
 #| fig-width: 12
 #| fig-height: 7
 
+pacman::p_load(fect)
+
 out.fect.p <- 
   anzia2012 |> 
   dplyr::filter(year >= 2005) |> 
@@ -1558,6 +1560,8 @@ anzia2012 |>
 
 ```
 
+## Sensitivity Analyses
+
 ### Sensitivity Analyses for Parallel Trends
 
 <br>
@@ -1577,12 +1581,60 @@ anzia2012 |>
 
   $$
   \begin{align*}
-  &\mathbb{E}[Y_{i1} (0) - Y_{i0} (0) \mid T_i = 1] - \mathbb{E}[Y_{i1} (0) - Y_{i0} (0) \mid G_i = 0] \\
-  &\quad = \phi \left( \mathbb{E}[Y_{i0} (0) - Y_{i,-1} (0) \mid G_i = 1] - \mathbb{E}[Y_{i0} (0) - Y_{i,-1} (0) \mid G_i = 0] \right),
+  &\E [Y_{i1} (0) - Y_{i0} (0) \given T_i = 1] - \E [Y_{i1} (0) - Y_{i0} (0) \given G_i = 0] \\
+  &\quad = \phi \left( \E [Y_{i0} (0) - Y_{i,-1} (0) \given G_i = 1] - \E [Y_{i0} (0) - Y_{i,-1} (0) \given G_i = 0] \right),
   \end{align*}
   $$
 
   with $\phi \in [-b, b]$.
+
+### Example: Impact of Election Timing
+
+```{r}
+#| label: sensitivity_fect
+#| echo: true
+#| eval: true
+#| output-location: column-fragment
+#| output: asis
+
+pacman::p_load_gh("lzy318/HonestDiDFEct")
+
+anzia2012 <-
+  readr::read_csv("../_data/anzia2012.csv") |>
+  dplyr::group_by(district) |>
+  dplyr::mutate(
+    group = as.numeric(any(oncycle == 1 & year == 2007))
+  ) |>
+  dplyr::ungroup()
+
+ests <-
+  estimatr::lm_robust(
+    lnavgsalary_cpi ~ group * factor(year),
+    fixed_effects = ~district,
+    data = anzia2012
+  )
+
+vcov.hat.p <- ests$vcov[7:12, 7:12]
+
+beta.hat.p <- unname(ests$coefficients[7:12])
+
+HonestDiDFEct::createSensitivityResults_relativeMagnitudes(
+  betahat = beta.hat.p,
+  sigma = vcov.hat.p,
+  numPrePeriods = 3,
+  numPostPeriods = 3,
+  l_vec = rep(1 / 3, 3),
+  Mbarvec = seq(0, 1, by = 0.1)
+) |>
+  dplyr::select(Mbar, lb, ub) |>
+  knitr::kable(
+    digits = 3,
+    align = "lcc",
+    caption = "Sensitivity Analysis "
+  ) |>
+  kableExtra::kable_minimal(font_size = 20)
+
+```
 
 ## Event Study (Post-Trends)
 
