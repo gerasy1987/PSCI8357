@@ -39,7 +39,7 @@ bibliography: ../_supp/psci8357.bib
 ---
 
 
-### {data-visibility="hidden"}
+### {data-visibility="uncounted"bility="hidden"}
 
 \(
   \def\E{{\mathbb{E}}}
@@ -1077,7 +1077,7 @@ rcs_estimate
 
   - Generally, "cluster robust" at the unit level, unless treatment is clustered at higher level.
 
-  - Recent contributions on DID inference with few groups in @mackinnon2018wild and @ferman2015inference.
+  - Recent contributions on DiD inference with few groups in @mackinnon2018wild and @ferman2015inference.
 
 ### Alternative Regression Estimator for RCS and Panel
 
@@ -1104,9 +1104,9 @@ rcs_estimate
 - If you are assuming [conditional parallel trends]{.highlight} instead, then
 
   :::incremental
-  1. **TWFE regression** that includes $X_{it} \times \text{Post}_k$ terms or first-differences ($\Delta Y_{i}$) regression that includes $X_i$’s.  
+  1. **TWFE regression** that includes $X_{it}$ (or $X_{it} \times \text{Post}_k$ interactions) terms or first-differences ($\Delta Y_{i}$) regression that includes $X_i$’s.  
     
-      - TWFE **must include interactions** with $\text{Post}_k$ (uninteracted $X_i$ will be partialled out by indiv. or group FEs).  
+      - TWFE that controls for baseline covariates **must include interactions** with $\text{Post}_k$ (uninteracted $X_i$ will be partialled out by indiv. or group FEs).  
       - Specification or aggregation biases are a problem (similar to classic OLS results).
 
   2. **Inverse-propensity score weighting** using $e(X_i)$ with respect to $T_i$.
@@ -1122,6 +1122,82 @@ rcs_estimate
   - Time-varying covariates ($\mathbf{X}_{it}$) should not include post-treatment variables!
 
 
+
+### Example: Impact of Election Timing
+
+<br>
+
+```{r}
+#| label: did_regression_panel
+#| echo: true
+#| eval: true
+#| output-location: column-fragment
+#| output: asis
+
+panel_interactive <-
+  estimatr::lm_robust(
+    lnavgsalary_cpi ~ group*year,
+    data = anzia2012,
+    se_type = "CR0",
+    cluster = district
+  )
+
+panel_twfe <-
+  estimatr::lm_robust(
+    lnavgsalary_cpi ~ group:year,
+    fixed_effects = ~ district + year,
+    data = anzia2012,
+    se_type = "CR0",
+    cluster = district
+  )
+
+panel_twfe2 <-
+  fixest::feols(
+    lnavgsalary_cpi ~ group:year | district + year,
+    data = anzia2012,
+    cluster = ~district
+  )
+
+panel_twfe_covars <-
+  fixest::feols(
+    lnavgsalary_cpi ~
+      group:year +
+        teachers_avg_yrs_exper +
+        ami_pc +
+        asian_pc +
+        black_pc +
+        hisp_pc |
+        district + year,
+    data = anzia2012,
+    cluster = ~district
+  )
+
+tibble(
+  type = c("plug-in", "interactive", "twfe (estimatr)", "twfe (fixest)", "twfe w/ covar's (fixest)"),
+  estimate = c(
+    panel_estimate,
+    panel_interactive$coefficients[[4]],
+    panel_twfe$coefficients[[1]],
+    panel_twfe2$coefficients[[1]],
+    panel_twfe_covars$coefficients[[6]]
+  ),
+  SE = c(
+    panel_se,
+    panel_interactive$std.error[[4]],
+    panel_twfe$std.error[[1]],
+    panel_twfe2$se[[1]],
+    panel_twfe_covars$se[[6]]
+  )
+) |>
+  knitr::kable(
+    digits = 4,
+    align = "lcc",
+    caption = "ATT Estimates of Effect of Recentralization"
+  ) |>
+  kableExtra::kable_minimal(font_size = 20)
+
+```
+
 ### Example: Impact of Recentralization
 
 <br>
@@ -1133,7 +1209,6 @@ rcs_estimate
 #| output-location: column-fragment
 #| output: asis
 
-# did repeated cross-section
 rcs_interactive <- 
   estimatr::lm_robust(
     vpost ~ treatment + post_treat + treatment*post_treat, 
@@ -1168,79 +1243,6 @@ tibble(
 
 ```
 
-### Example: Impact of Election Timing
-
-<br>
-
-```{r}
-#| label: did_regression_panel
-#| echo: true
-#| eval: true
-#| output-location: column-fragment
-#| output: asis
-
-# did repeated cross-section
-panel_interactive <-
-  estimatr::lm_robust(
-    lnavgsalary_cpi ~ group * I(year == 2007),
-    data = anzia2012,
-    cluster = district
-  )
-
-panel_twfe <-
-  estimatr::lm_robust(
-    lnavgsalary_cpi ~ group:year,
-    fixed_effects = ~ group + year,
-    data = anzia2012,
-    cluster = district
-  )
-
-panel_twfe2 <-
-  fixest::feols(
-    lnavgsalary_cpi ~ group:year | group + year,
-    data = anzia2012,
-    cluster = ~district
-  )
-
-panel_twfe_covars <-
-  fixest::feols(
-    lnavgsalary_cpi ~
-      group:year +
-        teachers_avg_yrs_exper +
-        ami_pc +
-        asian_pc +
-        black_pc +
-        hisp_pc |
-        group + year,
-    data = anzia2012,
-    cluster = ~district
-  )
-
-tibble(
-  type = c("plug-in", "interactive", "twfe (estimatr)", "twfe (fixest)", "twfe w/ covar's (fixest)"),
-  estimate = c(
-    panel_estimate,
-    panel_interactive$coefficients[[4]],
-    panel_twfe$coefficients[[1]],
-    panel_twfe2$coefficients[[1]],
-    panel_twfe_covars$coefficients[[6]]
-  ),
-  SE = c(
-    panel_se,
-    panel_interactive$std.error[[4]],
-    panel_twfe$std.error[[1]],
-    panel_twfe2$se[[1]],
-    panel_twfe_covars$se[[6]]
-  )
-) |>
-  knitr::kable(
-    digits = 4,
-    align = "lcc",
-    caption = "ATT Estimates of Effect of Recentralization"
-  ) |>
-  kableExtra::kable_minimal(font_size = 20)
-
-```
 
 ### DiD vs Lagged Dependent Variable
 
@@ -1285,7 +1287,7 @@ $$
 
 . . .
 
-- [Bracketing relationship]{.highlight}: @ding2019bracketing show that if either **parallel trends or LDV** assumption hold
+- [Bracketing relationship]{.highlight}: @ding2019bracketing show that if either **parallel trends or LDV** assumption hold (and if $G_i = 1$ distribution dominates)
 
   $$
   \E[\widehat{\tau}_{LDV}] \ge \tau_{ATT} \ge \E[\hat{\tau}_{DiD}]
@@ -1590,6 +1592,8 @@ anzia2012 |>
 
 ### Example: Impact of Election Timing
 
+<br>
+
 ```{r}
 #| label: sensitivity_fect
 #| echo: true
@@ -1786,6 +1790,454 @@ $$
 - Next we will generalize this to Staggered Adoption Design:
   
   - Diﬀerent units can receive the treatment in diﬀerent time periods
+
+# General Panel Data Analysis
+
+### Overview
+
+<br>
+
+- [Staggered Adoption (SA) Design]{.highlight}  
+  
+  - Units can receive the treatment in different time periods.
+  - [Note]{.note} Recently gained attention because scholars showed that the two-way fixed effects estimator is biased for the _ATT_ under the SA design.
+  - **Goal**: Understand estimand(s), identification and estimation
+
+. . .
+
+- [General Treatment Pattern]{.highlight} 
+  
+  - No specific pattern of the treatment assignment.
+  - **Goal**: Consider [TWFE]{.highlight} and [Sequential Ignorability]{.highlight} approaches
+
+. . .
+
+- [Synthetic Control Methods]{.highlight}
+  
+  - Estimate the causal effect on one treated unit.  
+  - **Goal**: Understand its central idea.
+
+## Staggered Adoption Design (DiD Fail?)
+
+### Example: Bargaining Rights and Size of the Government
+
+<br><br><br>
+
+- @paglayan2019public: Study relationship between public sector unions and the size of government
+
+  - **Treatment**: Introduction of collective bargaining rights for teachers across US.
+  - **Outcome**: Public educational expenditures. 
+  - **Results**: Collective bargaining rights to public sector unions do not lead to a significant increase in public spending and employment (!)
+
+### Data: Bargaining Rights and Size of the Government
+
+```{r}
+#| label: panelview_treat
+#| code-fold: true
+#| echo: true
+#| fig-align: center
+#| fig-width: 12
+#| fig-height: 6
+
+pacman::p_load(panelView)
+
+paglayan2019 <- 
+  readr::read_rds(file = "../_data/paglayan2019.rds") |> 
+  dplyr::filter(!(state %in% c("WI", "DC"))) |> 
+  dplyr::mutate(id_time = year,
+         id_subject = as.numeric(as.factor(state)),
+         log_expenditure = log(pupil_expenditure + 1),
+         log_salary      = log(teacher_salary + 1))
+
+panelView::panelview(
+  data = paglayan2019, log_salary ~ treatment, index = c("state", "year"),
+  xlab = "Year", ylab = "State", type = "treat", theme.bw = FALSE,
+  display.all = T, gridOff = TRUE, by.timing = TRUE, collapse.history = "TRUE", axis.lab.angle = 90
+  ) + custom_theme
+
+```
+
+### Data: Bargaining Rights and Size of the Government
+
+```{r}
+#| label: panelview_outcome
+#| code-fold: true
+#| echo: true
+#| fig-align: center
+#| fig-width: 11
+#| fig-height: 6
+
+panelView::panelview(
+  data = paglayan2019, log_salary ~ treatment, index = c("state", "year"),
+  xlab = "Year", ylab = "Log(Salary)", type = "outcome", theme.bw = FALSE,
+  display.all = T, gridOff = TRUE, by.timing = TRUE, color = c("lightblue", "blue", "#99999950"), 
+  axis.lab.angle = 90
+  ) + custom_theme
+
+
+```
+
+### Setup: SA Design
+
+- **Units can receive the treatment in different time periods.**
+- **Once units receive the treatment, they remain exposed to the treatment.**
+
+- Observe i.i.d samples of $N$ unique units at time $t = \{1, 2, \ldots, T\}$.
+- $T_{it}$: a binary treatment variable of unit $i$ at time $t$.
+
+. . .
+
+- **SA design property**: 
+  
+  - $\forall t > t^\prime$: If $T_{it^\prime} = 1$ then $T_{it} = 1$ 
+
+- We can summarize the information about the treatment assignment by the timing of the treatment: $G_i = \min \{t: T_{it} = 1\}.$  
+  
+  - When unit $i$ never receives the treatment, $G_i = \infty.$  
+  - $G_i$ defines a cohort (units with the same treatment history).
+
+- **Assumptions in the SA design**:  
+  
+  1. [No anticipation assumption]{.highlight}: Observe $Y_{it}(0)$ if $t < G_i$.  
+  2. [Invariance to history assumption]{.highlight}: Observe $Y_{it}(1)$ when $t \geq G_i$.  
+
+    $\rightsquigarrow$ We observe $Y_{it}(1)$ if $T_{it} = 1$ and $Y_{it}(0)$ if $T_{it} = 0$.
+
+### Causal Estimands
+
+- [Contemporaneous _ATT_]{.highlight}: The _ATT_ of the treatment at time $t$ on outcome at time $t$:  
+  $$
+  \tau(t) = \E [Y_{it}(1) - Y_{it}(0) \mid G_i = t].
+  $$
+
+- _Time-average contemporaneous ATT_:  
+  $$
+  \overline{\tau}^{\text{SA}} = \sum_{t=1}^T \tau(t) \ \frac{\sum_{i=1}^n \mathbb{1}\{G_i = t\}}{\sum_{i=1}^n \mathbb{1}\{G_i \leq T\}}.
+  $$
+
+. . .
+
+- [Long-term _ATT_]{.highlight}: The _ATT_ of the treatment at time $t$ on outcome at time $t+s$:  
+  $$
+  \tau(t, s) = \E [Y_{i,t+s}(1) - Y_{i,t+s}(0) \mid G_i = t].
+  $$
+
+  - [Note]{.note}: $\tau(t) = \tau(t, 0)$.
+
+- _Time-average long-term ATT_:  
+  $$
+  \overline{\tau}^{\text{SA}}(s) = \sum_{t=1}^{T-s} \tau(t, s) \ \frac{\sum_{i=1}^n \mathbb{1}\{G_i = t\}}{\sum_{i=1}^n \mathbb{1}\{G_i \leq T-s\}}.
+  $$
+
+### Visualization of SA Design
+
+<br><br><br>
+
+:::huge-font
+|           | **$t = 0$**        | **$t = 1$**        | **$t = 2$**        |
+|-------------------|:------------------:|:------------------:|:------------------:|
+| **Group $1$** | [0]{.green}              | [**1**]{.red} | [**1**]{.red} |
+| **Group $2$** | [0]{.green}              | [0]{.green}   | [**1**]{.red} |
+| **Group $\infty$** | [0]{.green}         | [0]{.green}   | [0]{.green}   |
+:::
+
+## Identification and Estimation
+
+### Contemporaneous ATT: Identification & Estimation
+
+- Identification and estimation work the same as the standard DiD!
+
+. . .
+
+- **Assumption**: [Parallel Trends at time $t$]{.highlight} 
+  $$
+  \E [Y_{it}(0) - Y_{i,t-1}(0) \mid G_i = t] = \E [Y_{it}(0) - Y_{i,t-1}(0) \mid G_i > t].
+  $$
+
+  - [Note]{.note}: We don't use "already-adopted groups" ($G_i < t$)!
+
+. . .
+
+- DiD Estimator for the [contemporaneous ATT at time $t$]{.highlight}:  
+  $$
+  \widehat{\tau}^{\text{SA}}(t) = \frac{1}{N_{1t}} \sum_{i=1}^N \mathbb{1}\{G_i = t\} (Y_{it} - Y_{i,t-1}) - \frac{1}{N_{0t}} \sum_{i=1}^N \mathbb{1}\{G_i > t\} (Y_{it} - Y_{i,t-1}),
+  $$
+
+  where $N_{1t} = \sum_{i=1}^N \mathbb{1}\{G_i = t\}$ and $N_{0t} = \sum_{i=1}^N \mathbb{1}\{G_i > t\}$.
+
+. . .
+
+- We can prove $\E (\widehat{\tau}^{\text{SA}}(t)) = \tau(t)$ under the parallel trends assumption.
+
+- To identify and estimate the **time-average contemporaneous ATT**, repeat the same estimators for each time period and average them.
+
+
+### Visualization of SA Design {data-visibility="uncounted"}
+
+<br><br><br>
+
+:::huge-font
+|           | **$t = 0$**        | **$t = 1$**        | **$t = 2$**        |
+|-------------------|:------------------:|:------------------:|:------------------:|
+| **Group $1$** | [0]{.green}              | [**1**]{.red} | [**1**]{.red} |
+| **Group $2$** | [0]{.green}              | [0]{.green}   | [**1**]{.red} |
+| **Group $\infty$** | [0]{.green}         | [0]{.green}   | [0]{.green}   |
+:::
+
+### Long-Term ATT: Identification & Estimation
+
+- In addition we might be interested in estimating the long-term effect.
+
+. . .
+
+- **Assumption**: [(long-term) Parallel Trends at time $t$]{.highlight}  
+  $$
+  \E [Y_{i,t+s}(0) - Y_{i,t-1}(0) \mid G_{i} = t] = \E [Y_{i,t+s}(0) - Y_{i,t-1}(0) \mid G_{i} > t+s].
+  $$
+
+  - [Note]{.note}: "Control" are units who don't receive the treatment until $t+s$.
+
+. . .
+
+- DiD Estimator for the [long-term ATT $\tau(t, s)$]{.highlight}:  
+  $$
+  \widehat{\tau}^{\text{SA}}(t, s) = \frac{1}{N_{1ts}} \sum_{i=1}^N \mathbb{1}\{G_{i} = t\} (Y_{i,t+s} - Y_{i,t-1}) - \frac{1}{N_{0ts}} \sum_{i=1}^N \mathbb{1}\{G_{i} > t+s\} (Y_{i,t+s} - Y_{i,t-1}),
+  $$
+  where $N_{1ts} = \sum_{i=1}^N \mathbb{1}\{G_{i} = t\}$ and $N_{0ts} = \sum_{i=1}^n \mathbb{1}\{G_{i} > t+s\}$.
+
+. . .
+
+- We can prove $\E (\widehat{\tau}^{\text{SA}}(t,s)) = \tau(t,s)$ under the parallel trends assumption.
+
+- To identify and estimate the _time-average_ long-term ATT, repeat the same estimators for each time period and average them.
+
+
+### Visualization of SA Design {data-visibility="uncounted"}
+
+<br><br><br>
+
+:::huge-font
+|           | **$t = 0$**        | **$t = 1$**        | **$t = 2$**        |
+|-------------------|:------------------:|:------------------:|:------------------:|
+| **Group $1$** | [0]{.green}              | [**1**]{.red} | [**1**]{.red} |
+| **Group $2$** | [0]{.green}              | [0]{.green}   | [**1**]{.red} |
+| **Group $\infty$** | [0]{.green}         | [0]{.green}   | [0]{.green}   |
+:::
+
+
+### Contemp-s _ATT_ Example: Bargaining Rights Effects
+
+<br>
+
+```{r}
+#| label: sa_contemporeneous
+#| echo: true
+#| eval: true
+#| output-location: fragment
+#| output: asis
+
+pacman::p_load(DIDdesign)
+
+# Contemporaneous Causal Effect
+fit_sa <-
+  DIDdesign::did(
+    formula = log_salary ~ treatment,
+    data = paglayan2019,
+    id_unit = "id_subject",
+    id_time = "id_time",
+    design = "sa",
+    option = list(n_boot = 200, parallel = TRUE, thres = 1, lead = 0)
+  )
+
+summary(fit_sa, estimator = "SA-DID") |> as_tibble() |> dplyr::select(1:4) |> 
+  knitr::kable(digits = 4, align = "lccccccc") |>
+  kableExtra::kable_minimal(font_size = 20)
+
+```
+
+### Long-Term ATT Example: Bargaining Rights Effects
+
+<br>
+
+```{r}
+#| label: sa_long_term
+#| echo: true
+#| eval: true
+#| output-location: fragment
+#| output: asis
+
+# Long-Term Causal Effects
+fit_sa_dyn <-
+  DIDdesign::did(
+    formula = log_salary ~ treatment,
+    data = paglayan2019,
+    id_unit = "id_subject",
+    id_time = "id_time",
+    design = "sa",
+    option = list(n_boot = 200, parallel = TRUE, thres = 1, lead = 0:4)
+  )
+
+summary(fit_sa_dyn, estimator = "SA-DID") |> as_tibble() |> dplyr::select(1:4) |>
+  knitr::kable(digits = 4, align = "lccccccc") |>
+  kableExtra::kable_minimal(font_size = 20)
+
+```
+
+## Two-Way Fixed Effects Under SA Design
+
+### Two-way Fixed Effects Estimator
+
+- Nonparametric DiD estimators are direct extensions of the basic DiD case, and they are transparent and easy to compute. 
+
+  - However, they could be less efficient.
+
+- The most popular approach is the [Two-Way Fixed Effects Estimator (TWFE)]{.highlight}:
+  $$
+  Y_{it} = \alpha_i + \gamma_t + \tau T_{it} + (\mathbf{X}_{it}^\top \gamma) + \epsilon_{it}
+  $$
+
+- The OLS coefficient can be estimated as (implemented by `plm`):
+  $$
+  (\hat{\tau}_{\text{SA}}, \widehat{\pmb{\alpha}}, \widehat{\pmb{\gamma}}) = \arg\min_{\tau, \pmb{\alpha}, \pmb{\gamma}} \frac{1}{T \ N} \sum_{t=1}^T \sum_{i=1}^N (Y_{it} - \alpha_i - \gamma_t - \tau T_{it})^2
+  $$
+
+- Angrist and Pischke (2008) refer to the two-way fixed effects estimator as the "generalized" difference-in-differences estimator.
+  - Equivalent under the basic DiD design (two groups and two time periods).
+
+- However, a series of recent papers reveal that the two-way fixed effects estimator is biased for the ATT when the treatment effects vary over time.
+
+### Unpacking Two-way Fixed Effects Estimator
+
+<br>
+
+- [The Main Intuition]{.highlight}:
+  
+  - The "valid" DiD estimator should compare:
+    - Units with $(T_{i,t-1}, T_{it}) = (0, 1)$ (a switcher from control to treatment).
+    - Units with $(T_{i,t-1}, T_{it}) = (0, 0)$ (stays in the control condition).
+
+  - TWFE includes the "invalid" DiD estimator, which compares:
+    - Units with $(T_{i,t-1}, T_{it}) = (0, 1)$ (a switcher from control to treatment).
+    - Units with $(T_{i,t-1}, T_{it}) = (1, 1)$ (stays in the treatment condition).
+
+. . .
+
+- Consider the very simple SA design with three time periods that we looked at before $t \in \{0, 1, 2\}$:
+  $$
+  \begin{cases}
+    G_i = 1 & \text{when } T_{i0} = 0, \ T_{i1} = 1, \ \text{and } T_{i2} = 1 \\
+    G_i = 2 & \text{when } T_{i0} = T_{i1} = 0, \ \text{and } T_{i2} = 1 \\
+    G_i = \infty & \text{when } T_{i0} = T_{i1} = T_{i2} = 0
+  \end{cases}
+  $$
+
+### @goodman2021difference: Three Groups under SA Design
+
+![](../_images/bacon_1.png){width="70%" fig-align="center"}
+
+- **Three groups**: 
+  - $k$ treated at $t^\star_k$ (or **Group $1$**),
+  - $\ell$ treated at $t^\star_\ell$ (or **Group $2$**),
+  - $U$ untreated (or **Group $\infty$**).
+
+### @goodman2021difference: Three Groups under SA Design
+
+![](../_images/bacon_2.png){width="70%" fig-align="center"}
+
+- Consider all of the $2 \times 2$ DiDs you could construct.  
+- 3 different ATT estimates (panels A–C), and then a fourth _inverse_ ATT (panel D).  
+- **Question**: How does TWFE relate to these effects?
+
+### Unpacking Two-way Fixed Effects Estimator (Continued)
+
+- [Goodman-Bacon Decomposition of the TWFE]{.highlight}:
+  $$
+  \begin{align*}
+  \widehat{\tau}_{\text{SA}} = \frac{1}{2} \Bigl\{ \omega_{1\infty} (\widehat{\text{DiD}}^{(1, \infty)}_{20} + \widehat{\text{DiD}}^{(1, \infty)}_{10}) &+ \omega_{2\infty} (\widehat{\text{DiD}}^{(2, \infty)}_{21} + \widehat{\text{DiD}}^{(2, \infty)}_{20}) \\
+  & \quad + \omega_{12} (\widehat{\text{DiD}}^{(1, 2)}_{10} \textcolor{#cc241d}{ - \widehat{\text{DiD}}^{(1, 2)}_{21}}) \Bigr\}
+  \end{align*}
+  $$
+
+  where:
+  
+  - each DiD estimator is defined as: $\widehat{\text{DiD}}^{(g, g^\prime)}_{tt^\prime} = (\overline{Y}_{gt} - \overline{Y}_{gt^\prime}) - (\overline{Y}_{g^\prime t} - \overline{Y}_{g^\prime t^\prime}).$
+  - $N_g = \sum_{i=1}^n \mathbb{1}\{G_i = g\}$: the number of units in each group.
+  - $\overline{Y}_{gt} = \sum_{i=1}^N \mathbb{1}\{G_i = g\} Y_{it} / N_g$: the average outcome of group $g$ at time $t$.
+
+. . .
+
+- Weights are proportional to treatment variance:
+$$
+\omega_{ab} = \frac{N_a N_b}{N_1 N_2 + N_1 N_\infty + N_2 N_\infty}.
+$$
+
+### Visualization of SA Design {data-visibility="uncounted"}
+
+<br><br><br>
+
+:::huge-font
+|           | **$t = 0$**        | **$t = 1$**        | **$t = 2$**        |
+|-------------------|:------------------:|:------------------:|:------------------:|
+| **Group $1$** | [0]{.green}              | [**1**]{.red} | [**1**]{.red} |
+| **Group $2$** | [0]{.green}              | [0]{.green}   | [**1**]{.red} |
+| **Group $\infty$** | [0]{.green}         | [0]{.green}   | [0]{.green}   |
+:::
+
+### Unpacking Two-way Fixed Effects Estimator
+
+- [Parallel Trends Assumption]{.highlight}:
+  
+  - The parallel trends assumption holds for *all* groups for all time periods:
+    
+    $$
+    \forall g,t: \: \E[Y_{it}(0) \mid G_i = g] - \E[Y_{i,t-1}(0) \mid G_i = g].
+    $$
+
+. . .
+
+- **Under the parallel trends assumption**:
+  $$
+  \begin{align*}
+  &\E(\widehat{\text{DiD}}^{(1, \infty)}_{20}) = \tau(1, 1), \quad \E(\widehat{\text{DiD}}^{(1, \infty)}_{10}) = \tau(1, 0), \\
+  &\E(\widehat{\text{DiD}}^{(2, \infty)}_{21}) = \tau(2, 0), \quad \E(\widehat{\text{DiD}}^{(2, \infty)}_{20}) = \tau(2, 0), \\
+  &\E(\widehat{\text{DiD}}^{(1, 2)}_{10}) = \tau(1, 0), \quad \E(\widehat{\text{DiD}}^{(1, 2)}_{21}) = \textcolor{#cc241d}{\{\tau(1, 1) - \tau(1, 0)\} - \tau(2, 0)}.
+  \end{align*}
+  $$
+
+- The expectation of the two-way fixed effects estimator:
+  $$
+  \E(\widehat{\tau}_{\text{SA}}) = (\omega_{1\infty}/2 + \omega_{12}) \times \tau(1, 0) + (\omega_{2\infty} + \omega_{12}/2) \times \tau(2, 0) + (\omega_{1\infty}/2 - \omega_{12}/2) \times \tau(1, 1).
+  $$
+
+. . .
+
+- [Intuition]{.note}: No bias when no treatment effect heterogeneity over time (i.e., $\tau(1, 1) = \tau(1, 0)$)
+
+### Two-way Fixed Effects with "Dynamic Specification"
+
+- One "partial" solution: Dynamic TWFE (Angrist and Pischke, 2008):
+  $$
+  \begin{align*}
+  Y_{it} = \alpha_i + \gamma_t &+ \sum_{s = 0}^S \tau_s \times \mathbb{1}\{s \text{ time after treatment}\}\\ 
+  &+ \widetilde{\tau}_{S} \times \mathbb{1}\{\text{more than } S \text{ time after treatment}\} + \epsilon_{it}.
+  \end{align*}
+  $$
+
+  where:
+
+  - Baseline category: not-yet treated ($G_i > t$).
+
+  - $\tau_0$ captures the contemporaneous effect.  
+  - $(\tau_1, \ldots, \tau_S)$ capture the long-term effect.  
+  - $\widetilde{\tau}_S$ captures the (very) long-term effect altogether.
+
+- $S$ determines how far post-treatment periods we want to examine.
+    
+    $\rightsquigarrow$ Relax the constant treatment effect assumption.
+
+- Note that Sun and Abraham (2021) show that this does not fully solve the treatment effect heterogeneity.
+  
+  - Only unbiased when the model is correctly specified.
 
 # Appendix {visibility="uncounted"}
 

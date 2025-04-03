@@ -19,6 +19,14 @@
   font-size: .8em;
 }
 
+.large-font {
+  font-size: 1.2em;
+}
+
+.huge-font {
+  font-size: 1.5em;
+}
+
 .highlight {
   color: #d65d0e;
   font-weight: bold;
