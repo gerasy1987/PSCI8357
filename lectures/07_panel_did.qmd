@@ -1656,7 +1656,9 @@ HonestDiDFEct::createSensitivityResults_relativeMagnitudes(
 
   where $\tau_k$ captures effect of $k$ periods of exposure.
 
-- Using pre- and post-trends $t = 0$ as reference period we can **evaluate parallel pre-trends**:
+. . .
+
+- Using pre-/post-trends and $t = 0$ as reference period we can simultaneously [evaluate parallel pre-trends]{.highlight}:
 
   $$
   Y_{it} = \alpha + \theta G_i + \sum_{j=-J}^{-1} \left( \rho_j \text{Pre}^{j}_{t} + \textcolor{#cc241d}{\pi_j} \ G_i \times \text{Pre}^{j}_{t} \right) + \sum_{k=1}^K \left( \phi_k \text{Post}^{k}_{t} + \textcolor{#cc241d}{\tau_k} \ G_i \times \text{Post}^{k}_{t} \right) + \varepsilon_{it}.
@@ -1664,7 +1666,7 @@ HonestDiDFEct::createSensitivityResults_relativeMagnitudes(
 
 . . .
 
-- [Note]{.note}: Using _only individual_ fixed effects is algebraically equivalent!
+- [Note]{.note}: Using _only unit_ fixed effects is algebraically equivalent!
 
 
 ## Triple (...) Differences 😵‍💫
@@ -1682,12 +1684,12 @@ HonestDiDFEct::createSensitivityResults_relativeMagnitudes(
 ::: {.columns}
 
 ::: {.column style="margin-top: 0em; width:60%;"}
-- @muralidharan2017cycling: Effects of Cycling to School on educational outcomes among girls in India
+- @muralidharan2017cycling: Effects of cycling to school on educational outcomes among girls in India
 
   - Reform: Only in Bihar in 2007, all girls aged 14/15 are given a free bicycle.
 
-  - **1st DID**: $G_i \in \{\text{girl, boy}\}$ and $T_i \in \{\text{2005, 2009}\}$ in Bihar.
-  - **2nd DID (placebo)**: $G_i \in \{\text{girl, boy}\}$ and $T_i \in \{\text{2005, 2009}\}$ in Jharkhand.
+  - **1st DiD**: $G_i \in \{\text{girl, boy}\}$ and $T_i \in \{\text{2005, 2009}\}$ in Bihar.
+  - **2nd DiD (placebo)**: $G_i \in \{\text{girl, boy}\}$ and $T_i \in \{\text{2005, 2009}\}$ in Jharkhand.
 :::
 
 ::: {.column style="margin-top: 2em; width:40%;"}
@@ -1736,21 +1738,21 @@ HonestDiDFEct::createSensitivityResults_relativeMagnitudes(
 
 ## Continuous Treatment
 
-### Continuous Treatment DID
+### Continuous Non-Linear Treatment DiD
 
-- Suppose a slightly cleaner and more generic DGP:
+- Suppose that treatment is continuous and (possibly) non-linear:
 
   $$
-  Y_{it} = \alpha_i + \lambda_t + \tau G_i \times f(T_i) \times \text{Post}_t + \epsilon_{it},
+  Y_{it} = \alpha_i + \lambda_t + \tau G_i \times \text{Post}_t \times f(T_it)  + \epsilon_{it},
   $$
 
-  meaning we have a pure control group ($G_i = 0$).
+  meaning we have pure control group ($G_i = 0$).
 
 . . .
 
 - **Potential outcomes**: $Y_{it}(d)$ for dose $T_i = d$.
 
-- Revise the usual **parallel trend assumption** to identify the "level" _ATT_ effect:
+- Revise the usual parallel trend assumption to identify [the "level" _ATT_ effect]{.highlight}:
 
   $$
   \E [Y_{i1}(0) - Y_{i0}(0) \given T_i = d] = \E [Y_{i1}(0) - Y_{i0}(0) \given T_i = 0],
@@ -1849,10 +1851,11 @@ paglayan2019 <-
          log_expenditure = log(pupil_expenditure + 1),
          log_salary      = log(teacher_salary + 1))
 
+p <- 
 panelView::panelview(
   data = paglayan2019, log_salary ~ treatment, index = c("state", "year"),
   xlab = "Year", ylab = "State", type = "treat", theme.bw = FALSE,
-  display.all = T, gridOff = TRUE, by.timing = TRUE, collapse.history = "TRUE", axis.lab.angle = 90
+  display.all = T, gridOff = TRUE, by.timing = TRUE, axis.lab.angle = 90
   ) + custom_theme
 
 ```
