@@ -1746,7 +1746,7 @@ HonestDiDFEct::createSensitivityResults_relativeMagnitudes(
 - Suppose that treatment is continuous and (possibly) non-linear:
 
   $$
-  Y_{it} = \alpha_i + \lambda_t + \tau G_i \times \text{Post}_t \times f(T_it)  + \epsilon_{it},
+  Y_{it} = \alpha_i + \lambda_t + \tau G_i \times \text{Post}_t \times f(T_it)  + \varepsilon_{it},
   $$
 
   meaning we have pure control group ($G_i = 0$).
@@ -2110,12 +2110,12 @@ summary(fit_sa_dyn, estimator = "SA-DID") |> as_tibble() |>
 
 - The most popular approach is the [Two-Way Fixed Effects Estimator (TWFE)]{.highlight}:
   $$
-  Y_{it} = \alpha_i + \gamma_t + \tau T_{it} + (\mathbf{X}_{it}^\prime \gamma) + \epsilon_{it}
+  Y_{it} = \alpha_i + \gamma_t + \tau T_{it} + (\mathbf{X}_{it}^\prime \beta)  + \varepsilon_{it}
   $$
 
-- The OLS coefficient can be estimated as (implemented by `plm`):
+- The OLS coefficient can be estimated as (implemented by `fixest`, `plm`, `estimatr`...):
   $$
-  (\hat{\tau}_{\text{SA}}, \widehat{\pmb{\alpha}}, \widehat{\pmb{\gamma}}) = \arg\min_{\tau, \pmb{\alpha}, \pmb{\gamma}} \frac{1}{T \ N} \sum_{t=1}^T \sum_{i=1}^N (Y_{it} - \alpha_i - \gamma_t - \tau T_{it})^2
+  (\hat{\tau}_{\text{SA}}, \widehat{\pmb{\alpha}}, \widehat{\pmb{\gamma}}, \widehat{\pmb{\beta}}) = \argmin_{\tau, \pmb{\alpha}, \pmb{\gamma}, \pmb{\beta}} \frac{1}{T \ N} \sum_{t=1}^T \sum_{i=1}^N (Y_{it} - \alpha_i - \gamma_t - \tau T_{it} - \mathbf{X}_{it}^\prime \beta)^2
   $$
 
 . . .
@@ -2124,7 +2124,14 @@ summary(fit_sa_dyn, estimator = "SA-DID") |> as_tibble() |>
   
   - [Note]{.highlight} Equivalent under the basic DiD design (two groups and two time periods).
 
-- [Problem]{.alert}: Recent work reveal that the TWFE estimator is biased for the ATT when the treatment effects vary over time.
+### TWFE Fail...
+
+- Recent work reveal that the TWFE estimator is **biased for the ATT when the treatment effects vary over time** $\rightsquigarrow$ Overwhelming number of new methods!
+
+<br>
+
+![](../_images/this_is_fine.jpg){width="75%" fig-align="center"}
+
 
 ### Unpacking TWFE Estimator
 
@@ -2145,15 +2152,11 @@ summary(fit_sa_dyn, estimator = "SA-DID") |> as_tibble() |>
 - Consider the very simple SA design with three time periods that we looked at before $t \in \{0, 1, 2\}$:
   $$
   \begin{cases}
-    G_i = 1 & \text{when } T_{i0} = 0, \ T_{i1} = 1, \ \text{and } T_{i2} = 1 \\
+    G_i = 1 & \text{when } T_{i0} = 0, \ \text{and } T_{i1} = T_{i2} = 1 \\
     G_i = 2 & \text{when } T_{i0} = T_{i1} = 0, \ \text{and } T_{i2} = 1 \\
     G_i = \infty & \text{when } T_{i0} = T_{i1} = T_{i2} = 0
   \end{cases}
   $$
-
-### @goodman2021difference to the Rescue
-
-![](../_images/bacon_meme.jpg){width="75%" fig-align="center"}
 
 ### @goodman2021difference: Three Groups under SA Design
 
@@ -2260,7 +2263,7 @@ $$
 
 . . .
 
-- [Intuition]{.note}: No bias when **no dynamic tretament effects** (no HTE over time, i.e., $\tau(1, 1) = \tau(1, 0)$). [**Returns ATT when no HTE at all!**]{.fragment}
+- [Intuition]{.note}: No bias when **no dynamic tretament effects** (no HTE over time, i.e., $\tau(1, 1) = \tau(1, 0)$). [**Moreover returns ATT when no HTE at all!**]{.fragment}
 
 ### GB Decomposition
 
@@ -2321,11 +2324,11 @@ ggplot(
 
 df_bacon |> 
   dplyr::group_by(type) |> 
-  dplyr::summarise(`Total Weight` = sum(weight), `Weighted Estimate` = sum(estimate*weight/sum(weight))) |> 
+  dplyr::summarise(`Total Weight` = sum(weight), `Weighted Estimate` = sum(estimate*weight/sum(weight)), `Number of 2x2 Comparisons` = n()) |> 
   dplyr::rename(Type = type) |> 
   knitr::kable(
     digits = 4,
-    align = "lcc",
+    align = "lccc",
     caption = "Estimates by Type of Comparison"
   ) |>
   kableExtra::kable_minimal(font_size = 20)
@@ -2338,7 +2341,7 @@ df_bacon |>
   $$
   \begin{align*}
   Y_{it} = \alpha_i + \gamma_t &+ \sum_{s = 0}^S \tau_s \times \mathbb{1}\{s \text{ time after treatment}\}\\ 
-  &+ \widetilde{\tau}_{S} \times \mathbb{1}\{\text{more than } S \text{ time after treatment}\} + \epsilon_{it}.
+  &+ \widetilde{\tau}_{S} \times \mathbb{1}\{\text{more than } S \text{ time after treatment}\} + \varepsilon_{it}.
   \end{align*}
   $$
 
@@ -2366,7 +2369,7 @@ df_bacon |>
   Y_{it} =& \alpha_i + \gamma_t + \sum_{s = 0}^S \tau_s \times \mathbb{1}\{s \ \text{time after treatment}\} \\
   &\qquad + \widetilde{\tau}_{S} \times \mathbb{1}\{\text{more than } S \ \text{time after treatment}\} \\
   &\qquad + \sum_{q = 1}^Q \delta_q \times \mathbb{1}\{q \ \text{time before treatment}\} \\
-  & + \mathbf{X}_{it}^\prime \gamma + \epsilon_{it}.
+  & + \mathbf{X}_{it}^\prime \beta + \varepsilon_{it}.
   \end{align*}
   $$
 
@@ -2378,9 +2381,9 @@ df_bacon |>
   
   - $(\delta_1, \ldots, \delta_Q)$ should be $0$ if the parallel trends assumption holds true.
 
-  - $\mathbf{X}_{it}^\prime \gamma$ adjusts for observed time-varying covariates.   (Do not include covariates affected by the treatment.)
+  - $\mathbf{X}_{it}^\prime \beta$ adjusts for observed time-varying covariates.   (Do not include covariates affected by the treatment.)
 
-### 
+### "Dynamic Specification" in Practice
 
 ```{r}
 #| label: dyn_twfe
@@ -2452,7 +2455,7 @@ twfe_est_dyn |>
 
 ### Practical Considerations
 
-<br>
+<br><br>
 
 - The two-way fixed effects estimator remains the base approach to analyze the SA designs.
 
@@ -2489,7 +2492,7 @@ twfe_est_dyn |>
 
 . . .
 
-- **Potential Outcome**: $Y_{it}(d)$ where $d \in \{0,1\}$.
+- **Potential Outcome**: $Y_{it}(t)$ where $t \in \{0,1\}$.
 - **Observed outcome**: $Y_{it} = Y_{it}(T_{it})$.
 
 . . .
@@ -2505,7 +2508,7 @@ twfe_est_dyn |>
 
 - **Identification + Modeling Assumption** are both parametric:
   $$
-  Y_{it}(d) = \alpha_i + \gamma_t + \tau d + \mathbf{X}_{it}^\prime \gamma + \epsilon_{it}
+  Y_{it}(d) = \alpha_i + \gamma_t + \tau d + \mathbf{X}_{it}^\prime \beta + \varepsilon_{it}
   $$
 
   - Under this assumption, the TWFE is consistent for the ATE.
@@ -2530,7 +2533,7 @@ twfe_est_dyn |>
 
 - **Identification Assumption**:
   
-  1. [Sequential Ignorability]{.highlight} (Robins, 1986):
+  1. [Sequential Ignorability]{.highlight} [@robins1986new]:
      $$
      \{Y_{it}(1), Y_{it}(0)\} \ \perp \!\!\!\! \perp \ T_{it} \ \given \ \mathbf{X}_{it} = \mathbf{x} \quad \text{for any } \mathbf{x}
      $$
@@ -2582,7 +2585,7 @@ twfe_est_dyn |>
 
 - **TWFE estimator**:
   - ✅ Can account for additive unmeasured time-invariant confounder.
-  - ❌ No simple non-parametric DID estimators to check the TFE.
+  - ❌ No simple non-parametric DiD estimators to check the TWFE.
   - ❌ Parallel trends assumption is hard to assess.
 
 - **Methodology based on the sequential ignorability**:
@@ -2594,6 +2597,7 @@ twfe_est_dyn |>
 - Recent Methodologies to use the parallel trends assumption:
   - @imai2023matching and [R]{.proglang} package `PanelMatch`.
   - @dechaisemartin2020two and [R]{.proglang} package `DIDmultiplegtDYN`.
+  - @chiu2023and and [R]{.proglang} package `fect`.
 
 - Many Methodologies to use the sequential ignorability:
   - @robins2000marginal
@@ -2798,7 +2802,7 @@ $$
 
 ### What to use?
 
-<br>
+<br><br>
 
 :::{.columns}
 :::{.column width="50%"}
