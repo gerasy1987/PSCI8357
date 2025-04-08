@@ -39,7 +39,7 @@ bibliography: ../_supp/psci8357.bib
 ---
 
 
-### {data-visibility="uncounted"bility="hidden"}
+### {data-visibility="hidden"}
 
 \(
   \def\E{{\mathbb{E}}}
@@ -68,9 +68,12 @@ pacman::p_load(
   pbapply,
   patchwork,
   MASS,
-  ggpubr
+  ggpubr,
+  thematic
   # rsample
 )
+
+pacman::p_load_gh("naoki-egami/DIDdesign")
 
 future::plan(multisession, workers = parallel::detectCores() - 2)
 
@@ -1843,20 +1846,31 @@ $$
 
 pacman::p_load(panelView)
 
-paglayan2019 <- 
-  readr::read_rds(file = "../_data/paglayan2019.rds") |> 
-  dplyr::filter(!(state %in% c("WI", "DC"))) |> 
-  dplyr::mutate(id_time = year,
-         id_subject = as.numeric(as.factor(state)),
-         log_expenditure = log(pupil_expenditure + 1),
-         log_salary      = log(teacher_salary + 1))
+paglayan2019 <-
+  readr::read_rds(file = "../_data/paglayan2019.rds") |>
+  dplyr::filter(!(state %in% c("WI", "DC"))) |>
+  dplyr::mutate(
+    id_time = year,
+    id_subject = as.numeric(as.factor(state)),
+    log_expenditure = log(pupil_expenditure + 1),
+    log_salary = log(teacher_salary + 1)
+  )
 
-p <- 
-panelView::panelview(
-  data = paglayan2019, log_salary ~ treatment, index = c("state", "year"),
-  xlab = "Year", ylab = "State", type = "treat", theme.bw = FALSE,
-  display.all = T, gridOff = TRUE, by.timing = TRUE, axis.lab.angle = 90
-  ) + custom_theme
+p <-
+  panelView::panelview(
+    data = paglayan2019,
+    log_salary ~ treatment,
+    index = c("state", "year"),
+    xlab = "Year",
+    ylab = "State",
+    type = "treat",
+    theme.bw = FALSE,
+    display.all = T,
+    gridOff = TRUE,
+    by.timing = TRUE,
+    axis.lab.angle = 90
+  ) +
+  custom_theme
 
 ```
 
@@ -1910,7 +1924,7 @@ panelView::panelview(
 
 - [Contemporaneous _ATT_]{.highlight}: The _ATT_ of the treatment at time $t$ on outcome at time $t$:  
   $$
-  \tau(t) = \E [Y_{it}(1) - Y_{it}(0) \mid G_i = t].
+  \tau(t) = \E [Y_{it}(1) - Y_{it}(0) \given G_i = t].
   $$
 
 - _Time-average contemporaneous ATT_:  
@@ -1922,7 +1936,7 @@ panelView::panelview(
 
 - [Long-term _ATT_]{.highlight}: The _ATT_ of the treatment at time $t$ on outcome at time $t+s$:  
   $$
-  \tau(t, s) = \E [Y_{i,t+s}(1) - Y_{i,t+s}(0) \mid G_i = t].
+  \tau(t, s) = \E [Y_{i,t+s}(1) - Y_{i,t+s}(0) \given G_i = t].
   $$
 
   - [Note]{.note}: $\tau(t) = \tau(t, 0)$.
@@ -1954,7 +1968,7 @@ panelView::panelview(
 
 - **Assumption**: [Parallel Trends at time $t$]{.highlight} 
   $$
-  \E [Y_{it}(0) - Y_{i,t-1}(0) \mid G_i = t] = \E [Y_{it}(0) - Y_{i,t-1}(0) \mid G_i > t].
+  \E [Y_{it}(0) - Y_{i,t-1}(0) \given G_i = t] = \E [Y_{it}(0) - Y_{i,t-1}(0) \given G_i > t].
   $$
 
   - [Note]{.note}: We don't use "already-adopted groups" ($G_i < t$)!
@@ -1995,7 +2009,7 @@ panelView::panelview(
 
 - **Assumption**: [(long-term) Parallel Trends at time $t$]{.highlight}  
   $$
-  \E [Y_{i,t+s}(0) - Y_{i,t-1}(0) \mid G_{i} = t] = \E [Y_{i,t+s}(0) - Y_{i,t-1}(0) \mid G_{i} > t+s].
+  \E [Y_{i,t+s}(0) - Y_{i,t-1}(0) \given G_{i} = t] = \E [Y_{i,t+s}(0) - Y_{i,t-1}(0) \given G_{i} > t+s].
   $$
 
   - [Note]{.note}: "Control" are units who don't receive the treatment until $t+s$.
@@ -2052,7 +2066,7 @@ fit_sa <-
     option = list(n_boot = 200, parallel = TRUE, thres = 1, lead = 0)
   )
 
-summary(fit_sa, estimator = "SA-DID") |> as_tibble() |> dplyr::select(1:4) |> 
+summary(fit_sa, estimator = "SA-DID") |> as_tibble() |> 
   knitr::kable(digits = 4, align = "lccccccc") |>
   kableExtra::kable_minimal(font_size = 20)
 
@@ -2080,7 +2094,7 @@ fit_sa_dyn <-
     option = list(n_boot = 200, parallel = TRUE, thres = 1, lead = 0:4)
   )
 
-summary(fit_sa_dyn, estimator = "SA-DID") |> as_tibble() |> dplyr::select(1:4) |>
+summary(fit_sa_dyn, estimator = "SA-DID") |> as_tibble() |> 
   knitr::kable(digits = 4, align = "lccccccc") |>
   kableExtra::kable_minimal(font_size = 20)
 
@@ -2090,13 +2104,13 @@ summary(fit_sa_dyn, estimator = "SA-DID") |> as_tibble() |> dplyr::select(1:4) |
 
 ### Two-way Fixed Effects Estimator
 
-- Nonparametric DiD estimators are direct extensions of the basic DiD case, and they are transparent and easy to compute. 
+- Nonparametric DiD estimators are transparent and easy to compute. [**However, they could be less efficient.**]{.fragment}
 
-  - However, they could be less efficient.
+. . .
 
 - The most popular approach is the [Two-Way Fixed Effects Estimator (TWFE)]{.highlight}:
   $$
-  Y_{it} = \alpha_i + \gamma_t + \tau T_{it} + (\mathbf{X}_{it}^\top \gamma) + \epsilon_{it}
+  Y_{it} = \alpha_i + \gamma_t + \tau T_{it} + (\mathbf{X}_{it}^\prime \gamma) + \epsilon_{it}
   $$
 
 - The OLS coefficient can be estimated as (implemented by `plm`):
@@ -2104,12 +2118,15 @@ summary(fit_sa_dyn, estimator = "SA-DID") |> as_tibble() |> dplyr::select(1:4) |
   (\hat{\tau}_{\text{SA}}, \widehat{\pmb{\alpha}}, \widehat{\pmb{\gamma}}) = \arg\min_{\tau, \pmb{\alpha}, \pmb{\gamma}} \frac{1}{T \ N} \sum_{t=1}^T \sum_{i=1}^N (Y_{it} - \alpha_i - \gamma_t - \tau T_{it})^2
   $$
 
-- Angrist and Pischke (2008) refer to the two-way fixed effects estimator as the "generalized" difference-in-differences estimator.
-  - Equivalent under the basic DiD design (two groups and two time periods).
+. . .
 
-- However, a series of recent papers reveal that the two-way fixed effects estimator is biased for the ATT when the treatment effects vary over time.
+- @angrist2009mostly refer to the TWFE estimator as the "generalized" difference-in-differences estimator.
+  
+  - [Note]{.highlight} Equivalent under the basic DiD design (two groups and two time periods).
 
-### Unpacking Two-way Fixed Effects Estimator
+- [Problem]{.alert}: Recent work reveal that the TWFE estimator is biased for the ATT when the treatment effects vary over time.
+
+### Unpacking TWFE Estimator
 
 <br>
 
@@ -2134,24 +2151,47 @@ summary(fit_sa_dyn, estimator = "SA-DID") |> as_tibble() |> dplyr::select(1:4) |
   \end{cases}
   $$
 
+### @goodman2021difference to the Rescue
+
+![](../_images/bacon_meme.jpg){width="75%" fig-align="center"}
+
 ### @goodman2021difference: Three Groups under SA Design
 
-![](../_images/bacon_1.png){width="70%" fig-align="center"}
+<br>
+
+::: {.columns}
+::: {.column width="50%"}
+![](../_images/bacon_1.png){width="90%" fig-align="center"}
+:::
+::: {.column width="50%"}
+
+<br>
+
+|           | **$t = 0$**        | **$t = 1$**        | **$t = 2$**        |
+|---------------------|:---------------:|:---------------:|:---------------:|
+| **Group $1$** | [0]{.green}              | [**1**]{.red} | [**1**]{.red} |
+| **Group $2$** | [0]{.green}              | [0]{.green}   | [**1**]{.red} |
+| **Group $\infty$** | [0]{.green}         | [0]{.green}   | [0]{.green}   |
+:::
+:::
 
 - **Three groups**: 
-  - $k$ treated at $t^\star_k$ (or **Group $1$**),
-  - $\ell$ treated at $t^\star_\ell$ (or **Group $2$**),
-  - $U$ untreated (or **Group $\infty$**).
+  - $k$ treated at $t^\star_k$ (or **Group $1$**); $\ell$ treated at $t^\star_\ell$ (or **Group $2$**); $U$ untreated (or **Group $\infty$**).
+
+. . .
+
+- What are all of the $2 \times 2$ DiDs you could construct?
 
 ### @goodman2021difference: Three Groups under SA Design
 
-![](../_images/bacon_2.png){width="70%" fig-align="center"}
+![](../_images/bacon_2.png){width="75%" fig-align="center"}
 
-- Consider all of the $2 \times 2$ DiDs you could construct.  
+. . .
+
 - 3 different ATT estimates (panels A–C), and then a fourth _inverse_ ATT (panel D).  
-- **Question**: How does TWFE relate to these effects?
+- **Question**: How does TWFE relate to these effects? [It's a weighted sum of these!]{.fragment .highlight}
 
-### Unpacking Two-way Fixed Effects Estimator (Continued)
+### Unpacking TWFE Estimator
 
 - [Goodman-Bacon Decomposition of the TWFE]{.highlight}:
   $$
@@ -2176,7 +2216,13 @@ $$
 
 ### Visualization of SA Design {data-visibility="uncounted"}
 
-<br><br><br>
+<br>
+
+$$
+\begin{align*}
+\widehat{\tau}_{\text{SA}} = \frac{1}{2} \Bigl\{ \omega_{1\infty} (\widehat{\text{DiD}}^{(1, \infty)}_{20} + \widehat{\text{DiD}}^{(1, \infty)}_{10}) + \omega_{2\infty} (\widehat{\text{DiD}}^{(2, \infty)}_{21} + \widehat{\text{DiD}}^{(2, \infty)}_{20}) + \omega_{12} (\widehat{\text{DiD}}^{(1, 2)}_{10} \textcolor{#cc241d}{ - \widehat{\text{DiD}}^{(1, 2)}_{21}}) \Bigr\}
+\end{align*}
+$$
 
 :::huge-font
 |           | **$t = 0$**        | **$t = 1$**        | **$t = 2$**        |
@@ -2186,14 +2232,14 @@ $$
 | **Group $\infty$** | [0]{.green}         | [0]{.green}   | [0]{.green}   |
 :::
 
-### Unpacking Two-way Fixed Effects Estimator
 
-- [Parallel Trends Assumption]{.highlight}:
-  
-  - The parallel trends assumption holds for *all* groups for all time periods:
+
+### Unpacking TWFE Estimator
+
+- [Parallel Trends Assumption]{.highlight} holds for *all* groups for all time periods:
     
     $$
-    \forall g,t: \: \E[Y_{it}(0) \mid G_i = g] - \E[Y_{i,t-1}(0) \mid G_i = g].
+    \forall g,t: \: \E[Y_{it}(0) \given G_i = g] - \E[Y_{i,t-1}(0) \given G_i = g].
     $$
 
 . . .
@@ -2214,11 +2260,81 @@ $$
 
 . . .
 
-- [Intuition]{.note}: No bias when no treatment effect heterogeneity over time (i.e., $\tau(1, 1) = \tau(1, 0)$)
+- [Intuition]{.note}: No bias when **no dynamic tretament effects** (no HTE over time, i.e., $\tau(1, 1) = \tau(1, 0)$). [**Returns ATT when no HTE at all!**]{.fragment}
 
-### Two-way Fixed Effects with "Dynamic Specification"
+### GB Decomposition
 
-- One "partial" solution: Dynamic TWFE (Angrist and Pischke, 2008):
+<br>
+
+```{r}
+#| label: bacon_decomp
+#| echo: true
+#| code-fold: true
+#| fig-align: center
+#| fig-width: 10
+#| fig-height: 7
+
+pacman::p_load(bacondecomp)
+
+df_bacon <- bacon(
+  log_salary ~ treatment,
+  data = paglayan2019,
+  id_var = "id_subject",
+  time_var = "id_time",
+  quietly = TRUE
+)
+
+base_twfe <-
+  fixest::feols(
+    fml = log_salary ~ treatment | id_subject + id_time,
+    data = paglayan2019,
+    cluster = "id_subject"
+  ) |>
+  broom::tidy()
+
+ggplot(
+  df_bacon,
+  aes(x = weight, y = estimate, shape = factor(type), color = factor(type))
+) +
+  geom_hline(
+    yintercept = base_twfe$estimate[[1]],
+    color = "#cc241d",
+    linetype = "dashed"
+  ) +
+  labs(x = "Weight", y = "Estimate", shape = "Type", color = 'Type') +
+  geom_point() +
+  theme_bw(base_size = 20) +
+  custom_theme
+```
+
+
+### GB Decomposition: Which One is "Invalid"?
+
+<br><br>
+
+```{r}
+#| label: bacon_decomp_comparisons
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| output-location: fragment
+
+df_bacon |> 
+  dplyr::group_by(type) |> 
+  dplyr::summarise(`Total Weight` = sum(weight), `Weighted Estimate` = sum(estimate*weight/sum(weight))) |> 
+  dplyr::rename(Type = type) |> 
+  knitr::kable(
+    digits = 4,
+    align = "lcc",
+    caption = "Estimates by Type of Comparison"
+  ) |>
+  kableExtra::kable_minimal(font_size = 20)
+
+```
+
+### Addressing HTE: "Dynamic Specification"
+
+- One "partial" solution: Dynamic TWFE [@angrist2009mostly]:
   $$
   \begin{align*}
   Y_{it} = \alpha_i + \gamma_t &+ \sum_{s = 0}^S \tau_s \times \mathbb{1}\{s \text{ time after treatment}\}\\ 
@@ -2228,19 +2344,506 @@ $$
 
   where:
 
-  - Baseline category: not-yet treated ($G_i > t$).
+  - **Baseline category**: not-yet treated ($G_i > t$).
 
-  - $\tau_0$ captures the contemporaneous effect.  
-  - $(\tau_1, \ldots, \tau_S)$ capture the long-term effect.  
-  - $\widetilde{\tau}_S$ captures the (very) long-term effect altogether.
+  - $\tau_0$ captures the contemporaneous effect; $(\tau_1, \ldots, \tau_S)$ capture the long-term effect; $\widetilde{\tau}_S$ captures the (very) long-term effect altogether.
 
-- $S$ determines how far post-treatment periods we want to examine.
-    
-    $\rightsquigarrow$ Relax the constant treatment effect assumption.
+. . .
 
-- Note that Sun and Abraham (2021) show that this does not fully solve the treatment effect heterogeneity.
+- $S$ determines how far post-treatment periods we want to examine $\rightsquigarrow$ Relaxation of the **constant treatment effect assumption**.
+
+- [Note]{.note} Does not fully solve the treatment effect heterogeneity [@sun2021estimating].
   
-  - Only unbiased when the model is correctly specified.
+- Only unbiased when the model is correctly specified.
+
+
+### "Dynamic Specification" in Practice
+
+- [Dynamic TWFE with leads and lags]{.highlight} [@angrist2009mostly]:  
+    
+  $$
+  \begin{align*}
+  Y_{it} =& \alpha_i + \gamma_t + \sum_{s = 0}^S \tau_s \times \mathbb{1}\{s \ \text{time after treatment}\} \\
+  &\qquad + \widetilde{\tau}_{S} \times \mathbb{1}\{\text{more than } S \ \text{time after treatment}\} \\
+  &\qquad + \sum_{q = 1}^Q \delta_q \times \mathbb{1}\{q \ \text{time before treatment}\} \\
+  & + \mathbf{X}_{it}^\prime \gamma + \epsilon_{it}.
+  \end{align*}
+  $$
+
+  where:
+
+  - **Baseline category**: Units not yet treated at time $t + Q$.
+
+  - $(\tau_0, \ldots, \tau_S, \widetilde{\tau}_S)$ same as before; 
+  
+  - $(\delta_1, \ldots, \delta_Q)$ should be $0$ if the parallel trends assumption holds true.
+
+  - $\mathbf{X}_{it}^\prime \gamma$ adjusts for observed time-varying covariates.   (Do not include covariates affected by the treatment.)
+
+### 
+
+```{r}
+#| label: dyn_twfe
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| output-location: fragment
+
+paglayan2019_use <- 
+  fect::get.cohort(as.data.frame(paglayan2019), D = "treatment", index=c("id_subject","id_time")) |> 
+  dplyr::mutate(
+    Time_to_Treatment = if_else(is.na(Time_to_Treatment), 0, Time_to_Treatment),
+    time_since_treat = if_else(Time_to_Treatment > 5, 5, Time_to_Treatment)
+  ) |> 
+  fastDummies::dummy_cols(select_columns = c("time_since_treat")) |> 
+  as_tibble()
+
+twfe_est_dyn <- 
+  fixest::feols(
+    log_salary ~ 
+    `time_since_treat_-5` + `time_since_treat_-4` + 
+    `time_since_treat_-3` + `time_since_treat_-2` + `time_since_treat_-1` +
+    time_since_treat_0 + time_since_treat_1 + 
+    time_since_treat_2 + time_since_treat_3 + time_since_treat_4 + time_since_treat_5 | 
+    id_subject + id_time, 
+                  data = paglayan2019_use, cluster = "id_subject")
+
+twfe_est_dyn |>
+  broom::tidy() |> 
+  dplyr::mutate(term = as.numeric(gsub("`|time_since_treat_", "", term))) |> 
+  dplyr::rename("time since treat" = term) |> 
+  knitr::kable(
+    digits = 4,
+    align = "lcccc",
+    caption = "Dynamic TWFE Estimates"
+  ) |>
+  kableExtra::kable_minimal(font_size = 20)
+```
+
+### Addressing HTE: Event-by-Event Estimation
+
+![](../_images/bacon_3.png){width="70%" fig-align="center"}
+
+@cengiz2019effect [also @dechaisemartin2020two; @sun2021estimating]:
+
+- Define the "clean event" DiDs in your data (i.e., ones that don’t use already-treated observations as controls).
+
+  - E.g. use the DiD estimates for each event in which a cohort enters into treatment:  
+
+- Take the treated-observation-weighted average.
+
+. . .
+
+- Can also estimate using first-differences [@dube2023local].
+
+### Addressing HTE: Stacked DiD [@cengiz2019effect]
+
+<br><br><br><br>
+
+![](../_images/stackedDID.png){width="70%" fig-align="center"}
+
+### @chiu2023and
+
+![](../_images/chiuetal2025.png){width="80%" fig-align="center"}
+
+### @chiu2023and
+
+![](../_images/chiuetal2025_2.png){width="80%" fig-align="center"}
+
+### Practical Considerations
+
+<br>
+
+- The two-way fixed effects estimator remains the base approach to analyze the SA designs.
+
+. . .
+
+- To investigate robustness to treatment effect heterogeneity:
+
+  1. Estimate the dynamic TWFE and check whether there exists significant treatment effect variation over time.
+
+  2. Estimate nonparametric DiD estimators for the SA design (e.g., using the [R]{.proglang} package `DIDdesign`) and assess whether substantive results from the TWFE and nonparametric DiD differ.
+
+. . .
+
+- If you find significant treatment effect variation over time or observe different results from the nonparametric DiD estimator, consider using recent HTE-robust estimators!
+
+
+# General Treatment Patterns
+
+### Setup: General Treatment Pattern
+
+- In the general treatment regime, there is no clear pattern of the treatment.
+- Units can go in and out of the treatment condition at different time points.
+
+. . .
+
+- Observe i.i.d samples of $n$ unique units.
+- Observe the same $n$ units at time $t = \{1, 2, \ldots, T\}$.
+- $T_{it}$: a binary treatment variable of unit $i$ at time $t$.
+
+. . .
+
+- General Treatment (no pattern), e.g., $T_{i1} = 1, T_{i2} = 0, T_{i3} = 0, T_{i4} = 1$.
+- Unlike SA ($T_{i1} = 0, T_{i2} = 0, T_{i3} = 1, T_{i4} = 1$).
+
+. . .
+
+- **Potential Outcome**: $Y_{it}(d)$ where $d \in \{0,1\}$.
+- **Observed outcome**: $Y_{it} = Y_{it}(T_{it})$.
+
+. . .
+
+- **Causal Estimand**: the Average Treatment Effect at time $t$:
+  $$
+  \tau(t) = \mathbb{E}\{Y_{it}(1) - Y_{it}(0)\}
+  $$
+
+### Approach 1: TWFE Again
+
+- Two-way fixed effects estimator (TWFE) is popular approach still
+
+- **Identification + Modeling Assumption** are both parametric:
+  $$
+  Y_{it}(d) = \alpha_i + \gamma_t + \tau d + \mathbf{X}_{it}^\prime \gamma + \epsilon_{it}
+  $$
+
+  - Under this assumption, the TWFE is consistent for the ATE.
+
+  - **Advantage**: Can account for additive unmeasured time-invariant confounder.
+
+  - **Disadvantage**: Identification relies on the parametric assumption.
+
+. . . 
+
+- **Problem 1**: [Treatment Effect Heterogeneity (HTE)]{.highlight}
+  - Treatment effect heterogeneity $\rightsquigarrow$ the TWFE is biased for the ATE.
+  - Similar to the SA design case.
+
+- **Problem 2**: [Assume away Treatment and Outcome Feedback]{.highlight}
+  - Past outcomes cannot affect the current treatment.
+  - This violation of the parallel trends assumption is common.
+
+### Approach 2: Sequential Ignorability (SI)
+
+- Extend LDV model to the panel data setting.
+
+- **Identification Assumption**:
+  
+  1. [Sequential Ignorability]{.highlight} (Robins, 1986):
+     $$
+     \{Y_{it}(1), Y_{it}(0)\} \ \perp \!\!\!\! \perp \ T_{it} \ \given \ \mathbf{X}_{it} = \mathbf{x} \quad \text{for any } \mathbf{x}
+     $$
+
+  2. [Positivity]{.highlight}:
+     $$
+     0 < \Pr(T_{it} = 1 \given \mathbf{X}_{it} = \mathbf{x}) < 1 \quad \text{for any } \mathbf{x}
+     $$
+
+- Importantly, $\mathbf{X}_{it}$ can include _any_ pre-treatment covariates, such as:
+  
+  - Past outcomes ($Y_{i, t-1}, Y_{i, t-2}, \ldots$).
+  - Past treatments ($T_{i, t-1}, T_{i, t-2}, \ldots$).
+  - Time fixed effects (dummy variables for time periods) but no unit fixed effects.
+
+. . .
+
+- **Advantage**: Allow for any feedback between the outcome and the treatment.
+
+- **Disadvantage**: Does not allow for any unmeasured confounder.
+
+### Identification and Estimation under SI
+
+<br>
+
+- **Identification**: Under the assumptions on the last slide
+  $$
+  \begin{align*}
+  \tau(t) = \int_{\mathcal{X}} \{\E (Y_{it} \given T_{it} = 1, \mathbf{X}_{it} = \mathbf{x}) - \E (Y_{it} \given T_{it} = 0, \mathbf{X}_{it} = \mathbf{x})\} f(\mathbf{x}) d\mathbf{x}
+  = \E _{\mathbf{X}}\{\mu_1(\mathbf{X}_{it}) - \mu_0(\mathbf{X}_{it})\}
+  \end{align*}
+  $$
+
+  where $\mu_t(\mathbf{x}) = \E (Y_{it} \given T_{it} = t, \mathbf{X}_{it} = \mathbf{x})$ for $t=0,1$.
+
+
+- **Estimation**:
+  - Essentially the same as "Regression in Observational Studies."
+  - Choose a model for $\E (Y_{it} \given T_{it} = t, \mathbf{X}_{it} = \mathbf{x})$.
+
+- [Example]{.highlight}: Linear Model with OLS
+  $$
+  \E (Y_{it} \given T_{it} = t, \mathbf{X}_{it} = \mathbf{x}) = \alpha + \tau T_{it} + \mathbf{X}_i^\prime \gamma
+  $$
+
+  - Cluster standard errors at the unit level.
+
+### Practical Consideration + Extensions
+
+- **TWFE estimator**:
+  - ✅ Can account for additive unmeasured time-invariant confounder.
+  - ❌ No simple non-parametric DID estimators to check the TFE.
+  - ❌ Parallel trends assumption is hard to assess.
+
+- **Methodology based on the sequential ignorability**:
+  - ✅ We can allow for any feedback between outcome and treatment.
+  - ❌ Assume no unmeasured confounding.
+
+. . .
+
+- Recent Methodologies to use the parallel trends assumption:
+  - @imai2023matching and [R]{.proglang} package `PanelMatch`.
+  - @dechaisemartin2020two and [R]{.proglang} package `DIDmultiplegtDYN`.
+
+- Many Methodologies to use the sequential ignorability:
+  - @robins2000marginal
+  - @blackwell2018make
+
+# Synthetic Control Method
+
+### Setup
+
+<br>
+
+- Suppose that we observe $J+1$ units in periods $1, ..., T_0, ..., T$.
+- Treatment kicks in for unit 1 at time $T_0$.
+- The unit remains exposed to the treatment thereafter.
+- The other $J$ units do not receive the treatment throughout the study period.
+
+- **Treatment Variable**:
+
+  - $T_{1t} = 1$ if $t \geq T_0$ and $T_{1t} = 0$ if $t < T_0$.
+  - $T_{it} = 0$ for all other units $i \in \{2, \ldots, J+1\}$ and $t \in \{1, \ldots, T\}$.
+
+- **Potential outcome**: $Y_{it}(d)$.
+- **Causal Estimand**: Treatment effect on unit $1$ at time $T_0+1, \ldots, T$ (special case of ATT):
+  $$
+  \tau_{1t} \ \equiv \ Y_{1t}(1) - Y_{1t}(0) = Y_{1t} - \textcolor{#cc241d}{Y_{1t}(0)} \quad \text{for} \quad t > T_{0}.
+  $$
+
+### Example: California's Proposition 99
+
+<br><br>
+
+- @abadie2010synthetic: Comprehensive tobacco control legislation in California (1988)
+
+  - Increased cigarette tax by 25 cents/pack.
+  - Earmarked tax revenues to health and anti-smoking budgets.
+  - Funded anti-smoking media campaigns.
+  - Spurred clean-air ordinances throughout the state.
+  - Produced more than \$100 million per year in anti-tobacco projects.
+
+. . .
+
+- Donor Pool
+
+  - Other states that subsequently passed control programs are excluded from the donor pool of controls (AK, AZ, FL, HA, MA, MD, MI, NJ, NY, OR, WA, DC).
+
+
+### Cigarette Consumption: CA & the Rest of the U.S.
+
+![](../_images/ca1.png){width="75%" fig-align="center"}
+
+### Estimation of Treatment Effect
+
+- $\mathbf{W} = (w_2,\ldots, w_{J+1})^\prime$: Synthetic weights for the control units.
+  - $w_i \geq 0$ for $i \in \{2,...,J+1\}$ and $\sum_{i=2}^{J+1} w_i = 1$.
+  - Each value of $\mathbf{W}$ represents a possible synthetic control.
+
+. . .
+
+
+- **Optimisation problem**: Choose synthetic weights $\mathbf{W}^*$ approximately such that:
+  
+$$
+\sum_{j=2}^{J+1} w^*_j X_{j1} = X_{11},\ \cdots \ ,\ \sum_{j=2}^{J+1} w^*_j X_{jR} = X_{1R}, \quad \sum_{j=2}^{J+1} w^*_j Y_{j1} = Y_{11},\ \cdots\ ,\ \sum_{j=2}^{J+1} w^*_j Y_{jT_0} = Y_{1T_0}.
+$$
+
+  where $(Y_{i1}, \ldots, Y_{iT_0})$ are $T_0$ observed pre-treatment outcomes; $(X_{i1}, \ldots, X_{iR})$ are $R$ observed pre-treatment covariates.
+
+. . .
+
+- Then an approximately unbiased estimator of $\tau_{1t}$ is:
+  $$
+  \widehat \tau_{1t} \ = \ Y_{1t} - \sum_{j=2}^{J+1} w^*_j Y_{jt} \quad \text{for} \quad t \in \{T_0+1,\ldots ,T\}.
+  $$
+
+
+### Constructing Synthetic Weights
+
+<br>
+
+- Let $\mathbf{V}_1 = (X_{11}, ..., X_{1R}, Y_{11}, ..., Y_{1T_0})^\prime$ be a $p$-dimensional vector of pre-intervention characteristics where $p = R + T_0$.
+
+- $\mathbf{V}_0$ is a $(p \times J)$ matrix of the same variables for the control units.
+
+. . .
+
+- $\mathbf{W}$ is chosen to minimize $\|\mathbf{V}_1 - \mathbf{V}_0 \mathbf{W}\|$, subject to constraints:
+  - $w_i \geq 0$ for $i \in \{2,...,J+1\}$ and $\sum_{i=2}^{J+1} w_i = 1$.
+- Use $\|\mathbf{V}_1 - \mathbf{V}_0 \mathbf{W}\| = \sqrt{(\mathbf{V}_1 - \mathbf{V}_0 \mathbf{W})^\prime \Sigma (\mathbf{V}_1 - \mathbf{V}_0 \mathbf{W})}$, where $\Sigma$ is some $(p \times p)$ symmetric and positive semidefinite matrix.
+
+. . .
+
+- Choose $\Sigma$ to minimize the MSPE for the pre-treatment outcomes for the treated unit:
+  $$
+  MSPE \ = \ \frac{1}{T_0}\sum_{t=1}^{T_0}\left(Y_{1t} - \sum_{j=2}^{J+1}w_j^\ast Y_{jt}\right)^2.
+  $$
+
+
+
+### Cigarette Consumption: CA & the Rest of the U.S.
+
+![](../_images/ca1.png){width="75%" fig-align="center"}
+
+
+### Cigarette Consumption: CA and Synthetic CA
+
+![](../_images/ca2.png){width="75%" fig-align="center"}
+
+
+### Synthetic Weights
+
+![](../_images/ca9.png){width="60%" fig-align="center"}
+
+
+### Predictor Means: Actual vs. Synthetic California
+
+<br><br>
+
+
+| Variables                     | Real          | Synthetic     | Average of 38 control states |
+|-------------------------------|:-------------:|:-------------:|:-------------:|
+| Ln(GDP per capita)            | 10.08  | 9.86      | 9.86                         |
+| Percent aged 15-24            | 17.40  | 17.40     | 17.29                        |
+| Retail price                  | 89.42  | 89.41     | 87.27                        |
+| Beer consumption per capita   | 24.28  | 24.20     | 23.75                        |
+| Cigarette sales per capita 1988 | 90.10 | 91.62     | 114.20                       |
+| Cigarette sales per capita 1980 | 120.20 | 120.43   | 136.58                       |
+| Cigarette sales per capita 1975 | 127.10 | 126.99   | 132.81                       |
+
+
+
+### Smoking Gap Between CA and Synthetic CA
+
+![](../_images/ca3.png){width="75%" fig-align="center"}
+
+
+
+### Inference
+
+<br>
+
+- [Permutation (Fisher) Inference]{.highlight}
+
+  - If there was no treatment effect, how unusual would the observed treatment effect be compared to its sampling distribution?
+
+. . .
+
+- **Check 1**: Use Control Units as if Treated Units
+
+  - Iteratively apply the synthetic method to each control unit and obtain a distribution of "placebo effects."
+  - Compare the gap for California to the distribution of the placebo gaps.
+
+- **Check 2**: Use Placebo Treatment Timing
+
+  - Apply the synthetic control method to the placebo treatment timing (prior to the true treatment timing).
+  - Check whether the synthetic control is similar to the treated unit until the actual treatment timing.
+
+### Smoking Gap for CA and 38 Control States
+
+![](../_images/ca4.png){width="75%" fig-align="center"}
+
+### Smoking Gap for CA and 34 Control States {data-visibility="uncounted"}
+
+![](../_images/ca5.png){width="75%" fig-align="center"}
+
+
+### Smoking Gap for CA and 29 Control States {data-visibility="uncounted"}
+
+![](../_images/ca6.png){width="75%" fig-align="center"}
+
+
+### Smoking Gap for CA and 19 Control States {data-visibility="uncounted"}
+
+![](../_images/ca7.png){width="75%" fig-align="center"}
+
+
+### Ratio Post-Prop. 99 MSPE to Pre-Prop. 99 MSPE
+
+![](../_images/ca8.png){width="75%" fig-align="center"}
+
+### Extensions
+
+<br><br>
+
+- The synthetic control method was developed for comparative case studies  
+  
+  - Core feature: One or few treated unit.
+  - See @abadie2021using and replication materials for @abadie2015comparative.
+
+. . .
+
+- Many scholars are extending it now:  
+  
+  1. **Extension to the SA design**  
+    
+      - @xu2017generalized: Generalized SC and [R]{.proglang} package `fect`.
+      - @ben2022synthetic: Augmented SC and [R]{.proglang} package `augsynth`.  
+      - @arkhangelsky2021synthetic: DiD + Synthetic Controls and [R]{.proglang} package `synthdid`.
+
+  2. **Understand Assumptions behind SCM: @doudchenko2016balancing, @bottmer2024design
+
+## Summary
+
+### What to use?
+
+<br>
+
+:::{.columns}
+:::{.column width="50%"}
+
+- [Classic DID/TWFE]{.highlight}
+  
+  :::small-font
+  - Single treatment cohort  
+  - Parallel trends (potentially conditionally)
+  - Control trends don't overlap treated trend
+  - Short pretrend data
+  :::
+
+- [Classic Synth]{.highlight}
+  
+  :::small-font
+  - Single treatment unit  
+  - Unweighted trends not necessarily parallel  
+  - Control trends overlap treated trend  
+  - Long pretrend data
+  :::
+
+:::
+::: {.column width="50%"}
+
+- [SA and HTE-robust methods]{.highlight}
+  
+  :::small-font
+  - Multiple cohorts receiving treatment at different times  
+  - Parallel trends (potentially conditionally)  
+  - Control trends don't overlap treated trend  
+  - Short pretrend data
+  :::
+
+- [Interactive FE Imputation Methods]{.highlight}
+  
+  :::small-font
+  - Multiple treated units, possibly at different times  
+  - Control trends overlap treated trends  
+  - Long pretrend data
+  :::
+
+:::
+:::
+
 
 # Appendix {visibility="uncounted"}
 
