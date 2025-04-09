@@ -53,7 +53,7 @@ pacman::p_load(tidyverse, haven)
 
 ## Guidelines
 
-- Please upload your answers to Brightspace by **Thursday, April 15th, at 11:59 PM**.
+- Please upload your answers to Brightspace by **Tuesday, April 15th, at 11:59 PM**.
 
 - Direct all questions about the problem set to Brightspace under Contents > Discussions > Class Feed > Problem Set 3.
 
