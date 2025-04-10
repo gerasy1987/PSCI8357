@@ -1,0 +1,115 @@
+---
+title: "Implementing Regression Discontinuity Design (RDD)"
+author: "Alexander Dean"
+subtitle: "Recitation Period 11"
+institute: "Vanderbilt University"
+email: "alexander.r.dean@vanderbilt.edu"
+date: today
+execute:
+  embed-resources: true 
+format: 
+  revealjs:
+    theme: dark
+    footer: "Alexander Dean (Vanderbilt University)"
+    slide-number: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    self-contained-math: true
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+    code-fold: true
+fontsize: 32px
+editor: source
+---
+
+## What We Will Cover Today
+
+1. What Regression Discontinuity Designs (RDDs) are
+2. When you can use RDDs (and when you can't)
+3. What you need to report on with an RDD in a paper
+4. Implementing the rdrobust package in R
+
+## What is a RD?
+
+1. A causal inference method when the treatment "occurs" differentially at some cutoff
+2. Specifically, there is some "running variable" that probabilistically or deterministically at the cutoff/threshold
+3. Popular research designs for RDDs include contexts where assignment sharply (completely) changes at an arbitrary cutoff
+    - Elections
+    - Educational tests (National Merit Scholarship & PSAT)
+    - Population thresholds for receiving additional FPM funds in Brazil
+
+## Visualization of an RDD with a DAG
+
+![](/rdd_dag.png)
+
+- Visualization of RDD DAG, consider educational testing
+
+## Types of RDDs {.smaller}
+
+1. Sharp RDD
+    - Treatment is deterministically assigned at the cutoff by the forcing variable
+    - Can recover the ATE
+2. Fuzzy RDD
+    - Treatment is probabilistically assigned at the cutoff by the forcing variable
+    - Can recover the LATE
+    - More relaxed than the above
+3. Regression Kink Design
+    - More relaxed assumptions than the two above
+    - Less common in political science, relatively more common in economics research 
+
+## Wait, what's a forcing variable?
+
+1. Some variable X that drives treatment assignment
+2. We're interested in comparing units that are close to some arbitrary cutoff, c, where the forcing variable drastically (completely) changes.
+
+. . . 
+
+3. X and c allow us to calculate $\tau_c = \mathbb{E}[Y_{1i} − Y_{0i}| X_{i} = c]$ and recover a causal estimator of interest!
+
+## How can we calculate the ATE with an RDD? {.smaller}
+
+![](/rdd_educ.png)
+
+. . . 
+
+- Which units (all of them? Some of them?) would you use in this analysis to causally measure the effect of treatment?
+
+## How can we calculate the ATE with an RDD? {.smaller}
+
+1. We use the units that are in the "local neighborhood" of the cutoff from the forcing variable. Why?
+
+. . .
+
+2. Assignment on either side of the threshold can be argued to be as-if random
+    - An election won by a few votes could have been swung by a voter not voting because it was raining
+    - If you were one question above/below an educational test threshold, that one question difference is probably due to chance, not ability
+
+. . . 
+
+![](/rdd_ate.png)
+
+## Threats to RDD validity and Data necessities?
+
+1. Continuity at cutoff (dn)
+2. Treatment assignment rule is known in advance (threat)
+3. Units are interested in adjusting treatment status (threat)
+4. Units have time to adjust treatment status (threat)
+5. Cutoff is endogenous to factors that independently cause potential outcomes to shift (threat)
+6. There is nonrandom heaping along the running variable (threat)
+
+## Some basics you need when you report on an RDD
+
+1. Visualization (graphs)
+2. Run local linear regression
+3. Provide results for both lower-order and higher-order polynomial non-parametric kernels
+4. Run and visualize with different windows around the cutoff
+
+## Implementing an RDD in R
+
+- Lets move to this [R script](https://github.com/gerasy1987/PSCI8357/tree/main/recitation_material/week_11) on the GitHub
