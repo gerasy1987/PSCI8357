@@ -1,5 +1,5 @@
 ---
-title: "Observational Studies:<br>DiD/Panel"
+title: "Observational Studies:<br>DiD/Panel/Synth"
 subtitle: "PSCI 8357 - Stats II"
 author: Georgiy Syunyaev
 institute: "Department of Political Science, Vanderbilt University"
@@ -2499,7 +2499,7 @@ twfe_est_dyn |>
 
 - **Causal Estimand**: the Average Treatment Effect at time $t$:
   $$
-  \tau(t) = \mathbb{E}\{Y_{it}(1) - Y_{it}(0)\}
+  \tau(t) = \E \{Y_{it}(1) - Y_{it}(0)\}
   $$
 
 ### Approach 1: TWFE Again
@@ -2648,28 +2648,95 @@ twfe_est_dyn |>
 
 ![](../_images/ca1.png){width="75%" fig-align="center"}
 
-### Estimation of Treatment Effect
+## Identification
 
-- $\mathbf{W} = (w_2,\ldots, w_{J+1})^\prime$: Synthetic weights for the control units.
-  - $w_i \geq 0$ for $i \in \{2,...,J+1\}$ and $\sum_{i=2}^{J+1} w_i = 1$.
+### DiD vs Synthetic Control
+
+- [DiD]{.highlight}: Focus on ATT and assume parallel trends.
+
+  $$
+  Y_{it} = \alpha_i + \gamma_t + \tau T_{it} + \mathbf{X}_{it}^\prime \beta + \varepsilon_{it}, \quad \text{with } \E [\varepsilon_{it} \given T_{it}, \mathbf{X}_{it}] = 0.
+  $$
+
+- This implies untreated trend is a [TWFE process]{.highlight} $Y_{jt}(0) = \alpha_j + \gamma_t + \varepsilon_{jt}.$
+
+. . .
+
+- [Synthetic Control (SCM)]{.highlight}: Estimand is effect trend for $i = 1$, $(\tau_{1,T_0+1}, \dots, \tau_{1,T})$
+
+  $$
+  \tau_{1t} = Y_{1t}(1) - Y_{1t}(0) = \underbrace{Y_{1t}}_{\text{Observed}} - \underbrace{Y_{1t}(0)}_{\text{Counterfactual}}
+  $$
+
+- Assumption: untreated trend is an [interactive FE (factor) model]{.highlight}:
+
+  $$
+  Y_{it}(0) = \gamma_t + \lambda_t^\prime \mu_i + \beta^\prime \mathbf{X}_i + \varepsilon_{it},
+  $$
+
+  where
+    
+    - $\lambda_t = (\lambda_{t1}, \ldots, \lambda_{tR})'$ are time shocks (factors) with $T_0 > R$,  
+    - $\mu_i = (\mu_{i1}, \ldots, \mu_{iR})'$ are unit-specific loadings.
+
+. . .
+
+- [Note]{.note}: If $\lambda_t = \lambda$, then this is TWFE.
+
+### Identification
+
+- [Idea]{.note}: Take a weighted sum of $J$ comparison (donor) units.
+
+- Weight vector $w = (w_j)_{j=2}^{J+1}$ where $w_j \geq 0$ and $\sum_{j=2}^{J+1} w_j = 1$.
+
+- Weighted sums of control observations is then:
+
+  $$
+  \sum_{j=2}^{J+1} w_j Y_{jt} 
+  = \gamma_t + \beta_t^\prime \sum_{j=2}^{J+1} w_j \mathbf{X}_j + \lambda_t^\prime \sum_{j=2}^{J+1} w_j \mu_j + \sum_{j=2}^{J+1} w_j \varepsilon_{jt}
+  $$
+
+. . .
+
+- Suppose $w^\star$ for which:
+
+  $$
+  \sum_{j=2}^{J+1} w_j^\star Y_{jt} = Y_{1t} \quad \text{for } t \leq T_0, 
+  \quad \text{and} \quad 
+  \sum_{j=2}^{J+1} w_j^\star X_j = X_1.
+  $$
+
+. . .
+
+- These [balancing weights]{.highlight} cause the $X_j$ term to cancel out when we take $Y_{1t}(0) - \sum_{j=2}^{J+1} w_j^\star Y_{jt}$.
+
+## Estimation and Inference
+
+### Estimation
+
+- $\mathbf{W} = (w_2,\dots, w_{J+1})^\prime$: Synthetic weights for the control units.
+  
   - Each value of $\mathbf{W}$ represents a possible synthetic control.
 
 . . .
 
 
-- **Optimisation problem**: Choose synthetic weights $\mathbf{W}^*$ approximately such that:
-  
-$$
-\sum_{j=2}^{J+1} w^*_j X_{j1} = X_{11},\ \cdots \ ,\ \sum_{j=2}^{J+1} w^*_j X_{jR} = X_{1R}, \quad \sum_{j=2}^{J+1} w^*_j Y_{j1} = Y_{11},\ \cdots\ ,\ \sum_{j=2}^{J+1} w^*_j Y_{jT_0} = Y_{1T_0}.
-$$
+- [Optimisation problem]{.highlight}: Choose synthetic weights $\mathbf{W}^\star$ such that 
 
-  where $(Y_{i1}, \ldots, Y_{iT_0})$ are $T_0$ observed pre-treatment outcomes; $(X_{i1}, \ldots, X_{iR})$ are $R$ observed pre-treatment covariates.
+  - $w_i \geq 0$ for $i \in \{2,...,J+1\}$ and $\sum_{i=2}^{J+1} w_i = 1$.
+  - $\forall t < T_0$ (pre-treatment periods) $\mathbf{W}^\star$ minimizes:
+  
+  $$
+  | X_{1t} - \sum_{j=2}^{J+1} w^\star_j X_{jt}|, \quad | Y_{11} - \sum_{j=2}^{J+1} w^\star_j Y_{j1} |.
+  $$
+
+  - (what is the problem here?)
 
 . . .
 
-- Then an approximately unbiased estimator of $\tau_{1t}$ is:
+- Then an _approximately_ unbiased estimator of $\tau_{1t}$ is:
   $$
-  \widehat \tau_{1t} \ = \ Y_{1t} - \sum_{j=2}^{J+1} w^*_j Y_{jt} \quad \text{for} \quad t \in \{T_0+1,\ldots ,T\}.
+  \widehat \tau_{1t} \ = \ Y_{1t} - \sum_{j=2}^{J+1} w^*_j Y_{jt} \quad \text{for} \quad t \in \{T_0+1,\dots ,T\}.
   $$
 
 
@@ -2685,16 +2752,33 @@ $$
 
 - $\mathbf{W}$ is chosen to minimize $\|\mathbf{V}_1 - \mathbf{V}_0 \mathbf{W}\|$, subject to constraints:
   - $w_i \geq 0$ for $i \in \{2,...,J+1\}$ and $\sum_{i=2}^{J+1} w_i = 1$.
+
 - Use $\|\mathbf{V}_1 - \mathbf{V}_0 \mathbf{W}\| = \sqrt{(\mathbf{V}_1 - \mathbf{V}_0 \mathbf{W})^\prime \Sigma (\mathbf{V}_1 - \mathbf{V}_0 \mathbf{W})}$, where $\Sigma$ is some $(p \times p)$ symmetric and positive semidefinite matrix.
 
 . . .
 
-- Choose $\Sigma$ to minimize the MSPE for the pre-treatment outcomes for the treated unit:
+- @abadie2010synthetic choose $\Sigma$ to minimize the MSPE for the pre-treatment outcomes for the treated unit:
   $$
   MSPE \ = \ \frac{1}{T_0}\sum_{t=1}^{T_0}\left(Y_{1t} - \sum_{j=2}^{J+1}w_j^\ast Y_{jt}\right)^2.
   $$
 
+### DiD vs Synthetic Control
 
+<br><br><br>
+
+- Synthetic Control and DiD are both [counterfactual approximation methods]{.highlight}:
+
+. . .
+
+- [DiD]{.highlight}: uniform weights and intercept adjustment  
+  $$
+  \widehat{Y}_{1t}(0) = \alpha_{1} + \sum_{j=2}^{J+1} \frac{1}{J} Y_{jt}
+  $$
+
+- [SCM]{.highlight}: variable, convex weights with no intercept  
+  $$
+  \widehat{Y}_{1t}(0) = \sum_{j=2}^{J+1} w_j Y_{jt}
+  $$
 
 ### Cigarette Consumption: CA & the Rest of the U.S.
 
@@ -2736,67 +2820,78 @@ $$
 
 ### Inference
 
-<br>
+- **Approach 1**: [Permutation (Fisher) Inference]{.highlight} [@abadie2010synthetic]
 
-- [Permutation (Fisher) Inference]{.highlight}
+  - [Idea]{.note}: Construct "placebo" estimates using SCM for post-treatment donor observations.
 
-  - If there was no treatment effect, how unusual would the observed treatment effect be compared to its sampling distribution?
+  - **Procedure**:
+
+    - Iteratively apply the synthetic method to each control unit and obtain a distribution of "placebo effects."
+  
+    - Compare the gap for California to the distribution of the placebo gaps.
 
 . . .
+ 
+- **Approach 2**: ["Conformal inference"]{.highlight} [@chernozhukov2021exact]
 
-- **Check 1**: Use Control Units as if Treated Units
+  
+  - [Idea]{.note}: Look at differences in pre- and post-treatment prediction residuals. 
+  
+  - **Procedure**:
+    
+    - Apply the synthetic control method to the each pre and post treatment period and calculate $u_{t} = Y_{1t} - \widehat{Y}_{1t} (0)$.
+  
+    - Under sharp null $\forall t: \: Y_{1t} (0) = Y_{1t} (1) = Y_{1t}$ $\rightsquigarrow$ $u_{t}$ at $t > T_{0}$ comes from the same distribution as $t <= T_{0}$.
 
-  - Iteratively apply the synthetic method to each control unit and obtain a distribution of "placebo effects."
-  - Compare the gap for California to the distribution of the placebo gaps.
-
-- **Check 2**: Use Placebo Treatment Timing
-
-  - Apply the synthetic control method to the placebo treatment timing (prior to the true treatment timing).
-  - Check whether the synthetic control is similar to the treated unit until the actual treatment timing.
-
-### Smoking Gap for CA and 38 Control States
+### Permutation Test: CA vs 38 Control States
 
 ![](../_images/ca4.png){width="75%" fig-align="center"}
 
-### Smoking Gap for CA and 34 Control States {data-visibility="uncounted"}
+- Looks good, but what is wrong with **bad** placebos pre-Proposition 99?
+
+### Permutation Test: CA vs 34 Control States {data-visibility="uncounted"}
 
 ![](../_images/ca5.png){width="75%" fig-align="center"}
 
+- Discard states with pre-Proposition 99 MSPE **twenty** times higher than California’s
 
-### Smoking Gap for CA and 29 Control States {data-visibility="uncounted"}
+### Permutation Test: CA vs 29 Control States {data-visibility="uncounted"}
 
 ![](../_images/ca6.png){width="75%" fig-align="center"}
 
+- Discard states with pre-Proposition 99 MSPE **five** times higher than California’s
 
-### Smoking Gap for CA and 19 Control States {data-visibility="uncounted"}
+### Permutation Test: CA vs 19 Control States {data-visibility="uncounted"}
 
 ![](../_images/ca7.png){width="75%" fig-align="center"}
 
+- Discard states with pre-Proposition 99 MSPE **two** times higher than California’s
 
 ### Ratio Post-Prop. 99 MSPE to Pre-Prop. 99 MSPE
 
 ![](../_images/ca8.png){width="75%" fig-align="center"}
 
-### Extensions
+- [Permutation distribution]{.highlight} California is clear outlier!
 
-<br><br>
+### Summary and Extensions
 
-- The synthetic control method was developed for comparative case studies  
-  
-  - Core feature: One or few treated unit.
-  - See @abadie2021using and replication materials for @abadie2015comparative.
+- Synthetic control method is like a _"quantitative case study"_ [@abadie2010synthetic]: **only one or few treated units needed, but long time series**.
+
+- In practice you need to look at the resulting weights: sometimes few controls receive any weight (_"corner solution" problem_).
+
+- See @abadie2021using and replication materials for @abadie2015comparative for implementation.
 
 . . .
 
 - Many scholars are extending it now:  
   
-  1. **Extension to the SA design**  
+  1. **Extension to the SCM design:**  
     
-      - @xu2017generalized: Generalized SC and [R]{.proglang} package `fect`.
-      - @ben2022synthetic: Augmented SC and [R]{.proglang} package `augsynth`.  
+      - @xu2017generalized: Generalized SCM and [R]{.proglang} package `fect`.
+      - @ben2022synthetic: Augmented SCM and [R]{.proglang} package `augsynth`.  
       - @arkhangelsky2021synthetic: DiD + Synthetic Controls and [R]{.proglang} package `synthdid`.
 
-  2. **Understand Assumptions behind SCM: @doudchenko2016balancing, @bottmer2024design
+  2. **Exploring assumptions behind SCM**: @doudchenko2016balancing, @bottmer2024design
 
 ## Summary
 
@@ -2807,42 +2902,42 @@ $$
 :::{.columns}
 :::{.column width="50%"}
 
-- [Classic DID/TWFE]{.highlight}
+- [Classic DiD/TWFE]{.highlight}
   
   :::small-font
-  - Single treatment cohort  
-  - Parallel trends (potentially conditionally)
-  - Control trends don't overlap treated trend
-  - Short pretrend data
+  - Single treatment cohort.
+  - Parallel trends (potentially conditionally).
+  - Control trends don't need to overlap treated trend.
+  - Short pretrend data.
   :::
 
-- [Classic Synth]{.highlight}
+- [Classic SCM]{.highlight}
   
   :::small-font
-  - Single treatment unit  
-  - Unweighted trends not necessarily parallel  
-  - Control trends overlap treated trend  
-  - Long pretrend data
+  - Single treatment unit.
+  - Unweighted trends not necessarily parallel.
+  - Control trends overlap treated trend.
+  - Long pretrend data.
   :::
 
 :::
 ::: {.column width="50%"}
 
-- [SA and HTE-robust methods]{.highlight}
+- [HTE-robust methods for General Panel]{.highlight}
   
   :::small-font
-  - Multiple cohorts receiving treatment at different times  
-  - Parallel trends (potentially conditionally)  
-  - Control trends don't overlap treated trend  
-  - Short pretrend data
+  - Multiple cohorts receiving treatment at different times.
+  - Parallel trends (potentially conditionally).
+  - Control trends don't overlap treated trend.
+  - Short pretrend data.
   :::
 
 - [Interactive FE Imputation Methods]{.highlight}
   
   :::small-font
-  - Multiple treated units, possibly at different times  
-  - Control trends overlap treated trends  
-  - Long pretrend data
+  - Multiple treated units, possibly at different times.
+  - Control trends overlap treated trends.
+  - Long pretrend data.
   :::
 
 :::
