@@ -2620,7 +2620,7 @@ twfe_est_dyn |>
   - $T_{it} = 0$ for all other units $i \in \{2, \ldots, J+1\}$ and $t \in \{1, \ldots, T\}$.
 
 - **Potential outcome**: $Y_{it}(d)$.
-- **Causal Estimand**: Treatment effect on unit $1$ at time $T_0+1, \ldots, T$ (special case of ATT):
+- **Causal Estimand**: Treatment effect on unit $1$ at time $T_0+1, \ldots, T$ (special case of _ATT_):
   $$
   \tau_{1t} \ \equiv \ Y_{1t}(1) - Y_{1t}(0) = Y_{1t} - \textcolor{#cc241d}{Y_{1t}(0)} \quad \text{for} \quad t > T_{0}.
   $$
@@ -2652,32 +2652,29 @@ twfe_est_dyn |>
 
 ### DiD vs Synthetic Control
 
-- [DiD]{.highlight}: Focus on ATT and assume parallel trends.
+<br>
+
+- [DiD]{.highlight}: Focus on _ATT_ and assume parallel trends.
 
   $$
   Y_{it} = \alpha_i + \gamma_t + \tau T_{it} + \mathbf{X}_{it}^\prime \beta + \varepsilon_{it}, \quad \text{with } \E [\varepsilon_{it} \given T_{it}, \mathbf{X}_{it}] = 0.
   $$
 
-- This implies untreated trend is a [TWFE process]{.highlight} $Y_{jt}(0) = \alpha_j + \gamma_t + \varepsilon_{jt}.$
+- This implies untreated trend is a [TWFE process]{.highlight} $Y_{jt}(0) = \alpha_i + \gamma_t + \varepsilon_{it}.$
 
 . . .
 
-- [Synthetic Control (SCM)]{.highlight}: Estimand is effect trend for $i = 1$, $(\tau_{1,T_0+1}, \dots, \tau_{1,T})$
+- [Synthetic Control (SCM)]{.highlight}: Assume untreated trend is an [interactive FE (factor) model]{.highlight}:
 
   $$
-  \tau_{1t} = Y_{1t}(1) - Y_{1t}(0) = \underbrace{Y_{1t}}_{\text{Observed}} - \underbrace{Y_{1t}(0)}_{\text{Counterfactual}}
-  $$
-
-- Assumption: untreated trend is an [interactive FE (factor) model]{.highlight}:
-
-  $$
-  Y_{it}(0) = \gamma_t + \lambda_t^\prime \mu_i + \beta^\prime \mathbf{X}_i + \varepsilon_{it},
+  Y_{it}(0) = \gamma_t + \lambda_t^\prime \pmb{\mu_i} + \beta^\prime \mathbf{X}_i + \varepsilon_{it},
   $$
 
   where
     
-    - $\lambda_t = (\lambda_{t1}, \ldots, \lambda_{tR})'$ are time shocks (factors) with $T_0 > R$,  
+    - $\lambda_t = (\lambda_{t1}, \ldots, \lambda_{tR})'$ are time shocks (factors) with $T_0 > R$.
     - $\mu_i = (\mu_{i1}, \ldots, \mu_{iR})'$ are unit-specific loadings.
+    - $\mathbf{X}_i$ should not be post-treatment!
 
 . . .
 
@@ -2693,7 +2690,7 @@ twfe_est_dyn |>
 
   $$
   \sum_{j=2}^{J+1} w_j Y_{jt} 
-  = \gamma_t + \beta_t^\prime \sum_{j=2}^{J+1} w_j \mathbf{X}_j + \lambda_t^\prime \sum_{j=2}^{J+1} w_j \mu_j + \sum_{j=2}^{J+1} w_j \varepsilon_{jt}
+  = \gamma_t + \beta_t^\prime \sum_{j=2}^{J+1} w_j \mathbf{X}_j + \lambda_t^\prime \sum_{j=2}^{J+1} w_j \pmb{\mu}_j + \sum_{j=2}^{J+1} w_j \varepsilon_{jt}
   $$
 
 . . .
@@ -2701,30 +2698,30 @@ twfe_est_dyn |>
 - Suppose $w^\star$ for which:
 
   $$
-  \sum_{j=2}^{J+1} w_j^\star Y_{jt} = Y_{1t} \quad \text{for } t \leq T_0, 
+  \sum_{j=2}^{J+1} w_j^\star \pmb{\mu}_j = \pmb{\mu}_1, 
   \quad \text{and} \quad 
-  \sum_{j=2}^{J+1} w_j^\star X_j = X_1.
+  \sum_{j=2}^{J+1} w_j^\star \mathbf{X}_j = \mathbf{X}_1.
   $$
 
 . . .
 
-- These [balancing weights]{.highlight} cause the $X_j$ term to cancel out when we take $Y_{1t}(0) - \sum_{j=2}^{J+1} w_j^\star Y_{jt}$.
+- These [balancing weights]{.highlight} cause the $X_j$ term to cancel out when we take $Y_{1t}(0) - \sum_{j=2}^{J+1} w_j^\star Y_{jt}$ for $t > T_{0}$ $\rightsquigarrow$ approximately $\tau_{1t}$.
 
 ## Estimation and Inference
 
 ### Estimation
 
-- $\mathbf{W} = (w_2,\dots, w_{J+1})^\prime$: Synthetic weights for the control units.
+- Need to have $\pmb{\mu}_j$ and estimate synthetic weights $\mathbf{W} = (w_2,\dots, w_{J+1})^\prime$ (representing synth control).
   
-  - Each value of $\mathbf{W}$ represents a possible synthetic control.
+  - **Solution**: Use $(Y_{j,1},\dots,Y_{j,T_0})$ for $\pmb{\mu}_j$ and solve for $\mathbf{W}$.
 
 . . .
 
 
 - [Optimisation problem]{.highlight}: Choose synthetic weights $\mathbf{W}^\star$ such that 
 
-  - $w_i \geq 0$ for $i \in \{2,...,J+1\}$ and $\sum_{i=2}^{J+1} w_i = 1$.
-  - $\forall t < T_0$ (pre-treatment periods) $\mathbf{W}^\star$ minimizes:
+  - $w_i \geq 0$ for $i \in \{2,...,J+1\}$ and $\sum_{i=2}^{J+1} w_i = 1$,
+  - $\forall t < T_0$ (pre-treatment periods) $\mathbf{W}^\star$ minimizes
   
   $$
   | X_{1t} - \sum_{j=2}^{J+1} w^\star_j X_{jt}|, \quad | Y_{11} - \sum_{j=2}^{J+1} w^\star_j Y_{j1} |.
