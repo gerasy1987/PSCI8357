@@ -2179,7 +2179,7 @@ summary(fit_sa_dyn, estimator = "SA-DID") |> as_tibble() |>
 :::
 
 - **Three groups**: 
-  - $k$ treated at $t^\star_k$ (or **Group $1$**); $\ell$ treated at $t^\star_\ell$ (or **Group $2$**); $U$ untreated (or **Group $\infty$**).
+  - $k$ treated at $t^\ast_k$ (or **Group $1$**); $\ell$ treated at $t^\ast_\ell$ (or **Group $2$**); $U$ untreated (or **Group $\infty$**).
 
 . . .
 
@@ -2695,17 +2695,17 @@ twfe_est_dyn |>
 
 . . .
 
-- Suppose $w^\star$ for which:
+- Suppose $w^\ast$ for which:
 
   $$
-  \sum_{j=2}^{J+1} w_j^\star \pmb{\mu}_j = \pmb{\mu}_1, 
+  \sum_{j=2}^{J+1} w_j^\ast \pmb{\mu}_j = \pmb{\mu}_1, 
   \quad \text{and} \quad 
-  \sum_{j=2}^{J+1} w_j^\star \mathbf{X}_j = \mathbf{X}_1.
+  \sum_{j=2}^{J+1} w_j^\ast \mathbf{X}_j = \mathbf{X}_1.
   $$
 
 . . .
 
-- These [balancing weights]{.highlight} cause the $X_j$ term to cancel out when we take $Y_{1t}(0) - \sum_{j=2}^{J+1} w_j^\star Y_{jt}$ for $t > T_{0}$ $\rightsquigarrow$ approximately $\tau_{1t}$.
+- These [balancing weights]{.highlight} cause the $X_j$ term to cancel out when we take $Y_{1t}(0) - \sum_{j=2}^{J+1} w_j^\ast Y_{jt}$ for $t \leq T_{0}$ $\rightsquigarrow$ use them to approximate $Y_{1t}(0)$ for $t > T_{0}$.
 
 ## Estimation and Inference
 
@@ -2718,13 +2718,13 @@ twfe_est_dyn |>
 . . .
 
 
-- [Optimisation problem]{.highlight}: Choose synthetic weights $\mathbf{W}^\star$ such that 
+- [Optimisation problem]{.highlight}: Choose synthetic weights $\mathbf{W}^\ast$ such that 
 
   - $w_i \geq 0$ for $i \in \{2,...,J+1\}$ and $\sum_{i=2}^{J+1} w_i = 1$,
-  - $\forall t < T_0$ (pre-treatment periods) $\mathbf{W}^\star$ minimizes
+  - $\forall t < T_0$ (pre-treatment periods) $\mathbf{W}^\ast$ minimizes
   
   $$
-  | X_{1t} - \sum_{j=2}^{J+1} w^\star_j X_{jt}|, \quad | Y_{11} - \sum_{j=2}^{J+1} w^\star_j Y_{j1} |.
+  | X_{1t} - \sum_{j=2}^{J+1} w^\ast_j X_{jt}|, \quad | Y_{11} - \sum_{j=2}^{J+1} w^\ast_j Y_{j1} |.
   $$
 
   - (what is the problem here?)
