@@ -244,12 +244,12 @@ thematic::thematic_on(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 
 ### Example: Party Incumbency Advantage 
 
-- @lee2008randomized studies the effect of incumbency status on vote shares?
+- @lee2008randomized studies the effect of incumbency status on vote shares in U.S. House elections?
 
 . . .
 
 - **Treatment** is incumbency status of party $j$ in district $i$ at election $t$, $T_{ijt}$.
-- Potential vote share as incumbent ($d=1$) or challenger ($d=0$), $V_{ijt}(d)$.
+- Potential vote share as incumbent ($t=1$) or challenger ($t=0$), $V_{ijt}(t)$.
 
 - **Observed vote share** is $V_{itj} = V_{ijt}(T_{ijt})$.
 
@@ -932,8 +932,6 @@ ggplot(results_bw, aes(x = bandwidth, y = estimate, color = color, fill = color)
 
 ### Placebo Test
 
-<br>
-
 - Test for the [continuity assumption]{.highlight}.
 
 - **Approach 1 ([Visual check]{.highlight}):** Plot $\E(W_i \given X_i, T_i)$ and look for jumps  
@@ -1045,10 +1043,12 @@ tibble(
 
 c_1 <- median(df_lee$margin_tm1[df_lee$margin_tm1 > 0], na.rm = TRUE)
 
-rdplot(
+rdrobust::rdplot(
   y = df_lee$share_t[df_lee$margin_tm1 > 0],
   x = df_lee$margin_tm1[df_lee$margin_tm1 > 0],
-  p = 1, c = c_1, h = 0.1, x.lim = c(0, 0.3))
+  p = 1, c = c_1, h = 0.1, x.lim = c(0, 0.3),
+  x.label = "Margin (t-1) with Placebo Cutoff",
+  y.label = "Vote Share (t)")
 
 ```
 
@@ -1069,7 +1069,7 @@ rdplot(
 
 - **Approach 1 (Visual check):** Histograms (make sure no bin overlaps with the threshold)
 
-- **Approach 2 (Formal test):** Density test [@]
+- **Approach 2 (Formal test):** Density test [@mccrary2008manipulation]
     
   $$
   \text{Test-statistics} = \frac{\widehat{f}_+ - \widehat{f}_-}{\sqrt{\widehat{\var}(\widehat{f}_+ - \widehat{f}_-)}}
