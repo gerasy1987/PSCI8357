@@ -1163,7 +1163,6 @@ plot_density_check <-
 
 - Fuzzy RD can therefore be thought of as an instrumental variable version of an RDD.
 
-
 ## Example
 
 ### Example: Class Size Effect 
@@ -1194,29 +1193,31 @@ avg_size <-
   summarise(avg_size = mean(classize, na.rm = TRUE), .groups = "drop")
 
 # create predicted class size using Maimonides' Rule
-rule_input <- 1:225
-maim_rule_predict <- rule_input / (floor((rule_input - 1) / 40) + 1)
+enrollment_range <- 1:225
+maim_rule_class_size <- enrollment_range / (floor((enrollment_range - 1) / 40) + 1)
 
 plot_df <- avg_size |>
   dplyr::filter(enrollment <= 225) |>
   dplyr::right_join(
-    tibble(enrollment = rule_input, maim_rule = maim_rule_predict),
+    tibble(enrollment = enrollment_range, maim_rule = maim_rule_class_size),
     by = "enrollment"
   )
 
 plot_df |>
-  filter(!is.na(avg_size) & !is.na(maim_rule)) |>
+  # filter(!is.na(avg_size) & !is.na(maim_rule)) |>
   ggplot(aes(x = enrollment)) +
-  geom_line(aes(y = avg_size), color = "#458588", size = 1.2, alpha = .8) +
-  geom_line(aes(y = maim_rule), linetype = "dashed", color = "#cc241d", size = 1, alpha = .8) +
+  geom_line(aes(y = avg_size), data = filter(plot_df, !is.na(avg_size)), color = "#458588", size = 1.5, alpha = .8) +
+  geom_line(aes(y = maim_rule), data = plot_df, linetype = "dashed", color = "#cc241d", size = 1, alpha = .8) +
   labs(
     x = "Enrollment Count",
     y = "Class Size"
   ) +
-  scale_y_continuous(limits = c(0, NA)) +
-  theme_bw(base_size = 20) +
+  geom_vline(xintercept = seq(40, 200, by = 40), linetype ="dashed", size = .5) +
   annotate("text", x = 200, y = 42, label = "Maimonides Rule", color = "#cc241d", hjust = 1, size = 6) +
   annotate("text", x = 200, y = 27, label = "Actual class size", color = "#458588", hjust = 1, size = 6) +
+  scale_y_continuous(limits = c(0, NA)) +
+  scale_x_continuous(limits = c(0, 225), breaks = seq(0, 200, by = 40)) +
+  theme_bw(base_size = 20) +
   theme(legend.position = "none") +
   custom_theme
 
@@ -1224,7 +1225,7 @@ plot_df |>
 
 ### Example: Class Size Effect
 
-<br><br>
+<br>
 
 - $Y_i$: Class average verbal test score.
 - $T_i$: Class size.
@@ -1246,6 +1247,10 @@ plot_df |>
   where $w$ is the bandwidth.
 
 - Class size $T_i$ discontinuously decreases at the cutoffs.
+
+. . .
+
+- [Note]{.note}: This example is more complex than standard fuzzy RD [with multi-cutoffs and descrete forcing variable]{.highlight}.
 
 ## Setup and Identification
 
@@ -1345,13 +1350,15 @@ plot_df |>
   \end{align*}
   $$
 
-- More flexible specifications can be used (e.g. polynomials of $\tilde{X}_i$)
+. . .
 
-- Then $\hat{\tau}_{2SLS}$ consistently (but not unbiasedly) estimates $\tau_{FRD}$
+- More flexible specifications can be used (e.g. polynomials of $\tilde{X}_i$).
 
-- In addition, it is also helpful to separately plot (and estimate) the outcome discontinuity and treatment discontinuity for interpretation
+- Then $\hat{\tau}_{2SLS}$ consistently (but not unbiasedly) estimates $\tau_{FRD}$.
 
-- Usual diagnostics can be applied to check plausibility of assumptions
+- In addition, it is also helpful to separately plot (and estimate) the outcome discontinuity and treatment discontinuity for interpretation.
+
+- Usual diagnostics can be applied to check plausibility of assumptions.
 
 ### Example: IV vs Treatment
 
@@ -1382,7 +1389,7 @@ df_al_bwcut <-
     )
   )
 
-rdplot(y = df_al_bwcut$classize, x = df_al_bwcut$forcing, p = 1)
+rdplot(y = df_al_bwcut$classize, x = df_al_bwcut$forcing, p = 1, y.label = "Class Size", x.label = "Enrollment around Cutoffs")
 
 ```
 
@@ -1399,7 +1406,7 @@ rdplot(y = df_al_bwcut$classize, x = df_al_bwcut$forcing, p = 1)
 
 
 
-rdplot(y = df_al_bwcut$avgverb, x = df_al_bwcut$forcing, p = 1)
+rdplot(y = df_al_bwcut$avgverb, x = df_al_bwcut$forcing, p = 1, y.label = "Class AVerage Exam Score", x.label = "Enrollment around Cutoffs")
 
 ```
 
@@ -1487,7 +1494,67 @@ tibble(
 
 4. **Sorting:** Do units sort around the threshold?
 
-### Extensions
+## Extensions
+
+### Kink Design
+
+- Sharp RD and Fuzzy RD exploit discontinuities in treatment **level** around a cutoff.
+- Another type of discontinuity is in the treatment **slope** around a cutoff—a [_kink_]{.highlight}.
+
+. . .
+
+- We still assume $Yi = \tau T_i + g(X_i) + \varepsilon_i$, but we assume that there is a kink in $T_i$:
+
+$$
+d_1 \equiv \lim_{x \downarrow x_0} \frac{\partial D_i}{\partial x} \neq \lim_{x \uparrow x_0} \frac{\partial D_i}{\partial x} \equiv d_0.
+$$
+
+- But smoothness in the trend $g(X_i)$: $\lim_{x \uparrow x_0} \frac{\partial g(x)}{\partial x} = \lim_{x \downarrow x_0} \frac{\partial g(x)}{\partial x}$; and errors, $\varepsilon_i$.
+
+. . .
+
+$$
+\begin{align*}
+\tau_{KRD} &= \frac{\lim_{x \downarrow x_0} \frac{\partial \E [Y_i \given X_i = x]}{\partial x} - \lim_{x \uparrow x_0} \frac{\partial \E [Y_i \given X_i = x]}{\partial x}}{d_1 - d_0} \\
+&= \frac{\lim_{x \downarrow x_0} \frac{\partial (\tau T_i + g(x) + \E [\varepsilon_i \given X_i = x])}{\partial x} - \lim_{x \uparrow x_0} \frac{\partial (\tau T_i + g(x) + \E [\varepsilon_i \given X_i = x])}{\partial x}}{d_1 - d_0} \\
+&= \frac{\tau (d_1 - d_0)}{d_1 - d_0} = \tau.
+\end{align*}
+$$
+
+### Example: @landais2015assessing
+
+![](../_images/rdd_kink1.png){width="75%" fig-align="center"}
+
+### Example: @landais2015assessing
+
+![](../_images/rdd_kink2.png){width="75%" fig-align="center"}
+
+
+### Kink design: Estimation
+
+<br>
+
+- If policy rule is _deterministic_, then you can get $d_1 - d_0$ from the rule. Otherwise, a local linear specification for $i$ near $x_0$:
+
+  $$
+  T_i = \alpha_0 + \alpha_1 \widetilde{X}_i + \alpha_2 Z_i \widetilde{X}_i  + \nu_i,
+  $$
+
+  where $\widehat{\alpha}_2$ estimates $d_1 - d_0$.
+
+. . .
+
+- To estimate the kink in the outcome, again use a local linear specification:
+
+$$
+Y_i = \beta_0 + \beta_1 \widetilde{X}_i + \beta_2 Z_i \widetilde{X}_i  + \varepsilon_i,
+$$
+
+- Regression kink estimator is $\widehat{\beta}_2/(d_1 - d_0)$ if you know $d_1 - d_0$ or $\widehat{\beta}_2/\widehat{\alpha}_2$ if you have to estimate.
+
+- See @card2017regression for generalizations and implementation in [R]{.proglang} with `rdrobust`.
+
+### Further Extensions
 
 <br><br>
 
@@ -1500,7 +1567,7 @@ tibble(
     
     - @cattaneo2016interpreting
 
-3.  [Geographic RD Design]{.highlight}
+3.  [Multiway/Geographic RD Design]{.highlight}
   
     - @keele2015geographic
 
