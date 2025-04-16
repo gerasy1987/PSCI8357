@@ -187,19 +187,19 @@ thematic::thematic_on(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 
 - **Identification Assumption**: [Continuity of average potential outcomes]{.highlight}
   
-  - $\E [Y_i(t) \given X_i = x]$ is continuous in $x$ around $X_i = c \text{ for } t \in \{0,1\}$ (i.e. is $p$-times differentiable at $c$).
+  - $\E [Y_i(t) \given X_i = x]$ is continuous in $x$ around $X_i = c \text{ for } t \in \{0,1\}$ (i.e. smooth or is $p$-times differentiable at $c$).
 
 - **Causal estimand**: [Local ATE _at the threshold_]{.highlight}
   $$
   \tau_{SRD} \equiv \E [Y_i(1) - Y_i(0) \given X_i = c]
   $$
 
-. . .
-
 - **Identification Result**: If the continuity assumption holds, $\tau_{SRD}$ is nonparametrically identified as
   $$
   \tau_{SRD} = \lim_{x \downarrow c} \E [Y_i \given X_i = x] - \lim_{x \uparrow c} \E [Y_i \given X_i = x]
   $$
+
+. . .
 
 - **Proof**:
   1. Under the **continuity**, $\E [Y_i(1) \given X_i = c] = \lim_{x \downarrow c} \E [Y_i(1) \given X_i = x]$.
@@ -293,9 +293,16 @@ thematic::thematic_on(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 
 ## Estimation
 
+### Ideas?
+
+<br>
+
+![](../_images/rdd2.png){width="75%" fig-align="center"}
+
+
 ### Estimation of the LATE at the Threshold
 
-1.  **Trim the sample to a reasonable window** around the threshold $c$ (discontinuity sample):
+1.  **Trim the sample to a _reasonable_ window** around the threshold $c$ (discontinuity sample):
   
     - $c-h \leq X_i \leq c + h$, where [bandwidth]{.highlight} $h > 0$ determines the width of the window.
 
@@ -1133,6 +1140,412 @@ plot_density_check <-
 ![](../_images/stommes_2023.png){width="100%" fig-align="center"}
 
 # Fuzzy Regression Discontinuity
+
+### Overview
+
+<br>
+
+- Threshold may not perfectly determine treatment exposure, but it may still create a **discontinuity in the probability of treatment**.
+
+. . .
+
+- [Hypothetical example]{.note}: SAT and scholarship
+  
+  - Scholarship may not be wholly determined by SAT scores $X_i$, but the rule specifies a threshold $X_i=c$ to become eligible  
+  
+  - Students above $c$ get a chance of receiving the scholarship, but may not actually get it  
+  
+  - Students below $c$ are excluded from consideration, perhaps except ones who are otherwise remarkable
+
+. . .
+
+- That is, an **encouragement** to receive treatment is discontinuously determined by $X_i$ at the threshold $c$.
+
+- Fuzzy RD can therefore be thought of as an instrumental variable version of an RDD.
+
+
+## Example
+
+### Example: Class Size Effect 
+
+- @angrist1999using study effect of class-size on student test scores.
+- Maimonides' Rule: Maximum class size is $40$
+  
+  $$
+  f(g) = \frac{g}{\left\lfloor \frac{g-1}{40} \right\rfloor + 1}
+  $$
+
+```{r}
+#| label: plot_maimonaides
+#| echo: true
+#| code-fold: true
+#| fig-align: center
+#| fig-width: 9
+#| fig-height: 5
+
+df_al <- 
+  read_csv("../_data/angrist_lavy_1994.csv") |> 
+  dplyr::mutate(enrollment = c_size)
+
+# compute average class size by enrollment
+avg_size <- 
+  df_al |>
+  group_by(enrollment) |>
+  summarise(avg_size = mean(classize, na.rm = TRUE), .groups = "drop")
+
+# create predicted class size using Maimonides' Rule
+rule_input <- 1:225
+maim_rule_predict <- rule_input / (floor((rule_input - 1) / 40) + 1)
+
+plot_df <- avg_size |>
+  dplyr::filter(enrollment <= 225) |>
+  dplyr::right_join(
+    tibble(enrollment = rule_input, maim_rule = maim_rule_predict),
+    by = "enrollment"
+  )
+
+plot_df |>
+  filter(!is.na(avg_size) & !is.na(maim_rule)) |>
+  ggplot(aes(x = enrollment)) +
+  geom_line(aes(y = avg_size), color = "#458588", size = 1.2, alpha = .8) +
+  geom_line(aes(y = maim_rule), linetype = "dashed", color = "#cc241d", size = 1, alpha = .8) +
+  labs(
+    x = "Enrollment Count",
+    y = "Class Size"
+  ) +
+  scale_y_continuous(limits = c(0, NA)) +
+  theme_bw(base_size = 20) +
+  annotate("text", x = 200, y = 42, label = "Maimonides Rule", color = "#cc241d", hjust = 1, size = 6) +
+  annotate("text", x = 200, y = 27, label = "Actual class size", color = "#458588", hjust = 1, size = 6) +
+  theme(legend.position = "none") +
+  custom_theme
+
+```
+
+### Example: Class Size Effect
+
+<br><br>
+
+- $Y_i$: Class average verbal test score.
+- $T_i$: Class size.
+- $G_i$: **Enrollment**.
+
+. . .
+
+- **Forcing variable** can be constructed as
+  
+  $$
+  X_i = 
+  \begin{cases}
+    G_i - 40 & \text{if } 40 - w/2 \leq G_i \leq 40 + w/2 \\
+    G_i - 80 & \text{if } 80 - w/2 \leq G_i \leq 80 + w/2 \\
+    \vdots & \vdots
+  \end{cases}
+  $$
+  
+  where $w$ is the bandwidth.
+
+- Class size $T_i$ discontinuously decreases at the cutoffs.
+
+## Setup and Identification
+
+### Fuzzy RD: Setup and Identification
+
+- $Z_i \in \{0,1\}$: Encouragement
+- $X_i$: Forcing variable that perfectly determines the value of $Z_i$ with cutpoint $c$
+
+  $$
+  Z_i = \mathbb{1}\{X_i \geq c\}
+  $$
+
+. . .
+
+- **Identification assumptions:**
+  1. Both $\E [T_i(z) \given X_i=x]$ (potential treatment) and $\E [Y_i(z) \given X_i=x]$ (potential outcome) are [continuous]{.highlight} in $x$ around $X_i=c$ for $z \in \{0,1\}$.
+  2. [IV assumptions]{.highlight}: Monotonicity, exclusion restriction, relevance of $Z_i$
+
+- **Causal estimand:** Local ATE for compliers at the threshold
+  $$
+  \tau_{FRD} = \E [Y_i(t=1) - Y_i(t=0) \given \text{unit $i$ is a complier and } X_i=c]
+  $$
+
+. . .
+
+- **Identification Result:** Under the above assumptions,
+  $$
+  \tau_{FRD} = \frac{\lim_{x \downarrow c} \E [Y_i \given X_i = x] - \lim_{x \uparrow c} \E [Y_i \given X_i = x]}{\lim_{x \downarrow c} \E [T_i \given X_i = x] - \lim_{x \uparrow c} \E [T_i \given X_i = x]}
+  $$
+
+### Fuzzy RD: Discontinuity in $\E [T \given X]$
+
+![](../_images/rdd_fuzzy1.png){width="70%" fig-align="center"}
+
+### Fuzzy RD: Discontinuity in $\E [Y \given X]$
+
+![](../_images/rdd_fuzzy2.png){width="70%" fig-align="center"}
+
+### Fuzzy RD: Discontinuity in $\E [Y \given X]$
+
+![](../_images/rdd_fuzzy3.png){width="70%" fig-align="center"}
+
+### Fuzzy RD: Discontinuity in $\E [Y \given X]$
+
+![](../_images/rdd_fuzzy4.png){width="70%" fig-align="center"}
+
+### Fuzzy RD: Continuity in $\E [Y(t) \given X]$
+
+![](../_images/rdd_fuzzy5.png){width="70%" fig-align="center"}
+
+### Fuzzy RD: Discontinuity in $\E [Y \given X]$
+
+![](../_images/rdd_fuzzy6.png){width="70%" fig-align="center"}
+
+### Proof: Identification under Fuzzy RDD
+
+- First focus on the numerator:
+  
+  $$
+  \begin{align*}
+  &\lim_{x \downarrow c} \E [Y_i \given X_i = x] - \lim_{x \uparrow c} \E [Y_i \given X_i = x] \\
+  &= \lim_{x \downarrow c} \E [Y_i(z=1) \given X_i = x] - \lim_{x \uparrow c} \E [Y_i(z=0) \given X_i = x] \\
+  &= \E [Y_i(z=1) \given X_i = c] - \E [Y_i(z=0) \given X_i = c] \\
+  &= \left\{ \E [Y_i(t=1) \given S_i = \text{co}, X_i = c] - \E [Y_i(t=0) \given S_i = \text{co}, X_i = c] \right\}  \textcolor{#cc241d}{\Pr(S_i = \text{co} \given X_i = c)}
+  \end{align*}
+  $$
+  
+  where $S_i = \text{co}$ indicates that unit $i$ is a **complier**.
+
+- Next focus on the denominator:
+  
+  $$
+  \begin{alignat*}{2}
+  &\lim_{x \downarrow c} \E [T_i \given X_i = x] - \lim_{x \uparrow c} \E [T_i \given X_i = x] \\
+  &\quad= \lim_{x \downarrow c} \E [T_i(z=1) \given X_i = x] - \lim_{x \uparrow c} \E [T_i(z=0) \given X_i = x] \\
+  &\quad= \E [T_i(z=1) \given X_i = c] - \E [T_i(z=0) \given X_i = c] \\
+  &\quad= \textcolor{#cc241d}{\Pr(S_i = \text{co} \given X_i = c)} \qquad \qquad \qed
+  \end{alignat*}
+  $$
+
+## Estimation
+
+### Estimation and Inference under Fuzzy RDD
+
+1. Trim the sample to a reasonable window above and below the threshold $c$ (discontinuity sample)
+
+2. Code the encouragement indicator: $Z_i = \mathbb{1}\{X_i > c\}$
+
+3. Recode the forcing variable to deviation from $c$: $\tilde{X}_i = X_i - c$
+
+4. Estimate the outcome model using two-stage least squares (2SLS):
+
+  $$
+  \begin{align*}
+  T_i &= \alpha_0 + \alpha_1 \tilde{X}_i + \alpha_2 Z_i + \alpha_3 Z_i \tilde{X}_i + \nu_i \quad \text{(First Stage)} \\
+  Y_i &= \beta_0 + \beta_1 \tilde{X}_i + \beta_2 Z_i \tilde{X}_i + \tau T_i + \epsilon_i \quad \text{(Second Stage)}
+  \end{align*}
+  $$
+
+- More flexible specifications can be used (e.g. polynomials of $\tilde{X}_i$)
+
+- Then $\hat{\tau}_{2SLS}$ consistently (but not unbiasedly) estimates $\tau_{FRD}$
+
+- In addition, it is also helpful to separately plot (and estimate) the outcome discontinuity and treatment discontinuity for interpretation
+
+- Usual diagnostics can be applied to check plausibility of assumptions
+
+### Example: IV vs Treatment
+
+```{r}
+#| label: plot_iv_treat
+#| echo: true
+#| code-fold: true
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 5
+
+pacman::p_load(rdrobust)
+
+df_al_bwcut <-
+  df_al |>
+  dplyr::filter(
+    (enrollment >= 36 & enrollment <= 46) | (enrollment >= 76 & enrollment <= 86) |
+      (enrollment >= 116 & enrollment <= 126) | (enrollment >= 156 & enrollment <= 166) |
+      (enrollment >= 196 & enrollment <= 206)
+  ) |>
+  dplyr::mutate(
+    forcing = case_when(
+      enrollment <= 46 ~ enrollment - 41,
+      enrollment <= 86 ~ enrollment - 81,
+      enrollment <= 126 ~ enrollment - 121,
+      enrollment <= 166 ~ enrollment - 161,
+      TRUE ~ enrollment - 201
+    )
+  )
+
+rdplot(y = df_al_bwcut$classize, x = df_al_bwcut$forcing, p = 1)
+
+```
+
+### Example: IV vs Outcome
+
+```{r}
+#| label: plot_iv_outcome
+#| echo: true
+#| code-fold: true
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 5
+
+
+
+
+rdplot(y = df_al_bwcut$avgverb, x = df_al_bwcut$forcing, p = 1)
+
+```
+
+
+### Example: Class Size Eﬀect
+
+<br>
+
+```{r}
+#| label: est_fuzzy_estimatr
+#| echo: true
+#| eval: true
+#| output-location: column-fragment
+#| output: asis
+
+pacman::p_load(estimatr) 
+
+df_al_bwcut <-
+  df_al_bwcut |>
+  dplyr::mutate(iv = ifelse(forcing >= 0, 1, 0))
+
+fuzzy_iv_fit <-
+  estimatr::iv_robust(
+    avgverb ~ classize + forcing + forcing:iv |
+      forcing + iv + forcing:iv,
+    data = df_al_bwcut, cluster = schlcode
+  )
+
+broom::tidy(fuzzy_iv_fit) |>
+  dplyr::select(1:3, 5) |>
+  knitr::kable(
+    digits = 4,
+    align = "lccc",
+    caption = "Fuzzy RD Estimates"
+  ) |>
+  kableExtra::kable_minimal(font_size = 20)
+
+```
+
+### Example: Class Size Eﬀect
+
+<br>
+
+```{r}
+#| label: est_fuzzy_rdrobust
+#| echo: true
+#| eval: true
+#| output-location: column-fragment
+#| output: asis
+
+fuzzy_fit <-
+  rdrobust::rdrobust(
+    y = df_al_bwcut$avgverb, x = df_al_bwcut$forcing, fuzzy = df_al_bwcut$classize,
+    kernel = "uniform", p = 1, h = 5,
+    # use masspoints = "ignore" because forcing variables are descrete
+    masspoints = "off", cluster = df_al_bwcut$schlcode
+  )
+
+tibble(
+  estimator = rownames(fuzzy_fit$coef),
+  estimate = as.vector(fuzzy_fit$coef),
+  std.error = as.vector(fuzzy_fit$se)
+) |>
+  knitr::kable(
+    digits = 4,
+    align = "lcc",
+    caption = "Fuzzy RD Estimates"
+  ) |>
+  kableExtra::kable_minimal(font_size = 20)
+
+```
+
+### Diagnostics: Falsification Checks
+
+<br><br>
+
+- Diagnose the robustness of your results via **falsification checks**
+- The same idea as the Sharp RD case
+
+1. **Model Specification:** Are results sensitive to alternative specifications?
+
+2. **Placebo Test:** Does any pre-treatment covariate $Z_i$ jump at the threshold?
+
+3. **Placebo Threshold:** Check if jumps occur at placebo thresholds $c^{\ast}$?
+
+4. **Sorting:** Do units sort around the threshold?
+
+### Extensions
+
+<br><br>
+
+1.  [External validity in RD]{.highlight}
+  
+    - @angrist2015wanna
+    - @bertanha2020external
+
+2.  [RD with multiple cutoffs]{.highlight}
+    
+    - @cattaneo2016interpreting
+
+3.  [Geographic RD Design]{.highlight}
+  
+    - @keele2015geographic
+
+
+## Practical Consideration and Summary
+
+### Practical Consideration
+
+<br>
+
+1.  **Be careful about the estimand**
+    
+    1. [Sharp RD]{.highlight}: Local ATE at the threshold
+    2. [Fuzzy RD]{.highlight}: Local ATE at the threshold for compliers
+
+2.  **Provide falsification tests to evaluate assumptions**
+  
+    - Check modeling assumptions: Model Specification
+    - Check continuity assumptions (identification)
+      
+      1. Placebo Test
+      2. Placebo Threshold
+      3. Sorting
+
+3. **Whenever possible, provide both visualization and formal tests**
+
+
+### Summary
+
+<br><br>
+
+- **Advantages:**
+  
+  1. The design is simple and it is easy to communicate your RDD
+  2. Visualization can often provide clear evidence
+  3. A series of well-known falsification tests are available
+
+. . .
+
+- **Disadvantages:**
+  
+  1.  Very limited external validity: at best, RDD estimates the average effect of the sub-population with $X_i$ close to the cutoff.
+      - Only with additional assumptions (e.g. constant treatment effects), we can estimate the overall ATE.
+  
+  2. External validity is even more limited for the fuzzy RD.
 
 # Appendix {visibility="uncounted"}
 
