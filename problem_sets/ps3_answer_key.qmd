@@ -1,0 +1,629 @@
+---
+title: "Problem Set 3"
+author: "STAT II (Spring 2025)"
+date-modified: "**`r Sys.Date()`**"
+format-links: false
+format:
+   pdf:
+      toc: false
+      margin-left: "2cm"
+      margin-top: "2cm"
+      margin-right: "2cm"
+      margin-bottom: "2cm"
+      pdf-engine: pdflatex
+      highlight-style: tango
+      include-in-header: 
+         text: |
+            \usepackage{multicol}
+            \usepackage{enumitem}
+            \usepackage{ragged2e}
+        # include-in-header: ../_supp/mystyle.sty
+editor: source
+fontsize: 11pt
+bibliography: ../_supp/psci8357.bib
+# csl: _supp/chicago_syllabus.csl
+bibliographystyle: chicago
+suppress-bibliography: false
+link-citations: true
+citations-hover: true
+---
+
+```{=tex}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\textrm{Pr}}
+\newcommand{\var}{\mathbb{V}}
+\newcommand{\cov}{\mathrm{cov}}
+\newcommand{\corr}{\mathrm{corr}}
+\newcommand{\argmin}{\arg\!\min}
+\newcommand{\argmax}{\arg\!\max}
+\newcommand{\qedknitr}{\hfill\rule{1.2ex}{1.2ex}}
+\newcommand{\given}{\:\vert\:}
+\newcommand{\indep}{\mbox{$\perp\!\!\!\perp$}}
+```
+
+```{r}
+#| include: false
+
+pacman::p_load(tidyverse, haven)
+
+```
+
+***Disclaimer:** Please read the guidelines below carefully. Good luck!*
+
+
+## Guidelines
+
+- Please upload your answers to Brightspace by **Tuesday, April 15th, at 11:59 PM**.
+
+- Direct all questions about the problem set to Brightspace under Contents > Discussions > Class Feed > Problem Set 3.
+
+- For precise and expedited responses, we will address questions about this problem set on Brightspace until 6:00 PM on April 14th.
+
+- Collaboration is allowed, but I encourage you to attempt the problems on your own before seeking help from others. Regardless of collaboration, you must individually write up and submit your answers.
+
+- Late submissions will not be accepted unless prior approval is obtained from the instructor at least one day before the due date.
+
+- **The total points for the problem set are 150**.
+
+- **Grading:** Show every step of your derivations. We grade the steps of derivations as well as the final answers. If you are unable to solve the problem completely, partial credit can be given for your derivations. Conversely, a correct final answer without complete derivations may not receive full credit.
+
+- **Stylistic Requirements:** Adhere to the guidelines for the format of your submitted answers. Ensure you follow these rules:
+   
+   1. Submit your answers as a PDF file compiled from \LaTeX, R Markdown, or (ideally) a Quarto Markdown document.
+   2. If using raw \LaTeX (.tex) for your answers, submit an accompanying .R file for any computational tasks, with referenced line numbers corresponding to each specific task.
+   3. If using R Markdown (.Rmd) or Quarto Markdown (.qmd), include your code as code chunks in the source file. Additionally, submit the source .Rmd or .qmd file along with the compiled PDF to allow us to run your code easily.
+   4. To ensure reproducibility of your simulation results, use `set.seed()` at the beginning of your document.
+
+
+## Problem 1. Propensity Score and Weighting (25 points)
+
+In this question, we learn more about the properties of propensity score and weighting estimators. We consider the binary treatment variable $T_i \in \{0,1\}$, which takes $1$ if unit $i$ is in the treatment group and $0$ if unit $i$ is in the control group. We define two potential outcomes $\{Y_i(1), Y_i(0)\}$ for each unit and make the standard consistency assumption, i.e., $Y_i = T_i Y_i(1) + (1-T_i) Y_i(0).$ We observe pre-treatment covariates $\mathbf{X}_i$ for each unit $i$. We assume throughout this question that we obtain $n$ i.i.d. samples $\{Y_i, T_i, \mathbf{X}_i\}_{i=1}^n$ where $n$ is the sample size.
+
+(a) We learned in the class that we can identify the ATE by conditioning only on propensity scores. To prove this result, we first establish an important lemma. Suppose the following two identification assumptions hold:
+
+    1. **Conditional Ignorability:** $\{Y_i(1), Y_i(0)\} \ \indep \ T_i \given \mathbf{X}_i = \mathbf{x}$ for any $\mathbf{x} \in \mathcal{X}$ where $\mathcal{X}$ is the support of $\mathbf{X}_i.$
+    2. **Positivity:** $0 < \Pr(T_i=1\given \mathbf{X}_i = \mathbf{x}) < 1$ for any $\mathbf{x} \in \mathcal{X}.$ 
+
+    Under these two assumptions, please prove that the following conditional independence holds: 
+
+    ```{=tex}
+    $$
+    \{Y_i(1), Y_i(0)\} \ \indep \ T_i \ \given \ \pi(\mathbf{X}_i),
+    $$
+    ```
+
+    where $\pi(\mathbf{X}_i)$ is the propensity score, i.e., $\pi(\mathbf{X}_i) \equiv \Pr(T_i = 1 \given \mathbf{X}_i).$ This conditional independence means that the treatment variable is independent of the potential outcomes conditional only on the propensity score.
+
+    ```{=tex}
+    {\color{blue}
+    \textbf{Answer (15 points):}
+
+    To prove the conditional independence between two random variables $A$ and $B$ given $C$, all we need is to show that $\Pr(A \given B, C) = \Pr(A \given C)$. 
+    
+    \begin{align*}
+    & \Pr(T_i=1 \given Y_i(1),Y_i(0),\pi(\mathbf{X}_i)) \\
+    &\qquad = \ \E[T_i \given Y_i(1),Y_i(0),\pi(\mathbf{X}_i)] \qquad (\because \text{$T_i$ is a binary variable}) \\
+    &\qquad = \ \E\left[\E[T_i \given Y_i(1),Y_i(0),\mathbf{X}_i] \given Y_i(1),Y_i(0),\pi(\mathbf{X}_i)\right] \qquad (\because \text{Law of iterated Expectation}) \\
+    & \qquad = \  \E\left[\E[T_i \given \mathbf{X}_i] \given Y_i(1),Y_i(0),\pi(\mathbf{X}_i)\right] \quad (\because \  \text{Conditional ignorability}) \\
+    & \qquad = \ \E\left[\pi(\mathbf{X}_i) \given Y_i(1),Y_i(0),\pi(\mathbf{X}_i)\right] \qquad (\because \text{Definition of } \pi(\mathbf{X}_i) ) \\
+    & \qquad = \pi(\mathbf{X}_i)
+    \end{align*}
+    
+    We can also show that
+    
+    \begin{align*}
+    \Pr(T_i=1 \given \pi(\mathbf{X}_i))& = \E(T_i \given \pi(\mathbf{X}_i )) \qquad (\because \text{$T_i$ is a binary variable}) \\
+    & = \E\{\E(T_i \given \mathbf{X}_i) \given \pi(\mathbf{X}_i)\} \qquad (\because \mbox{Law of iterated expectation}) \\ 
+    & = \E(\pi(\mathbf{X}_i) \given \pi(\mathbf{X}_i)) \ = \ \pi(\mathbf{X}_i) 
+    \end{align*}
+    
+    Therefore, $$\Pr(T_i=1 \given Y_i(1),Y_i(0),\pi(\mathbf{X}_i)) = \Pr(T_i=1 \given \pi(\mathbf{X}_i)),$$ which implies $$\left\{ Y_i(1), Y_i(0) \right\} \indep T_i \given \pi(\mathbf{X}_i). \qquad \qedknitr$$
+    }
+    ```
+
+(b) Please explain in words the benefit of the approach based on propensity score $\pi(\mathbf{X}_i)$ as opposed to adjustment for $\mathbf{X}_i$.
+
+    _**Note:** There is no "one correct" answer. We will evaluate your answers primarily based on how well you apply concepts we learn in the class to investigate the benefit of propensity score._
+
+    ```{=tex}
+    {\color{blue}
+    \textbf{Answer (10 points):}
+    
+    Approach based on propensity scores suggests that researchers do not need to directly adjust for pre-treatment covariates $\mathbf{X}_i$, and it is sufficient to adjust for one-dimensional propensity score $\pi(\mathbf{X}_i).$ This is especially useful for matching because matching tends to perform poorly if we aim to match on too many covariates, but using the propensity score, we just need to match only on one variable.
+    }
+    ```
+
+    On the other hand, there is a recent article arguing against the use of propensity score in matching. If you are interested in this topic, read @king2019propensity.
+
+## Problem 2. Instrumental Variables (25 points)
+
+In this problem, we explore formal properties of the instrumental variable (IV) approach. We assume a binary treatment variable as in class, and adopt the following notation:
+
+- **Units:** Indexed by $i \in \{1, \ldots, n\}$, where $n$ is the total number of units.
+- **Treatment:** $T_i$ is a binary treatment variable for unit $i$, with $T_i \in \{0, 1\}$.
+- **Instrument:** $Z_i$ is a binary instrumental variable for unit $i$, with $Z_i \in \{0, 1\}$.
+- **Potential Treatment:** $T_i(z)$ is the treatment received by unit $i$ when $Z_i = z$.
+- **Potential Outcome:** $Y_i(z, t)$ is the outcome for unit $i$ when $Z_i = z$ and $T_i = t$.
+
+For formalization, define the compliance type $S_i$ as follows:
+
+- **Complier ($S_i = C$)**: $T_i(1) = 1$ and $T_i(0) = 0$.
+- **Never-Taker ($S_i = N$)**: $T_i(1) = 0$ and $T_i(0) = 0$.
+- **Always-Taker ($S_i = A$)**: $T_i(1) = 1$ and $T_i(0) = 1$.
+- **Defier ($S_i = D$)**: $T_i(1) = 0$ and $T_i(0) = 1$.
+
+_**Hint**: Slides 22-23 on Instrumental Variables should be useful for this problem._
+
+(a) Define the local average treatment effect (LATE) in terms of the potential outcomes. Prove (showing all steps, not just the final result) that the IV estimand
+
+    ```{=tex}
+    \begin{equation*}
+    \frac{\mathbb{E}\bigl(Y_i \given Z_i = 1\bigr) - \mathbb{E}\bigl(Y_i \given Z_i = 0\bigr)}{\mathbb{E}\bigl(T_i \given Z_i = 1\bigr) - \mathbb{E}\bigl(T_i \given Z_i = 0\bigr)}
+    \end{equation*}
+    ```
+
+    is equal to the LATE under the four core assumptions discussed in class. Clearly state each assumption in terms of the potential outcomes and indicate at each step of your proof which assumption you are using.
+
+    ```{=tex}
+    {\color{blue}
+    \textbf{Answer (5 points):}
+    
+    The local average treatment effect (LATE) is defined as $\E[Y_i(t=1) - Y_i(t=0) \given S_i = C]$.
+
+    The necessary identification assumptions are:
+
+    \begin{itemize}
+        \item \textbf{Randomization:} $\{Y_i (1,T_i(1)), Y_i(0, T_i(0)), T_i(1), T_i(0)\} \indep Z_i$
+        \item \textbf{Exclusion Restriction:} $Y_i (1, t) = Y_i(0, t)$ for all $t$ and for all units.
+        \item \textbf{Monotonicity:} $T_i(1) \geq T_i(0)$ for all units.
+        \item \textbf{Relevance:} $\E[T_i(1) - T_i(0)] \neq 0$.
+    \end{itemize}
+
+    Now we prove the IV estimand is equal to the LATE. We begin by rewriting the numerator. 
+
+    \begin{align*}
+        & \E[ Y_i \given Z_i=1] - \E[ Y_i \given Z_i=0] \\
+        & = \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0))] \qquad (\because \text{Random Assignment})\\
+        & = \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0)) \given S_i = C] \ \Pr(S_i =C) \\
+        &\qquad + \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0)) \given S_i = N] \ \Pr(S_i =N)  \\
+        &\qquad + \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0)) \given S_i = A] \ \Pr(S_i =A) \\
+        &\qquad + \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0)) \given S_i = D] \ \Pr(S_i =D) \qquad (\because \text{Law of Total Expectation})\\
+        & = \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0)) \given S_i = C] \ \Pr(S_i =C) \\
+        &\qquad + \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0)) \given S_i = N] \ \Pr(S_i =N)  \\
+        &\qquad + \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0)) \given S_i = A] \ \Pr(S_i =A) \qquad (\because \text{Monotonicity})\\
+        & = \E[Y_i(t=1) - Y_i(t=0) \given S_i = C] \ \Pr(S_i =C) \qquad (\because \text{Exclusion Restriction})\\
+    \end{align*}
+    
+    Also, by Random Assignment and Monotonicity, 
+
+    \begin{align*}
+        & \E[T_i \given Z_i=1] - \E[T_i \given Z_i=0]\\
+        & = \Pr(T_i(1) = 1) - \Pr(T_i(0)=1) \qquad(\because \text{Random Assignment and $T_i$ is a binary variable})\\ 
+        & = \{\Pr(T_i(1) = 1, T_i(0) = 1) + \Pr(T_i(1) = 1, T_i(0) = 0)\} \\
+        &\qquad - \{\Pr(T_i(0)=1, T_i(1) = 1) + \Pr(T_i(0)=1, T_i(1) = 0)\} \qquad(\because \text{Rule of Probability}) \\ 
+        & = \Pr(T_i(1) = 1, T_i(0)=0) \qquad(\because \text{Monotonicity}) \\
+        & = \Pr(S_i = C)
+    \end{align*}
+    
+    Therefore, given the Relevance ($E[T_i(1) - T_i(0)] > 0$):
+
+    $$
+    \frac{\E[ Y_i \given Z_i=1] - \E[ Y_i \given Z_i=0]}{\E[T_i \given Z_i=1] - \E[T_i \given Z_i=0]} = \E[Y_i(t=1) - Y_i(t=0) \given S_i = C].
+    $$
+    }
+    ```
+
+(b) Now, relax some of the assumptions used in part (a). Specifically, assume that the exclusion restriction holds **only for compliers**. Prove (showing all steps, not just the final result) that the IV estimand does not equal the LATE. Derive the exact expression for the bias, defined as the IV estimand minus the LATE.
+
+    ```{=tex}
+    {\color{blue}
+    \textbf{Answer (10 points):}
+    
+    We being by rewriting the numerator. 
+    
+    \begin{align*}
+        & \E[ Y_i \given Z_i=1] - \E[ Y_i \given Z_i=0] \\
+        & = \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0))]  \qquad (\because \text{Random Assignment})\\
+        & = \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0)) \given S_i = C] \ \Pr(S_i =C) \\
+        &\qquad + \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0)) \given S_i = N] \ \Pr(S_i =N)  \\
+        &\qquad + \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0)) \given S_i = A] \ \Pr(S_i =A)\\
+        &\qquad + \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0)) \given S_i = D] \ \Pr(S_i =D) \qquad (\because \text{Law of Total Expectation})\\
+        & = \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0)) \given S_i = C] \ \Pr(S_i =C) \\
+        &\qquad + \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0)) \given S_i = N] \ \Pr(S_i =N)  \\
+        &\qquad + \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0)) \given S_i = A] \ \Pr(S_i =A) \qquad (\because \text{Monotonicity})\\
+        & = \E[Y_i(t=1) - Y_i(t=0) \given S_i = C] \Pr(S_i =C) \\
+        &\qquad + \E[Y_i(1, 0) - Y_i(0, 0) \given S_i = N] \Pr(S_i =N)  \\
+        &\qquad + \E[Y_i(1, 1) - Y_i(0, 1) \given S_i = A] \Pr(S_i =A) \qquad (\because \text{Exclusion Restriction only for Compliers})
+    \end{align*}
+
+    The denominator is the same as in (a) because it only uses Random Assignment and Monotonicity. 
+
+    Therefore, combining the numerator and denominator, 
+    
+    \begin{align*}
+        \frac{\E[ Y_i \given Z_i=1] - \E[ Y_i \given Z_i=0]}{\E[T_i \given Z_i=1] - \E[T_i \given Z_i=0]} & = \E[Y_i(1) - Y_i(0) \given S_i = C] \\
+        & + \E[Y_i(1, 0) - Y_i(0, 0) \given S_i = N] \frac{\Pr(S_i =N)}{\Pr(S_i =C)}  \\
+        & + \E[Y_i(1, 1) - Y_i(0, 1) \given S_i = A] \frac{\Pr(S_i =A)}{\Pr(S_i =C)}
+    \end{align*}
+
+    Hence, the bias is $$\E[Y_i(1, 0) - Y_i(0, 0) \given S_i = N] \frac{\Pr(S_i =N)}{\Pr(S_i =C)} + \E[Y_i(1, 1) - Y_i(0, 1) \given S_i = A] \frac{\Pr(S_i =A)}{\Pr(S_i =C)}.$$
+
+    Note that $\E[Y_i(1, 0) - Y_i(0, 0) \given S_i = N] = \E[Y_i(z = 1) - Y_i(z = 0) \given S_i = N]$ and $\E[Y_i(1, 1) - Y_i(0, 1) \given S_i = A] = \E[Y_i(z = 1) - Y_i(z = 0) \given S_i = A].$
+
+    The bias formula offers two important insights. First, when the direct effect of the instrument is large among never-takers and always-takers, the bias is larger. Second, when the proportions of the never-takes and always-takers are large, the bias is larger. This bias expression also contains two intuitive special cases: (1) when the direct effect of the instrument is zero for both never-takers and always-takers, the bias is zero (the case in which the exclusion restriction holds for always-takers and never-takers as well as for compliers), and (2) when there is no never-taker and no always-taker (the case in which all samples are compliers and the exclusion restriction holds for all samples).
+    }
+    ```
+
+(c) Finally, consider the case where the **monotonicity** assumption is violated _while maintaining the exclusion restriction_. Explain _in words_ what is the source of bias of IV estimand (compared to the LATE) in this case?
+
+    ```{=tex}
+    {\color{blue}
+    \textbf{Answer (10 points):}
+    
+    We begin by rewriting the numerator. 
+    
+    \begin{align*}
+        & \E[ Y_i \given Z_i=1] - \E[ Y_i \given Z_i=0] \\
+        & = \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0))]   \qquad (\because \text{Random Assignment})\\
+        & = \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0)) \given S_i = C] \Pr(S_i =C) \\
+        &\qquad + \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0)) \given S_i = N] \Pr(S_i =N)  \\
+        &\qquad + \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0)) \given S_i = A] \Pr(S_i =A) \\
+        &\qquad + \E[Y_i(1, T_i(1)) - Y_i(0, T_i(0)) \given S_i = D] \Pr(S_i =D)  \qquad (\because \text{Law of Iterated Expectation})\\
+        & = \E[Y_i(t=1) - Y_i(t=0) \given S_i = C] \Pr(S_i =C) \\
+        &\qquad - \E[Y_i(t=1) - Y_i(t=0) \given S_i = D] \Pr(S_i =D)  \qquad (\because \text{Exclusion Restriction})
+    \end{align*}
+    
+    Now, without monotonicity, 
+    
+    \begin{align*}
+        & \E[T_i \given Z_i=1] - \E[T_i \given Z_i=0]  \\
+        & = \Pr(T_i(1) = 1) - \Pr(T_i (0)=1)   \qquad (\because \text{Random Assignment and $T_i$ is a binary variable})\\
+        & = \{\Pr(T_i(1) = 1, T_i(0) = 1) + \Pr(T_i(1) = 1, T_i(0) = 0)\} \\
+        &\qquad \hspace{0.5in} - \{\Pr(T_i(0)=1, T_i(1) = 1) + \Pr(T_i(0)=1, T_i(1) = 0)\} \qquad (\because \text{Rule of Probability}) \\
+        & = \{\Pr(S_i = A) + \Pr(S_i = C)\} - \{\Pr(S_i = A) + \Pr(C_i = D)\} \qquad (\because \text{Definition}) \\ 
+        & = \Pr(S_i = C) - \Pr(S_i=D)
+    \end{align*}
+    
+    Therefore, combining the numerator and the denominator, 
+    
+    \begin{align*}
+        &\frac{\E[ Y_i \given Z_i=1] - \E[ Y_i \given Z_i=0]}{\E[T_i \given Z_i=1] - \E[T_i \given Z_i=0]}  \\
+        & =  \E[Y_i(t=1) - Y_i(t=0) \given S_i = C] \frac{\Pr(S_i=C)}{\Pr(S_i=C) - \Pr(S_i=D)}\\
+        &\qquad  - \E[Y_i(t=1) - Y_i(t=0) \given S_i = D] \frac{\Pr(S_i =D)}{\Pr(S_i=C) - \Pr(S_i=D)}\\
+        & =  \E[Y_i(t=1) - Y_i(t=0) \given S_i = C] \\
+        &\qquad  + \lambda \{\E[Y_i(t=1) - Y_i(t=0) \given S_i = C] - \E[Y_i(t=1) - Y_i(t=0) \given S_i = D]\}
+    \end{align*}
+    
+    where $\lambda = \frac{\Pr(S_i =D)}{\Pr(S_i=C) - \Pr(S_i=D)}$
+
+    Therefore, the bias is $$\lambda \{\E[Y_i(t=1) - Y_i(t=0) \given S_i = C] - \E[Y_i(t=1) - Y_i(t=0) \given S_i = D]\}$$
+
+    The bias formula offers two important insights. First, when the average causal effect of the treatment is the same for compliers and defiers, the bias is zero. Second, when the proportion of defiers is large, the bias is larger. In a special case in which the proportion of defiers is zero, the bias is zero.
+    }
+    ```
+
+## Problem 3. Instrumental Variables (Group Assignment; 50 points) 
+
+In this problem, you will need to split into groups of 2-3 people and then find and examine an observational study where researchers rely on the instrumental variable approach. It should satisfy the following criteria:
+
+1. **Journals**: It should be from the following three journals: *American Political Science Review, American Journal of Political Science*, or *Journal of Politics*.
+
+2. **Replication Data**: The paper should have a publicly available replication file. For the above three journals, they require authors to upload replication files to the following archives in recent years. So, if you pick a paper from recent years, it should be straightforward to find a replication file.
+  
+    - American Political Science Review: <https://dataverse.harvard.edu/dataverse/the_review>
+    - American Journal of Political Science: <https://dataverse.harvard.edu/dataverse/ajps>
+    - Journal of Politics: <https://dataverse.harvard.edu/dataverse/jop>
+
+3. **Google Spreadsheet**: Each group should find a different paper. To make sure every group finds a different paper, as soon as your group finds a paper, please write it down in this Google Spreadsheet (<https://docs.google.com/spreadsheets/d/1ElMZMC7zMIw73RIqm3PGVzRDmg3clA28rac_NPEosBU/edit?usp=sharing>). We use the "first come first served" rule.
+
+4. **New Application**: You cannot choose papers that are discussed or mentioned in lectures or sections. You cannot choose a paper from a list at the end of slides on Instrumental Variables.
+
+_**Note:** Do not spend too much time looking for a "perfect" paper that perfectly fits your research interests, rather be less selective and treat this exercise as if you were asked to review the paper by a journal or for a conference. There is no "one correct" answer to most of the following questions. We will evaluate your answers primarily based on how well you apply concepts we learn in the class to investigate a study you choose._
+
+(a) Please first explain the overall research question of the paper, the data and contexts of the study, and the main findings.
+
+    Then, please explain what are the outcome variable, the treatment variable, and the instrumental variable in the study.
+
+    ```{=tex}
+    {\color{blue}
+    \textbf{Answer (10 points)}}
+    ```
+
+(b) Then, please examine the identification assumptions necessary for the IV analysis. How do the authors justify those IV assumptions? Please investigate each of the four assumptions we covered in the class. Do they discuss potential violations of assumptions? If so, what do they do to address the potential violation of those IV assumptions?
+
+    _**Note:** Please focus your answer to this question on how _the original authors_ discuss and address the IV assumptions. You will evaluate them in the next question!_
+
+    ```{=tex}
+    {\color{blue}
+    \textbf{Answer (10 points)}}
+    ```
+
+(c) Please evaluate the identification assumptions the authors make. Are they plausible? If so, why? If not, please provide a concrete substantive argument that suggests potential violations of the assumptions. Again, please investigate all the four assumptions we covered in the class.
+
+    ```{=tex}
+    {\color{blue}
+    \textbf{Answer (15 points)}}
+    ```
+
+(d) What methodological limitations do *you* think the study has? You can discuss points related to the IV or any other methodological problems. What would you do to address the methodological limitations you identified?
+
+    ```{=tex}
+    {\color{blue}
+    \textbf{Answer (15 points)}}
+    ```
+
+## Problem 4. Difference-in-Differences Design (50 points)
+
+@bechtel2011lasting use the difference-in-differences design to estimate the causal impact of beneficial policies. The data for the paper is available online at the Harvard Dataverse ( [Link](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/25582) ). Please check their replication file for definitions of each variable in the data.
+
+```{r, message = FALSE, warning = FALSE}
+## Prepare the Data
+pacman::p_load(
+  readstata13, tidyverse,
+  estimatr, fixest
+)
+
+data1998 <- haven::read_dta("../_data/1994_1998.dta")
+data2002 <- haven::read_dta("../_data/1998_2002.dta")
+data2005 <- haven::read_dta("../_data/1998_2005.dta")
+data2009 <- haven::read_dta("../_data/1998_2009.dta")
+
+data1998 <-
+  data1998 |>
+  group_by(wkr) |>
+  mutate(Tgroup = as.integer(any(Flooded == 1))) |>
+  ungroup()
+
+```
+
+(a) Please read it carefully before you work on this question. Define each of the following variables in the context of this study. Note that you might need to define some of the variables separately for the short- and long-term effects.
+
+    1. Treatment group  
+    2. Treatment variable  
+    3. Pre-treatment period and post-treatment period  
+    4. Outcome variable  
+
+    ```{=tex}
+    {\color{blue}
+    \textbf{Answer (5 points):}
+
+    The treatment group is a set of electoral districts that were "affected by the Elbe flood and the associated disaster response." The treatment variable at year $t$ takes the value of one if an electoral district experience at least one of the following events in year $t$: "stabilization or breach of levees, flood warning, overtopping of levee, flooding, evacuation warning, or evacuation." It is important to define the treatment variable with respect to a particular year $t$. Year 1994 and 1998 are the pre-treatment periods and year 2002, 2005, and 2009 are the post-treatment periods. Outcome variables vary depending on the causal quantities of interest. For the short-term effect, the authors are interested in "the SPD’s proportional representation (PR) vote share in a given district" in 2002. For the long-term effects, the authors consider the same outcome variable in 2005 and 2009.
+    }
+    ```
+
+(b) Some scholars might argue that the 2002 Elbe flooding in Germany can be considered quasi-random. Suppose that they then propose to use a difference-in-means estimator, rather than the difference-in-differences design, to estimate the causal effect of beneficial policies.
+
+    Explain why the difference-in-differences design might be a more plausible approach to make causal inference in this study. After describing your reasoning, provide empirical evidence using the data.
+
+    ```{=tex}
+    {\color{blue}
+    \textbf{Answer (5 points):}
+
+    The difference-in-means estimator is an unbiased estimator if the treatment assignment is randomly assigned. However, districts close to the Elbe River are more likely to be affected by the Elbe flooding, suggesting that some important confounders might be associated with the treatment assignment. If so, the difference-in-means estimator might not be appropriate. Instead, the difference-in-difference estimator is unbiased as far as unobserved confounders are time-invariant. Given that the main confounding might be due to the proximity to the Elbe River, this assumption of the time-invariant confounder might be more plausible, suggesting the difference-in-difference estimator might be more reliable. 
+
+    One simple way to empirically check this reasoning is to check whether the pre-treatment outcome variables are well balanced across treatment groups. In particular, we can check the SPD vote share in 1998. Given that the Elbe flooding occurred in 2002, if the treatment assignment is randomized, the treatment and control groups should have similar levels of the SPD support. However, the support in the treatment group is about $33$ \% and the one in the control group is about $42$ \% -- the gap is about $9$ percentage points. This strongly suggests that the difference-in-means estimator might not be appropriate. In the next problem, we show that an necessary assumption for the difference-in-difference estimator, the parallel trend assumption, is plausible in this application.
+    }
+    ```
+
+(c) The difference-in-differences design requires the "parallel trends assumption." Discuss the substantive meaning of this assumption in the context of this study. How did the authors check the plausibility of this assumption? (Note: they could not directly test this assumption, but they checked its plausibility). Provide a plot that assesses the parallel trends assumption in this study. Finally, provide a formal statistical test that assesses the parallel trends assumption.
+
+
+    ```{=tex}
+    {\color{blue}
+    \textbf{Answer (10 points):}
+
+    In this application, the parallel trend assumption means that the trend of the SPD vote share for the treatment group, absent of the Elbe flooding, is similar to the one of the SPD vote share for the control group. The authors check the plausibility of this assumption by investigating the parallel trend assumption in the pre-treatment periods. Given that both treatment and control groups have no received the treatment in the pre-treatment periods, they should have the parallel trend.
+    }
+    ```
+
+\small
+
+```{r}
+DID <- function(data, t.name){
+  p01 <- mean(data$spd_z_vs[data$PostPeriod == 0 & data[,t.name] ==1])
+  p00 <- mean(data$spd_z_vs[data$PostPeriod == 0 & data[,t.name]==0])
+  p11 <- mean(data$spd_z_vs[data$PostPeriod == 1 & data[,t.name]==1])
+  p10 <- mean(data$spd_z_vs[data$PostPeriod == 1 & data[,t.name]==0])
+
+  dif.t <- p11 - p01
+  dif.c <- p10 - p00
+  effect <- dif.t - dif.c
+  output <- list("p01" =p01, "p00" =p00, "p11" =p11, "p10" =p10,
+                 "dif.t"=dif.t, "dif.c"=dif.c,
+                 "effect" = effect)
+  return(output)
+}
+```
+
+```{r}
+#| fig-align: center
+
+did1998 <- DID(data1998, t.name = "Tgroup")
+
+# Prepare data for plotting
+plot_data <- data.frame(
+  Year = factor(c("1994", "1998"), levels = c("1994", "1998")),
+  SPD_Vote_Share = c(did1998$p01, did1998$p11, did1998$p00, did1998$p10),
+  Group = rep(c("Treatment Group", "Control Group"), each = 2)
+)
+
+plot_data$SPD_Vote_Share[3:4] <- c(did1998$p00, did1998$p10)
+
+ggplot(plot_data, aes(x = Year, y = SPD_Vote_Share, group = Group, color = Group)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 3) +
+  scale_color_manual(
+    values = c(
+      "Treatment Group" = "red",
+      "Control Group" = "black"
+    )
+  ) +
+  labs(
+    title = "Check for Parallel Trends Assumption",
+    x = "Year",
+    y = "Vote Share for the SPD"
+  ) +
+  theme_bw() +
+  theme(legend.title = element_blank())
+```
+
+```{r}
+## Difference in Differece with 1994 and 1998 (Pre-treatment Periods)
+dif1994 <- 
+mean(data1998$spd_z_vs[data1998$year == 1994 & data1998$Tgroup==1]) - 
+  mean(data1998$spd_z_vs[data1998$year == 1994 & data1998$Tgroup==0])
+dif1998 <- 
+mean(data1998$spd_z_vs[data1998$year == 1998 & data1998$Tgroup==1]) - 
+  mean(data1998$spd_z_vs[data1998$year == 1998 & data1998$Tgroup==0])
+## No Effect (as we expected!)
+dif1998 - dif1994
+
+# Two-way fixed effects using estimatr::lm_robust with clustered SEs
+did_test <- lm_robust(
+    spd_z_vs ~ Flooded,
+    fixed_effects = wkr + year,
+    data = data1998,
+    clusters = wkr
+)
+
+broom::tidy(did_test) |> dplyr::select(1:5)
+```
+
+\normalsize
+
+(d)  What are the main quantities of interest in this study? Provide formal definitions and then interpret them in the context of this study. Note that the authors consider not only one but several estimands in Table 1 (page 857).
+
+```{=tex}
+{\color{blue}
+\textbf{Answer (5 points):} The main quantity of interest is the average treatment effect on the treated (ATT) for both short-term and long-term effects. Formally, we have
+    
+\begin{equation*}
+\forall t = \{2002, 2005, 2009\}: \: \E[ Y_{it} (1) - Y_{it} (0) \given G_i =1 ]. 
+\end{equation*}
+    
+where $t = 2002$ corresponds to the short-term effect and $t = 2005, 2009$ to the long-term effect. 
+}
+```
+
+(e) Estimate these main quantities of interest defined in (d) using the difference-in-differences estimator without including any control variables. Please report point estimates, standard errors, and the 95% confidence intervals. When computing standard errors, please cluster standard errors at the district level. Finally, please briefly interpret the result.
+
+    ```{=tex}
+    {\color{blue}
+    \textbf{Answer (10 points):}}
+    ```
+
+\small
+```{r}
+data2002 <-
+  data2002 |>
+  group_by(wkr) |>
+  mutate(Tgroup = as.integer(any(Flooded == 1))) |>
+  ungroup()
+
+data2005 <-
+  data2005 |>
+  group_by(wkr) |>
+  mutate(Tgroup = as.integer(any(Flooded == 1))) |>
+  ungroup()
+
+data2009 <-
+  data2009 |>
+  group_by(wkr) |>
+  mutate(Tgroup = as.integer(any(Flooded == 1))) |>
+  ungroup()
+
+did1998 <- DID(data1998, t.name = "Tgroup")
+did2002 <- DID(data2002, t.name = "Tgroup")
+did2005 <- DID(data2005, t.name = "Tgroup")
+did2009 <- DID(data2009, t.name = "Tgroup")
+
+## Short term, Mid-term, and Long-term effects
+c(did2002$effect, did2005$effect, did2009$effect)
+
+# Using estimatr::lm_robust for two-way fixed effects with clustered SEs
+did2002_tfe <- lm_robust(
+  spd_z_vs ~ Flooded,
+  fixed_effects = wkr + year,
+  data = data2002,
+  clusters = wkr
+) |> tidy()
+
+did2005_tfe <- lm_robust(
+  spd_z_vs ~ Flooded,
+  fixed_effects = wkr + year,
+  data = data2005,
+  clusters = wkr
+) |> tidy()
+
+did2009_tfe <- lm_robust(
+  spd_z_vs ~ Flooded,
+  fixed_effects = wkr + year,
+  data = data2009,
+  clusters = wkr
+) |> tidy()
+
+bind_rows(did2002_tfe, did2005_tfe, did2009_tfe) |>
+  dplyr::mutate(year = c(2002, 2005, 2009)) |>
+  dplyr::select(year, 2:5) |>
+  knitr::kable(digits = 3, align = "lcccc") |>
+  kableExtra::kable_minimal(font_size = 12)
+```
+
+\normalsize
+
+
+(f) Estimate these main quantities of interest defined in (d) using the difference-in-differences estimator while including control variables that the original authors included (control variables used in Columns (3) and (6) of Table 1 in the paper). Due to the data limitation, you can focus on the effect on 2002 and 2005 (excluding 2009). Please report point estimates, standard errors, and the 95% confidence intervals. When computing standard errors, please cluster standard errors at the district level. Finally, please briefly interpret the result.
+
+    ```{=tex}
+    {\color{blue}
+    \textbf{Answer (10 points):}}
+    ```
+
+\small
+```{r}
+# Identify control variables (those starting with "xx")
+controls <- colnames(data2002)[grep("^xx", colnames(data2002))]
+
+# Build formula for lm_robust
+form_with_control <- as.formula(
+  paste("spd_z_vs ~ Flooded +", paste(controls, collapse = " + "))
+)
+
+# 2002 model
+did2002_tfe_cont <- lm_robust(
+  formula = form_with_control,
+  fixed_effects = wkr + year,
+  data = data2002,
+  clusters = wkr
+) |>
+  tidy() |>
+  dplyr::filter(term == "Flooded")
+
+# 2005 model
+did2005_tfe_cont <- lm_robust(
+  formula = form_with_control,
+  fixed_effects = wkr + year,
+  data = data2005,
+  clusters = wkr
+) |>
+  tidy() |>
+  dplyr::filter(term == "Flooded")
+
+# Combine into a single table
+dplyr::bind_rows(
+  did2002_tfe_cont, 
+  did2005_tfe_cont
+) |>
+  dplyr::mutate(year = c(2002, 2005)) |>
+  dplyr::select(year, 2:5) |>
+  knitr::kable(, digits = 3, align = "lcccc", caption = "DiD Estimates with Controls") |>
+  kableExtra::kable_minimal(font_size = 12)
+```
+
+\normalsize
+
+```{=tex}
+\pagebreak
+```
+
+## References
