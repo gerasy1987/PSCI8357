@@ -84,8 +84,8 @@ You will receive homework about every two weeks via Brightspace (not GitHub). Yo
 -   Include a short disclaimer at the top of the assignment (e.g., after your name/date) indicating whether you used any AI tool(s) beyond spell-checking/light editing and for what purpose(s). If you did, also attach a printed to PDF log of the AI chat.
 -   Estimates obtained in [R]{.proglang} must be formatted properly into tables or graphs resembling journal presentation styles. You should use a table formatting function (e.g., `kableExtra`, `apsrtable` or `stargazer` in [R]{.proglang}). Use a reasonable (2 or at most 3) number of digits after decimal points, report standard errors or confidence intervals along with coefficients, clarify what are the dependent variables in each table or figure, and explain in footnotes to your tables or figures what kinds of estimators or adjustments have been used. Print outs of raw screen output or commented logs will not receive any credit. However, you may include such output as an appendix so that the grader can troubleshoot.
 -   Mathematical derivations should include all key steps with explanations for important techniques.
-- Your assignment should be submitted as a PDF file compiled from \LaTeX, R Markdown, or (_ideally_) a Quarto Markdown document.
-    - If using raw \LaTeX (.tex) for your answers, submit an accompanying .R file for any computational tasks, with referenced line numbers corresponding to each specific task.
+- Your assignment should be submitted as a PDF file compiled from \LaTeX, [R]{.proglang} Markdown, or (_ideally_) a Quarto Markdown document.
+    - If using raw \LaTeX (.tex) for your answers, submit an accompanying [R]{.proglang} file for any computational tasks, with referenced line numbers corresponding to each specific task.
     - If using R Markdown (.Rmd) or Quarto Markdown (.qmd), include your code as code chunks in the source file. Additionally, submit the source .Rmd or .qmd file along with the compiled PDF to allow us to run your code easily.
 
 Homework will be graded for points as indicated on each assignment and count toward 35% of your grade.
@@ -125,7 +125,7 @@ A final exam will be scheduled during the final examination week (the week of Ap
 
 -   **35% Problem sets** (every two weeks, see schedule below)
 -   **40% Replications** (due March 2nd and April 13th)
--   **20% Take-home final exam** (Week of April 20th)
+-   **25% Take-home final exam** (Week of April 20th)
 
 Late work will not be accepted without documented proof of a family or medical emergency.
 
@@ -160,8 +160,6 @@ And here are the **recommended** ones:
 -   Lohr, Sharon L. *Sampling: Design and Analysis.* CRC press, 2021.
 
 You can obtain these as PDFs on Brightspace or on the authors' websites and online preprint archives (SSRN or arXiv). Papers are listed below according to topic.
-
-### Brightspace
 
 ### Course Pages
 
