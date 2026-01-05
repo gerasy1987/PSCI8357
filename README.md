@@ -7,7 +7,7 @@
 -   [Grading and Deadlines](#grading-and-deadlines)
 -   [Resources](#resources)
 -   [Course Schedule](#course-schedule)
--   [Class Policies](#class-policies)
+-   [Course Policies](#course-policies)
 -   [Acknowledgments](#acknowledgments)
 -   [References](#references)
 
@@ -240,7 +240,7 @@ We will draw on textbooks and papers for the course. Here are the
 -   Angrist, Joshua D., and Jörn-Steffen Pischke. *Mostly Harmless
     Econometrics: An Empiricist’s Companion.* Princeton university
     press, 2009.
--   Gerber, Alan S and Donald P Green, . *Field Experiments: Design,
+-   Gerber, Alan S and Donald P Green. *Field Experiments: Design,
     analysis, and interpretation.* W.W. Norton, 2012.
 -   Morgan, Stephen L., and Christopher Winship. *Counterfactuals and
     Causal Inference.* 2nd Ed. Cambridge University Press, 2015.
@@ -269,12 +269,31 @@ according to topic.
 
 ### Brightspace
 
-Readings, lectures, assignments, and news for the course will be posted
-on the course page on Brightspace (course management system used by
-Vanderbilt). I will post announcements and changes to the home page of
-the site, please keep an eye out. In addition, we will have discussion
-forums for any class related questions and class related news/social
-media posts on Brightspace.
+### Course Pages
+
+Syllabus, readings, assignments, and announcements for the course will
+be posted on the course page on Brightspace (course management system
+used by Vanderbilt). I will post announcements and changes to the home
+page of the site, please keep an eye out. In addition, we will have
+discussion forums for any class related questions, replication plans and
+class related news/social media posts on Brightspace.
+
+In addition to Brightspace, we will maintain a class GitHub repository
+at <https://github.com/gerasy1987/PSCI8357>. All current lecture slides,
+handouts, code, and other publicly shareable materials will be posted
+there. Please **clone** this repository to your laptop early in the
+semester and **pull** regularly so you always have the latest versions.
+The GitHub repository will also include the **raw Quarto (.qmd)** source
+files used to produce many of the course materials, which can serve as
+concrete examples of reproducible scientific writing and analysis
+workflows.
+
+Getting comfortable with **git/GitHub and version control** is a
+valuable skill in its own right. Even if you have not used it before,
+this course is a low-stakes opportunity to practice a workflow that will
+help you on future projects-keeping track of changes, collaborating
+cleanly, and making it easy to return to earlier versions of your work
+when (not if) something breaks.
 
 ### AI Tools
 
@@ -624,7 +643,7 @@ heterogeneity, optimal treatment regimes</td>
 </tbody>
 </table>
 
-## Class Policies
+## Course Policies
 
 ### Cell Phones, Laptops, Tablets, etc.
 
