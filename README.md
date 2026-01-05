@@ -97,11 +97,13 @@ following guidelines:
     such output as an appendix so that the grader can troubleshoot.
 -   Mathematical derivations should include all key steps with
     explanations for important techniques.
--   Your assignment should be submitted as a PDF file compiled from , R
-    Markdown, or (*ideally*) a Quarto Markdown document.
-    -   If using raw (.tex) for your answers, submit an accompanying .R
-        file for any computational tasks, with referenced line numbers
-        corresponding to each specific task.
+-   Your assignment should be submitted as a PDF file compiled from ,
+    <span class="proglang">R</span> Markdown, or (*ideally*) a Quarto
+    Markdown document.
+    -   If using raw (.tex) for your answers, submit an accompanying
+        <span class="proglang">R</span> file for any computational
+        tasks, with referenced line numbers corresponding to each
+        specific task.
     -   If using R Markdown (.Rmd) or Quarto Markdown (.qmd), include
         your code as code chunks in the source file. Additionally,
         submit the source .Rmd or .qmd file along with the compiled PDF
@@ -201,7 +203,7 @@ so that we can arrange an alternative time. The final will constitute
 
 -   **35% Problem sets** (every two weeks, see schedule below)
 -   **40% Replications** (due March 2nd and April 13th)
--   **20% Take-home final exam** (Week of April 20th)
+-   **25% Take-home final exam** (Week of April 20th)
 
 Late work will not be accepted without documented proof of a family or
 medical emergency.
@@ -229,8 +231,6 @@ through RStudio or VS Code (or even many of its wrappers like
 the repository I prepared for the Scientific Workflow workshop at
 Vanderbilt here:
 [github.com/gerasy1987/workflow_workshop](https://github.com/gerasy1987/workflow_workshop).
-
-------------------------------------------------------------------------
 
 ### Textbooks
 
@@ -266,8 +266,6 @@ And here are the **recommended** ones:
 You can obtain these as PDFs on Brightspace or on the authors’ websites
 and online preprint archives (SSRN or arXiv). Papers are listed below
 according to topic.
-
-### Brightspace
 
 ### Course Pages
 
@@ -331,14 +329,14 @@ document AI use, please ask during class or contact me individually.
 ## Course Schedule
 
 ***Note:** The schedule is subject to change. Readings will be
-distributed through Brightspace ahead of each class.*
+distributed via Brightspace ahead of each class.*
 
 <table>
 <colgroup>
-<col style="width: 10%" />
-<col style="width: 20%" />
-<col style="width: 40%" />
-<col style="width: 30%" />
+<col style="width: 9%" />
+<col style="width: 18%" />
+<col style="width: 36%" />
+<col style="width: 36%" />
 </colgroup>
 <thead>
 <tr>
@@ -642,6 +640,8 @@ heterogeneity, optimal treatment regimes</td>
 </tr>
 </tbody>
 </table>
+
+------------------------------------------------------------------------
 
 ## Course Policies
 

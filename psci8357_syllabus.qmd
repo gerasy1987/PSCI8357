@@ -47,7 +47,7 @@ pacman::p_load(tidyverse)
 
 ------------------------------------------------------------------------
 
-#### **Instructor:** Georgiy (Gosha) Syunyaev ([g.syunyaev\@vanderbilt.edu](mailto:g.syunyaev@vanderbilt.edu))
+#### **Instructor:** Georgiy (Gosha) Syunyaev ([g.syunyaev@vanderbilt.edu](mailto:g.syunyaev@vanderbilt.edu))
 
 -   **Office hours:** Wednesday, 10 AM - 12 PM in Commons 351 (or email me to schedule appointment)
 -   **Office hourse sign-up link:** <https://calendar.app.google/iHhWLRvcGoppGW477>
@@ -139,8 +139,6 @@ Problem sets and exam will have opportunities to earn extra credit, theoreticall
 
 You will have to work in [R]{.proglang} in this class. I encourage using [Quarto](https://quarto.org/) for your assignments. This is a great investment that will pay off in the long run in terms of productivity as well as reproducibility. Quarto Markdown runs easily through RStudio or VS Code (or even many of its wrappers like [Cursor](https://www.cursor.com/) or soon [Positron](https://positron.posit.co/)). You can also check materials in the repository I prepared for the Scientific Workflow workshop at Vanderbilt here: [github.com/gerasy1987/workflow_workshop](https://github.com/gerasy1987/workflow_workshop).
 
-------------------------------------------------------------------------
-
 ### Textbooks
 
 We will draw on textbooks and papers for the course. Here are the **required** textbooks:
@@ -186,9 +184,9 @@ If you have questions or concerns about what is allowed, or how to document AI u
 
 ## Course Schedule
 
-***Note:** The schedule is subject to change. Readings will be distributed through Brightspace ahead of each class.*
+***Note:** The schedule is subject to change. Readings will be distributed via Brightspace ahead of each class.*
 
-:::{.list-table aligns=c,l,l,l widths=1,2,4,3 header-cols=1}
+:::{.list-table aligns=c,l,l,l widths=1,2,4,4 header-cols=1}
 
 *   - Date
     - Title
@@ -325,6 +323,8 @@ If you have questions or concerns about what is allowed, or how to document AI u
     - 
     - 
 :::
+
+------------------------------------------------------------------------
 
 ## Course Policies
 
