@@ -1,0 +1,29 @@
+/*-- scss:defaults --*/
+
+
+
+.callout-important {
+  font-size: 4rem;
+}
+
+#title-slide .title {
+  font-size: 2em;
+  color: #d65d0e;
+}
+
+/*-- scss:rules --*/
+
+$red: #cc241d;
+$green: #98971a;
+$yellow: #d79921;
+$blue: #458588;
+$purple: #b16286;
+$aqua: #689d6a;
+$orange: #d65d0e;
+$gray: #928374;
+
+div.callout-important {
+  border-left-color: $purple !important;
+  font-size: 0.85em !important;
+  border-color: $purple;
+}

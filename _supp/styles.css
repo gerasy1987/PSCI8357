@@ -1,0 +1,116 @@
+.border {
+  border: 1px solid #689d6a;
+}
+.border-thick {
+  border-width: 3px;
+}
+.reveal .slides .fragment.blur {
+  filter: blur(5px);
+}
+.reveal .slides .fragment.blur.visible {
+  filter: none;
+}
+
+.tiny-font {
+  font-size: .5em;
+}
+
+.small-font {
+  font-size: .8em;
+}
+
+.large-font {
+  font-size: 1.2em;
+}
+
+.huge-font {
+  font-size: 1.5em;
+}
+
+.highlight {
+  color: #d65d0e;
+  font-weight: bold;
+}
+
+.note {
+  color: #458588;
+  font-weight: bold;
+}
+
+.alert {
+  color: #cc241d;
+  font-weight: bold;
+}
+
+.red {
+  color: #cc241d;
+}
+.green {
+  color: #98971a;
+}
+.yellow {
+  color: #d79921;
+}
+.blue {
+  color: #458588;
+}
+.purple {
+  color: #b16286;
+}
+.aqua {
+  color: #689d6a;
+}
+.orange {
+  color: #d65d0e;
+}
+.gray {
+  color: #928374;
+}
+.light {
+  color: #d5c4a1;
+}
+
+.pdf {
+  max-width: 100%;
+	width: 600px;
+	height: 2400px;
+	border: 10px solid rgba(0,0,0,.2);
+	margin: 0;
+}
+
+/*********************************************
+ * PROGRESS BAR
+ *********************************************/
+ .reveal .progress {
+  background: rgba(214, 93, 14, .1); }
+
+.reveal h1 {
+  font-size: 34pt
+}
+
+.reveal h2 {
+  font-size: 32pt
+}
+  
+.reveal h3 {
+  font-size: 30pt
+}
+
+.reveal .progress span {
+  background: rgba(214, 93, 14, .9);
+  -webkit-transition: width 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985);
+  -moz-transition: width 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985);
+  transition: width 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985); }
+
+
+.heatMap tr:nth-child(5) { background: #d5c4a1; }
+.heatMap tr:nth-child(6) { background: #d5c4a1; }
+.heatMap tr:nth-child(7) { background: #d5c4a1; }
+
+
+.v-center-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 90%;
+}

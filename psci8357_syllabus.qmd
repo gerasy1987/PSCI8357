@@ -1,7 +1,7 @@
 ---
 title: |
     |   PSCI 8357 (Spring 2026)
-    |   Statistics for Political Research II
+    |   Statistics for Political Research (STAT) II
 subtitle: |
     |   WHEN: M/W 4:30 – 5:45PM
     |   WHERE: COMMONS 320
@@ -71,40 +71,47 @@ There are two prerequisits for this class. First, students should have a firm gr
 
 ## Requirements
 
-### Homeworks (7 $\times$ 5 %)
+### In-class quizzes
 
-You will receive homework about every two weeks. You will have to submit your completed assignment within a week; exact deadlines will be made clear on the assignment. You can work with others, but to receive credit, your homework must comply with the following guidelines:
+Roughly once a week, we'll start class with a short in-class quiz (no more than 5 questions). The goal is simply to check how the main ideas are landing and to help me identify topics that may need more explanation or practice. These quizzes are *low-stakes* and meant to support your learning---not to add pressure. They are **not graded**, and you should think of them as a quick warm-up and a way for us to calibrate where we are as a class.
 
--   You must turn in a PDF copy of your own homework by the stated deadline to both the professor and TA.
+### Problem sets (7 $\times$ 5 %)
+
+You will receive homework about every two weeks via Brightspace (not GitHub). You will have to submit your completed problem set within a week; exact deadlines will be made clear on the assignment. You can work with others, but to receive credit, your homework must comply with the following guidelines:
+
+-   You must turn in a PDF copy of your own homework by the stated deadline to both the instructor and TA.
 -   The assignment that you turn in must clearly reflect your own thinking. Sets of verbatim copies of homework will have credit reduced by half.
--   Homework assignments may be hand written or typed, but they must be clearly legible.
+-   Include a short disclaimer at the top of the assignment (e.g., after your name/date) indicating whether you used any AI tool(s) beyond spell-checking/light editing and for what purpose(s). If you did, also attach a printed to PDF log of the AI chat.
 -   Estimates obtained in [R]{.proglang} must be formatted properly into tables or graphs resembling journal presentation styles. You should use a table formatting function (e.g., `kableExtra`, `apsrtable` or `stargazer` in [R]{.proglang}). Use a reasonable (2 or at most 3) number of digits after decimal points, report standard errors or confidence intervals along with coefficients, clarify what are the dependent variables in each table or figure, and explain in footnotes to your tables or figures what kinds of estimators or adjustments have been used. Print outs of raw screen output or commented logs will not receive any credit. However, you may include such output as an appendix so that the grader can troubleshoot.
 -   Mathematical derivations should include all key steps with explanations for important techniques.
+- Your assignment should be submitted as a PDF file compiled from \LaTeX, R Markdown, or (_ideally_) a Quarto Markdown document.
+    - If using raw \LaTeX (.tex) for your answers, submit an accompanying .R file for any computational tasks, with referenced line numbers corresponding to each specific task.
+    - If using R Markdown (.Rmd) or Quarto Markdown (.qmd), include your code as code chunks in the source file. Additionally, submit the source .Rmd or .qmd file along with the compiled PDF to allow us to run your code easily.
 
-Homework will be graded for points as indicated on each assignment and count toward 40 % of your grade.
+Homework will be graded for points as indicated on each assignment and count toward 35% of your grade.
 
 ### Replications (2 $\times$ 20 %)
 
-The primary objective of this course is to provide both a theoretical understanding and hands-on experience implementing the methods we cover. To that end, you must complete **two individual replications** of published studies: one based on a Randomized Controlled Trial (RCT) or other experiment, and one based on an observational study. This is an **individual assignment**: you may discuss ideas with classmates, but all code and writing must be your own. **No two students may replicate the same paper.**
+The primary objective of this course is to provide both a theoretical understanding and hands-on experience implementing the methods we cover. To that end, you must complete **two individual replications** of published studies: one based on an experimental and one based on an observational study. This is an **individual assignment**: you may discuss ideas with classmates, but all code and writing must be your own. **No two students may replicate the same paper.**
 
-Each student must select a paper at least **one month before** the relevant replication deadline and notify both the professor and the TA. To streamline selection—and to keep the emphasis on replication/extension skills rather than searching for a "perfect" fit—I will provide a curated list of pre-approved papers with publicly available replication materials (e.g., Harvard Dataverse, OSF) in advance of the selection deadline. You should choose from this list unless you have a compelling reason to propose an alternative; any off-list selection must be approved in advance and is still subject to the "no duplicates" rule. If replication materials are not readily accessible online, you may contact the authors or request assistance from the instructor, but deadlines still apply.
+Each student must select a paper at least **one month before** the relevant replication deadline and notify both the instructor and the TA. To streamline selection---and to keep the emphasis on replication/extension skills rather than searching for a "perfect" fit---I will provide a curated list of pre-approved papers with publicly available replication materials (e.g., Harvard Dataverse, OSF) in advance of the selection deadline. You should choose from this list unless you have a compelling reason to propose an alternative; any off-list selection must be approved in advance and is still subject to the "no duplicates" rule. If replication materials are not readily accessible online, you may contact the authors or request assistance from the instructor, but deadlines still apply.
 
 Once you have selected your paper, you are expected to complete two tasks:
 
-1. **Replication:** Replicate the primary analyses reported in the main body of the paper **using your own code** (you do not need to replicate appendices unless explicitly required). You should not rely on the authors’ original code as your main implementation.
-2. **Extensions (at least two):** Conduct **two distinct extensions** of the replicated analysis. Each extension must be **clearly delineated** (labelled as "Extension 1" and "Extension 2"), **well-motivated**, and explained as a specific contribution beyond the main replication. Extensions may take one of two broad forms:  
-   - **Robustness checks:** e.g., alternative estimators/specifications, alternative measurement choices, additional tests of identifying assumptions.  
-   - **Theory-driven analyses:** e.g., additional tests implied by the theory/hypotheses (such as heterogeneity analyses).  
-   You may do two robustness checks, two theory-driven analyses, or one of each, as long as each is distinct, motivated, and clearly separated.
+1. **Replication:** Replicate the primary analyses reported in the main body of the paper **using your own code** (you do not need to replicate appendices unless explicitly required). You should not rely on the authors' original code as your main implementation.
+2. **Extensions (at least two):** Conduct **two distinct extensions** of the replicated analysis. Each extension must be **clearly delineated** (labelled as "Extension 1" and "Extension 2"), **well-motivated**, and explained as a specific contribution beyond the main replication. Extensions may take one of two broad forms:
+   - **Robustness checks:** e.g., alternative estimators/specifications, alternative measurement choices, additional tests of identifying assumptions.
+   - **Theory-driven analyses:** e.g., additional tests implied by the theory/hypotheses (such as heterogeneity analyses). You may do two robustness checks, two theory-driven analyses, or one of each, as long as each is distinct, motivated, and clearly separated.
 
 For both replication and extensions, you must post a brief replication plan on the Brightspace forum at least **one week** before submitting the replication report. I am happy to discuss any issues and extension ideas during the office hours.
 
-Your final submission must include the data files you used, original authors replication code (if available), and a replication write-up in a reproducible [R]{.proglang} Markdown or Quarto file so the instructor and TA can re-run your analysis on their machines. The write-up should include:
+Your final submission must include (1) the data files you used, (2) the original authors' replication code (if available), (3) a replication write-up compiled to PDF, and (4) the raw, fully reproducible [R]{.proglang} Markdown or Quarto Markdown source file that would allow the instructor and TA to re-run your analyses. The compiled PDF write-up should be **10–20 double-spaced pages** and should include:
 
-- A brief summary of the paper’s theory and hypotheses.
+- A brief summary of the paper's theory and hypotheses.
 - A concise description of the data, model, and main results (screenshots from the paper are allowed for reference).
-- A report on the replication of the main results (including code, output, and discussion of any deviations from the original paper).
-- A report on the two extensions (including code, output, and interpretation).
+- A report on your replication of the main results (including code, output, and discussion of any deviations from the original paper).
+- A report on your two extensions (including code, output, and interpretation).
+- *(Optional)* An appendix with ancillary details, tables, or figures that does not count toward the page limit and may be referenced in the main text.
 
 Because part of the goal is to practice professional research communication, a small portion of your grade will be based on **formatting and presentation quality**. For example: do not dump large data frames; do not present a separate table for every minor model variation; format tables and figures in a paper-ready style rather than showing raw console output.
 
@@ -116,9 +123,9 @@ A final exam will be scheduled during the final examination week (the week of Ap
 
 ## Grading and Deadlines
 
--   **35% Homeworks** (every two weeks)\
--   **40% Replications** (due February 26th and April 15th)\
--   **25% Take-Home Final Exam** (Week of April 20th)
+-   **35% Problem sets** (every two weeks, see schedule below)
+-   **40% Replications** (due March 2nd and April 13th)
+-   **20% Take-home final exam** (Week of April 20th)
 
 Late work will not be accepted without documented proof of a family or medical emergency.
 
@@ -126,7 +133,7 @@ Problem sets and exam will have opportunities to earn extra credit, theoreticall
 
 ------------------------------------------------------------------------
 
-## Required Resources
+## Resources
 
 ### Software
 
@@ -152,11 +159,24 @@ And here are the **recommended** ones:
 -   Imbens, Guido W., and Donald B. Rubin. *Causal Inference in Statistics, Social, and Biomedical Sciences.* Cambridge University Press, 2015.
 -   Lohr, Sharon L. *Sampling: Design and Analysis.* CRC press, 2021.
 
-You can obtain these as PDFs on Brightspace or on the authors’ websites and online preprint archives (SSRN or arXiv). Papers are listed below according to topic.
+You can obtain these as PDFs on Brightspace or on the authors' websites and online preprint archives (SSRN or arXiv). Papers are listed below according to topic.
 
 ### Brightspace
 
 Readings, lectures, assignments, and news for the course will be posted on the course page on Brightspace (course management system used by Vanderbilt). I will post announcements and changes to the home page of the site, please keep an eye out. In addition, we will have discussion forums for any class related questions and class related news/social media posts on Brightspace.
+
+### AI Tools
+
+Students may use AI tools (e.g., ChatGPT, Claude, Copilot) for **all non in-class activities** in this course, including brainstorming, debugging, coding assistance, explaining unfamiliar concepts or coaching for the exam. However, AI should be treated as an **assistant**, not a substitute for your own writing, critical thinking, and coding.
+
+This course is designed to make you an informed and professional user of causal inference tools---not someone who can only run pre-written snippets of code without understanding the underlying identification logic, assumptions, inference and code. Using AI to fully replace substantive reasoning, original writing, or core implementation work undermines that goal and may be treated as a form of academic misconduct.
+
+If you use any AI tool **other than grammar/spell-checking tools** (e.g., _Grammarly_-style editing) for any part of any class assignment, you must do **both** of the following:
+
+1. **Disclosure statement:** Include a short disclaimer at the top of the assignment (e.g., after your name/date) indicating what tool(s) you used and for what purpose(s).
+2. **Conversation log:** In addition to other submitted materials, submit a PDF printout of the full conversation log(s) with the AI tool(s) used for that assignment. For example, if you used ChatGPT in a browser, open the relevant conversation and print/save it to PDF, then submit it with your assignment.
+
+If you have questions or concerns about what is allowed, or how to document AI use, please ask during class or contact me individually.
 
 ------------------------------------------------------------------------
 
@@ -190,12 +210,12 @@ Readings, lectures, assignments, and news for the course will be posted on the c
         - @morgan2015counterfactuals [Ch. 1-2]
         - @holland1986statistics
 
-*   - **1/14**
+*   - **1/14 1/19**
     - No class
-    - SPSA
+    - SPSA, MLK Holiday
     - 
 
-*   - **1/19**
+*   - **1/21**
     - What is Identification (cont.)?
     - observation versus intervention, potential outcomes (ATE, ATT, probability of necessity), ATE under SUTVA and strong ignorability, causal effects with potential outcomes, 
     -   - @gerber2012field [Ch. 2]
@@ -203,14 +223,14 @@ Readings, lectures, assignments, and news for the course will be posted on the c
         - @morgan2015counterfactuals [Ch. 1-2]
         - @holland1986statistics
 
-*   - **1/21 1/26**
+*   - **1/26 1/28**
     - Regression and Causality
     - CEF and its properties, selection on observables, conditional ignorability, **problem set 1 is posted on 1/21**
     -   - @angrist2009mostly [Ch. 3.1-3.2.2]
         - @morgan2015counterfactuals [Ch. 6.1-6.2]
         - @cinelli2024crash
 
-*   - **1/28**
+*   - **2/2**
     - The Truth about Regression
     - regression anatomy, omitted variable bias, positivity assumption
     -   - @angrist2009mostly [Ch. 3.2.3-3.5]
@@ -221,12 +241,12 @@ Readings, lectures, assignments, and news for the course will be posted on the c
 *   -
     - []{colspan=3} **EXPERIMENTAL DESIGNS**
 
-*   - **2/2 2/4**
+*   - **2/4 2/9**
     - Basics of Experimental Design
     - target quantities (SATE, PATE), inference for the SATE and PATE in an idealized experiment, randomization inference, imbalance, **problem set 2 is posted on 2/2**
     -   - @gerber2012field [Ch. 3]
 
-*   - **2/9 2/11**
+*   - **2/11 2/16**
     - Complex Experimental Designs and Power Analysis
     - cluster and block randomization, factorial designs, MDE and power analysis
     -   - @gerber2012field [Ch. 4]
@@ -234,7 +254,7 @@ Readings, lectures, assignments, and news for the course will be posted on the c
 *   - 
     - []{colspan=3} **OBSERVATIONAL DESIGNS FOR CAUSAL INFERENCE**
 
-*   - **2/16 2/18 2/23**
+*   - **2/18 2/23 2/25**
     - Matching
     - distance metrics, exact matching, nearest neighbor matching, propensity score matching, balancing property, sensitivity analysis, weighting, doubly robust estimators **problem set 3 is posted on 2/16**
     -   - @angrist2009mostly [Ch. 3]
@@ -242,7 +262,7 @@ Readings, lectures, assignments, and news for the course will be posted on the c
         - @sekhon2009opiates
         - @caliendo2008some
 
-*   - **2/25 3/2**
+*   - **3/2 3/4**
     - Instrumental Variables
     - Local Average Treatment Effects, IV estimator, one-/two-sided non-compliance, 2SLS estimator and its bias, **problem set 4 is posted on 3/2**, **experimental replication is due on 3/2**
     -   - @angrist2009mostly [Ch. 4]
@@ -261,24 +281,24 @@ Readings, lectures, assignments, and news for the course will be posted on the c
     - Spring Break
     - 
 
-*   - **3/16**
+*   - **3/16 3/18**
     - Difference-in-Differences (cont.)
     - conditional DID, continuous treatment DID, event-by-event estimation, **problem set 5 is posted on 3/16**
     -   - @angrist2009mostly [Ch. 5.2]
         - @bertrand2004much
 
-*   - **3/18 3/23**
+*   - **3/23 3/25**
     - Panel Data
     - staggered adoption design, fixed effects, TWFE estimator and its bias
     -   - @angrist2009mostly [Ch. 5.1, 5.4]
         - @morgan2015counterfactuals [Ch. 11.3]
 
-*   - **3/25**
+*   - **3/30**
     - Synthetic Control
     - identification, estimation and statistical inference, interactive FEs, **problem set 6 is posted on 3/25**
     -   - @abadie2010synthetic
 
-*   - **3/30 4/1**
+*   - **4/1 4/6**
     - Regression Discontinuity Designs
     - parametric, non-parametric local regression, optimized RD and honest inference, threats, fuzzy RDD
     -   - @angrist2009mostly [Ch. 6]
@@ -286,14 +306,14 @@ Readings, lectures, assignments, and news for the course will be posted on the c
         - @imbens2008regression
         - @de2016misunderstandings
 
-*   - **4/6 4/8**
+*   - **4/8 4/13**
     - Mediation Effects
-    - natural direct and indirect effects, controlled direct and indirect effects **problem set 7 is posted on 4/6**, **observational replication is due on 4/6**
+    - natural direct and indirect effects, controlled direct and indirect effects **problem set 7 is posted on 4/6**, **observational replication is due on 4/13**
     -   - @gerber2012field [Ch. 9-10]
 
-*   - **4/13 4/15**
+*   - **4/15**
     - Effect Heterogeneity
-    - interaction effects and non-linear conditional effect curves, decomposing effect heterogeneity, optimal treatment regimes
+    - interaction effects, decomposing effect heterogeneity, optimal treatment regimes
     - TBD
 
 *   - **4/20**
@@ -302,21 +322,7 @@ Readings, lectures, assignments, and news for the course will be posted on the c
     - 
 :::
 
-
 ## Class Policies
-
-### Policy on Use of AI Tools
-
-Students may use AI tools (e.g., ChatGPT, Claude, Copilot) for **all non in-class activities** in this course, including brainstorming, debugging, coding assistance, and explaining unfamiliar concepts. However, AI should be treated as an **assistant**, not a substitute for your own writing, thinking, and coding.
-
-This course is designed to make you an informed and professional user of causal inference tools---not someone who can only run pre-written snippets of code without understanding the underlying identification logic, assumptions, inference and code. Using AI to fully replace substantive reasoning, original writing, or core implementation work undermines that goal and may be treated as a form of academic misconduct.
-
-If you use any AI tool **other than grammar/spell-checking tools** (e.g., Grammarly-style editing) for any part of an assignment, you must do **both** of the following:
-
-1. **Disclosure statement:** Include a short disclaimer at the top of the assignment (e.g., after your name/date) indicating what tool(s) you used and for what purpose(s).
-2. **Conversation log:** Submit a PDF “printout” of the full conversation log(s) with the AI tool(s) used for that assignment. For example, if you used ChatGPT in a browser, open the relevant conversation and print/save it to PDF, then submit it with your assignment.
-
-If you have questions or concerns about what is allowed, or how to document AI use, please ask during class or contact me individually.
 
 ### Cell Phones, Laptops, Tablets, etc.
 
@@ -352,9 +358,9 @@ Students may encounter stressors that impact both their academic performance and
 
 ### Mandatory Reporting
 
-Title IX makes it clear that violence and harassment based on sex and gender are Civil Rights offenses subject to the same kinds of accountability and support applied to offenses against other protected categories such as race and national origin. If students or someone they know has been harassed or assaulted, they can call the Project Safe 24-hour crisis/support hotline at 615-322-7233. A list of resources can be found at Project Safe. The University’s Title IX Coordinator (615-322-4705) is another contact point, where appropriate resources and contacts for confidential support are available: [www.vanderbilt.edu/title-ix/](https://www.vanderbilt.edu/title-ix/).
+Title IX makes it clear that violence and harassment based on sex and gender are Civil Rights offenses subject to the same kinds of accountability and support applied to offenses against other protected categories such as race and national origin. If students or someone they know has been harassed or assaulted, they can call the Project Safe 24-hour crisis/support hotline at 615-322-7233. A list of resources can be found at Project Safe. The University's Title IX Coordinator (615-322-4705) is another contact point, where appropriate resources and contacts for confidential support are available: [www.vanderbilt.edu/title-ix/](https://www.vanderbilt.edu/title-ix/).
 
-As faculty members, professors have responsibilities to help create a safe learning environment on campus, regardless of identity or circumstances. Professors also have a mandatory reporting responsibility. It is the intention that students feel able to share information related to their life experiences in classroom discussions, written work, and one-on-one meetings. Faculty will seek to keep information shared as private as possible. However, as representatives of an institution that strives for safety for all people, professors are mandatory reporters. University faculty, many staff members, and some student leaders are required to report incidents of sexual assault, sexual harassment, dating violence, domestic violence, stalking, and child abuse, as well as any suspected discrimination (regarding age, race, color, creed, religion, ancestry, national or ethnic origin, sex/gender, sexual orientation, disability, genetic information, military status, familial status, or other protected categories under local, state, or federal law) to the University’s Title IX Coordinator (615-322-4705), as required by University policy and state and federal law. If an experience of interpersonal violence and/or child abuse is disclosed to faculty or classmates with mandatory reporting duties, whether in class discussion, through a course assignment, or in private communication, the disclosure will be kept as private as possible but may not remain confidential.
+As faculty members, professors have responsibilities to help create a safe learning environment on campus, regardless of identity or circumstances. Professors also have a mandatory reporting responsibility. It is the intention that students feel able to share information related to their life experiences in classroom discussions, written work, and one-on-one meetings. Faculty will seek to keep information shared as private as possible. However, as representatives of an institution that strives for safety for all people, professors are mandatory reporters. University faculty, many staff members, and some student leaders are required to report incidents of sexual assault, sexual harassment, dating violence, domestic violence, stalking, and child abuse, as well as any suspected discrimination (regarding age, race, color, creed, religion, ancestry, national or ethnic origin, sex/gender, sexual orientation, disability, genetic information, military status, familial status, or other protected categories under local, state, or federal law) to the University's Title IX Coordinator (615-322-4705), as required by University policy and state and federal law. If an experience of interpersonal violence and/or child abuse is disclosed to faculty or classmates with mandatory reporting duties, whether in class discussion, through a course assignment, or in private communication, the disclosure will be kept as private as possible but may not remain confidential.
 
 ### Diversity Statement
 

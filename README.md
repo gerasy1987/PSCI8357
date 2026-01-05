@@ -1,11 +1,11 @@
 #   PSCI 8357 (Spring 2026)  
-  Statistics for Political Research II
+  Statistics for Political Research (STAT) II
 
 -   [Course Overview](#course-overview)
 -   [Prerequisites](#prerequisites)
 -   [Requirements](#requirements)
 -   [Grading and Deadlines](#grading-and-deadlines)
--   [Required Resources](#required-resources)
+-   [Resources](#resources)
 -   [Course Schedule](#course-schedule)
 -   [Class Policies](#class-policies)
 -   [Acknowledgments](#acknowledgments)
@@ -56,20 +56,33 @@ courses.
 
 ## Requirements
 
-### Homeworks (7 × 5 %)
+### In-class quizzes
 
-You will receive homework about every two weeks. You will have to submit
-your completed assignment within a week; exact deadlines will be made
-clear on the assignment. You can work with others, but to receive
-credit, your homework must comply with the following guidelines:
+Roughly once a week, we’ll start class with a short in-class quiz (no
+more than 5 questions). The goal is simply to check how the main ideas
+are landing and to help me identify topics that may need more
+explanation or practice. These quizzes are *low-stakes* and meant to
+support your learning—not to add pressure. They are **not graded**, and
+you should think of them as a quick warm-up and a way for us to
+calibrate where we are as a class.
+
+### Problem sets (7 × 5 %)
+
+You will receive homework about every two weeks via Brightspace (not
+GitHub). You will have to submit your completed problem set within a
+week; exact deadlines will be made clear on the assignment. You can work
+with others, but to receive credit, your homework must comply with the
+following guidelines:
 
 -   You must turn in a PDF copy of your own homework by the stated
-    deadline to both the professor and TA.
+    deadline to both the instructor and TA.
 -   The assignment that you turn in must clearly reflect your own
     thinking. Sets of verbatim copies of homework will have credit
     reduced by half.
--   Homework assignments may be hand written or typed, but they must be
-    clearly legible.
+-   Include a short disclaimer at the top of the assignment (e.g., after
+    your name/date) indicating whether you used any AI tool(s) beyond
+    spell-checking/light editing and for what purpose(s). If you did,
+    also attach a printed to PDF log of the AI chat.
 -   Estimates obtained in <span class="proglang">R</span> must be
     formatted properly into tables or graphs resembling journal
     presentation styles. You should use a table formatting function
@@ -84,23 +97,31 @@ credit, your homework must comply with the following guidelines:
     such output as an appendix so that the grader can troubleshoot.
 -   Mathematical derivations should include all key steps with
     explanations for important techniques.
+-   Your assignment should be submitted as a PDF file compiled from , R
+    Markdown, or (*ideally*) a Quarto Markdown document.
+    -   If using raw (.tex) for your answers, submit an accompanying .R
+        file for any computational tasks, with referenced line numbers
+        corresponding to each specific task.
+    -   If using R Markdown (.Rmd) or Quarto Markdown (.qmd), include
+        your code as code chunks in the source file. Additionally,
+        submit the source .Rmd or .qmd file along with the compiled PDF
+        to allow us to run your code easily.
 
 Homework will be graded for points as indicated on each assignment and
-count toward 40 % of your grade.
+count toward 35% of your grade.
 
 ### Replications (2 × 20 %)
 
 The primary objective of this course is to provide both a theoretical
 understanding and hands-on experience implementing the methods we cover.
 To that end, you must complete **two individual replications** of
-published studies: one based on a Randomized Controlled Trial (RCT) or
-other experiment, and one based on an observational study. This is an
-**individual assignment**: you may discuss ideas with classmates, but
-all code and writing must be your own. **No two students may replicate
-the same paper.**
+published studies: one based on an experimental and one based on an
+observational study. This is an **individual assignment**: you may
+discuss ideas with classmates, but all code and writing must be your
+own. **No two students may replicate the same paper.**
 
 Each student must select a paper at least **one month before** the
-relevant replication deadline and notify both the professor and the TA.
+relevant replication deadline and notify both the instructor and the TA.
 To streamline selection—and to keep the emphasis on
 replication/extension skills rather than searching for a “perfect” fit—I
 will provide a curated list of pre-approved papers with publicly
@@ -126,11 +147,11 @@ tasks:
     the main replication. Extensions may take one of two broad forms:
     -   **Robustness checks:** e.g., alternative
         estimators/specifications, alternative measurement choices,
-        additional tests of identifying assumptions.  
+        additional tests of identifying assumptions.
     -   **Theory-driven analyses:** e.g., additional tests implied by
-        the theory/hypotheses (such as heterogeneity analyses).  
-        You may do two robustness checks, two theory-driven analyses, or
-        one of each, as long as each is distinct, motivated, and clearly
+        the theory/hypotheses (such as heterogeneity analyses). You may
+        do two robustness checks, two theory-driven analyses, or one of
+        each, as long as each is distinct, motivated, and clearly
         separated.
 
 For both replication and extensions, you must post a brief replication
@@ -138,19 +159,24 @@ plan on the Brightspace forum at least **one week** before submitting
 the replication report. I am happy to discuss any issues and extension
 ideas during the office hours.
 
-Your final submission must include the data files you used, original
-authors replication code (if available), and a replication write-up in a
-reproducible <span class="proglang">R</span> Markdown or Quarto file so
-the instructor and TA can re-run your analysis on their machines. The
-write-up should include:
+Your final submission must include (1) the data files you used, (2) the
+original authors’ replication code (if available), (3) a replication
+write-up compiled to PDF, and (4) the raw, fully reproducible
+<span class="proglang">R</span> Markdown or Quarto Markdown source file
+that would allow the instructor and TA to re-run your analyses. The
+compiled PDF write-up should be **10–20 double-spaced pages** and should
+include:
 
 -   A brief summary of the paper’s theory and hypotheses.
 -   A concise description of the data, model, and main results
     (screenshots from the paper are allowed for reference).
--   A report on the replication of the main results (including code,
+-   A report on your replication of the main results (including code,
     output, and discussion of any deviations from the original paper).
--   A report on the two extensions (including code, output, and
+-   A report on your two extensions (including code, output, and
     interpretation).
+-   *(Optional)* An appendix with ancillary details, tables, or figures
+    that does not count toward the page limit and may be referenced in
+    the main text.
 
 Because part of the goal is to practice professional research
 communication, a small portion of your grade will be based on
@@ -173,9 +199,9 @@ so that we can arrange an alternative time. The final will constitute
 
 ## Grading and Deadlines
 
--   **35% Homeworks** (every two weeks)  
--   **40% Replications** (due February 26th and April 15th)  
--   **25% Take-Home Final Exam** (Week of April 20th)
+-   **35% Problem sets** (every two weeks, see schedule below)
+-   **40% Replications** (due March 2nd and April 13th)
+-   **20% Take-home final exam** (Week of April 20th)
 
 Late work will not be accepted without documented proof of a family or
 medical emergency.
@@ -189,7 +215,7 @@ D 64-66 | D- 60-63 | F \<60
 
 ------------------------------------------------------------------------
 
-## Required Resources
+## Resources
 
 ### Software
 
@@ -249,6 +275,37 @@ Vanderbilt). I will post announcements and changes to the home page of
 the site, please keep an eye out. In addition, we will have discussion
 forums for any class related questions and class related news/social
 media posts on Brightspace.
+
+### AI Tools
+
+Students may use AI tools (e.g., ChatGPT, Claude, Copilot) for **all non
+in-class activities** in this course, including brainstorming,
+debugging, coding assistance, explaining unfamiliar concepts or coaching
+for the exam. However, AI should be treated as an **assistant**, not a
+substitute for your own writing, critical thinking, and coding.
+
+This course is designed to make you an informed and professional user of
+causal inference tools—not someone who can only run pre-written snippets
+of code without understanding the underlying identification logic,
+assumptions, inference and code. Using AI to fully replace substantive
+reasoning, original writing, or core implementation work undermines that
+goal and may be treated as a form of academic misconduct.
+
+If you use any AI tool **other than grammar/spell-checking tools**
+(e.g., *Grammarly*-style editing) for any part of any class assignment,
+you must do **both** of the following:
+
+1.  **Disclosure statement:** Include a short disclaimer at the top of
+    the assignment (e.g., after your name/date) indicating what tool(s)
+    you used and for what purpose(s).
+2.  **Conversation log:** In addition to other submitted materials,
+    submit a PDF printout of the full conversation log(s) with the AI
+    tool(s) used for that assignment. For example, if you used ChatGPT
+    in a browser, open the relevant conversation and print/save it to
+    PDF, then submit it with your assignment.
+
+If you have questions or concerns about what is allowed, or how to
+document AI use, please ask during class or contact me individually.
 
 ------------------------------------------------------------------------
 
@@ -315,13 +372,13 @@ role="doc-biblioref">1986</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>1/14</strong></th>
+<th style="text-align: center;"><strong>1/14 1/19</strong></th>
 <td style="text-align: left;">No class</td>
-<td style="text-align: left;">SPSA</td>
+<td style="text-align: left;">SPSA, MLK Holiday</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>1/19</strong></th>
+<th style="text-align: center;"><strong>1/21</strong></th>
 <td style="text-align: left;">What is Identification (cont.)?</td>
 <td style="text-align: left;">observation versus intervention, potential
 outcomes (ATE, ATT, probability of necessity), ATE under SUTVA and
@@ -342,7 +399,7 @@ role="doc-biblioref">1986</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>1/21 1/26</strong></th>
+<th style="text-align: center;"><strong>1/26 1/28</strong></th>
 <td style="text-align: left;">Regression and Causality</td>
 <td style="text-align: left;">CEF and its properties, selection on
 observables, conditional ignorability, <strong>problem set 1 is posted
@@ -360,7 +417,7 @@ role="doc-biblioref">2024</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>1/28</strong></th>
+<th style="text-align: center;"><strong>2/2</strong></th>
 <td style="text-align: left;">The Truth about Regression</td>
 <td style="text-align: left;">regression anatomy, omitted variable bias,
 positivity assumption</td>
@@ -384,7 +441,7 @@ role="doc-biblioref">2016</a>)</span></li>
 DESIGNS</strong></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>2/2 2/4</strong></th>
+<th style="text-align: center;"><strong>2/4 2/9</strong></th>
 <td style="text-align: left;">Basics of Experimental Design</td>
 <td style="text-align: left;">target quantities (SATE, PATE), inference
 for the SATE and PATE in an idealized experiment, randomization
@@ -397,7 +454,7 @@ inference, imbalance, <strong>problem set 2 is posted on
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>2/9 2/11</strong></th>
+<th style="text-align: center;"><strong>2/11 2/16</strong></th>
 <td style="text-align: left;">Complex Experimental Designs and Power
 Analysis</td>
 <td style="text-align: left;">cluster and block randomization, factorial
@@ -414,7 +471,7 @@ designs, MDE and power analysis</td>
 FOR CAUSAL INFERENCE</strong></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>2/16 2/18 2/23</strong></th>
+<th style="text-align: center;"><strong>2/18 2/23 2/25</strong></th>
 <td style="text-align: left;">Matching</td>
 <td style="text-align: left;">distance metrics, exact matching, nearest
 neighbor matching, propensity score matching, balancing property,
@@ -435,7 +492,7 @@ role="doc-biblioref">2008</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>2/25 3/2</strong></th>
+<th style="text-align: center;"><strong>3/2 3/4</strong></th>
 <td style="text-align: left;">Instrumental Variables</td>
 <td style="text-align: left;">Local Average Treatment Effects, IV
 estimator, one-/two-sided non-compliance, 2SLS estimator and its bias,
@@ -478,7 +535,7 @@ role="doc-biblioref">2004</a>)</span></li>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>3/16</strong></th>
+<th style="text-align: center;"><strong>3/16 3/18</strong></th>
 <td style="text-align: left;">Difference-in-Differences (cont.)</td>
 <td style="text-align: left;">conditional DID, continuous treatment DID,
 event-by-event estimation, <strong>problem set 5 is posted on
@@ -493,7 +550,7 @@ role="doc-biblioref">2004</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>3/18 3/23</strong></th>
+<th style="text-align: center;"><strong>3/23 3/25</strong></th>
 <td style="text-align: left;">Panel Data</td>
 <td style="text-align: left;">staggered adoption design, fixed effects,
 TWFE estimator and its bias</td>
@@ -507,7 +564,7 @@ role="doc-biblioref">2015</a>, Ch. 11.3)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>3/25</strong></th>
+<th style="text-align: center;"><strong>3/30</strong></th>
 <td style="text-align: left;">Synthetic Control</td>
 <td style="text-align: left;">identification, estimation and statistical
 inference, interactive FEs, <strong>problem set 6 is posted on
@@ -519,7 +576,7 @@ role="doc-biblioref">2010</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>3/30 4/1</strong></th>
+<th style="text-align: center;"><strong>4/1 4/6</strong></th>
 <td style="text-align: left;">Regression Discontinuity Designs</td>
 <td style="text-align: left;">parametric, non-parametric local
 regression, optimized RD and honest inference, threats, fuzzy RDD</td>
@@ -539,12 +596,12 @@ role="doc-biblioref">2016</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>4/6 4/8</strong></th>
+<th style="text-align: center;"><strong>4/8 4/13</strong></th>
 <td style="text-align: left;">Mediation Effects</td>
 <td style="text-align: left;">natural direct and indirect effects,
 controlled direct and indirect effects <strong>problem set 7 is posted
 on 4/6</strong>, <strong>observational replication is due on
-4/6</strong></td>
+4/13</strong></td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="gerber2012field">Gerber and Green
 (<a href="#ref-gerber2012field" role="doc-biblioref">2012</a>, Ch.
@@ -552,11 +609,10 @@ on 4/6</strong>, <strong>observational replication is due on
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>4/13 4/15</strong></th>
+<th style="text-align: center;"><strong>4/15</strong></th>
 <td style="text-align: left;">Effect Heterogeneity</td>
-<td style="text-align: left;">interaction effects and non-linear
-conditional effect curves, decomposing effect heterogeneity, optimal
-treatment regimes</td>
+<td style="text-align: left;">interaction effects, decomposing effect
+heterogeneity, optimal treatment regimes</td>
 <td style="text-align: left;">TBD</td>
 </tr>
 <tr>
@@ -569,37 +625,6 @@ treatment regimes</td>
 </table>
 
 ## Class Policies
-
-### Policy on Use of AI Tools
-
-Students may use AI tools (e.g., ChatGPT, Claude, Copilot) for **all non
-in-class activities** in this course, including brainstorming,
-debugging, coding assistance, and explaining unfamiliar concepts.
-However, AI should be treated as an **assistant**, not a substitute for
-your own writing, thinking, and coding.
-
-This course is designed to make you an informed and professional user of
-causal inference tools—not someone who can only run pre-written snippets
-of code without understanding the underlying identification logic,
-assumptions, inference and code. Using AI to fully replace substantive
-reasoning, original writing, or core implementation work undermines that
-goal and may be treated as a form of academic misconduct.
-
-If you use any AI tool **other than grammar/spell-checking tools**
-(e.g., Grammarly-style editing) for any part of an assignment, you must
-do **both** of the following:
-
-1.  **Disclosure statement:** Include a short disclaimer at the top of
-    the assignment (e.g., after your name/date) indicating what tool(s)
-    you used and for what purpose(s).
-2.  **Conversation log:** Submit a PDF “printout” of the full
-    conversation log(s) with the AI tool(s) used for that assignment.
-    For example, if you used ChatGPT in a browser, open the relevant
-    conversation and print/save it to PDF, then submit it with your
-    assignment.
-
-If you have questions or concerns about what is allowed, or how to
-document AI use, please ask during class or contact me individually.
 
 ### Cell Phones, Laptops, Tablets, etc.
 
