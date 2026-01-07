@@ -11,6 +11,7 @@ PSCI8357_statistics_for_political_research_ii.Rproj
 .DS_Store
 lectures/*
 !lectures/.gitkeep
+!lectures/01_probability_refresher_slides*
 recitation_material/*
 !recitation_material/.gitkeep
 problem_sets/*

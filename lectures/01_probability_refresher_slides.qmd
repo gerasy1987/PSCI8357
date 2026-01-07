@@ -1,0 +1,497 @@
+---
+title: "Probability Refresher"
+subtitle: "PSCI 8357 - STAT II"
+author: Georgiy (Gosha) Syunyaev
+institute: "Department of Political Science, Vanderbilt University"
+date: today
+date-format: long
+format: 
+  revealjs:
+    toc: true
+    toc-depth: 1
+    toc-title: "Plan"
+    slide-number: true
+    # preview-links: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    html-math-method: mathjax
+    self-contained-math: true
+    css: ../_supp/styles.css
+    theme: [serif,"../_supp/custom.scss"]
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+fontsize: 28px
+editor: source
+bibliography: ../_supp/psci8357.bib
+---
+
+## {data-visibility="hidden"}
+
+```css
+<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {enableAssistiveMml: true}});</script>
+```
+
+\(
+\def\E{{\mathbb{E}}}
+\def\Pr{{\textrm{Pr}}}
+\def\var{{\mathbb{V}}}
+\def\cov{{\mathrm{cov}}}
+\def\corr{{\mathrm{corr}}}
+\def\argmin{{\arg\!\min}}
+\def\argmax{{\arg\!\max}}
+\def\qedknitr{{\hfill\rule{1.2ex}{1.2ex}}}
+\def\given{{\:\vert\:}}
+\def\indep{{\mbox{$\perp\!\!\!\perp$}}}
+\)
+
+# Expectations
+
+## What is Expectation
+
+<br>
+
+- [**Expectation**]{.highlight} of a random variable is its average value.
+
+. . .
+
+- **Why it matters**: 
+  - Individual causal effects are unobservable.
+  - Focus shifts to *average causal effects* (e.g., average treatment effects).
+
+## Discrete Random Variables
+
+<br>
+
+- Let $X$ be a discrete random variable with values $x \in \mathcal{X}$ and probability mass function (PMF) $p(x)$, then its expected value is given by
+
+. . .
+
+$$
+\E [X] = \sum_{x \in \mathcal{X}} x p(x).
+$$
+
+. . .
+
+- [Example]{.note}: Lottery
+
+  :::small-font
+  - Outcomes $X = \{0, 100\}$, where $\Pr (0) = \Pr (100) = 0.5$.
+
+  - Expectation calculation
+    $$
+    \begin{align*}
+      \E [X] &\class{fragment}{{}= 0 \times \Pr (0) + 100 \times \Pr (100)} \\
+             &\class{fragment}{{} = 0 \times 0.5 + 100 \times 0.5 = 50}
+    \end{align*}
+    $$
+  :::
+
+## Continuous Random Variables
+
+<br><br>
+
+- For continuous random variables with probability density function (PDF) $f(x)$:
+  $$
+  \E [X] = \int_{X} x f(x) dx.
+  $$
+
+- _[**Note**]{.note}: This course will primarily focus on discrete random variables._
+
+## Key Properties
+
+<br>
+
+- [**Linearity**]{.highlight}: $\E [aX + b]$ [${}= a\E [X] + b$.]{.fragment}
+
+- [**Additivity**]{.highlight}: $\E [X + Y]$ [${}= \E [X] + \E [Y]$.]{.fragment}
+
+- [**Constants**]{.highlight}: For a constant $a$, $\E [a]$ [${}= a$.]{.fragment}
+
+- [**Scaling**]{.highlight}:
+
+  For a constant $a$, $\E [aX]$ [${}= a\E [X]$.]{.fragment}
+  
+  For constants $a, b$: $\E [aXbY]$ [${}= ab\E [XY]$.]{.fragment}
+
+## You wish!
+
+<br><br>
+
+- [**Product of Expectations**]{.highlight}: $\E [XY] \neq \E [X]\E [Y]$ unless $X$ and $Y$ are independent.
+
+. . .
+
+- [**Function of Expectations**]{.highlight}: $\E [f(X)] \neq f(\E [X])$, generally.
+
+. . .
+
+- [**Division of Expectations**]{.highlight}: $\E \left[\frac{X}{Y}\right] \neq \frac{\E [X]}{\E [Y]}$, generally.
+
+# Conditional Expectation
+
+## Conditional Probability
+
+<br>
+
+- For discrete random variables $X$ with probability mass function $p_{X}(x)$ and $Y$ with $p_{Y} (y)$, the joint probability mass function $p_{X,Y} (x, y)$ defines:
+  $$
+  \Pr (X=x \given Y = y) = \frac{p_{X,Y} (x, y)}{p_{Y} (y)}.
+  $$
+
+. . .
+
+- [Example]{.note}: Sum of Two Dice
+  
+  :::small-font
+  - Consider two independent fair dice rolls. 
+  - Calculate the probability that the sum of the rolls is odd, given the first roll is 1?
+  - Conditional probablity:
+    $$
+    \Pr (\text{Sum is odd} \given \text{First die is 1}) \class{fragment}{{}= \frac{\left(\frac{1}{2}\right)\left(\frac{1}{6}\right)}{\frac{1}{6}} = \frac{1}{2}.}
+    $$
+  :::
+
+## Conditional Expectation
+
+<br><br>
+
+- For discrete random variables $X$ and $Y$, the expected value of $X$, conditional on $Y = y$ is
+  
+  $$
+  \E [X \given Y = y] = \sum_{x \in \mathcal{X}} x \left(\frac{p_{X,Y} (x, y)}{p_{Y} (y)}\right)
+  $$
+
+. . .
+
+- [Example]{.note}: Conditional Expectation of Sum of Dice
+
+  :::small-font
+  - Calculate $\E [X \given Y=1]$, where $X$ is the sum of two dice rolls and $Y$ is the event that the first roll is $1$.
+  :::
+
+## Solving the Example
+
+<br>
+
+- Independence implies $p_{X,Y}(x, 1) = 0$ for $x > 7$ or $x < 2$.
+
+- $\forall x \in \{2, 3, 4, 5, 6, 7\}$: \quad $p_{X,Y}(x, 1) = \left(\frac{1}{6}\right)\left(\frac{1}{6}\right)$.
+
+  $$
+  \begin{align*}
+  \E [X \given Y = 1] &\class{fragment}{{}= \sum_{x \in \mathcal{X}} x \left(\frac{p_{X,Y}(x, 1)}{p_Y(1)}\right) \quad \text{($\because$ definition)}} \\
+  &\class{fragment}{{}= \sum^{7}_{x = 2} x \left(\frac{p_{X,Y}(x, 1)}{\frac{1}{6}}\right) \quad \text{($\because$ reducing support)}} \\
+  &\class{fragment}{{}= \left(\frac{1}{6}\right)\sum^{7}_{x = 2} x \quad \text{($\because$ distributive)}} \\
+  &\class{fragment}{{}= \frac{27}{6} = 4.5} 
+  \end{align*}
+  $$
+
+## Continuous Variables Case
+
+<br><br><br>
+
+- We will predominantly deal with discrete cases, but...
+
+. . .
+
+- The definition extends analogously to continuous random variables with joint density functions.
+
+- Intuitions from the discrete case generally carry over.
+
+# Law of Iterated Expectation
+
+## Definition
+
+<br>
+
+- [Law of Iterated Expectation]{.highlight} (or Law of Total Expectation) states:
+  
+  :::fragment
+  $$
+  \E [X] = \E [ \E [X \given Y]]
+  $$
+  :::
+
+. . .
+
+  - [**Intuition**]{.note}: We can decompose expectation of one variable, $X$, using some other variable $Y$ using conditional expectation of $X$ given $Y$ and marginal expectation over $Y$.
+
+. . .
+
+- We will use this law frequently in deriving key results later in the semester:
+  
+  :::small-font
+  - Decompose overall treatment effect into treatment effects within subpopulations defined by some other variable $Y$
+  - [Example]{.note}: In matching we will weight within-covariate differences between treated and control units
+  :::
+
+## Let's Try to Prove It
+
+<br>
+
+$$
+\begin{align*}
+\E [\E [X \given Y]] &\class{fragment}{{}= \sum_{y \in \mathcal{Y}} \E [X \given Y = y] p_{Y} (y)} \\
+&\class{fragment}{{}= \sum_{y \in \mathcal{Y}} \left[\sum_{x \in \mathcal{X}} x \frac{p_{X,Y} (x, y)}{p_{Y} (y)} \right] p_Y (y) \quad \text{($\because$ definition)}} \\
+&\class{fragment}{{}= \sum_{y \in \mathcal{Y}} \sum_{x \in \mathcal{X}} x p_{X,Y} (x, y) \quad \text{($\because$ distribute and cancel $p_{Y} (y)$)}} \\
+&\class{fragment}{{}= \sum_{x \in \mathcal{X}} x \sum_{y \in \mathcal{Y}} p_{X,Y} (x, y) \quad \text{($\because$ reorder sums)}} \\
+&\class{fragment}{{}= \sum_{x \in \mathcal{X}} x p_X(x) \quad \text{($\because$ marginalize over $Y$)}} \\
+&\class{fragment}{{}= \E [X]}
+\end{align*}
+$$
+
+# Independence
+
+## Variance/Covariance/Correlation
+
+- [Variance]{.highlight} measures the "spread" of a random variable
+  $$
+   \var (X) = \E [(X-\E [X])^2] = \E [X^2] - \E [X]^2.
+  $$
+
+. . .
+
+- [Covariance]{.highlight} measures how two random variables move together
+  $$
+  \cov (X,Y) = \E [(X - \E [X])(Y - \E [Y])] = \E [XY] - \E [X] \E [Y].
+  $$
+
+. . .
+
+- [Pearson's correlation coefficient]{.highlight} just standardizes covariance
+  $$
+  \corr (X,Y) = \frac{\cov (X,Y)}{\sqrt{ \var (X) \var (Y)}}.
+  $$
+
+  - "$1$": perfect positive relationship; "$-1$": perfect negative relationship; "$0$": no linear relationship.
+
+## Independence
+
+<br>
+
+- Two variables $X$ and $Y$ are independent (or $X \indep Y$) iff
+
+  :::fragment
+  $$
+  p_{X,Y} (x,y) = p_X (x) p_Y (y) \quad \forall x, y.
+  $$
+
+  or
+  
+  $$
+  \E [X \given Y = y] = \E [X].
+  $$
+  
+  :::
+
+. . . 
+
+- Implies: $\cov (X,Y) = 0.$
+
+. . .
+
+- _[**Note:**]{.note} The converse of the latter is not true_
+
+  :::small-font
+  - [Example]{.note}: $X$ is a random variable that takes values $1$, $0$, and $-1$ each with probability $\frac{1}{3}$; $Y$ is given by $Y = X^2$.
+  :::
+
+## Conditional Independence
+
+<br>
+
+- $X$ and $Y$ are conditionally independent given $Z$ (or $X \indep Y  \given  Z$) iff
+
+  :::fragment
+  $$
+  p(x,y \given Z = z) = p_X(x \given Z = z)p_Y(y \given Z = z).
+  $$
+
+  or
+  
+  $$
+  \E [X \given Y = y, Z = z] = \E [X \given Z = z].
+  $$
+  :::
+
+. . .
+
+- [Example:]{.note} Three Dice Rolls
+
+  - Two random variables: $X$ is sum of dice 1 and 3; $Y$ is sum of dice 2 and 3
+
+  - $X$ and $Y$ are not independent, but they are independent conditional on $Z$, the value of die 3.
+
+# Statistical Inference
+
+## Sampling Distribution
+
+- [**Sampling distribution**]{.highlight} [is a probability distribution of a statistic derived from repeated random samples]{.fragment}
+
+  :::{.fragment .small-font}
+  - Sampling distributions enable us to make statistical inferences by providing vital information about the sampling variability of estimators _under certain assumptions about the truth_.
+  :::
+
+. . .
+
+:::{.small-font}
+| Parameter/Esimand      | Statistic/Estimator        | Sampling Distribution                                                                                           |
+|---------------------|----------------------------|------------------------------------------------------------------------------------------------------------------|
+| Population average ($\mu$)        | $\frac{1}{n} \sum_{n} X$ (sample mean)          | $\mathcal{N}(\mu, \frac{\sigma^2}{n})$        |
+| Linear coefficient of regression ($\beta$)    | $(X'X)^{-1}X'Y$      | $\mathcal{N}(\beta, \sigma^2 (X'X)^{-1})$ |
+| Difference-in-means ($\mu_1 - \mu_2$)         | $\frac{1}{n_1} \sum_{n_1} X_i - \frac{1}{n_2} \sum_{n_2} X_j$           | $\mathcal{N}(\mu_1 - \mu_2, \frac{\sigma_1^2}{n_1} + \frac{\sigma_2^2}{n_2})$          |
+: {tbl-colwidths="[40,30,30]"}
+:::
+
+. . .
+
+- Properties of estimators
+
+  :::small-font
+  - [**Unbiasedness**]{.highlight}:  $\E[\hat{\mu}] = \mu$
+  - [**Consistency**]{.highlight}: $\hat{\mu} \overset{p}{\to} \mu$ ($\forall \epsilon > 0: \quad \lim_{n \to \infty} \Pr (|\hat{\mu}_n - \mu| > \epsilon) = 0$)
+  - [**Intuition**]{.note}: Hitting the bullseye on average (unbiased) vs ensuring that we get closer to the bullseye as you take more shots, i.e., gather more data (consistency)
+  :::
+
+## CIs and $p$-value
+
+<br>
+
+- [**Confidence interval**]{.highlight} [gives an estimated range of values which is likely to include an unknown population parameter, with a certain degree of confidence ($\alpha$ level).]{.fragment}
+  
+  :::{.small-font .fragment}
+  - [**Intuition**]{.note}: If we were to re-sample and compute a CI from each sample, approximately $1-\alpha$ of the times CIs will contain the true parameter (estimand).
+  :::
+
+. . .
+
+- [**$p$-value**]{.highlight} [is the probability of observing statistic as extreme as the one observed, assuming that the null hypothesis is true.]{.fragment}
+
+  :::{.small-font .fragment}
+  - [**Intuition**]{.note}: $p$-value is a measure of the evidence against the null hypothesis: the smaller the p-value, the stronger the evidence that the null hypothesis is false.
+  :::
+
+# What Are We Doing Here?
+
+## Causal Empiricism [@samii2016causal]
+
+<br>
+
+. . .
+
+- [Goal:]{.highlight} Identify causal effects, e.g. $\E[Y_i(t)] - \E[Y_i(t')], \; t, t' \in \mathcal{T}$.
+
+. . .
+
+
+- Often researchers use regression model to estimate this quantity
+  
+  $$
+  Y = \alpha + \beta T + X' \gamma + \varepsilon
+  $$
+
+. . .
+
+- Conditions for causal identification are
+
+  1. [**Conditional Independence**]{.highlight}: $\forall t \in \mathcal{T}: \: Y(t) \indep T \given X$.
+  2. [**Positivity**]{.highlight}: $\forall t \in \mathcal{T}, x \in \mathcal{X}:\: 0 < \mathrm{Pr}(T = t \given X = x) < 1$.
+
+## The Critique
+
+<br>
+
+- Conventional regression studies often create _"pseudo-general pseudo-facts."_ 
+
+. . .
+
+- Issues are
+  
+  :::{.small-font .fragment}
+  - [**Misspecification**]{.highlight}: Results hinge on unverifiable assumptions about relationships among variables.
+  - [**Generalizability**]{.highlight}: Results are based on weighted subpopulations ( $\omega_i = T_i - \E[T_i \given X_i] )^2$.
+  - [**Bad controls**]{.highlight}: Post-treatment variables or inappropriate covariates introduce bias.
+  :::
+
+## Pillars of Causal Empiricism
+
+<br>
+
+1. [**Identification by Design**]{.highlight}
+  
+  -  Exploit sources of identifying variation (e.g., randomization, natural experiments, discontinuity).
+  -  Clear definition of counterfactual comparisons.
+  
+. . .
+
+2. [**Realism About Specificity**]{.highlight}
+
+  - Effects are often local (e.g., LATE, ATT, convenience sample).
+  - Generalization requires aggregation across credible local findings.
+  
+## Design-Based Inference
+
+<br>
+
+- Requires carefully crafted research design that links causal estimand to the estimators used and ensures the conditions are satisfied
+
+. . .
+
+- Examples of designs:
+
+  :::small-font
+  - Randomized Experiments
+  - Natural Experiments
+  - Instrumental Variables (IV)
+  - Matching and Propensity Scores
+  - Difference-in-Differences
+  - _many more_
+  :::
+
+## Specificity
+
+<br>
+
+- Be explicit about the units about which the inferences can be made!
+
+. . .
+
+- [Example]{.note}: In instrumental variables approach we will use
+  
+  $$
+  \text{LATE} = \E[Y_i(t = 1) - Y_i(t = 0) \given T_i(z = 1) = 1, T_i(z = 0) = 0],
+  $$
+
+  where $Y$ is outcome of interest, $T$ is treatment assignment, $Z$ is instrument that affects $T$ but not $Y$
+
+## Causal Empiricism vs. Conventional Approaches
+
+<br>
+
+| Aspect                  | Conventional Regression                     | Causal Empiricism                      |
+|-------------------------|---------------------------------------------|----------------------------------------|
+| Identification          | Relies on informal controls, model-dependent| Explicit use of identifying variation. |
+| Generalization          | Claims broad applicability                  | Accepts locality, builds from specifics|
+| Validity                | Internal validity often compromised         | Prioritizes internal validity          |
+| Research focus          | Theory and generalization in one study      | Division of labor, research programs   |
+: {tbl-colwidths="[20,40,40]"}
+
+## Next time
+
+<br>
+
+- Potential Outcomes Framework
+
+- Causal effects with potential outcomes
+
+- ATE under SUTVA and strong ignorability
+
+- Causal effects with DAGs
+
+## References
