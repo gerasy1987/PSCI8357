@@ -12,8 +12,7 @@ PSCI8357_statistics_for_political_research_ii.Rproj
 lectures/*
 !lectures/.gitkeep
 !lectures/01_probability_refresher_slides*
-recitation_material/*
-!recitation_material/.gitkeep
+# Removed the don't track command for recitation material folder
 problem_sets/*
 _data/*
 !_data/.gitkeep
