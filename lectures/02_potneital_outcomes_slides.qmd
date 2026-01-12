@@ -1,0 +1,1225 @@
+---
+title: "Potential Outcomes Framework<br>(and More)"
+subtitle: "PSCI 8357 - STAT II"
+author: Georgiy Syunyaev
+institute: "Department of Political Science, Vanderbilt University"
+date: today
+date-format: long
+format: 
+  revealjs:
+    toc: true
+    toc-depth: 1
+    toc-title: "Plan"
+    slide-number: c/t
+    # preview-links: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    html-math-method: mathjax
+    # logo: images/wzb_logo.png
+    self-contained-math: true
+    css: ../_supp/styles.css
+    theme: [serif,"../_supp/custom.scss"]
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    # progress: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+    fig-cap-location: top
+fontsize: 26px
+editor: source
+aspectratio: 169
+bibliography: ../_supp/psci8357.bib
+---
+
+## {data-visibility="hidden"}
+
+```css
+<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {enableAssistiveMml: true}});</script>
+```
+
+\(
+  \def\E{{\mathbb{E}}}
+  \def\Pr{{\textrm{Pr}}}
+  \def\var{{\mathbb{V}}}
+  \def\cov{{\mathrm{cov}}}
+  \def\corr{{\mathrm{corr}}}
+  \def\argmin{{\arg\!\min}}
+  \def\argmax{{\arg\!\max}}
+  \def\qedknitr{{\hfill\rule{1.2ex}{1.2ex}}}
+  \def\given{{\:\vert\:}}
+  \def\indep{{\mbox{$\perp\!\!\!\perp$}}}
+\)
+
+
+# Potential Outcomes Framework
+
+## What is Causal Inference?
+
+<br>
+
+- Causal inference = inference about [counterfactuals]{.highlight}
+
+. . .
+
+- [Examples]{.note}:
+  
+  :::{.incremental .small-font}
+  - Incumbency advantage:
+  
+    What *would have been* the election outcome if the candidate had not been an incumbent?
+  
+  - Democratic peace:
+
+    *Would* the two countries have fought each other if they had been both autocratic?
+  
+  - Policy intervention:
+  
+    How many more disadvantaged youths *would get* employed under the new job training program?
+  :::
+
+. . .
+
+- [Problem]{.alert}: We need a statistical framework that can explicitly distinguish factuals and counterfactuals.
+
+## Potential Outcomes Framework to the Rescue
+
+<br><br>
+
+:::{layout="[[-10,30,-5,31,-10]]"}
+![Jerzy Neyman (1894–1981)](../_images/neyman.jpeg)
+
+![Donald Rubin (1943–)](../_images/rubin.png)
+:::
+
+## Neyman Urn Model
+
+<br><br><br>
+
+![](../_images/potential_outcomes_1.png){fig-align="center" width="60%"}
+
+## Neyman Urn Model
+
+![](../_images/potential_outcomes_2.png){fig-align="center" width="90%"}
+
+## More Formally
+
+:::{.callout-important icon="false" title="DEFINITION: Treatment"}
+$T_i$: Indicator of treatment intake for *unit* $i$, where $i = 1, ..., N$
+
+$$
+T_i = 
+\begin{cases}
+  1 & \text{if unit } i \text{ received the treatment} \\
+  0 & \text{otherwise}
+\end{cases}
+$$
+:::
+
+. . .
+
+:::{.callout-important icon="false" title="DEFINITION: Observed Outcome"}
+$Y_i$: Variable of interest whose value may be affected by the treatment
+:::
+
+. . .
+
+:::{.callout-important icon="false" title="DEFINITION: Potential Outcome"}
+$Y_{i} (t)$: Value of the outcome that *would be* realized if unit $i$ received the treatment $t$, where $t \in \{ 0, 1\}$
+
+$$
+Y_{i} (t) = 
+\begin{cases}
+  Y_{i} (1) & \text{Potential outcome for unit } i \text{ under treatment} \\
+  Y_{i} (0) & \text{Potential outcome for unit } i \text{ under no treatment}
+\end{cases}
+$$
+:::
+
+:::{.fragment .aside}
+_[Alternative notation]{.note}: $T$ / $t$ is often replaced with $D$ / $d$; $Y_{i} (t)$ can be written as $Y_{ti}$, $Y_{i}^{t}$, etc._
+:::
+
+## Causal Effects with Potential Outcomes
+
+:::{.callout-important icon="false" title="DEFINITION: Unit Treatment Effect"}
+Causal effect of the treatment on the outcome for unit $i$ is the difference between its two potential outcomes:
+
+$$
+\tau_i = Y_{i} (1) - Y_{i} (0)
+$$
+:::
+
+. . .
+
+- What we observe is just the realization of potential outcomes:
+
+$$
+Y_i = 
+\begin{cases}
+  Y_{i} (1) & \text{if } T_i=1 \\
+  Y_{i} (0) & \text{if } T_i=0
+\end{cases}
+$$
+
+- Hence observed outcomes can be given by [switching equation]{.highlight}: $Y_i = Y_i ({T_i}) = T_i Y_{i} (1) + (1-T_i) Y_{i} (0)$
+
+. . .
+
+- [**Fundamental Problem of  Causal Inference**]{.highlight} [@holland1986statistics]: 
+
+  :::small-font
+  - We can never observe both $Y_{i}(1)$ and $Y_{i}(0)$ for the same $i$
+  - This makes $\tau_i$ **unidentifiable** without further assumptions.
+  :::
+
+## Causal Inference as a Missing Data Problem
+
+- Causal effect (or treatment effect) for unit $i$ is
+  $$
+  \tau_i = Y_{i}(1) - Y_{i}(0)
+  $$
+
+. . .
+
+- For treated unit $i$ with $T_i = 1$ we observe $Y_i(1)$, so
+  $$
+  \tau_i = \underbrace{Y_{i}}_{\text{observed}} - \underbrace{Y_{i}(0)}_{\text{unobserved}}
+  $$
+
+. . .
+
+- [Intuition]{.note}: We want to "impute" [counterfactual]{.highlight} outcome $Y_i(0)$ for treated units
+
+. . .
+
+- The opposite is true for control unit $i$ with $T_i = 0$
+
+. . .
+
+- Without assumptions, it is in general impossible to learn about causal effects $\rightarrow$ we can think that [causal inference]{.highlight} helps:
+
+  - Develop designs and clarify **reasonable** and **interpretable** assumptions that we need to make to infer about **counterfactual** outcomes.
+
+## Causal Inference as a Missing Data Problem
+
+<br>
+
+- [Problem]{.alert}: We only observe one of the potential outcomes, so how can we learn about $\tau_i = Y_{i}(1) - Y_{i}(0)$?
+
+. . .
+
+- One _"heroic solution"_ is to assume [unit homogeneity]{.highlight}
+  
+  - If $Y_{i} (1)$ and $Y_{i} (0)$ are constant across individual units, then cross-sectional comparisons will recover $\tau = \tau_i$
+  
+  - If $Y_{i} (1)$ and $Y_{i} (0)$ are constant across time, then before-and-after comparisons will recover $\tau = \tau_i$
+
+. . .
+
+- This may be sometimes plausible in physics or chemistry, but **is [almost never]{.underline} true in social sciences.**
+
+. . .
+
+- Our best hope is to try to recover some _aggregated_ quantities of interest, or [causal estimands]{.highlight}
+
+# Causal Estimands
+
+## Back to the Neyman Urn Model
+
+![](../_images/potential_outcomes_2.png){fig-align="center" .center width="90%"}
+
+## Causal Quantities of Interest, or Causal Estimands
+
+<br>
+
+- Unit-level causal effects are fundamentally unobservable [$\rightarrow$ focus on *averages* in most situations.]{.fragment .highlight}
+
+. . .
+
+:::{.callout-important icon="false" title="DEFINITION: Average Treatment Effect (ATE)"}
+$$
+\begin{align*}
+\tau_{ATE} &= \frac{1}{N}\sum_{i=1}^N \left\{Y_{i}(1) - Y_{i}(0) \right\} &&\textit{(finite-population)}\\
+\tau_{ATE} &= \E [Y_{i}(1) - Y_{i}(0)] &&\textit{(super-population)}
+\end{align*}
+$$
+:::
+
+. . .
+
+- [Example]{.note}: The average effect of a GOTV mail on the voter turnout.
+- [Note]{.note}: that $\tau_{ATE}$ is still unidentified
+
+- In the rest of this course, we will consider various assumptions under
+which $\tau_{ATE}$ can be identified from observed information
+
+
+## Causal Quantities of Interest, or Causal Estimands
+
+<br>
+
+:::{.callout-important icon="false" title="DEFINITION: Average Treatment Effect on the Treated (ATT)"}
+
+Let $N_1 \equiv \sum_{i=1}^N T_i$, then
+
+$$
+\begin{align*}
+\tau_{ATT} &= \frac{1}{N_1}\sum_{i=1}^N T_i\left\{Y_{i} (1) - Y_{i} (0) \right\} &&\textit{(finite-population)}\\
+\tau_{ATT} &= \E [Y_{i}(1) - Y_{i}(0) \mid T_i = 1] &&\textit{(super-population)}
+\end{align*}
+$$
+:::
+
+- [Example]{.note}: The average effect among people who received the mail.
+- [Exercise]{.note}: Define ATE on the untreated (control) unit, $\tau_{ATC}$.
+
+. . .
+
+:::{.callout-important icon="false" title="DEFINITION: Conditional Average Treatment Effect (CATE)"}
+$$
+\tau_{CATE}(x) = \E [ Y_{i}(1) - Y_{i}(0) \given X_i = x]
+$$
+:::
+
+- [Example]{.note}: The average effect of a GOTV mail on the voter turnout among females.
+
+## Illustration: Average Treatment Effect
+
+- Suppose we observe a population of 4 units
+
+:::{.heatMap}
+| $i$ | $T_i$ | $Y_i$ | $Y_{i}(1)$ | $Y_{i}(0)$ | $\tau_i$ |
+|:---------------|:-----:|:-----:|:----------:|:----------:|:--------:|
+| 1 | 1 | 3 | 3 | ? | ? |
+| 2 | 1 | 1 | 1 | ? | ? |
+| 3 | 0 | 0 | ? | 0 | ? |
+| 4 | 0 | 1 | ? | 1 | ? |
+
+: {tbl-colwidths="[30,15,15,15,15,15]"}
+:::
+
+. . .
+
+<br>
+
+- What is our best guess about $\tau_{ATE}=\E [Y_{i}(1) - Y_{i}(0)]$?
+
+## Illustration: Average Treatment Effect {visibility="uncounted"}
+
+- Let us try to calculate our best guess
+
+:::{.heatMap}
+| $i$ | $T_i$ | $Y_i$ | $Y_{i}(1)$ | $Y_{i}(0)$ | $\tau_i$ |
+|:----|:-----:|:-----:|:----------:|:----------:|:--------:|
+| 1 | 1 | 3 | 3 | ? | ? |
+| 2 | 1 | 1 | 1 | ? | ? |
+| 3 | 0 | 0 | ? | 0 | ? |
+| 4 | 0 | 1 | ? | 1 | ? |
+| $\E[Y_{i}(1) \given T_i = 1]$                |      |      | 2 |      |   |
+| $\E[Y_{i}(0) \given T_i = 0]$                |      |      |   | 0.5  |   |
+
+: {tbl-colwidths="[30,15,15,15,15,15]"}
+:::
+
+<br>
+
+- Observed difference in means is $\hat\tau_{DiM} = \E[Y_{i}(1) \given T_i = 1] - \E[Y_{i}(0) \given T_i = 0] = 1.5$.
+
+. . .
+
+- Could this be wrong? [Knowing $\tau_{ATE}=\E[Y_{i} (1) - Y_{i} (0)]$ would help.]{.fragment} 
+
+. . .
+
+- [We need potential outcomes that we do not observe!]{.alert}
+
+## Illustration: Average Treatment Effect {visibility="uncounted"}
+
+- Suppose hypothetically: $Y_{1}(0) = 0, Y_{2}(0) = Y_{3}(1) = Y_{4}(1) = 1$
+
+:::{.heatMap}
+| $i$ | $T_i$ | $Y_i$ | $Y_{i}(1)$ | $Y_{i}(0)$ | $\tau_i$ |
+|:----|:-----:|:-----:|:----------:|:----------:|:--------:|
+| 1 | 1 | 3 | 3 | [**0**]{.blue} | [**3**]{.blue} |
+| 2 | 1 | 1 | 1 | [**1**]{.blue} | [**0**]{.blue} |
+| 3 | 0 | 0 | [**1**]{.blue} | 0 | [**1**]{.blue} |
+| 4 | 0 | 1 | [**1**]{.blue} | 1 | [**0**]{.blue} |
+| $\E [Y_{i}(1)]$                |      |      | 1.5 |      |   |
+| $\E [Y_{i}(0)]$                |      |      |   | 0.5  |   |
+
+: {tbl-colwidths="[30,15,15,15,15,15]"}
+:::
+
+<br>
+
+- What is $ATE$? [$\tau_{ATE} = \E[Y_{i}(1)-Y_{i}(0)] = \E[\tau_i] = \frac{3 + 0 + 1 + 0}{4} = 1$.]{.fragment}
+
+. . .
+
+- Why is $\tau_{ATE} \neq \hat\tau_{DiM}$? When would they be equal?
+
+## Illustration: Average Treatment Effect on the Treated {visibility="uncounted"}
+
+- Let's look at the other estimand?
+
+:::{.heatMap}
+| $i$ | $T_i$ | $Y_i$ | $Y_{i}(1)$ | $Y_{i}(0)$ | $\tau_i$ |
+|:----|:-----:|:-----:|:----------:|:----------:|:--------:|
+| 1 | 1 | 3 | 3 | [**0**]{.blue} | [**3**]{.blue} |
+| 2 | 1 | 1 | 1 | [**1**]{.blue} | [**0**]{.blue} |
+| 3 | [0]{.light} | [0]{.light} | [1]{.light} | [0]{.light} | [1]{.light} |
+| 4 | [0]{.light} | [1]{.light} | [1]{.light} | [1]{.light} | [0]{.light} |
+| $\E [Y_{i}(1) \given T_i = 1]$                |      |      | 2 |      |   |
+| $\E [Y_{i}(0) \given T_i = 1]$                |      |      |   | 0.5  |   |
+
+: {tbl-colwidths="[30,15,15,15,15,15]"}
+:::
+
+<br>
+
+- What is $ATT$? [$\tau_{ATT} = \E[Y_{i}(1)-Y_{i}(0) \given T_i = 1] = \E[\tau_i \given T_{i}] = \frac{3 + 0}{2} = 1.5$.]{.fragment}
+
+. . .
+
+- $\tau_{ATT} = \hat\tau_{DiM}$, but would that always be the case?
+
+. . .
+
+- Why is $\tau_{ATT} \neq \tau_{ATT}$? When would they be equal?
+
+# SUTVA?
+
+## Stable Unit Treatment Value Assumption (SUTVA)
+
+<br>
+
+- Recall that we define potential outcomes as $Y_{i}(1)$ and $Y_{i}(0)$
+
+. . .
+
+- This _implicitly_ makes an important assumption: potential outcomes for unit $i$ are stable _wrt_  others (1) and your own (2) treatment assignment
+
+:::{.callout-important icon="false" title="ASSUMPTION: SUTVA"}
+$$ 
+Y_{i} (\mathbf{t}) = Y_{i} (\mathbf{t^{\prime}}) \quad \text{if } t_{i} = t_{i}^{\prime}
+$$
+:::
+
+
+. . .
+
+- SUTVA consists of two sub-assumptions:
+  
+  :::{.incremental .small-font}
+  1. [No interference]{.highlight}: Potential outcomes for a unit must not be affected by treatment for any other units.
+    [Violations]{.note}: spillover effects, contagion, dilution, displacement, communication
+  
+  2. [Consistency]{.highlight}: Nominally identical treatments are in fact identical. [Violations]{.note}: Variable levels of treatment, technical errors, fertilizer on plot yield
+  :::
+
+## Causal Inference without SUTVA
+
+- Let $\mathbf{T}= (T_1,T_2)$ be a vector of binary treatments for $N = 2$. 
+
+. . .
+
+- How many different values can $\mathbf{T}$ possibly take? [$\textcolor{#8ec07c}{(0,0)},\, \textcolor{#928374}{(1,0)},\, \textcolor{#d65d0e}{(0,1)},\, \textcolor{#b16286}{(1,1)}$]{.fragment}
+
+. . .
+
+- How many potential outcomes unit $1$ has? [$Y_{1}(\textcolor{#8ec07c}{(0,0)}),\, Y_{1}(\textcolor{#928374}{(1,0)}),\, Y_{1}(\textcolor{#d65d0e}{(0,1)}),\, Y_{1}(\textcolor{#b16286}{(1,1)})$]{.fragment}
+
+. . .
+
+- How many causal effects for unit $1$?
+
+. . .
+
+$$
+\begin{array}{cc}
+  Y_{1}(\textcolor{#b16286}{(1,1)}) - Y_{1}(\textcolor{#8ec07c}{(0,0)}), &Y_{1}(\textcolor{#b16286}{(1,1)}) - Y_{1}(\textcolor{#d65d0e}{(0,1)}), \\
+  Y_{1}(\textcolor{#b16286}{(1,1)}) - Y_{1}(\textcolor{#928374}{(1,0)}), &Y_{1}(\textcolor{#928374}{(1,0)}) - Y_{1}(\textcolor{#8ec07c}{(0,0)}),\\
+  Y_{1}(\textcolor{#d65d0e}{(0,1)}) - Y_{1}(\textcolor{#8ec07c}{(0,0)}). &\\
+\end{array}
+$$
+
+- How many observed outcomes for unit $i$? [Only one, $Y_i = Y_{i} ( (T_1, T_2) )$]{.fragment}
+
+. . .
+
+- Without SUTVA, causal inference becomes **[EX]{.purple}[PO]{.aqua}[NEN]{.gray}[TIALLY]{.orange}** more difficult as $N$ increases (formally we have $2^N$ potential outcomes).
+
+  - That said we can study interference directly [e.g., @sinclair2012detecting].
+
+
+# Selection Bias
+
+## Selection Bias
+
+- Comparisons of observed outcomes do not usually give the right answer
+
+$$
+\begin{align*}
+\hat\tau &= \E[Y_i \given T_i=1]-\E[Y_i \given T_i=0] &&\\
+        &\class{fragment}{{}= \E[Y_{i} (1) \given T_i=1]-\E[Y_{i} (0) \given T_i=0] \quad \text{($\because$ switching equation)}}\\
+        &\class{fragment}{{}= \underbrace{\E[Y_{i} (1) - Y_{i} (0) \given T_i=1]}_{\tau_{ATT}} + \underbrace{\E[Y_{i} (0) \given T_i=1]-\E[Y_{i} (0) \given T_i=0]}_{\text{Selection bias}} \quad \text{($\because \pm \E[Y_{i} (0) \given T_i=1]$)}}
+\end{align*}
+$$
+
+## Selection Bias {visibility="uncounted"}
+
+- Comparisons of observed outcomes do not usually give the right answer
+
+$$
+\begin{align*}
+\hat\tau &= \E[Y_i \given T_i=1]-\E[Y_i \given T_i=0] &&\\
+        &= \E[Y_{i} (1) \given T_i=1]-\E[Y_{i} (0) \given T_i=0] \quad \text{($\because$ switching equation)}\\
+        &= \underbrace{\E[Y_{i} (1) - Y_{i} (0) \given T_i=1]}_{\tau_{ATT}} + \underbrace{\E[Y_{i} (0) \given T_i=1]-\E[Y_{i} (0) \given T_i=0]}_{\text{Selection bias}} \quad \text{($\because \pm \E[Y_{i} (0) \given T_i=1]$)}
+\end{align*}
+$$
+
+- Bias term $\neq 0$ if [selection into treatment]{.highlight} is associated with potential outcomes.
+
+. . .
+
+- [Example]{.note}: Church attendance and turnout
+
+  :::{.small-font .incremental}
+  - Churchgoers differ from individuals who do not attend church in many ways (e.g., civic duty).
+  - Turnout for churchgoers would be higher than for non-churchgoers even if churchgoers never attended church. [ $\rightarrow$ $\E [Y_{i} (0) \given T_i=1] - \E [Y_{i} (0) \given T_i=0] > 0$]{.fragment .alert}
+  :::
+
+. . .
+
+- [Example]{.note}: Job training program for the disadvantaged
+
+  :::{.small-font .incremental}
+  - Participants are self-selected from a subpopulation of individuals in difficult labor situations.
+  - Post-training period earnings for participants would be lower than those for nonparticipants in the absence of the program. [ $\rightarrow$ $\E [Y_{i} (0) \given T_i=1] - \E [Y_{i} (0) \given T_i=0] < 0$]{.fragment .alert}
+  :::
+
+
+## Other Decompositions
+
+- Can we decompose the difference in means, $\hat\tau$, using selection into control group instead?
+
+. . .
+
+$$
+\begin{align*}
+\hat\tau &= \E[Y_i \given T_i = 1]-\E[Y_i \given T_i = 0] \\
+    &= \underbrace{\E[Y_{i} (1) - Y_{i} (0) \given T_i = 1]}_{\tau_{ATC}} +\underbrace{\E[Y_{i} (1) \given T_i=1]-\E[Y_{i} (1) \given T_i=0]}_{\text{Selection bias wrt $Y_i(1)$}}
+\end{align*}
+$$
+
+. . .
+
+- Can we decompose the difference in means, $\hat\tau$, using $ATE$ instead of $ATT$?
+
+. . .
+
+$$
+\begin{multline}
+\E [Y_i \given T_i = 1] - \E [Y_i \given T_i = 0] = \tau_{ATE} \\
++ \underbrace{\E [Y_{i}(0) \given T_i = 1] - \E [Y_{i}(0) \given T_i = 0]}_{\text{Selection bias wrt $Y_i(0)$}} + (1 - \pi)(\underbrace{\E [\tau_{i} \given T_i = 1] - \E [\tau_{i} \given T_i = 0]}_{\text{Selection bias wrt $\tau_i$}}), \\\text{where } \pi = \Pr[T_i = 1].
+\end{multline}
+$$
+
+. . .
+
+- [Note]{.note}: This could be rewritten in terms of selection bias wrt to $Y_i(1)$'s and $\tau_i$ as well.
+
+# Components of Causal Inference
+
+## Identification $\neq$ Estimation and Inference
+
+<br>
+
+1. [**(Causal) Identification**]{.highlight}
+   
+   :::incremental
+   - With an _infinite_ amount of data, can we learn about our causal estimand? **$\Rightarrow$ Identification is independent of the dataset size.**
+   - Focus on [**causal estimand**]{.highlight} (not the same as [**statistical estimand**]{.highlight}).
+   - Can we express causal estimands solely in terms of observed outcomes?
+   - What (if any) [identification assumptions] do we need for this?
+   :::
+
+. . .
+
+2. [**Estimation and Inference**]{.highlight} (standard statistics)
+   
+   - Given the _finite_ amount of data available, how well can we learn about the statistical estimand (which equals the causal estimand under identification)?
+   - This involves finding a point estimate, confidence interval, and $p$-value.
+
+## Causal Identification under the Potential Outcomes
+
+<br>
+
+#### [Example of Identifying Assumption: Random Assignment]{.note}
+
+- Under random assignment we have [Strong Ignorability]{.highlight}: [$T_i \indep (Y_{i}(0), Y_{i}(1))$ and $0 < \Pr(T_i = 1) < 1$]{.fragment}
+
+:::fragment
+$$
+\E[ Y_{i} (0) | T_i = 1] = E[Y_{i} (0) | T_i = 0] = E[Y_{i} (0)] \implies \text{no selection bias}
+$$
+
+- **Why?**
+:::
+
+:::fragment
+- Also under random assignment:
+
+$$
+E[Y_{i} (1) | T_i = 1] - E[Y_{i} (0) | T_i = 1] = E[Y_{i} (1) - Y_{i} (0)] \quad \text{($ATT$ is the same as $ATE$)}
+$$
+
+- **Why?**
+:::
+
+:::fragment
+- So, **difference in means equals the $ATE$ under random assignment!**
+:::
+
+## Causal Identification under the Potential Outcomes
+
+#### [Example of Identifying Assumption (Conditional Ignorability)]{.note}
+
+- Under [Conditional Ignorability]{.highlight} we have: [$T_i \indep (Y_{i}(0), Y_{i}(1)) \given X_i$ and $\forall x \in \mathcal{X}:\: 0 < \Pr(T_i = 1 \given X_i = x) < 1$]{.fragment}
+
+:::fragment
+- Conditional Average Treatment Effect is 
+:::
+
+:::fragment
+$$
+\E[ Y_{i} (0) - Y_{i} (1) | X_i = x] = \tau_{CATE}
+$$
+:::
+
+:::fragment 
+- and we can show that
+
+$$
+\E [Y_{i} | T_i = 1, X_i = x] - \E [Y_{i} | T_i = 0, X_i = x] = \tau_{CATE} (x)
+$$
+
+- **How?**
+:::
+
+:::fragment
+
+- Averaging across $\mathcal{X}$ will give us
+
+$$
+\sum_{x \in \mathcal{X}} \tau_{CATE} (x) p(x) = \tau_{ATE}
+$$
+
+
+:::
+
+
+## Principles in Causal Inference
+
+- Separation of Causal Estimands, Identification, and Estimation/Inference 
+
+  :::{.incremental}
+  - **Step 1**: Always consider causal estimands first.
+  - **Step 2**: Determine whether and how we can *identify* causal estimands.
+  - **Step 3**: If our causal estimand is identified, consider how to *estimate and infer* about causal estimands.
+  :::
+
+. . .
+
+- [Identification Strategies (Designs)]{.highlight}
+  
+  - E.g., randomized experiment, conditional ignorability, absence of omitted variables
+  
+  - Or instrumental variables, Regression Discontinuity (RDD), Difference-in-Differences (DID) 
+
+- [Estimation Strategies]{.highlight}
+   
+  - E.g., linear regression, logistic regression, Maximum Likelihood Estimation (MLE), and Bayesian models
+
+# Causal Diagrams
+
+## An Alternative Causal Model: Causal Graphs
+
+- Did social scientists not do causal inference before Rubin? [No!]{.alert}
+
+. . .
+
+- The old paradigm: [structural equation modeling (SEM)]{.highlight} and [path analysis]{.highlight}
+  
+:::{.columns}
+:::{.column width="60%"}
+
+:::fragment
+1. Postulate a causal mechanism and draw a corresponding [path diagram]{.highlight}.
+:::
+
+:::fragment
+2. Translate it into a (typically linear) system of equations:
+
+  $$
+  \begin{align*}
+  Y &= \alpha_0 + \alpha_1 Z + \alpha_2 X_1 + \alpha_2 X_3 + \epsilon_\alpha, \\
+  Z &= \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 X_3 + \beta_4 X_4 + \epsilon_\beta\\
+  . . .&
+  \end{align*}
+  $$
+:::
+
+:::fragment
+3. Estimate $\alpha, \beta$, etc., typically assuming normality and exogeneity.
+:::
+:::
+
+:::{.column width="40%"}
+
+```{dot}
+//| fig-width: 4
+//| fig-height: 4
+digraph causal_graph {
+    rankdir=LR;
+    bgcolor="transparent"
+    X1 [label="Personal\nWell-Being\n(X1)"];
+    X2 [label="Social\nTrust\n(X2)"];
+    Y [label="Voter\nBehavior\n(Y)"];
+    Z [label="Political\nSatisfaction\n(Z)"];
+    X3 [label="Media\nExposure\n(X3)"];
+    X4 [label="Social\nNetworks\n(X4)"];
+
+    Z -> Y;
+    X3 -> Z;
+    X2 -> Z;
+    X4 -> Z;
+    X1 -> Z;
+    X1 -> Y;
+    X3 -> Y;
+}
+```
+:::
+:::
+
+. . .
+
+- [Critique]{.note}: Strong **distributional/functional form assumptions** and no language to distinguish causation from association
+
+## Pearl's Attack
+
+<br>
+
+::: {.columns}
+::: {.column width="60%"}
+
+
+- Judea Pearl (1936--) proposed a new causal inference framework based on **nonparametric structural equation modeling (NPSEM)**
+
+:::fragment
+  - Originally a computer scientist  
+  - Previous important work on artificial intelligence  
+  - *Causality* [@pearl2009causality]  
+  - Won the Turing Award in 2011 for his causal work
+:::
+
+:::fragment
+- Pearl's framework builds on SEMs and revives it as a formal language of causality.
+:::
+
+:::
+::: {.column width="35%"}
+![](../_images/pearl.jpg){fig-align=center width="300"}
+:::
+:::
+
+## DAGs
+
+<br>
+
+:::{.columns}
+:::{.column width="60%"}
+- A causal diagram is a [directed acyclic graph (DAG)]{.highlight} composed of:
+
+  - **Nodes** (representing variables in the causal model)  
+  - **Directed edges or arrows** (representing *possible* causal effect)  
+:::
+
+:::{.column width="40%"}
+
+:::{.r-stack}
+
+:::{.fragment .fade-out fragment-index=2}
+
+```{dot}
+//| fig-width: 4
+//| fig-height: 2
+//| fig-align: center
+digraph G {
+  bgcolor="transparent"
+  rankdir="LR"
+  edge [
+		arrowsize=0.5,
+		// fontname="Helvetica,Arial,sans-serif"
+		labeldistance=3,
+		// labelfontcolor="#00000080"
+		penwidth=2
+		// style=dotted // dotted style symbolizes data transfer
+	]
+  node [
+    shape=plaintext,
+    fontsize=24,
+    penwidth=2
+  ]
+  X->Y;
+  X->T->Y;
+  { rank=min; X; }
+  { rank=max; Y; }
+}
+```
+:::
+
+:::{.fragment .fade-in-then-out fragment-index=2}
+
+```{dot}
+//| fig-width: 4
+//| fig-height: 2
+//| fig-align: center
+digraph G {
+  bgcolor="transparent"
+  rankdir="LR"
+  newrank=true;
+  edge [
+		arrowsize=0.5,
+		// fontname="Helvetica,Arial,sans-serif"
+		labeldistance=3,
+		// labelfontcolor="#00000080"
+		penwidth=2
+		// style=dotted // dotted style symbolizes data transfer
+	]
+  node [
+    shape=plaintext,
+    fontsize=24,
+    penwidth=2
+  ]
+  X->Y;
+  X->T->Y;
+
+  subgraph U {
+    node [
+      shape=plaintext
+      fontcolor="#cc241d"
+      fontsize=24
+      penwidth=2
+    ]
+		edge [color = "#cc241d"]
+    ex [label="Ux"];
+    et [label="Ut"];
+    ey [label="Uy"];
+  ex->et->ey[style = invis];
+  // ex->ey[constraint=false style = invis];
+  ex -> X;
+  ey -> Y;
+  et -> T;
+}
+
+{ rank=min; X;ex; }
+{ rank=max; Y;ey; }
+{ rank=same; T;et; }
+}
+```
+:::
+
+:::{.fragment .fade-in-then-out fragment-index=3}
+
+```{dot}
+//| fig-width: 4
+//| fig-height: 2
+//| fig-align: center
+digraph G {
+  bgcolor="transparent"
+  rankdir="LR"
+  edge [
+		arrowsize=0.5,
+		// fontname="Helvetica,Arial,sans-serif"
+		labeldistance=3,
+		// labelfontcolor="#00000080"
+		penwidth=2
+		// style=dotted // dotted style symbolizes data transfer
+	]
+  node [
+    shape=plaintext,
+    fontsize=24,
+    penwidth=2
+  ]
+  X->Y;
+  X->T->Y;
+  subgraph U {
+    node [
+      shape=plaintext
+      fontcolor="#cc241d"
+      penwidth=2
+    ]
+		edge [
+      color = "#cc241d"
+      style="dashed"
+      ]
+    T:se->Y:s[constraint=false dir=both];
+  }
+}
+```
+:::
+
+:::{.fragment .fade-in fragment-index=4}
+```{dot}
+//| fig-width: 4
+//| fig-height: 2
+//| fig-align: center
+digraph G {
+  bgcolor="transparent"
+  rankdir="LR"
+  edge [
+		arrowsize=0.5,
+		// fontname="Helvetica,Arial,sans-serif"
+		labeldistance=3,
+		// labelfontcolor="#00000080"
+		penwidth=2
+		// style=dotted // dotted style symbolizes data transfer
+	]
+  node [
+    shape=plaintext,
+    fontsize=24,
+    penwidth=2
+  ]
+  // X->Y;
+  X->T->Y;
+}
+```
+:::
+:::
+:::
+:::
+
+:::{.fragment fragment-index=2}
+- Exogenous variables not explicitly modeled (*errors*) can be omitted from a graph  
+:::
+
+:::{.fragment fragment-index=3}
+- Relationships involving unobserved variables are often represented by dashed/dotted lines  
+:::
+
+:::{.fragment fragment-index=4}
+- Missing edges encode causal assumptions:  
+  
+  - Missing arrows encode exclusion restrictions  
+
+  - Missing dashed arcs encode independencies between error terms  
+:::
+
+## NPSEM and Treatments
+
+<br>
+
+:::{.columns}
+:::{.column width="60%"}
+
+A causal DAG has a one-to-one relationship with an NPSEMa:
+
+$$
+\begin{align*}
+X &= f_X(U_X), \\
+T &= f_T(X, U_T), \\
+Y &= f_Y(T, X, U_Y)
+\end{align*}
+$$
+
+:::
+::: {.column width="40%"}
+
+```{dot}
+//| fig-width: 4
+//| fig-height: 2
+//| fig-align: center
+digraph G {
+  bgcolor="transparent"
+  rankdir="LR"
+  edge [
+		arrowsize=0.5,
+		// fontname="Helvetica,Arial,sans-serif"
+		labeldistance=3,
+		// labelfontcolor="#00000080"
+		penwidth=2
+		// style=dotted // dotted style symbolizes data transfer
+	]
+  node [
+    shape=plaintext,
+    fontsize=24,
+    penwidth=2
+  ]
+  X->Y;
+  X->T->Y;
+
+  subgraph U {
+    node [
+      shape=plaintext
+      fontcolor="#cc241d"
+      fontsize=24
+      penwidth=2
+    ]
+		edge [color = "#cc241d"]
+    ex [label="Ux"];
+    et [label="Ut"];
+    ey [label="Uy"];
+  ex->et->ey[style = invis];
+  // ex->ey[constraint=false style = invis];
+  ex -> X;
+  ey -> Y;
+  et -> T;
+}
+
+{ rank=min; X;ex; }
+{ rank=max; Y;ey; }
+{ rank=same; T;et; }
+}
+```
+
+:::
+:::
+
+. . .
+
+- These are *structural* equations (as opposed to algebraic) and represent causation -- the equal signs are thus *directional* (i.e., no moving around)
+
+- Treatments (interventions) are represented by the [$do()$ operator]{.highlight}
+
+. . .
+
+- For example, $do(x_0)$ holds $X$ at $x_0$ exogenously and removes the ["backdoor path"]{.highlight}:  
+
+$$
+X = x_0, \quad T = f_T (x_0, U_T),\quad Y = f_Y(T, x_0, U_Y)
+$$
+
+
+## Causal Effects and Identification
+
+<br>
+
+- The pre-intervention distribution: $p(y, t, x)$
+
+- The post-intervention distribution: $p(y, x \given do(t_0))$  
+
+. . .
+
+- The average treatment effect of $T$ on $Y$, $\tau_{ATE}$, can be defined as the average difference in $Y$ between two intervention regimes: 
+
+$$
+\E [Y \given do(t_1)] - \E [Y \given do(t_0)]
+$$
+
+. . .
+
+- **(Causal) Identification**: Can $P(y \given do(t))$ be estimated from data governed by the pre-intervention distribution $P(y, t, x)$?
+
+## Useful Intuition from DAGs
+
+<br>
+
+- A [collider]{.highlight} is a node in a DAG where two or more arrows meet.
+
+. . .
+
+- [Collider bias]{.highlight}: Conditioning on collider can induce relationship between its parents
+
+. . .
+
+:::{.columns}
+:::{.column}
+
+- [Example]{.note}:
+
+  - Admissions process where $T$ is students' grades, $Y$ is motivation, both influencing $X$, the admission decision.
+  
+  - Conditioning on $X$ (e.g. admitted) can create a misleading relationship between $Z$ and $Y$...
+
+:::
+::: {.column}
+
+```{dot}
+//| fig-width: 4
+//| fig-height: 3
+//| fig-align: center
+digraph collider_bias {
+  bgcolor="transparent"
+  rankdir=LR;
+  node [fontsize=24 shape=plaintext];
+  edge [
+    arrowsize=0.5,
+		labeldistance=3,
+		penwidth=2];
+  T [label="Grades\n(T)"];
+  Y [label="Motivation\n(Y)"];
+  X [label="Admitted\n(X)"];
+  T -> X;
+  T -> Y[style="invis"];
+  Y -> X;
+
+  // T:ne->Y:nw[dir="both" style="dashed" color = "#cc241d"];
+  { rank=min; T;}
+  { rank=max; Y;}
+}
+```
+
+:::
+:::
+
+## Useful Intuition from DAGs
+
+<br>
+
+- An [M-structure]{.highlight} forms when two variables that do not have a direct causal path share a common cause and the same effect. 
+
+. . .
+
+- [M-bias]{.highlight}: Conditioning on a common effect can create spurious correlation between otherwise uncorrelated variables.
+
+. . .
+
+:::{.columns}
+::: {.column}
+
+- [Example]{.note}:
+
+  - In Pearl's lung cancer study, $T$ is smoking, $X$ is wearing a seatbelt, $Y$ is lung cancer. $U_1$ is social norms following and $U_2$ is health norms following.
+  
+  - Conditioning on $X$ creates a false correlation between $T$ and $Y$,
+producing M-bias.
+
+:::
+::: {.column}
+
+```{dot}
+//| fig-width: 4
+//| fig-height: 3
+//| fig-align: center
+digraph {
+  bgcolor="transparent"
+  rankdir=LR;
+  edge [
+		arrowsize=0.5,
+		// fontname="Helvetica,Arial,sans-serif"
+		labeldistance=5,
+		// labelfontcolor="#00000080"
+		penwidth=2
+		// style=dotted // dotted style symbolizes data transfer
+	]
+  node [
+    shape=plaintext,
+    fontsize=24,
+    penwidth=2
+  ]
+  // Node shapes and connections
+  T [label="Smoking\n(T)"]
+  X [label="Seatbelt\n(X)"]
+  Y [label="Lung cancer\n(Y)"]
+  
+  // T -> X
+  T -> Y[style="invis"]
+  T -> X -> Y[style="invis"]
+
+  subgraph U {
+    node [
+      shape=plaintext
+      fontcolor="#cc241d"
+      fontsize=24
+      penwidth=2
+      color="#cc241d"
+    ]
+		edge [
+      color = "#cc241d"
+      style=dashed]
+  U1 [label="U1" style=dashed]
+  U2 [label="U2" style=dashed]
+  U1 -> U2[style="invis"]
+  U1 -> X
+  U1 -> T
+  U2 -> X
+  U2 -> Y
+  }
+  { rank=min; T;U1}
+  { rank=max; Y;U2}
+}
+```
+:::
+:::
+
+
+## DAGs $\leftrightarrow$ Potential Outcomes
+
+<br>
+
+- A causal model represented as a graph can be translated into potential outcomes.  
+
+. . .
+
+- For example the following NPSEM
+
+  $$
+  X = f_X(U_X), \quad T = f_T(X, U_T), \quad Y = f_Y(T, U_Y)
+  $$
+
+  directly corresponds to the following potential outcomes: $X_i$, $T_{i} (X_i)$, and $Y_{i} (T_i)$.
+
+. . .
+
+- Because of this fundamental equivalence, we will mostly work with potential outcomes, currently the standard framework in social sciences.  
+
+- [Note]{.note}: Graphs are useful for expressing and visualizing a causal model in empirical research.
+
+## Potential Outcomes vs. DAGs Controversy
+
+<br>
+
+- Imbens and Rubin (2015):
+
+  _Pearl's work is interesting, and many researchers find his arguments that path diagrams are a natural and convenient way to express assumptions about causal structures appealing. In our own work, perhaps influenced by the type of examples arising in social and medical sciences, we have not found this approach to aid drawing of causal inferences._
+
+. . .
+
+- Pearl’s blog post:
+
+  _So, what is it about epidemiologists that drives them to seek the light of new tools, while economists seek comfort in partial blindness, while missing out on the causal revolution? Can economists do in their heads what epidemiologists observe in their graphs? Can they, for instance, identify the testable implications of their own assumptions? Can they decide whether the IV assumptions are satisfied in their own models of reality? Of course they can't; such decisions are intractable to the graph-less mind._
+
+## Further Readings on DAGs
+
+<br>
+
+- Front-Door criteria [@Pearl1995frontdoor]
+
+- do-calculus [@Pearl1995docalculus]
+
+- ID algorithm [@TianPearl2002id]
+
+- ID algorithm is sound and complete [@ShpitserPearl2006]
+
+. . .
+
+- Causal DAGs are useful for understanding
+  
+  - dynamic causal effects [@HernanRobins2020]
+  
+  - interference [@OgburnVanderWeele2014]
+  
+  - external validity [@BareinboimPearl2016]
+  
+  - mediation [@Pearl2001mediation,@ImaiKeeleTingley2010]
+
+. . .
+
+- [DAGitty](https://www.dagitty.net/) is really helpful!
+
+## References
