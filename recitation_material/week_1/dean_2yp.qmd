@@ -1,0 +1,660 @@
+---
+title: ""
+author: ""
+bibliography: 2yp.bib
+csl: american-political-science-association.csl
+format:
+  pdf:
+    link-citations: true
+    number-sections: true
+    fontsize: 11pt
+    indent: true
+    keep-tex: true
+    math: true
+    documentclass: article
+    number-depth: 3
+    include-in-header: preamble.tex
+execute:
+  echo: false
+  warning: false
+  cache: true
+---
+
+```{=latex}
+\newpage
+\begin{titlepage}
+    \centering
+    \vspace*{1in}
+    {\Large \textbf{How NGOs Reshape the State: Evidence from Municipal Spending and Employment in Brazil}} \\[1cm]
+    {\large Alexander Dean\footnote{Ph.D. Student, Vanderbilt University, Department of Political Science. Email: \texttt{alexander.r.dean@vanderbilt.edu}. I thank Liz Zechmeister, Abhit Bhandari, Gosha Syunyaev, Federico Lombisano, and Guilherme Fasolin for their invaluable comments and feedback on this project. I also thank participants of the Vanderbilt Comparative Politics Grad Lab for helpful comments and suggestions.}} \\[0.5cm]
+    
+    \vspace{1cm} % Space before the abstract label
+    \today \\[0.5cm]
+    \vspace{1cm}
+    \textbf{Abstract} \\[0.5cm]
+    \begin{minipage}{0.9\textwidth}
+        \small
+        \singlespacing
+        How does NGO-led public goods provision shift state incentives to provide public goods? When NGOs provide public goods, they may relieve the state of responsibility, provoke competition, or create space for more efficient governance. This paper theorizes how factors like the degree of political attribution and institutional budgetary constraints shape how state actors respond to NGO-provided public goods. In low-oversight settings, NGOs are more likely to act as a monetary windfall. Where budgetary constraints are tighter or attribution is clearer, NGOs may instead incentivize state capacity investments through more efficient spending or trigger political competition, respectively. To test these competing explanations, I compile panel data (2002–2022) on NGO activity, municipal expenditures, and municipal employment records in Brazil, where an efficiency effect or nonstate windfall is most likely ex ante, and apply a generalized difference-in-differences design. I find evidence for an efficiency effect: municipalities that receive NGO-provided public goods increase the hiring of civil service bureaucrats and reduce reliance on temporary contracts. Contrary to windfall or competition-based expectations, I find no evidence that NGO-provided goods significantly shift spending on public goods. These findings suggest that in settings with existing state capacity, NGOs can strengthen, rather than substitute, state capacity investments by changing how politicians allocate resources. This contributes to our understanding of the second-order political effects of nonstate service delivery, with broader implications for development and governance.
+    \end{minipage}
+    
+    \vfill
+\end{titlepage}
+```
+\pagebreak
+
+\doublespacing
+
+# Introduction {#sec:intro}
+
+Nongovernmental organizations (NGOs) are increasingly central actors in the production of public goods, service delivery, and expansion of social welfare across the world. NGO funding of public goods has quadrupled this century [@aldashevDevelopmentNGOsBasic2018] and NGOs are expected to spend $\$353.21$ billion on projects globally in 2025 alone [@GlobalNGOsCharitable2025], an amount that is greater than the GDP of all but 41 countries [@imfWoldEconomicOutlook2025]. Yet, despite the central role that NGOs play in providing social welfare to hundreds of millions of individuals, the consequences of NGO-provided public goods and services remain understudied, especially compared to the extensive literature on state-led public goods provision [@cammettIntroductionPoliticalConsequences2011].
+
+While scholars have begun to study how NGOs affect citizen behavior [e.g., @deserrannoImpactNGOProvidedAID2024;@torpey-saboeDoesNGOPresence2015], little work explores how governments respond to NGOs providing welfare services in their jurisdiction. Most previous scholarship in this domain has focused on (undeserved) credit claiming for nonstate goods provision [e.g., @cruzForeignAidUndeserved2017], which documents whether and how politicians can convince voters that they were responsible for the nonstate project. Research in this domain suggests that voters often attribute such projects to politicians, even without the politician attempting to claim credit [@baldwinForeignAidPolitical2023;@guiterasDoesDevelopmentAid2015].^[Although politicians are less often given credit in high-information environments where the clarity of attribution is stronger [@baldwinForeignAidPolitical2023].] But if politicians are typically rewarded for services they did not provide, how does this affect their own incentives to invest in public goods?
+
+I argue that NGO-provided public goods can have second-order effects on state incentives to provide public goods, albeit with several contrasting effects, depending on contextual factors like the clarity of attribution or institutional budgeting constraints. I first explore the merit behind standard NGO claims [e.g., @najamFourCsGovernment2000] that their funding of public goods increases the efficiency of state-led public goods provision. I argue that such an effect is most likely to occur in institutional settings with high levels of budgeting oversight and contexts with medium levels of clarity of attribution to the actor responsible for public goods production. When the clarity of attribution for public goods production is high and there are relatively fewer institutional constraints on budgeting oversight, I argue that nonstate service delivery can instead induce the state to increase public goods production under a competition effect in order to maintain political support. Previous work has noted several anecdotal examples of politicians supplying public goods and services only after NGOs began to provide similar goods [e.g., @cacerescabanaPandemicResponseRural2021;@sprechmann20052010ImpactReport2011]. This explanation draws upon existing political economy research on the effects of increased political competition [e.g., @dattaPoliticalCompetitionPublic2020;@maniDemocracyVisibilityPublic2007], where increased political competition incentivizes politicians to spend on more visible policies (i.e., more easily attributable policies), like public goods instead of less visible policies like strengthening bureaucratic capacity. Conversely, when there is low ability to attribute public goods provision to the correct actor or few institutional restraints against rent-seeking and budget oversight, I argue that nonstate public goods provision can cause the state to invest less in public goods provision in a locality. I term this effect a "nonstate windfall", which has similar structural features to already known windfalls [e.g., @brolloPoliticalResourceCurse2013].
+
+I test these explanations for the effects of nonstate public goods provision in Brazil, a country with a high density of NGOs,^[As of February 2025, 917,727 NGOs, typically called civil society organizations (*organizações da sociedade civil*, OSC) in Portuguese, are registered with the Brazilian government. This accounts for roughly 4.5 NGOs per million people in Brazil [@ipeaMapaOrganizacoesSociedade2025], resulting in one of the highest civil society organizations per capita in the world [@torpey-saboeDoesNGOPresence2015].] a significant degree of decentralization with respect to the budgeting process for public goods production [@brolloPoliticalResourceCurse2013;@buenoBypassingEnemyDistributive2018], and rich employment and budget micro-data [@zamboniAuditRiskRent2018]. Together, these features of the Brazilian political system make Brazil an ideal setting to understand how NGO-led public goods provision affects state incentives to invest in public goods. While scholars have previously studied nonstate public goods provision in Brazil [e.g., @buenoBypassingEnemyDistributive2018;@torpey-saboeDoesNGOPresence2015], existing work has either focused on the political effects of federal government's funding of NGO projects in non-aligned municipalities [e.g., @buenoBypassingEnemyDistributive2018] or how NGO headquarter density is associated with per capita social spending [e.g., @torpey-saboeDoesNGOPresence2015]. In comparison, this paper focuses on the projects that NGOs undertake and how they affect mayoral incentives in their budget allocation and hiring practices.
+
+I collect data on NGO activity, municipal budget expenditures, and municipal employment records in Brazil for the period 2002-2022 to test whether the provision of public goods by NGOs in a municipality decreases municipal spending on public goods provision and increases spending on municipal employment. I apply a generalized difference-in-differences (DiD) identification strategy to gain causal leverage in addressing whether nonstate spending on public goods provision changes how politicians allocate resources towards public goods provision and municipal employment.
+
+I find evidence that the composition of the municipal bureaucratic workforce does change when an NGO provides public goods, with a significant increase in the hiring of civil servant bureaucrats, as compared to non-civil service municipal employees. This change in employment composition is primarily driven by a decrease in the hiring of temporary contract workers and an increase in hiring of employment contracts issued under Brazil's civil service. This effect is most consistent with NGOs' arguments that their funding of public goods can allow for the state to more efficiently spend their resources in order to jointly increase citizen welfare, in this case by strengthening bureaucratic capacity. Conversely, I do not find evidence of NGOs generating a nonstate windfall nor a competition effect for municipalities which host NGO-provided public goods. Even in municipalities in which either effect is most likely to theoretically occur ex ante, I do not find any evidence that mayors significantly shift funding for employment and public goods provision following the completion of an NGO public good.
+
+These findings have strong implications for the functioning of NGOs both in Brazil and globally. While previous research has indicated that nonstate public goods provision can have a negative effect on state capacity, through a substitution mechanism, in low-capacity settings [e.g., @deserrannoImpactNGOProvidedAID2024;@katzBigTruckThat2013], I show that in contexts where the state is already capable of providing public goods that the presence of NGO-provided public goods may actually have a positive effect on state capacity, through unlocking investments in bureaucratic capacity. This paper extends existing research on nonstate public goods provision, a historically understudied phenomenon [@cammettIntroductionPoliticalConsequences2011], and strengthens our understanding of the "supply-side" effects of such provision on state incentives.
+
+# Conceptualizing Expectations {#sec:lit}
+
+This section draws on theoretical and empirical evidence from NGOs and existing political economy research to derive expectations for how NGOs can shape state behavior.^[This paper uses the UN Development Programme's definition of an NGO: where an NGO is defined as an institutionalized organization that is (i) private (separate from the government), (ii) non-profit distributing (profits not returned to owners or directors), (iii) self-governing, and (iv) voluntary [@NonGovernmentalOrganizationNGO2025].] In particular, I focus on how this research provides expectations for understanding how nonstate funding for public goods can shift politicians' incentives to fund public goods.^[In this paper, I refer to nonstate funding as resources for public goods provision that are provided by actors outside of formal state channels— whether from domestic sources like charitable donations or international sources like foreign aid. Conversely, state funding refers to public goods provision provided by the state. Public goods refer to welfare-enhancing expenditures typically provided by the state, including, but not limited, to education, healthcare, and infrastructure. While such spending is not strictly a public good in an economic sense, I use public goods provision and service delivery interchangeably to represent such funding.]
+
+## NGOs as Crowding-In Efficient Spending {#subsec:ngo-claims}
+
+Many NGOs explicitly frame their involvement in service provision as complementary to state efforts. Rather than supplanting or competing with the state, NGOs argue that their service delivery can enhance the state’s capacity to deliver goods and services by reducing information and implementation frictions, supplying technical expertise, or unlocking latent bureaucratic or financial capacity [@najamFourCsGovernment2000]. This logic suggests that NGO activity alone can enable more efficient state spending, especially for public goods [@brassAlliesAdversariesNGOs2016]. In Kenya, NGOs have aided in the functioning of essential services like water access in Rachuonyo, funded agricultural extension services in Butere-Mumias, and procured primary school textbooks nation-wide [@brassBlurringBoundariesIntegration2012]. As a result, the Kenyan government has been able to more efficiently build state capacity, especially at the national-level. Similarly, in response to international aid funds purposed for hospital construction in Uganda, the Ugandan government was able to construct multiple new hospitals in Kampala, achieving the government's plan to have a general hospital in each city neighborhood [@cruzattiChineseAidHealth2023]. However, others have found negative effects regarding such claims from NGOs. In low-capacity settings, NGO-provided public goods can have potentially harmful effects on state capacity, crowding-out state investments [e.g., @deserrannoImpactNGOProvidedAID2024;@katzBigTruckThat2013].
+
+Thus, the evidence of NGOs as "unlocking" efficiency in state-led public goods provision is unsettled. Additionally, much of this scholarship has examined how national-level governments respond and shift budget allocations in response to nonstate funding of public goods provision. In such cases, total funding for public goods may remain the same while allocations to specific localities may instead change. Conversely, in a local setting, such as a municipality, such spending shifts across jurisdictions are not feasible. Instead, more efficient spending would instead take the form of investments in local state capacity, like hiring civil servants. Finally, NGO claims of complementarity may not reflect how local politicians perceive or respond to nonstate public goods provision. Whether politicians view NGO activity as assisting more efficient spending on citizen welfare likely depends on contextual factors like institutional budgeting constraints and how well citizens attribute public goods and policy implementation to the correct actor. 
+
+## NGOs as Inducing Political Competition
+
+Compared to literature on monetary windfalls, explored below, or NGO-claims of the effects of nonstate public goods provision, research on political competition suggests that the introduction of a second provider of public goods in a locality should (i) increase perceptions of political competition and (ii) shift politicians' incentives to increase spending on more visible policies. 
+
+Canonical political economy models of electoral accountability highlight the role that political competition plays in spurring better governance, through both selection [e.g., @fearonElectoralAccountabilityControl1999] and sanctioning [e.g., @besleyPrincipledAgentsPolitical2006] mechanisms. In such models, better governance typically is conceptualized as investments in public goods provision [@poloElectoralCompetitionPolitical1998], human capital investments [@bruecknerFiscalFederalismEconomic2006], or general productivity investments [@hatfieldFederalismTaxationEconomic2015;@hatfieldPoliticalEconomyTheory2012]. Empirical evidence generally supports the conclusions of formal models of political competition and its effects [e.g., @arvateElectoralCompetitionLocal2013;@dattaPoliticalCompetitionPublic2020].^[Although, some scholars argue that political competition can actually *decrease* public goods production [e.g., @gottliebCountervailingEffectsCompetition2019]. However, such studies often examine how increased political competition in legislative arenas increases gridlock. Such an effect is distinct from the effect of increased political competition on the incentives of executive politicians.]
+
+While politicians should respond to increased political competition by increasing spending, such spending is likely to be unevenly distributed. Rather, politicians often increase investments in visible policies that citizens can more easily attribute to the politician. Increased political competition is associated with increased spending on famine relief (rather than malnutrition prevention), despite the fact that malnutrition prevention is significantly more productive in combating hunger, because relief is more visible to citizens than prevention [@maniDemocracyVisibilityPublic2007]. Similarly, voters reward incumbent politicians for (the visible) disaster relief funding, but not for (the less visible) disaster preparedness funding [@healyMyopicVotersNatural2009]. Thus, even when increasing spending on policies like civil service hiring (or policies that generally strengthen bureaucratic capacity) could provide a strictly greater welfare increase for citizens, such spending is less attractive to politicians than spending on more visible policies, like the construction of new schools.^[While the increased funding of visible policies is not harmful to citizen welfare, it nonetheless may not provide the most significant welfare gains for citizens, especially if less visible policies are already relatively underfunded (like disaster preparedness funding or bureaucratic funding).]
+
+Yet, do politicians view NGOs as political competitors? From the example in the introduction where a politician reported feeling pressured to begin supplying additional public goods after NGOs began providing their own services [@cacerescabanaPandemicResponseRural2021], it is clear that politicians do sometimes perceive NGOs to be competitors in governance. Such perceptions of competition are most likely to occur in high information settings, where voters can clearly differentiate between public goods provided by each actor thereby enabling the formation of preferences for a particular provider or by reducing reliance upon the politician for goods and services. In high-information environments, such as experiments, where individuals are informed about the specific providers of public goods, scholars have found that individuals generally develop preferences for a particular provider [@buenoBypassingEnemyDistributive2018;@springmanPoliticalEconomyNGO2022]. Thus, under high-information environments, it is possible for nonstate public goods provision to stimulate political competition and incentivize politicians to invest in more visible policies.
+
+## Nonstate Goods as a Monetary Windfall {#subsec:windfall}
+
+Compared to the previous two possible outcomes, if nonstate services can generate a windfall for the state, this can adversely affect citizen welfare. Monetary windfalls, also called fiscal windfalls, are broadly characterized as sudden or large increases of governmental revenues that can arise from oil revenues [@caselliOilWindfallsImprove2013], increased intra-governmental transfers [@brolloPoliticalResourceCurse2013], or commodity booms that increase governmental revenue [@loayzaLocalImpactMining2016]. Rather than boosting public goods provision, monetary windfalls often have adverse effects on rent-seeking behavior and societal wellbeing. All else held equal, an increase of revenues should increase expenditures across a number of spending categories, including funding for public goods provision, but windfalls can instead turn into "missing money" [@caselliOilWindfallsImprove2013] as additional revenues are diverted into activities like rent extraction [@brolloPoliticalResourceCurse2013] or patronage spending [@monteiroDoesOilMake2010].^[In some cases, windfalls can, theoretically, allow for the lowering of taxes or increasing governmental savings [@caselliOilWindfallsImprove2013]. However, in the empirical context of this paper, both alternative outcomes are unlikely, as Brazilian municipalities obtain $90\%-95\%$ of their revenue from transfers and are required to spend nearly all transfers received. Thus, decreasing taxation or increasing governmental savings is highly unlikely.]
+
+Recent windfall scholarship has noted that adverse effects of monetary windfalls can accrue without conflict between different groups through exacerbations of political agency problems [@brolloPoliticalResourceCurse2013; @caselliOilWindfallsImprove2013]. The political agency problem arises from the idea that voters, while rational, are imperfectly informed about government policy and politician behavior [@brolloPoliticalResourceCurse2013]. Empirical evidence of voter knowledge of monetary windfalls suggest that voters are unaware of or severely underestimate the size of monetary windfalls [@caselliOilWindfallsImprove2013]. The same mechanism, imperfect voter information, can also drive adverse effects of nonstate public goods provision as well. There is a robust literature on (undeserved) credit claiming, where politicians attempt to co-opt nonstate public goods provision spending to make it appear that they themselves have provided the goods, with citizens often attributing the service delivery projects to the politician's responsibility [see @cruzForeignAidUndeserved2017, for instance]. However, even when politicians do not attempt to claim credit for nonstate public goods provision projects, voters often attribute these projects to politicians anyway [@baldwinForeignAidPolitical2023; @guiterasDoesDevelopmentAid2015]. When citizens credit politicians for public goods provided by NGOs, politicians may be able to redirect government resources toward other policy priorities, personal enrichment, or political gain without sacrificing political support. In settings with weak institutional constraints against rent-seeking or budgetary rules, a nonstate windfall effect is relatively more likely to occur.
+
+# Theoretical Framework {#sec:theory}
+## A Stylized Example {#subsec:toy-example}
+
+Consider a municipality where the mayor, who is seeking reelection, controls the budget. Each period, the mayor typically receives 100 coins, of which 95 coins must be spent on public goods to meet citizen expectations and satisfy minimal state monitoring to be reelected. Spending less than 95 coins can risk losing reelection for the mayor, either because citizens expect a minimum standard of public services, or because state monitoring agencies may sanction or audit underperforming municipalities. Although both conditions are probabilistic constraints, the risk of reelection loss or sanctions can make doing so costly for the mayor. The politician has discretion over the remaining 5 coins, which can be spent on (i) additional public goods, (ii) investments in bureaucratic capacity, (iii) patronage employment, or (iv) rent extraction. Of these options, spending on public goods or strengthening bureaucratic capacity maximize societal welfare, private transfers produce a smaller welfare gain (for only those who receive the transfer), and rent extraction produces none. Finally, spending on public goods is most visible to citizens, in terms of attributability, while spending on patronage employment contracts or bureaucratic capacity investments is relatively less visible to citizens, and rent extraction is not visible at all.
+
+Suppose now that an NGO provides 10 coins worth of public goods in the municipality. This (theoretically) increases the total coins available public goods provision from 100 to 110 coins. First, presume that citizens generally attribute these additional goods to the politician, such that the mayor now needs to personally provide only 85 coins to meet the perceived minimum threshold. The remaining 15 coins can be distributed towards any of the spending categories as specified above. Thus, NGO-funded service delivery effectively frees up 15 coins for discretionary use, compared to 5 coins previously. While the overall level of spending for goods provision and service delivery in the municipality remains the same, the level of spending from state sources decreases. Such an effect is theoretically consistent with a windfall or efficiency effect. 
+
+Now, let the citizens *not* attribute the NGO-provided goods to the politician. When attribution is high (i.e., citizens correctly attribute goods provision to the correct actor), the politician must still provide 95 coins towards public goods provision in order to meet reelection demands, which limits their ability to use the nonstate goods provision to increase their discretionary spending. Additionally, suppose that the addition of a second service-providing actor increases political competition for the mayor. In order to maintain their chance at winning reelection in the face of greater competition, the mayor can respond by increasing their spending on more highly attributable policies, like public goods provision, instead of spending the remaining 5 coins on policies like bureaucratic capacity or rent extraction. Such an effect is theoretically consistent with a competition effect.
+
+This stylized example relies on several assumptions related to nonstate goods provision. First, the example assumes that public goods provided by the state and public goods provided by an NGO are substitutable. Second, it assumes that the nonstate service delivery was performed adequately and did not fail to meet expectations. I empirically address both of these assumptions in [section 6.5](#robustness) in Brazil to provide evidence that these assumptions reasonably hold in my case.^[I also specifically discuss information regarding NGO operations and mayoral budgeting constraints in Brazil in [section 4](#sec:context).]
+
+## A Typology of Politician Responses and Observable Implications {#subsec:typology}
+
+From the stylized example and literature expectations, each possible effect of nonstate public goods provision on politician incentives for resource allocation can be represented by the typology in figure \ref{fig:typology}, where the level of institutional constraints (for budgeting and corruption more generally) and clarity of attribution shifts the likelihood of each effect occurring. 
+
+```{=latex}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[xscale=10, yscale=8]
+  % Axes
+  \draw[->] (0,0) -- (1.1,0) node[anchor=north west] {\small High};
+  \draw[->] (0,0) -- (0,1.1) node[anchor=south east, rotate=90] {\small High};
+
+  % Axis labels
+  \node at (-0.02, -0.02) {\small Low};
+  \node at (0.55, -0.06) {\textbf{Clarity of Attribution}};
+  \node[rotate=90] at (-0.06, 0.5) {\textbf{Institutional Constraints}};
+
+  % Ellipses for the three categories
+  \node[draw, ellipse, minimum width=2.8cm, minimum height=1.2cm, align=center] at (0.2, 0.1) {Nonstate\\Windfall};
+  \node[draw, ellipse, minimum width=2.8cm, minimum height=1.2cm, align=center] at (0.5, 0.9) {Efficiency\\Effect};
+  \node[draw, ellipse, minimum width=2.8cm, minimum height=1.2cm, align=center] at (0.9, 0.25) {Political\\Competition};
+\end{tikzpicture}
+\caption{Typology of Theorized Political Effects}
+\label{fig:typology}
+\end{figure}
+```
+
+In settings with low institutional constraints and poor clarity of attribution, nonstate public goods provision is more likely to function as a windfall for politicians, allowing for the shifting of budgets away from public goods provision and towards actions like patronage employment or rent-seeking. Conversely, when there is a high clarity of attribution and relatively low institutional constraints for politicians, a political competition effect and increased spending on public goods is more likely. Finally, when there is a high level of institutional constraints against budget shifts and adverse behavior, an efficiency effect is more likely to occur, where the politician shifts spending so as to increase citizen welfare and state capacity.
+
+The ability of citizens to attribute goods provision to the correct actor depends on factors like the richness of the information environment and institutional structures. While studies of credit claiming generally demonstrate that voters attribute nonstate service delivery to politicians [e.g., @baldwinForeignAidPolitical2023;@guiterasDoesDevelopmentAid2015], correct attribution is more frequent in high infomation environments [e.g., @baldwinForeignAidPolitical2023;@buenoBypassingEnemyDistributive2018]. A richer information environment can come from numerous sources, like from hosting a radio station that provides local news in the municipality [e.g., @ferrazExposingCorruptPoliticians2008] or from having internet access [e.g., @falckElectionsVotingBehavior2014]. Institutional structures also affect the clarity of responsibility, where, for instance, citizens in federal states tend to have lower levels of correct attribution [e.g., @leonWhoResponsibleWhat2010].
+
+Institutional constraints similarly shape how likely each theorized effect is to occur. In municipalities that have received a recent governance audit, which raises the perceived costs of engaging in corruption [e.g., @avisGovernmentAuditsReduce2018], mayors should be less likely to divert funds toward patronage or rent extraction when an NGO provides a public good in their municipality, thereby making a windfall expectation less likely. Similarly, when a municipal council must approve the mayor's budget, or when the mayor is legally bound to devote a certain percentage of their budget to particular goods and services, a monetary windfall effect or a political competition effect are less likely to occur, as both effects are consistent with shifts *across* budget categories. Conversely, a crowding-in explanation is more likely to occur in settings with significant institutional constraints related to budgeting or corruption, because more efficient spending can also occur by shifting spending within budget categories.^[For instance, mayors could shift the composition of the municipal workforce and hire less workers who assist in public goods production and increase hiring of civil servants while devoting the same proportion of the budget to municipal employment.]
+
+The level of institutional constraints and clarity of attribution are both dependent on national and local characteristics. Thus, while national-level characteristics like a federalized institutional structure and constitutionally required spending mandates for public goods provision may incentivize an efficiency effect for mayors in an average municipality, municipalities with a history of corruption may nonetheless still be more likely to experience a nonstate windfall effect following nonstate service delivery. This heterogeneity in effects is important because several observable implications of each theorized effect are (partially) observationally equivalent. If I were to only measure shifts in budget expenditures on municipal employment, increased expenditures on strengthening municipal bureaucratic capacity— such as an increase of hirings of civil servants— would be observationally equivalent with increased municipal expenditures for patronage employment.^[Increased expenditures on municipal employment contracts, whether they stem from civil service or temporary employment contracts, would all be part of a municipality's employment budget.] In [Section 6.3](#subsec:employment-comp), I detail additional statistical tests that differentiate between investments in bureaucratic capacity and patronage hiring. Specifically, an increase in civil service municipal employment contracts is indicative of an investment in bureaucratic capacity, while increases in temporary employment contracts is more consistent with patronage hiring [@toralCanAnticorruptionPolicies2023; @toralHowPatronageDelivers2024].
+
+## Hypotheses {#subsec:hypotheses}
+
+Building from the stylized example, observable implications, and the literature expectations from the previous section, I derive the following hypotheses:
+
+```{=latex}
+\begin{quote}
+$H_{1}$: In response to an NGO providing public goods in a municipality, the mayor will:
+
+\begin{quote}
+$H_{1A}$: increase spending on strengthening state capacity when institutional constraints are strong (efficiency explanation)
+\end{quote}
+
+\begin{quote}
+$H_{1B}$: increase spending on public goods provision when political attribution is strong (competition explanation)
+\end{quote}
+
+\begin{quote}
+$H_{1C}$: decrease spending on public goods provision when political attribution and institutional constraints are weak (windfall explanation)
+\end{quote}
+
+$H_{2}$: In municipalities that have fewer institutional constraints ex ante, a nonstate windfall effect is more likely to occur, all else held equal
+\end{quote}
+```
+
+# Context: NGOs, Mayors, and Budgets in Brazil {#sec:context}
+
+In this section I provide context about (i) NGO goods production and service delivery and (ii) the role of mayors in providing public goods and setting spending allocations in Brazilian municipalities. Brazil is a highly decentralized, federal republic with 26 states subdivided into 5,570 municipalities (\textit{municípios}). Municipalities are managed by an elected mayor (\textit{Prefeito}) and an elected municipal council (\textit{Camara dos Vereadores}). Municipal governments are responsible for providing public goods and service delivery for urban planning, land development, public transportation, garbage collection, education, health, and infrastructure projects [@ConstituicaoBrasileira1988].^[Municipal governments share some responsibility with state and federal governments for the provision of health care and education, where municipalities typically provide lower-level service delivery, such as the maintenence of primary schools, clinics, and small hospitals [@bragaLocalGovernmentSpending2017].] The Brazilian Constitution also mandates that a certain proportion of annual spending be spent on particular public goods, with a $25\%$ and $15\%$ floor for education and healthcare spending, respectively. Due to this responsibility, municipal governments tend to have relatively large workforces, with the average municipal government employing $4.9\%$ of the local population and $38\%$ of individuals who are formally employed [@toralCanAnticorruptionPolicies2023]. Municipal employees experience a relative wage premium in comparison to the private sector, making municipal employment an attractive employment option for citizens [@colonnelliPatronageSelectionPublic2020]. Often, mayors use municipal employment as a form of patronage to increase their electoral support from citizens [@toralCanAnticorruptionPolicies2023; @mignozzettiLegislatureSizeWelfare2022].^[Mayors typically have wide latitude in their hiring of municipal employees. However, there exist some exceptions, like a prohibition of hiring a family member up to three degrees of consanguinity [@toralTurnoverHowLameDuck2024].] In order to decrease mayors' ability to engage in patronage and rent extraction, the Brazilian federal government has launched several notable reforms. Brazil prohibits the hiring and firing of municipal employees in the three months prior to and after an election in an attempt to limit the electoral budget cycle and patronage as a campaign strategy [@toralCanAnticorruptionPolicies2023].^[In an unintended consequence, the law has shifted employment hiring to the lead-up to the hiring freeze before the election [@toralCanAnticorruptionPolicies2023]. Thus, rather than displacing the use of patronage, it only shifted the periods in which it is most common.] Brazil also has an independent agency that has performed randomized audits on municipalities since 2000 [@ferrazElectoralAccountabilityCorruption2011]. After receiving an audit, mayors are significantly less likely to engage in corrupt behavior, viewing such action as being more risky than prior to the audit, even if the audit did not find malfeasance [@zamboniAuditRiskRent2018].
+
+Despite municipalities being charged with the primary responsibility for goods provision and service delivery generally in Brazil, they have relatively limited ability to raise taxes. Instead, municipalities primarily rely upon transfers from higher levels of government [@corbiRegionalTransferMultipliers2019]. Federal transfers account for roughly $65\%$ of transfers, taking the forms of constitutionally mandated automatic transfers determined by municipal population (\textit{Fundo de Participação do Municipios}, FPM) and discretionary transfers (\textit{CONV\^ENIO}) [@brolloTyingYourEnemys2012].^[The FPM roughly accounts for $50\%$ of transfers while discretionary transfers account for $15\%$ of total revenues.] State transfers account for roughly $23\%$ of municipal revenue while tax revenue from municipalities themselves only comprises about $5.5\%$ of revenue [@brolloTyingYourEnemys2012].^[Additionally, municipalities are strongly constrained by institutional factors to take on debt, with restrictions on over-borrowing and running a deficit thanks to the Fiscal Responsibility Law of 2000 [@meloPoliticalEconomyFiscal2010].]
+
+While FPM transfers are constitutionally mandated, all other municipal transfers are discretionary in nature, with municipalities competing for these other discretionary funds. Often, these funds are distributed in a manner to favor aligned mayors [@brolloTyingYourEnemys2012].^[Discretionary transfers commonly favor co-aligned partisans across the world, not just in Brazil [@braccoIntergovernmentalGrantsSignals2015; @fouirnaiesEnglishBaconCopartisan2015; @berryPresidentDistributionFederal2010].] However, municipalities are not the sole receivers of these discretionary transfers. Federal discretionary transfers also fund state governments (roughly $30\%$ of federal discretionary transfers), NGOs (roughly $21\%$ of federal discretionary transfers),^[Between 2010 and 2018, 22,000 NGOs (out of 820,000 active in this timeframe) received funding ($R\$118.5$ billion, $\$21,908,336$ USD) from the Brazilian national government [@ipeaMapaOrganizacoesSociedade2025]. These NGOs are especially concentrated in providing welfare services [@buenoBypassingEnemyDistributive2018;@ipeaMapaOrganizacoesSociedade2025].] and federal agencies and publicly owned companies ($3\%$ of total federal discretionary transfers) [@buenoBypassingEnemyDistributive2018]. In non-aligned municipalities, NGOs receive a greater share of discretionary transfers than in municipalities which have an aligned mayor [@buenoBypassingEnemyDistributive2018]. However, NGOs in Brazil receive funding from a wide range of sources. NGOs routinely procure funding via donations from domestic individuals, private companies, foreign governments, international NGOs, and donations from foreign individuals, in addition to receiving funding from the national-level government.^[In the pubic NGO data from the government, there is a column which lists the funding source for NGO projects, although the data was not filled out for most of the entries. For projects that do have a funding source listed, there was a significant amount of variance for the funding principal of the project [@ListaProjetos2023].] There is a high degree of overlap in the types of public goods provision and service delivery provided by NGOs and mayors [@buenoBypassingEnemyDistributive2018].^[Federal transfers for NGOs tend to be concentrated around service delivery that improves social welfare, but non-governmental funding sources are not as concentrated [@buenoBypassingEnemyDistributive2018; @ListaProjetos2023].]
+
+Given existing institutional constraints concerning the municipal budget process and adverse political behavior in Brazil, I argue that the average municipality will experience an efficiency effect following nonstate service delivery. Mayors share some budgetary powers with the municipal council. While the mayor has the primary power of setting budgets, the inclusion of another actor in bargaining decreases the mayor's ability to secure their own budget priorities [@mignozzettiLegislatureSizeWelfare2022]. Furthermore, the existence of mandated minimum spending on public goods should limit shifts in spending across budget categories. Brazil also has institutional constraints against rent-seeking, including its independent audit agency and municipal employment laws that aim to restrict patronage hiring practices in election years. However, in municipalities with a prior history of corruption, these national-level constraints may matter less in comparison to weak local institutional constraints against opportunistic political behavior. In these municipalities, a nonstate windfall effect is more likely to materialize rather than an efficiency effect.
+
+# Data {#sec:data}
+## Data Coverage and Sources {#subsec:data-sources}
+
+To test the competing expectations for the effect of NGO public goods provision, I build a municipality-year panel dataset of NGO projects, municipal expenditures, and municipal employment contracts. The Brazilian national government makes information about all registered NGOs and their projects publically available in Brazil for the period 2002-2023.^[This data was obtained from the Open Data Portal, [Dados Abertos Portal](https://dados.gov.br/dados/conjuntos-dados/mapaosc), and is collected by the Brazilian Institue of Applied Economic Research (*Instituto de Pesquisa Econômica Aplicada*— IPEA) under its map of civil society organizations (*Mapa das Organizações da Sociedade Civil*). I exclude 2023 from my panel because all projects that were listed as starting in 2023 did not have a listed end-date or were listed to end in the future.] I additionally collect data on municipal budget expenditures from 2002-2022 from the Brazilian government.^[This data was obtained through the IPEA [website](http://www.ipeadata.gov.br/Default.aspx).] Finally, employment contract data, corruption audit data, and covariates were collected from *A Base dos Dados* for the period 2002-2022.^[[A Base dos Datos](https://basedosdados.org) is an NGO in Brazil that publishes data outputs relating to Brazil.] Descriptive statistics are reported on in [Appendix A](#appendix.a).
+
+## NGO Projects {#subsec:ngos-projects}
+
+The NGO project data was downloaded with project descriptions as raw text, requiring refinement in order to quantitatify the type of public goods NGOs provide.^[While Brazil publishes each NGOs registered "type", similar data is not available for individual projects. It is probable that most service delivery projects undertaken by NGOs will fall under their registered legal category (such as a registered development NGO or a registered education NGO). However, I cannot substantiate that this is fully true and instead rely upon structural topic modeling to classify NGO projects. Additionally, some of the registered legal categories do not map well onto project types, such as a registered religious NGO, which could plausibly execute projects across a number of project types.] I rely upon structural topic modeling (STM), an unsupervised learning algorithm, to classify the project descriptions.^[This model builds upon previous topic models like Latent Dirichlet Allocation (LDA) by allowing topics to correlate with one another and the ability to assign "meta" variables which supersede topics [@robertsStructuralTopicModels2014].] STM uses word frequency and word distribution to allocate each descriptions into distinct topics [@robertsStmPackageStructural2019].^[See [Appendix B](#stm_ngo) for reporting on tradeoffs for modeling the number of topics with this specific dataset.] Through STM, NGO projects were catagorized into 6 main categories: cultural, sports, education, development, health, and environmental projects.^[Note that there were 8 topics generated with STM. However, topics 1 and 6 had key words in the project description that were primarily cultural. Similarly, topics 5 and 8 were associated with descriptions that were primarily developmental in nature. See [Appendix B](#stm_ngo) for the most frequent words associated with each topic. Within the sample, only 37 projects could not be assigned a topic from their project descriptions.] Figure \ref{fig:ngo_topics} in the appendix reports on the frequency of assignment to these topics. Health-related projects are the most common NGO-led public goods project by itself, while cultural projects (when combining both topics) make up a plurality of projects. With STM, I am able to validate a key assumption about the substitutability of public goods provided by the state and by NGOs. If NGOs primarily provided service delivery that are distinct from the services provided by the state, then it would not be theoretically possible for nonstate public goods provision to function as a windfall or to generate a competition effect for politicians. The topic grouping by STM indicates that NGOs and municipalities generally overlap in the public goods and services that they provide.
+
+```{=tex}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\linewidth]{../../figures/ngo_map.png}
+  \caption{NGO Projects by Geographic Location}
+  \label{fig:ngo_map}
+\end{figure}
+```
+
+Above, figure \ref{fig:ngo_map} visualizes the municipalities which host NGO projects at any point within the panel. There is widespread geographic variation in the municipalities which host nonstate public goods, although rural and very inaccessible municipalities within the Amazon in Brazil are relatively less likely to host such projects. In addition to maintaining project descriptions, the Brazilian government collects reported NGO project costs as well. The median (unadjusted) cost of a nonstate public goods project is $R\$476,045.5$ ($\$85,596.69$ USD). Convsersly, the median (unadjusted) reported yearly expenditures among all municipalities is $R\$22,629,155$ ($\$4,068,898.58$ USD), meaning that the median NGO project is roughly $2\%$ of the median municipality's budget.
+
+## Budget Expenditures {#subsec:budget}
+
+The Brazilian Institute of Geography and Statistics (IBGE) collects data on submitted expense reports from Brazilian municipalities, which classify their budgetary expenses across 21 categories that are federally set. From these 21 initial categories, I collapse spending into 4 primary spending categories, (i) Public Goods Spending, (ii) Administration (Employment) Spending, (iii) Special Charges, and (iv) Other Spending. [Appendix A](#appendix.a) reports on the coding scheme and summary statistics for the expediture categories To standardize expenditures with adjusting for inflation, I created a spending ratio function.^[I take the proportion of the expense category relative to total spending and multiply it by 100, $\left(\frac{Category}{Total}\right)*(100)$.] On average, Brazilian municipalities allocate approximately $15\%$ of spending for categories relating to municipal employment. Spending in categories relating to public goods and service delivery in Brazilian municipalities comes to roughly $75\%$ of the overall budget in the panel period. Spending in "special charges", which serves as a catchall for any spending that doesn't aligned with the other budget category, and the other category accounts for $7\%$ and $3\%$ of total expenditures, respectively. The relative change in the proportion of budget expenditures spent on public goods categories versus municipal employment categories is one of the primary dependent variables of the empirical portion of this study.
+
+## Municipal Employment Contracts {#subsec:rais}
+
+The Brazilian government actively maintains a database of all formal employment contracts under its jurisdiction, the Annual Report of Social Information (\textit{Relação Anual de Informações Sociais}, RAIS). RAIS provides contract-level data on wages, job types, job tenure, and individual-level characteristics of workers like their race and gender. Such micro-level data is particularly valuable to this study, as it allows for myself to distinguish municipal hiring trends that are consistent with investments in bureaucratic capacity (civil service contracts) and investments that are more indicative of patronage (temporary contracts). Hirings through patronage networks are no less likely to appear within the RAIS dataset than non-patronage hirings [@toralCanAnticorruptionPolicies2023].^[Formal employees are incentivized to ensure that their contract is correctly recorded within RAIS in order to be eligible for PIS-PASEP, a program which supplements formal workers wages (if they make less than twice the minimum wage) [@toralTurnoverHowLameDuck2024]. Patronage hirings can take the form of long-term contracts, but such contracts are less common and may actually increase citizen welfare, because such contracts can reduce agency losses [@toralHowPatronageDelivers2024].] I subset RAIS data to municipal contracts and aggregate municipal-level data on the proportion of contract types. I separate contract types into two primary categories, civil service contracts and non-civil service contracts. Within non-civil service contracts, I maintain a distinction between contracts listed as "employed for determined period" (temporary contracts) and long-term contracts "employed for indefinite period".^[Note that scholars often refer to all non-civil service contracts as "temporary" [e.g., @toralHowPatronageDelivers2024], because such contracts can be terminated, unlike a civil service contract. However, this study maintains the distinction between true temporary and long-term contracts.]
+
+## Covariates {#subsec:covariates}
+
+The locations of NGOs in Brazil, as elsewhere, is not exogenously given. An example of this is that NGO projects tend to be concentrated in more populous municipalities and in poor municipalities. In order to account for these baseline differences between municipalities which host NGO-funded projects and municipalities which don't, I include a set of time-varying municipal-level covariates. Their inclusion is twofold. First, their inclusion helps ensure that control and treated municipalities are comparable prior to treatment in terms of their observed characteristics. Second, the inclusion of these covariates addresses potential time-varying confounders that do not move in parallel (such as the municipality's level of development) that could plausibly influence receiving NGO-funded public goods and employment-related outcome measures. Specifically, I match municipalities on measures of their logged population, local school educational quality, human development index score, proportion rural, proportion impoverished, adjusted GDP per capita, adjusted income per capita, and whether the mayor is of the same party as the national level government. I discuss the matching strategy in greater depth in the next section.
+
+## Identification Strategy and Model Specification {#subsec:id}
+
+In order to provide causal leverage to test the relationship between NGO goods production and municipal budget allocations, I use two-way fixed effects (TWFE), with a generalized difference-in-differences (DiD) design to recover the effect of NGO goods provision on municipal budgets. The setting of this study lends itself to a DiD design because I am able to compare municipalities where NGOs provide goods provision and municipalities where no NGO goods provision occur. With multiple periods in the panel and staggered (i.e., heterogeneous) treatment assignment, the standard TWFE estimator, canonically used in DiD applications, gives greater weight to units treated closest to the middle period of the panel and can even return negative weights. Thus, the ATT can only be recovered under potentially unreasonably assumptions— such as constant treatment effects over time [@goodman-baconDifferenceindifferencesVariationTreatment2021]. I rely on the estimation strategy proposed by Imai and co-authors [-@imaiMatchingMethodsCausal2023] that aids in surpassing this issue. The estimator can recover a causally interpretable Average Treatment Effect for the Treated (ATT) under heterogeneous treatment assignment and lagged treatment effects with panel data using matching techniques as specified below:
+
+```{=tex}
+\small
+\begin{equation}
+\begin{aligned}
+\delta(F, L) =\; \mathbb{E} \bigg\{ 
+& Y_{i, t+F} \left( X_{it} = 1,\ X_{i, t-\ell} = 0,\ \{X_{i, t-\ell}\}_{\ell}^L \right) \\
+& - Y_{i, t+F} \left( X_{it} = 0,\ X_{i, t-\ell} = 0,\ \{X_{i, t-\ell}\}_{\ell}^L \right) \;\bigg| \; X_{it} = 1,\ X_{i, t-\ell} = 0 \bigg\},
+\end{aligned}
+\end{equation}
+\normalsize
+```
+
+\noindent where $Y_{i, t+F}(X_{it} = 1, X_{i, t-\ell} = 0, \{X_{i, t-\ell}\}_{\ell}^{L})$ is the potential outcome with treatment. The matching process relies upon one of three matching estimators, the Mahalanobis distance measure, propensity score weighting, and propensity score matching— I rely upon the Mahalanobis distance measure.^[The Mahalanobis distance computes the average between each treated and control observation over time: $S_{it}(i^{'}) = \frac{1}{L} \sum_{\ell = 1}^{L}\sqrt{(\textbf{V}_{i, t - \ell} - \textbf{V}_{i^{'}, t - \ell})^{\top} \sum_{i, t - \ell}^{-1}(\textbf{V}_{i, t - \ell} - \textbf{V}_{i^{'}, t - \ell})}$.] The primary model specification for this study is as follows:
+
+```{=tex}
+\begin{equation}
+Y_{i, t + F} = \alpha_{i} + T_{it} \delta_{i} + \gamma_{t} + \textbf{X}^{'}_{it} + \epsilon_{it}, \tag{2}
+\end{equation}
+```
+
+\noindent where Y is the outcome of interest, the change in municipal budget allocations, $\alpha_{1}$ are unit-level fixed effects, $T_{it}$ is a binary variable that indicates treatment for each unit and time period, $\delta_{i}$ is the ATT, $\gamma_{t}$ are time-varying effects, $\textbf{X}_{it}^{'}$ are the covariates, and $\epsilon_{it}$ the error term, with mean zero. I implement a lag of 4 periods and a lead variable for the subsequent 4 periods after treatment.^[The implementation of a lead time is case-specific [@imaiMatchingMethodsCausal2023]. I use a 4-period effect, where 4 was chosen because it represents a standard mayoral term to capture the short-term impact of NGO public goods. Imai and co-authors [-@imaiMatchingMethodsCausal2023] note that the selection of a lag period involves a bias tradeoff, where longer lags can increase the credibility of no carryover effects but also reduces the number of matched observations available. The number of units in the panel, over 5,000, reduces concerns that increasing the lag period would reduce the number of matched observations available.] 
+
+# Analysis {#sec:analysis}
+## Parallel Trends and No Anticipation {#subsec:paralleltrends}
+
+A critical assumption for recovering the ATT under a DiD identification strategy is for parallel trends, the parallel movement of the outcome of interest absent treatment between the treatment units and the control units, to hold [@rothWhatsTrendingDifferenceindifferences2023]. Below, figure \ref{fig:parallel_example} visualizes the relationship between NGO project funding and the proportion of the municipal administration that are civil servants. Typically, scholars visually interpret whether the pre-treatment trend crosses the x-axis and remains insignificant through the entire pre-period to justify that parallel trends hold [@rambachanMoreCredibleApproach2023]. As can be seen in period t-1, the period before treatment, there is a significant, negative effect. Such a result suggests that parallel trends may not hold in my data.
+
+```{=tex}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.7\linewidth]{../../figures/parallel_example.png}
+  \caption{Visual Examination of Parallel Trends}
+  \label{fig:parallel_example}
+\end{figure}
+```
+
+To quantify the extent to which this apparent violation of parallel trends precludes the ability to conduct causal analysis, I rely upon a form of sensitivity analysis, introduced by Rambachan and Roth [-@rambachanMoreCredibleApproach2023].^[Conducting a sensitivity analysis for a "test" of the parallel trends assumption is generally a methodological improvement upon "standard" methods of assessing the plausibility of parallel trends. Common methods for testing violations of parallel trends— like checking pre-treatment coefficients for significance or visually inspecting if estimates cross zero— often yield misleading inferences due to low power, biased estimates, and under-covered confidence intervals [@rothPretestCautionEventStudy2022; @bilinskiNothingSeeHere2020]. In contrast, sensitivity analysis using Rambachan and Roth’s nuisance parameter estimator offers near-optimal local asymptotic power ($1 - \beta \xrightarrow{p} 1$) under sufficient condition.] This sensitivity analysis involves the construction of a nuisance parameter *M*, that represents the robustness of the pre-existing trend line to increasing degrees of variation away from the pre-trend estimate, such that I can estimate how much of a deviation from the pre-existing difference in the trends is needed for the null to be rejected.
+
+```{r parallel_trends}
+#| label: fig-parallel_trends
+#| fig-align: center
+#| fig-pos: H
+#| out.width: "70%"
+#| fig-cap: "Sensitivity of Pre-Trends to M Nuisance Parameter"
+
+knitr::include_graphics("../../figures/sensitivity_plot.png")
+```
+
+@fig-parallel_trends shows the results of the sensitivity analysis with nuisance parameter *M*. The analysis suggests that the pre-treatment trends in my data is robust to a violation of parallel trends for control and treatment units in pre-treatment periods that is twice the magnitude of the point estimates for the analysis. This suggests that my model specification is robust to a violation of parallel trends.^[In contrast to other estimators that assume parallel trends without adjustment, the Imai et al. estimator [-@imaiMatchingMethodsCausal2023] is designed to minimize violations of this assumption and improve causal identification in observational panel settings. Thus, I rely on the estimator for main analysis out of an abundance of caution.]
+
+## Shifts in Budgeting {#subsec:main-tests}
+
+I now turn to the primary analysis of this paper. To recall, building off of existing scholarship, I theorize that public goods provision provided by NGOs can have one of three distinct effects on a politician's incentives to provide public goods. Under a nonstate windfall effect, nonstate service delivery should result in politicians increasing their funding for municipal employment and for short-term contracts, consistent with patronage. Under an efficiency effect, politicians should shift spending to more efficiently build state capacity, like increased civil service hirings. Finally, under a competition effect, nonstate welfare provision should cause politicians to increase public goods funding. Figure \ref{fig:expenditures-main} reports event study plots to test hypothesis one and to visualize the effect of nonstate public goods provision on municipal budget expenditures.^[I present regression tables that report on the overall effect for this analysis in [Appendix C](#appendixc).] 
+
+```{=tex}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.48\textwidth}
+    \includegraphics[width=\linewidth]{../../figures/pgs_share.png}
+    \caption{Public Goods Expenditures}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \includegraphics[width=\linewidth]{../../figures/employment_share.png}
+    \caption{Employment Expenditures}
+  \end{subfigure}
+  \caption{Impact of Hosting NGO Project on Municipal Budget Shift}
+  \label{fig:expenditures-main}
+\end{figure}
+```
+
+I find no effect of hosting an NGO project on future shifts in municipal budgets for public goods and employment. The differences are quite small in magnitude across all four periods and are statistically indistinguishable from zero. However, municipal expenditures for public goods are consistently higher than in municipalities which have not received an NGO-provided public good, while municipal labor budgets are, on average, lower in treated municipalities. Thus, I reject both hypothesis 1B and 1C, that nonstate public goods provision generates a political competition effect or a nonstate windfall, respectively, in Brazilian municipalities.
+
+Below, figure \ref{fig:expenditures-moderator} reports on event study plots that tests the second hypothesis, whether municipalities which have fewer institutional constraints are more likely to experience a nonstate windfall effect. To identify municipalities with fewer institutional constraints against patronage or rent-seeking, I employ data from the *Controladoria-Geral da União* (CGU) corruption audit program, which conducts annual checks of randomly selected municipalities.^[The selection mechanism for the audit uses a lottery. Audits primarily focus on any irregular activities relating to the mayor.] I follow Brollo and coauthors [-@brolloPoliticalResourceCurse2013] and define a corruption violation as any municipality which had "severe" irregularities,^[These irregularities include fraud, favoritism, over-invoicing, and severe illegal procurement practices [@brolloPoliticalResourceCurse2013].] where municipalities that have had a severe corruption violation are coded 1, and 0 otherwise.^[Imai and co-authors' matching estimator unfortunately does not allow for time-varying moderators [@imaiMatchingMethodsCausal2023]. Thus, I code municipalities which have received a severe corruption violation from the CGU as a 1 for the entire duration of the panel. Because the perceived risk of engaging in behaviors like rent extraction or patronage increases following an audit [e.g., @avisGovernmentAuditsReduce2018], the point estimates for this analysis (with the corruption violation as a moderator) should be biased towards zero as a result.]
+
+```{=tex}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.48\textwidth}
+    \includegraphics[width=\linewidth]{../../figures/pgs_share_mod.png}
+    \caption{Public Goods Expenditures}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \includegraphics[width=\linewidth]{../../figures/employment_share_mod.png}
+    \caption{Employment Expenditures}
+  \end{subfigure}
+  \caption{Impact of Hosting NGO Project on Municipal Budget Shift}
+  \label{fig:expenditures-moderator}
+\end{figure}
+```
+
+Similar to the first test, I do not find any significant effect of hosting NGO-provided service delivery in a municipality on future budget allocations. For both municipalities which have received a corruption violation and municipalities which have not, the effect is insignificant and statistically indistinguishable from zero. Taken together, the evidence from this analysis suggests that hosting an NGO project does not create a nonstate windfall nor does it provoke competition for providing public goods for Brazilian mayors. However, this finding does not rule out an efficiency effect, especially given that Brazil is a case with strong institutional constraints with regards to budgeting. 
+
+## Shifts in Employment Composition {#subsec:employment-comp}
+
+While I do not find evidence that mayors shift municipal budgets in response to an NGO service delivery in their municipality, this section tests whether NGO public goods shifts the composition of municipal administrations. Even without a shift in expenditures across budget categories, hosting NGOs may incentive mayors to shift their hiring practices when nonstate public goods provision promotes an efficiency effect. For instance,  NGOs providing public goods— with their own workers— may give mayors the opportunity to increase the hiring of civil service bureaucrats instead of municipal employees which assist in public goods provision. Figure \ref{fig:civ_serv_ctrct} below reports on event study plots on the composition of both new civil service contracts (defined as municipal hirings within a single calendar year) and the entire municipal administration.
+
+```{=tex}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.48\textwidth}
+    \includegraphics[width=\linewidth]{../../figures/new_prop_civ_serv.png}
+    \caption{New Contracts}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \includegraphics[width=\linewidth]{../../figures/prop_civ_serv.png}
+    \caption{Entire Municipal Administration}
+  \end{subfigure}
+  \caption{Impact of Hosting NGO Project on Municipal Employee Composition}
+  \label{fig:civ_serv_ctrct}
+\end{figure}
+```
+
+Following an NGO providing public goods in a municipality, there is a sustained and significant effect on the composition of municipal employment contracts. For the four years following treatment, treated municipalities hire $5\%$ more civil service bureaucrats, as a proportion of all newly hired contracts. This sustained increase in hirings of civil servants also affects the composition of the entire municipal workforce, which, by the fourth year following an NGO providing a public good, is $3\%$ higher in treated municipalities. This effect is consistent with an efficiency effect, hypothesis 1C, where the increased hiring of civil servants increases bureaucratic capacity. Yet, given that there is an increase in the proportion of new hirees that are civil servants, what types of contracts are less frequently hired in NGO-project hosting municipalities? Below, Figure \ref{fig:short_long_ctrct} reports on the composition of newly hired municipal employee contract type to determine whether the increased proportion of municipal civil service contracts overtakes temporary or long-term municipal contracts.^[Brazil differentiates among non-civil service municipal employment contracts that are for an indefinite period (long-term contracts) and a definite period (temporary contracts). Both are regulated by the *Consolidação das Leis do Trabalho* (CLT). Conversely, civil service contracts are regulated by the civil service, the *Regime Jurídico Único* (RJU).]
+ 
+```{=tex}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.48\textwidth}
+    \includegraphics[width=\linewidth]{../../figures/new_prop_long.png}
+    \caption{New Long-Term Contracts}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \includegraphics[width=\linewidth]{../../figures/new_prop_short.png}
+    \caption{New Temporary Contracts}
+  \end{subfigure}
+  \caption{Impact of Hosting NGO Project on Temporary and Long-Term Contracts}
+  \label{fig:short_long_ctrct}
+\end{figure}
+```
+
+The increase of new civil service contracts comes at the expense of temporary contracts, where the proportion of new temporary contracts is $5\%$ less, on average, after an NGO provides services in a municipality. This effect is significant and statistically distinguishable from zero. In contrast, NGO public goods provision does not affect the proportion of newly hired long-term ("indefinite hire") contracts. Together, this section demonstrates that an efficiency effect, where nonstate public goods allows for the state to more efficiently spend resources on strengthening state capacity, can be realized without corresponding shifts in spending for public goods or employment more generally.
+
+## Robustness Checks {#robustness}
+
+This section reports on several robustness tests as well as empirical tests for whether citizens differentiate between public goods produced by mayors versus public goods produced by NGOs. As previously discussed, the extent to which citizens correctly attribute public goods to the actor which produced the good should influence how likely NGO service delivery is likely to result in a monetary windfall effect, an efficiency effect, or a competition effect. In contexts with low to medium levels of attribution, an efficiency effect or a monetary windfall is more likely to occur. Conversely, in contexts with high levels of attribution, a competition effect should occur more frequently.
+
+In order to empirically test the strength of the clarity of attribution in Brazilian municipalities, I rely on public opinion data from the AmericasBarometer 2023 Survey in Brazil. The AmericasBarometer asks respondents about their satisfaction with school quality, road infrastructure, health services, and water access in their locality.^[The AmericasBarometer asks "How satisfied are you with [public good]", with a question for the quality of road infrastructure, public schools, public health facilities, and water services, respectively. Respondents were instructed to answer on a 4-point scale, where 1 is very satisfied, and 4 is very unsatisfied.] If citizens often or always attribute public goods provision to the mayor, regardless of whoever provided the good, then we should expect there to be no differences in the rating of local public goods quality among municipalities which have received NGO service delivery and those which have not. I include the same covariates as the main analysis to control for baseline differences in public goods provision and satisfaction between treated and untreated municipalities that may arise, for instance, from differences in development.
+
+```{=latex}
+\input{../../figures/lapop_analysis.tex}
+```
+
+Below, table 1 demonstrates that individuals in municipalities which have received nonstate public goods do not rate their satisfaction with common public goods in their municipality in a significantly different manner than individuals in nontreated municipalities. This result is indicative of a low to medium level of attribution, which is consistent with the range under which an efficiency effect is more likely to occur in figure \ref{fig:typology}. Additionally, this result provides assurance that NGO services and state-provided public goods are generally substitutable, a key assumption necessary for nonstate public goods to be able to shift politicians' incentives for resource allocation.
+
+To assess the validity of the identifying assumptions of the Imai and co-authors' estimator, specifically that pre-treatment trends are not driving treatment effects, I implement a placebo test. The placebo test estimates a "treatment effect" in periods prior to the actual takeup of treatment using the same matching procedure in the main analysis of this paper. If my observed treatment effect is due to a violation in parallel trends or anticipatory behavior (i.e., mayors begin shifting budgets prior to the completion of an NGO-provided public good), then we should expect that the placebo-treated periods would be statistically significant. Conversely, a null effect suggests that this paper's treatment effects are not confounded by pre-existing differences in outcome trends (a violation of parallel trends) or of anticipatory behavior. Figure \ref{fig:placebo_test} reports on the placebo test in [Appendix C](#appendix-c-placebo). For both primary outcomes in this paper, public goods spending and the proportion of civil servants among all newly hired contracts, the placebo test is insignificant and statistically indistinguishable from zero. These results provide additional assurance that the observed treatment effect is not due to a violation of parallel trends or anticipatory behavior from mayors.
+
+Another potential issue with panel data is autocorrelation of standard errors— due to the repeated measurement of units over time [@bertrandHowMuchShould2004]. Without implementing corrections, standard errors can be too conservative, leading to an increased probability of recovering a Type I error. I follow Betrand and coauthors [-@bertrandHowMuchShould2004] suggestion for bootstrapping standard errors. While some have cautioned against bootstrapping standard errors when working with matching estimators [e.g., @abadieFailureBootstrapMatching2008], more recent scholarship has shown that standard errors computed with a bootstrap procedure does yield valid inference [@otsuBootstrapInferenceMatching2017]. All standard errors in models are bootstrapped with 1000 simulations.
+
+# Conclusion {#sec:conclusion}
+
+In this paper, I conceptualize three competing explanations that explain how nonstate public goods provision can reshape state behavior. Specifically, I draw upon real-world examples and political economy scholarship on political competition and monetary windfalls to argue that nonstate public goods provision may: (i) crowd-in more efficient spending from the state, increasing citizen welfare; (ii) induce political competition, increasing a politician's incentives to spend on public goods; or (iii) create a windfall for the state, increasing politicians' ability to engage in Pareto-inefficient actions like patronage employment or rent extraction. I argue that contextual factors like the clarity of attribution and institutional budget constraints shift how likely each effect is to occur.
+
+I use a difference-in-differences identification strategy and find that Brazilian mayors do not shift budget expenditures following an NGO providing a public good in their municipality, including in municipalities where this effect is more likely to materialize. However, I do find significant evidence that nonstate service delivery does indirectly affect municipal administration through a significant and sustained effect on the composition of municipal employees. Following an NGO providing public goods in a municipality, the increase of civil servant contracts increases significantly, with treated municipalities hiring, on average, $5\%$ more civil servant bureaucrats than non-treated municipalities. Such an effect is theoretically and empirically consistent with an efficiency effect, indicating that NGOs can strengthen, rather than substitute, state capacity.
+
+Brazilian municipalities represent a "hard test" for whether nonstate spending on service delivery can shift mayoral incentives for resource allocation. Mayors are constitutionally mandated to spend the majority of their budget on public goods provision. If public goods funding is already near "floor levels" (the constitutionally stipulated minimum), then it makes sense that mayors would be broadly unable to shift expenditures away from public goods and towards municipal employment. Thus, it is intuitive, given such institutional constraints, that mayors shift spending *within* budget categories, rather than across.
+
+In future versions of this project, I anticipate making several design changes. First, I plan on using the d'Chaisemartin and de Hautefoeuille DiD estimator (2024) that can recover the ATT with a continuous independent variable (IV). My current design approach, with the Imai and coauthors' estimator, strictly requires a binary IV. Using a continuous estimator will allow me to better ascertain the extent to which NGO project size (money spent on the project) affects state incentives to shift spending in response to nonstate public goods production. Intuitively, more expensive projects should generate a bigger effect on resource reallocation than smaller projects.^[One potential tradeoff in switching to a continuous estimator compared to the Imai et al. estimator is that my analysis will be more sensitive to potential violations in the requisite assumptions to causally identify the ATT (e.g., the parallel trends assumption). However, the inclusion of secondary analysis with plausibly exogenous NGO projects, such as International NGO projects--- explored below--- can strengthen confidence that such results are not being driven by violations of parallel trends.] Relatedly, one potential explanation for the null results for tests of budget shifts across categories (i.e., shifting spending from public goods to employment) is that the median NGO project, just $2\%$ of the median municipal budget, is too small to shift politicians' incentives to reallocate resources. With a continous estimator, I can estimate whether NGO project size affects how mayors allocate budgets.
+
+Second, future versions of this paper will strengthen discussion and analysis around concerns of selection and endogeneity. My current analysis strategy requires the assumption that there is no selection into the relationship between NGO public goods and municipal budgeting or bureaucratic hiring after including control variables. However, this assumption--- a selection-on-observables assumption--- is quite strong [see @angristMostlyHarmlessEconometrics2009]. The addition of supplementary analysis, such as subsetting to plausibly exogenous NGOs like International NGOs, can strengthen this argument that my results are not being driven by confounding variables.
+
+Third, I will implement a more robust discussion and analysis of how clarity of attribution affects mayoral responses to NGO-provided public goods. Like institutional constraints, clarity of attribution is a key contextual variable that affects the relationship between nonstate public goods projects and state budget allocations. One possible avenue of including the effect of clarity of attribution within the broader analysis is to examine how the presence of a local radio station affects mayoral response to NGO-provided public goods. Previous research [e.g., @ferrazElectoralAccountabilityCorruption2011] has indicated that the presence of a local radio station greatly increases the local information environment. A corollary of a stronger local information environment is that local citizens ought to have generally stronger clarity of attribution.
+
+Fourth, my current construction of the severe corruption indicator can be improved upon to better capture settings with low institutional constraints against budget shifts or adverse political behavior. Given the requirements of the estimator used in this paper, the severe corruption indicator in this paper includes the years following the corruption violation in a municipality as "treated". However, existing research notes that following an audit, the perceived cost of corruption increases and corruption decreases [e.g., @zamboniAuditRiskRent2018]. Thus, especially for municipalities which received an audit early in my panel, it is quite plausible that the interaction effect is biased towards zero. A future measure that can circumvent this issue is to construct a reliance on clientelism index through measuring campaign expenditures in elections.
+
+Lastly, two future avenues of exploration within this broader project include examining the effects of NGO-led public goods during election years and disaggregating the public goods measure. Patronage is most common in the year preceding, of, and after elections. Thus, it is probable that my current estimation approach is not well-suited to estimating whether mayors use nonstate public goods in election years in a manner differently than they might in non-election years. Finally, it is possible that nonstate public goods provision shifts mayors' budget priorities, albeit in less obvious ways. My study aggregates all public goods spending into a single category, but it is possible that mayors, instead of increasing overall funding for municipal administration, instead shift funding towards other public goods in the municipality. While this would constitute a shift in municipal expenditures, my current data approach would not capture this effect.
+
+Together, this paper's findings suggest that political scientists and other social scientists need to conduct further research on how state and nonstate actors interact with one another. It is clear that NGOs are dynamic actors in the political system and are capable of shifting the behaviors and preferences of other actors in equilibrium. However, in order to better understand the effects that NGOs have on state incentives to provide public goods globally, this project would benefit from the inclusion of additional cases for two reasons. The first relates to local-level variation. As previously mentioned, Brazil features strong institutional constraints with respect to the municipal budgeting process. The inclusion of another case like India, where there is likely more variation across municipalities in terms of institutional constraints than in Brazil, would allow me to test for each theorized effect of nonstate public goods provision while keeping national-level characteristics like a federal institutional structure constant. The second reason to consider additional cases is that I only test the effects of NGO-led service delivery in a context with existing state capacity to provide public goods. Much of the literature that examines the effects of NGO-led public goods provision [e.g., @katzBigTruckThat2013;@deserrannoImpactNGOProvidedAID2024] in lower-capacity settings have found a crowding-out effect. Thus, while I find that nonstate public goods provision likely increases citizen welfare through an efficiency effect in Brazil, such an outcome may be conditioned on already having an existing level of state capacity to provide public goods.
+
+Finally, this study also has important implications for policy practitioners. Nonstate public goods provision in developing contexts is widespread and cross-national spending flows funding NGOs to provide public goods is at least $\$70$ billion dollars [@GlobalPhilanthropyTracker], with overall funding for public goods quadrupling within the past two decades [@aldashevDevelopmentNGOsBasic2018]. While this study demonstrates that NGOs might have a positive effect on citizen welfare through a strengthening of bureaucratic capacity (via the increased hiring of civil servants), the results of this paper should serve as a call to better understand how NGOs affect existing political equilibria that may increase or decrease citizen welfare, depending on the context. Future research is needed to better understand how NGOs, both domestic and international, can best increase citizen welfare.
+
+\pagebreak
+
+# References
+
+::: {#refs}
+:::
+
+\pagebreak
+
+\singlespacing
+
+::: {.unnumbered}
+\tableofcontents
+:::
+
+\pagebreak
+
+# Appendix A: Descriptive Statistics {#appendix.a .unnumbered .toc}
+## A.1 Budget Expenditure Categorization {.unnumbered .toc}
+
+```{=latex}
+\begin{table}[H]
+\centering
+\begin{tabularx}{1.05\textwidth}{|>{\raggedright\arraybackslash}p{0.15\textwidth}|>{\raggedright\arraybackslash}p{0.85\textwidth}|}\hline
+\textbf{Budget Category} & \textbf{Translated Description} \\ \hline
+Administration & Concentrates on the management and maintenance of government agencies, including, for example, payment of active Union personnel and administration of units. \\ \hline
+Social Assistance & A citizen's right and a duty of the State, Social Assistance is a non-contributory public policy that aims to provide the minimum social necessities to ensure basic needs are met. It is implemented through an integrated set of public and civil society initiatives. \\ \hline
+Science \& Technology & To implement the National Science, Technology and Innovation Policy, the Federal Government executes programs and actions that promote scientific and technological research and innovation. \\ \hline
+Communication & The department is responsible for formulating and proposing national broadcasting, posting, digital inclusion, and telecommunications policies, as well as granting and monitoring broadcasting services. It develops public policies that promote access to communications services and contribute to economic growth, technological innovation, and social inclusion. \\ \hline
+Culture & A set of policies aimed at ensuring the full exercise of cultural rights and access to sources of national culture, as well as the appreciation and dissemination of cultural expressions. Also noteworthy is the protection of expressions of popular culture, indigenous culture, Afro-Brazilian culture, and that of other groups participating in the national civilizing process. \\ \hline
+National Defense & The Ministry of Defense is the body responsible for the senior management of the Armed Forces, national institutions primarily responsible for National Defense and consisting of the Navy, Army and Air Force Commands, in addition to the General Staff, which handles the joint operations of the three Military Commands. \\ \hline
+Sports and Leisure & The Constitution enshrines leisure as a social right and states that it is the State's duty to promote sports activities. To this end, the Federal Government structures its actions based on the National Sports Development Plan, which has four pillars: social inclusion through sports and leisure; qualification of high-performance sports; expansion of sports infrastructure; and promotion of major sporting events. \\ \hline
+Education & The right to education was enshrined in the Constitution as a social right. As a result, the State became obligated to guarantee quality education to all Brazilians. In 2007, the Federal Government launched the Education Development Plan with the aim of reducing inequality in educational opportunities and promoting quality education from kindergarten to graduate school. The plan is structured around five pillars: basic education; literacy; continuing education and diversity; professional and technological education; and higher education. \\ \hline
+Special Charges & It includes expenses that cannot be associated with a good or service to be generated in the current production process, such as: debts, reimbursements, compensation, subsidies, grants and other similar expenses. \\ \hline
+\end{tabularx}%
+\caption{Expense Function Descriptions}
+\label{tab:budget_description_a}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{1.05\textwidth}{|>{\raggedright\arraybackslash}p{0.15\textwidth}|>{\raggedright\arraybackslash}p{0.85\textwidth}|}\hline
+\textbf{Budget Category} & \textbf{Translated Description} \\ \hline
+Energy & Public policies in this area seek to develop the national energy sector and address various energy sources such as hydraulic, nuclear, alternative and petroleum energy. \\ \hline
+Justice & The Essential Justice function refers to the actions of the Federal Public Prosecutor's Office, the National Council of the Public Prosecutor's Office, the Attorney General's Office and the Federal Public Defender's Office. \\ \hline
+Environment & The Constitution, in Article 225, states that everyone has the right to an ecologically balanced environment, a common good for the people and essential to a healthy quality of life. It imposes on the government and the community the duty to defend and preserve it for present and future generations. Among the mechanisms of the National Environmental Policy are environmental licensing for polluting activities, environmental zoning, the creation of environmental protection areas, and forest concessions. \\ \hline
+Housing & Includes typical urban housing and urban infrastructure expenses. \\ \hline
+Commerce & This thematic area encompasses measures to promote competitiveness, foreign trade, investment, and innovation in Brazilian companies, with the aim of stimulating growth and job creation. Among the most significant topics in this area are intellectual property and technology transfer; metrology, standardization, and industrial quality; foreign trade policies; the development of tourism in the country; the mining industry; and policies to support micro and small businesses and individual microentrepreneurs. \\ \hline
+Judiciary & The Judiciary is one of the three branches of government, which aims to guarantee and defend individual, collective and social rights, and promote justice, through compliance with judicial and constitutional norms and laws. \\ \hline
+Legislation & The Federal Constitution states that the Legislative Power is exercised by the National Congress, composed of the Chamber of Deputies and the Federal Senate, whose main responsibilities are to create laws and monitor them. \\ \hline
+Foreign Relations & The Ministry of Foreign Affairs, known as Itamaraty, maintains diplomatic relations with the governments of other countries, international organizations, and organizations. It promotes Brazil's interests internationally, respecting the principle of non-intervention and acting favorably to guarantee democracy, the prevalence of peace, and respect for legal equality among states, in addition to providing consular services to Brazilian citizens. \\ \hline
+Sanitation & To ensure access to drinking water and healthy living, the Federal Government supports states, municipalities and the Federal District through actions to implement, expand or improve water supply and sewage systems, urban drainage and water management. \\ \hline
+Health & The 1988 Constitution establishes health as a fundamental social right, guaranteed through social and economic policies aimed at promoting, protecting, and restoring individual and population health and reducing disease and injury. In Brazil, the right to health is primarily realized by the Unified Health System (SUS), whose organizing principles include universal access to health services for all citizens, provided in a decentralized, comprehensive, and participatory manner. Thus, for example, the SUS is responsible for providing medications and vaccines, monitoring food and beverages, and performing surgeries, among other tasks. \\ \hline
+\end{tabularx}
+\caption{Expense Function Descriptions}
+\label{tab:budget_description_b}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{1.05\textwidth}{|>{\raggedright\arraybackslash}p{0.15\textwidth}|>{\raggedright\arraybackslash}p{0.85\textwidth}|}\hline
+\textbf{Budget Category} & \textbf{Translated Description} \\ \hline
+Public Security & Public safety is a duty of the State, a right, and a responsibility of all. Within the Federal Government, the Ministry of Justice is the agency responsible for implementing most public policies related to this topic. This agency includes the Federal Police, the Federal Highway Police, the National Secretariat of Public Safety (SENASP), and the National Public Safety Fund (FNSP). \\ \hline
+Labor & The Union develops and implements policies and guidelines that contribute to job and income generation, as well as worker support. This includes training and professional development, wage policy, occupational health and safety, job and income generation, and labor relations oversight. Worker protection measures, such as unemployment insurance and salary bonuses, represent a significant portion of the resources invested in this area. \\ \hline
+Transportation & The Federal Government is responsible for maintaining and expanding federal highways; building new highways; supervising passenger and cargo transportation; promoting the shipping industry; and coordinating air transportation and port services. Thus, to guarantee freedom of movement for people within the national territory and reduce the logistical costs of producing goods, the Federal Government implements a series of public policies related to road, rail, waterway, and air transportation. \\ \hline
+Urbanism & The Federal Government supports federal entities in developing Master Plans and other regulations required by Brazilian urban planning legislation, with the aim of promoting urban transformations and minimizing problems arising from the disorderly growth of cities. The Union also encourages the planning and implementation of interventions to rehabilitate central areas and mitigate risks, the urbanization of precarious settlements, land regularization, the promotion of urban accessibility, and the implementation, modernization, and operation of urban public transportation systems. \\ \hline
+\end{tabularx}%
+\caption{Expense Function Descriptions}
+\label{tab:budget_description_c}
+\end{table}
+```
+
+Tables \ref{tab:budget_description_a}, \ref{tab:budget_description_b}, and \ref{tab:budget_description_c} describes the expense budget categories that municipalities must use when listing their expenses. These categories are set by the federal government. When IPEA collects this data and makes it public, some expense categories are combined together. These are indicated in table \ref{tab:budget_coding} with an ampersand.
+
+```{=latex}
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{|X|X|}
+\hline
+\textbf{Category} & \textbf{Individual Category} \\ \hline
+Public Goods Spending & Education \& Culture, Health \& Sanitation, Housing \& Urbanism, Sports \& Leisure, Public Security, Social Assistance, Environment \& Agriculture, Labor, and Transportation \\ \hline
+Employment Spending & Administration \\ \hline
+Special Charges & Special Charges \\ \hline
+Other Spending & Commerce, Communications, Legislative, Foreign Relations, Judicial, Justice, Science \& Technology, and Energy \\ \hline
+\end{tabularx}
+\caption{Public Goods and Patronage-Proxy Spending by Municipal Expenditure Type.}
+\label{tab:budget_coding}
+\end{table}
+```
+
+## A.2 Summary Statistics for Municipal Budget Category {#a.2 .unnumbered .toc}
+
+```{=tex}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{../../figures/spending_plot.png}
+  \caption{Municipal Spending Over Time}
+  \label{fig:budget_time}
+\end{figure}
+```
+
+```{=tex}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{../../figures/spending_table.png}
+  \caption{Summary Stats for Municipal Budget Categories}
+  \label{fig:budget_stats}
+\end{figure}
+```
+
+## A.3 Employment Summary Stats {.unnumbered .toc}
+
+```{=tex}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{../../figures/employ_trend.png}
+  \caption{Municipal Employment Trends Over Time}
+  \label{fig:employ_trend}
+\end{figure}
+```
+
+## A.4 Covariates Summary Stats {.unnumbered .toc}
+
+```{=tex}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{../../figures/covariate_table.png}
+  \caption{Summary Stats for Covariates in Study}
+  \label{fig:cov_stats}
+\end{figure}
+```
+
+# Appendix B: Structural Topic Modeling {#stm_ngo .unnumbered .toc}
+## B.1 Perplexity Analysis and Gamma Plot {.unnumbered .toc}
+
+```{=tex}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{../../figures/lda_topic_tuning_plot.png}
+  \caption{LDA Optimal Topic Analysis}
+  \label{fig:lda_perplexity}
+\end{figure}
+```
+
+Figure \ref{fig:lda_perplexity} displays four standard diagnostic metrics used to evaluate the optimal number of topics for a Latent Dirichlet Allocation (LDA) model. Each subplot corresponds to a different evaluation method: Arun et al. (2010), Cao Juan et al. (2009), Deveaud et al. (2014), and Griffiths and Steyvers (2004). Lower values indicate better model fit for the Arun2010 and CaoJuan2009 metrics, while higher values indicate a better model fit for both Deveaud2014 and Griffiths2004. Across all of the metrics, using 6–8 topics shows a consistent local optima for the number of topics. Below, figure \ref{fig:ngo_topics} displays the number of NGO projects per topic. Finally, figure \ref{fig:gamma} displays the average gamma value for each topic, where the gamma value indicates how much the NGO project description is associated with each of the assigned topics from the STM analysis. Specifically, Gamma is a proportion, between 0 and 1, of words in each project description that the structural topic moel attributes to a particular topic. High values indicate that the project description is highly similar to the topic as a whole. On average, the topic descriptions feature a high gamma value.
+
+```{=tex}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\linewidth]{../../figures/ngo_topic_distribution.png}
+  \caption{Number of NGO Projects by Topic}
+  \label{fig:ngo_topics}
+\end{figure}
+```
+
+```{=tex}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\linewidth]{../../figures/gamma.png}
+  \caption{Average Gamma for Project Description by Topic}
+  \label{fig:gamma}
+\end{figure}
+```
+
+## B.2 Example NGO Projects Descriptions {.unnumbered .toc}
+
+```{=latex}
+\begin{table}[H]
+\centering
+\makebox[\textwidth]{%
+\begin{tabularx}{1.13\textwidth}{|>{\raggedright\arraybackslash}p{0.15\textwidth}|>{\raggedright\arraybackslash}p{0.45\textwidth}|>{\raggedright\arraybackslash}p{0.45\textwidth}|}\hline
+\textbf{Topic Category} & \textbf{Sample Description} & \textbf{Translation} \\ \hline
+Culture A & promover de 05 a 21 de outubro de 2012 a  edicao da oktoberfest da sogipa que ocorre desde o inicio do seculo xx no parque sao joao em porto alegre onde surgiu o evento no pais como plena manifestacao da cultura germanica num espaco de fruicao vivencias e de recuperacao do patrimonio material e imaterial ainda preservado pela instituicao reunindo a comunidade em geral em torno da alegria das musicas dancas e outros saberes tipicos & To promote, from October 5th to 21st, 2012, the edition of the Sogipa Oktoberfest, which has been taking place since the beginning of the 20th century in São João Park in Porto Alegre, where the event emerged in the country as a full manifestation of Germanic culture in a space for the enjoyment of experiences and the recovery of the material and immaterial heritage still preserved by the institution, bringing together the community in general around the joy of music, dances and other typical knowledge. \\ \hline
+Culture B & este plano anual apresenta as atividades a serem realizadas no museu do futebol instituicao publica localizada no estadio municipal paulo machado de carvalho o pacaembu a proposta contempla duas exposicoes temporarias duas exposicoes itinerantes programacao cultural gratuita e diversificada o programa educativo e de acessibilidadeatividades de pesquisa e documentacao do acervo e acoes gerais de manutencao predial e atualizacao tecnologica do equipamento & This annual plan presents the activities to be carried out at the Football Museum, a public institution located in the Paulo Machado de Carvalho Municipal Stadium (Pacaembu). The proposal includes two temporary exhibitions, two traveling exhibitions, a free and diverse cultural program, an educational and accessibility program, research and documentation activities of the collection, and general building maintenance and technological updating of the equipment \\ \hline
+Development A & projeto de desenvolvimento e consolidacao da infraestrutura de pesquisa e posgraduacao na universidade federal do para & project to develop and consolidate research and postgraduate infrastructure at the Federal University of Paraíba \\ \hline
+Development B & o presente projeto tem como objetivo geral promover no territorio da cidadania do noroeste do mato grosso reconhecido e apoiado pela secretaria de desenvolvimento territorial  sdt do ministerio do desenvolvimento agrario  mda processos para a gestao participativa do desenvolvimento sustentavel do territorio rural atraves de 1 eventos de mobilizacao de atores sociais 2 assessoria tecnica visando o aprimoramento da gestao participativa do territorio rural & The general objective of this project is to promote, in the territory of citizenship in the northwest of Mato Grosso, recognized and supported by the Secretariat of Territorial Development (SDT) of the Ministry of Agrarian Development (MDA), processes for the participatory management of the sustainable development of rural territories through 1 events for the mobilization of social actors 2 technical assistance aimed at improving the participatory management of rural territories \\ \hline
+\end{tabularx}%
+}
+\caption{Example NGO Project Descriptions by Project}
+\end{table}
+
+\begin{table}[H]
+\centering
+\makebox[\textwidth]{%
+\begin{tabularx}{1.13\textwidth}{|>{\raggedright\arraybackslash}p{0.15\textwidth}|>{\raggedright\arraybackslash}p{0.45\textwidth}|>{\raggedright\arraybackslash}p{0.45\textwidth}|}\hline
+\textbf{Topic Category} & \textbf{Sample Description} & \textbf{Translation} \\ \hline
+Education & no projeto acordes de compaixao criancas em vulnerabilidade social irao desenvolver habilidades musicais em oficinas semanais com expressao corporal desenvolvimento de ritmos musicais danca e estudos sobre musica popular brasileira o pano de fundo sera o desenvolvimento de habilidades para a vida com enfoque na compaixao disponibilizaremos gratuitamente videos sobre as atividades desenvolvidas as criancas receberao formacao musical em horarios complementares ao escolar realizaremos uma apresentacao musical no final do projeto ofereceremos contrapartida social em escolas publicas & In the Compassion Chords project, socially vulnerable children will develop musical skills in weekly workshops with body expression, development of musical rhythms, dance, and studies on Brazilian popular music. The backdrop will be the development of life skills with a focus on compassion. We will make videos about the activities developed available free of charge. The children will receive musical training in extracurricular hours. We will hold a musical presentation at the end of the project. We will offer social assistance in public schools. \\ \hline
+Environment & o programa olhos dagua iniciado em 2010 tem como foco promover a protecao conservacao e recuperacao dos recursos hidricos na bacia hidrografica do rio doce atraves de um conjunto de praticas conservacionistas contribuindo para a manutencao dos seus recursos naturais com foco no ser humano mediante acoes de educacao ambiental o programa tambem visa ampliar a consciencia do publico para o uso racional da agua e a protecao dos mananciais em consonancia com o pirhdoce & The Olhos da Água program, launched in 2010, focuses on promoting the protection, conservation and recovery of water resources in the Doce River basin through a set of conservationist practices, contributing to the maintenance of its natural resources with a focus on human beings through environmental education actions. The program also aims to increase public awareness of the rational use of water and the protection of water sources in line with the Pirhdoce \\ \hline
+Health & aquisicao de equipamento medicohospitalares e materiais permanentes para estruturacao de unidade de atencao especializada em saude & acquisition of hospital medical equipment and permanent materials for the structuring of a specialized health care unit \\ \hline
+Sport & funcionamento de dois nucleos de esporte recreativo e lazer com atividades sistematica e eventos para todas as faixas etarias e pessoas com deficiencia & operation of two recreational sports and leisure centers with systematic activities and events for all age groups and people with disabilities \\ \hline
+\end{tabularx}%
+}
+\caption{Example NGO Project Descriptions by Project}
+\label{tab:project_description_example}
+\end{table}
+```
+
+## B.3 NGO Project Keywords by Topic {.unnumbered .toc}
+
+```{=latex}
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{|X|X|}
+\hline
+\textbf{Topic} & \textbf{Keyword (Portuguese)} \\ \hline
+Culture A & cultural, music, arte, realiz, apresentaco, artist, cidad, projet, espetacul, teatr \\ \hline
+Sport & public, esport, pesso, cidad, realiz, apresentaco, escol, projet, espetacul, mog \\ \hline
+Health & saud, equip, aquisica, material, unidad, permanent, atenca, especializ, reform, medic \\ \hline
+Education & projet, escol, ano, jov, formaca, music, crianc, public, ensin, orquestr \\ \hline
+Development A & atend, crianc, adolescent, contribu, desenvolv, estrateg, sustentavel, projet, objet, atrav \\ \hline
+Culture B & projet, cultural, histor, livr, brasileir, realiz, public, arte, brasil, cultur \\ \hline
+Environment & foc, program, recurs, proteca, uso, ambiental, manutenca, agu, ampli, inic \\ \hline
+Development B & desenvolv, projet, social, trabalh, apoi, aco, objet, tecnic, curs, comun \\ \hline
+\end{tabularx}
+\caption{Word Classifications for Each Topic}
+\label{tab:project_coding}
+\end{table}
+```
+
+Note that topic keywords are lemmatized versions of the word, such that the full word are typically "cut-off" and all diacritics removed. For instance, "crianc" is "*criança*" (child).
+
+# Appendix C: Differences-in-Difference {#appendixc .unnumbered .toc}
+## C.1 Placebo Test Results {#appendix-c-placebo .unnumbered .toc}
+
+```{=tex}
+\begin{figure}[H]
+ \centering
+ \begin{subfigure}[t]{0.48\textwidth}
+   \includegraphics[width=\linewidth]{../../figures/placebo_pgs.png}
+   \caption{Public Goods Spending}
+ \end{subfigure}
+ \hfill
+ \begin{subfigure}[t]{0.48\textwidth}
+   \includegraphics[width=\linewidth]{../../figures/placebo_civ_serv.png}
+   \caption{Proportion New Civil Serivce Contracts}
+ \end{subfigure}
+ \caption{Placebo Tests for Outcome Measures}
+ \label{fig:placebo_test}
+\end{figure}
+```
+
+Figure \ref{fig:placebo_test} reports on the placebo test of the two primary outcomes from the budget shift section and municipal employment composition sections of the paper, respectively. The PanelMatch package, which calculates Imai and co-authors' estimator [-@imaiMatchingMethodsCausal2023], calculates placebo tests for the evaluation of the effect of treatment at time *t* in pre-treatment periods, which can rule out the possibility of effects being driven by anticipation. In my specific case, it is quite possible theoretically that mayors would anticipate the completition of an NGO-good and begin shifting resources accordingly. While such an action would bias any significant findings towards zero, I nonetheless report the results of the placebo test here. As can be seen, for both outcomes, the pre-treatment effect is insignificant and statistically indistinguishable from zero. Thus, I fail to reject the null for this test and this test provides additional credibility that, absent treatment, treated and matched control units would have followed parallel trends.
+
+## C.2 Budget Shifts Regression Tables {.unnumbered .toc}
+
+::: {=latex}
+\input{../../figures/employment.tex}
+:::
+
+::: {=latex}
+\input{../../figures/employment_moderator.tex}
+:::
+
+::: {=latex}
+\input{../../figures/pgs.tex}
+:::
+
+::: {=latex}
+\input{../../figures/pgs_moderator.tex}
+:::
+
+\newpage
+
+## C.3 Emploment Composition Regression Tables {.unnumbered .toc}
+
+::: {=latex}
+\input{../../figures/new_civ_serv_ctrct.tex}
+:::
+
+::: {=latex}
+\input{../../figures/civ_serv_ctrct.tex}
+:::
+
+::: {=latex}
+\input{../../figures/new_temp_ctrct.tex}
+:::
+
+::: {=latex}
+\input{../../figures/new_long_ctrct.tex}
+:::
+

@@ -1,0 +1,188 @@
+---
+title: "Reading Technical Papers and Quarto Overview"
+author: "Alexander Dean"
+subtitle: "Recitation Period 1"
+institute: "Vanderbilt University"
+email: "alexander.r.dean@vanderbilt.edu"
+date: today
+format: 
+  revealjs:
+    theme: dark
+    footer: "Alexander Dean (Vanderbilt University)"
+    slide-number: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    self-contained-math: true
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+fontsize: 32px
+editor: source
+---
+
+# Introductory Spiel
+
+## What We Will Cover Today
+1. Strategies for reading methods papers
+2. Implementing Quarto into your everyday workflow
+3. A brief how-to for using Git/GitHub
+
+## Why You Should Pay Attention to Today's Recitation
+1. The skillset of reading a technical methods paper is different than that of reading a paper for seminars and it isn't really "taught" in classes
+2. Quarto is the new RMarkdown, essentially, and I *think* RMarkdown won't be updated anymore
+3. GitHub is quite useful for version control and collaboration
+
+# Reading Methods Papers
+
+## What this recitation period will help with:
+
+- Understanding the concepts discussed
+- Being able to go on and learn how to implement paper into your workflow
+
+## What this recitation period *doesn't* cover
+
+- Solving formal proofs from technical papers
+- Implementation of paper in your own statistical work (for now)
+
+## Aronow and Samii 2016
+
+- Does Regression Produce Representative Estimates of Causal Effects?
+
+## Some strategies for reading technical papers
+1. Go **slowly**
+
+. . .
+
+  - Like really slowly
+  - Set aside a solid chunk of time without interruptions
+
+. . .
+
+2. Write down what you think the paper is saying as you go along
+3. Keep a "statistics dictionary" handy
+4. Chat-GPT is quite useful here
+
+## A look at the abstract
+
+::: {.smaller}
+"With an unrepresentative sample, the estimate of a causal effect may fail to characterize how effects operate in the population of interest. What is less well understood is that conventional estimation practices for observational studies may produce the same problem even with a representative sample. Causal effects estimated via multiple regression differentially weight each unit’s contribution. The “effective sample” that regression uses to generate the estimate may bear little resemblance to the population of interest, and the results may be nonrepresentative in a manner similar to what quasi-experimental methods or experiments with convenience samples produce. There is no general external validity basis for preferring multiple regression on representative samples over quasi-experimental or experimental methods. We show how to estimate the “multiple regression weights” that allow one to study the effective sample. We discuss alternative approaches that under certain conditions, recover representative average causal effects. The requisite conditions cannot always be met."
+:::
+
+## Beginning the breakdown
+
+1. Read the abstract once over
+2. Write a sentence (or two) for what you think the abstract is saying
+3. Highlight two types of words:
+    1. "Crucial" words
+    2. "Unsure" words
+4. Chat with a neighbor for similarities/differences in above 
+
+## Starting the close read
+1. Go sentence by sentence
+2. When the sentence has a statistical word you're unfamiliar/unsure/uncertain/etc., look it up and write down the definition!
+3. If the paragraph/sentence/etc. is completely undecipherable to you, then asking Chat-GPT to explain it can be quite useful.
+4. At the end of each section (paragraph if you want to be thorough), summarize the point(s)
+
+## Relooking at the abstract
+
+::: {.smaller}
+"With an `unrepresentative sample`, the `estimate` of a causal effect may fail to characterize how effects operate in the population of interest. What is less well understood is that `conventional estimation practices` for observational studies may produce the same problem even with a representative sample. Causal effects estimated via multiple regression differentially weight each unit’s contribution. The “effective sample” that regression uses to generate the estimate may bear little resemblance to the `population of interest`, and the results may be nonrepresentative in a manner similar to what quasi-experimental methods or experiments with convenience samples produce. There is no general `external validity` basis for preferring multiple regression on representative samples over quasi-experimental or experimental methods. We show how to estimate the “multiple regression weights” that allow one to study the effective sample. We discuss alternative approaches that under certain conditions, recover representative average causal effects. The requisite conditions cannot always be met."
+:::
+
+# Quarto
+
+## What is Quarto?
+
+- An open-source system where you can combine typing and statistical computation
+- It's fundamentally similar to [R]{.proglang} Markdown and also uses `knitr` to run [R]{.proglang} code, meaning that you can usually render your RMD files without modification with Quarto!
+- You can write everything in it, including your term papers, presentations, and even websites!
+
+. . . 
+
+<!-- This is how you comment using markdown. The `. . .` is a pause in the presentation on the same slide -->
+
+- The switch is quite easy, I've personally found rendering documents to be hardly different from rendering with RMarkdown and rendering presentations with revealjs (html) or beamer (pdf) to be **significantly** easier than when using [R]{.proglang} Markdown or a [LaTeX]{.proglang} processor
+
+## Downloading Quarto
+
+1. Go to the [Quarto webpage](https://quarto.org/docs/get-started/)
+2. Download the proper Quarto CLI for your computer operating system
+
+OR
+
+:::{.fragment}
+- If you plan on using Quarto in [R]{.proglang}Studio, it is already integrated if your software is relatively up-to-date
+::::
+
+:::{.notes}
+If you want to include presentation notes for yourself, you can do se by putting them in this chunk!
+:::
+
+## Main differences from your current workflows
+
+1. YAML (the Preamble)
+2. Markdown syntax
+
+## YAML and Frontmatter
+- Writing your YAML will take the place of writing your [LaTeX]{.proglang} preamble
+- Once you have a "standard" YAML, you can just copy paste
+- I have several "templates" on the github under Reciation -> Week 1 that you can use and modify for your own work
+
+## YAML Example
+
+![Example with Document YAML](../../_images/yaml_paper_example.png)
+
+## Another YAML Example
+
+![Example with Presentation YAML](../../_images/yaml_present_example.png)
+
+## Markdown Syntax
+- Somewhat different than [LaTeX]{.proglang} syntax, but easy to pick up
+- See [this website](https://www.markdownguide.org/cheat-sheet/) for a downloadable cheatsheet
+- Very few changes when you are writing a manuscript, a bit more with presentations
+    - Citations and footnotes (easy switch)
+    - Presentation structure is different, but easier to quickly create after the switch
+
+## Helpful Resources
+
+- Example templates for presentation and manuscripts [on our github](https://github.com/gerasy1987/PSCI8357/tree/main/recitation_material/week_1)
+- The [Quarto website](https://quarto.org/docs/guide/) is *quite* thorough 
+- This [book chapter](https://r4ds.hadley.nz/quarto)
+
+# Git and Github
+
+## What is git?
+
+1. A file management system
+2. The system is designed s.t. you can reaccess previous versions of your files
+3. Additionally, you can create branches where you can experiment/perform initial coding before you add changes to the master path
+
+## A visualization
+
+![A visualization of git's method of management](../../_images/git_explainer.png)
+
+## What is GitHub?
+
+1. An online version of git
+2. A useful tool for collarborations, especially when multiple coauthors are handling part of the empirics for the project
+
+## What you need to get started
+
+1. Download [git](https://git-scm.com)
+2. Create a [GitHub account](https://github.com)
+3. Be unafraid to use your computer's [terminal](https://www.technigo.io/explained/what-is-the-terminal) (or terminal in your IDE)
+
+## Some resources
+
+1. This [webpage](https://webtuu.com/blog/04/git-basics-branching-merging-push-to-github) 
+2. [GitHub starting page(s)](https://docs.github.com/en/get-started)
+3. This [GitHub tutorial](https://training.github.com/downloads/github-git-cheat-sheet.pdf)
+4. This [interactive desktop app](https://github.com/jlord/git-it-electron#what-to-install) to learn git/Github
+5. Terminal cheatsheets:
+    1. [This one](https://www.git-tower.com/blog/command-line-cheat-sheet/)
+    2. [This one for windows](https://serverspace.us/support/help/windows-cmd-commands-cheat-sheet/)

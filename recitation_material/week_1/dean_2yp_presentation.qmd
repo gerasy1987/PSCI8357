@@ -1,0 +1,297 @@
+---
+title: "How NGOs Reshape the State:"
+author: "Alexander Dean"
+subtitle: "Evidence from Municpal Spending and Employment in Brazil"
+institute: "Vanderbilt University"
+email: "alexander.r.dean@vanderbilt.edu"
+date: 08/19/2025
+format:
+  beamer:  
+    aspectratio: 43
+    navigation: horizontal
+    theme: Madrid
+    colortheme: rose
+    slide-number: true
+    embed-resources: true
+    center: false
+    link-external-icon: true
+    link-external-newwindow: true
+    self-contained-math: true
+    incremental: false
+    citations-hover: true
+    scrollable: true
+    reference-location: document
+    section-titles: false
+    slide-level: 2
+    math: true
+fontsize: 28px 
+# bibliography: stat_paper.bib
+header-includes:
+  - \usepackage{tabularray}
+  - |
+    \setbeamertemplate{footline}
+    {
+      \leavevmode%
+      \hbox{%
+        % Leftmost box: Hyperlink to TOC
+        \begin{beamercolorbox}[wd=.333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+          \hyperlink{toc-frame}{How NGOs Reshape the State}%
+        \end{beamercolorbox}%
+        % Center box: Section name
+        \begin{beamercolorbox}[wd=.333\paperwidth,ht=2.25ex,dp=1ex,center]{section in head/foot}%
+          \insertsection%
+        \end{beamercolorbox}%
+        % Rightmost box: Page number
+        \begin{beamercolorbox}[wd=.333\paperwidth,ht=2.25ex,dp=1ex,center]{date in head/foot}%
+         \insertframenumber{}%
+        \end{beamercolorbox}%
+      }%
+      \vskip0pt%
+    }
+    \setbeamertemplate{navigation symbols}{}
+    \newcommand{\definitionbox}[1]{
+    \fbox{\parbox{\textwidth}{\textbf{Definition:} #1}}
+    }
+---
+
+# Introduction
+
+## The Rise of Nonstate Service Delivery
+
+- Non-Governmental Organization (NGO) funding of public goods has quadrupled this century (Aldasehv & Navarra 2018)
+
+- In 2025 alone, NGOs will spend $\$352.21$ billion on service delivery (BRC 2025)
+
+. . . 
+
+- Yet, we know relatively little about the consequences of nonstate public goods provision (Cammet & MacLean 2011) and especially about "supply-side" effects
+
+## Motivating Question
+
+-   How does the provision of public goods by NGOs change the incentives of the state to provide public goods?
+
+# Expectations
+
+## NGO Goods as Catalysts for Efficient State Spending
+
+- NGOs often claim their projects can lead to the state more efficiently allocating resources for public goods (e.g., Najam 2000)
+- In Kenya, government has been able to build greater state capacity because of NGOs providing local public goods (Brass 2012, 2016)
+- Similar example in Uganda (Cruzzatti et al. 2023)
+- Yet others find less positive effects of NGOs on state capacity (e.g., Deserranno et al. 2024)
+- Increased investments in state capacity like hirings of civil servants or shifts across muincipalities
+
+## NGO Goods as Catalysts for Competition
+
+- NGOs can be alternative source of public goods, spurring politicians to view NGOs as political competitors (e.g., Cabana et al. 2021)
+- As political competition increases, politicians engage in better governance (e.g., Hatfield 2015; Datta 2020)
+- Specific increases in visible spending (e.g., Healy & Malhotra 2007), like public goods instead of investments in less visible policies
+
+## NGO Goods as Catalysts for Patronage and Rents
+
+- Under low levels of attribution, nonstate projects may actually be assumed to be the doing of a politician (e.g., Cruz & Schneider 2017)
+- Similar exacerbations of political agency problems with windfalls (e.g., Brollo et al. 2013) and nonstate projects (Guiteras & Mobarak 2015)
+- Such an effect can lead to increased spending on patronage or rent extraction
+
+## A Typology of Potential Effects
+
+```{=tex}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\linewidth]{../../figures/typology.png}
+\end{figure}
+```
+
+## Observable Implications on Municipal Spending
+
+```{=tex}
+\begin{table}[ht]
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+ & Public Goods & Employment \\ \hline
+Efficiency & $\uparrow$ OR $\emptyset$ & $\uparrow$ OR $\emptyset$ \\ \hline
+Competition & $\uparrow$ & $\downarrow$ \\ \hline
+Windfall & $\downarrow$ & $\uparrow$ \\ \hline
+\end{tabular}
+\caption{Observable Outcomes of Each Expectation}
+\end{table}
+```
+
+# Data and Empirics
+## The Brazilian Case: NGOs, Mayors, and Budgets
+
+1. Brazil has among the highest registered NGOs densities (per capita) in the world (IPEA 2025)
+2. Rich micro-level data on municipal spending, municipal employment, and NGO projects
+3. Municipalities are the primary providers of public goods and are among the largest formal employers in each locality
+4. Federal institutional structure, limiting clarity of attribution
+5. Institutional constraints:
+    1. Spending floors for public goods
+    2. Random audit checks for corruption
+    3. Safeguard laws against patronage in election years
+
+
+## Panel Data: 2002-2022
+- NGO projects:
+    1. Similar public goods provided by both NGOs and municipalities
+- Municipal Expenditures:
+    1. 21 budget categories 
+    2. Supra-categories for public goods \(75\%\), administration \(15\%\), special charges \(7\%\) and other \(3\%\)
+- Municipal Employment:
+    1. Contract types: civil service and non-civil service (permanent and temporary employment)
+- Covariates:
+    1. Logged population, local school quality, HDI, proportion impovershed, proportion rural, adjusted GDP per capita, political alignment with nat'l government, and adjusted income per capita
+
+## Design {#design-frame}
+- Generalized DiD identification strategy
+- Imai et al. estimator (2023)
+    1. Allows for units to go in and out of treatment
+    2. Matching for a refined treatment vs. control 
+- Reporting on [parallel trends](#robust-parallel) and robustness checks in appendix
+
+$$
+Y_{i, t + F} = \alpha_{i} + D_{it}\tau_{i} + \gamma_{t} + \textbf{X}^{'}_{it} + \epsilon_{it}
+$$
+
+## Municipal Spending
+
+```{=tex}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.48\textwidth}
+    \includegraphics[width=\linewidth]{../../figures/pgs_share.png}
+    \caption{Public Goods Expenditures}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \includegraphics[width=\linewidth]{../../figures/employment_share.png}
+    \caption{Employment Expenditures}
+  \end{subfigure}
+  \caption{Impact of Hosting NGO Project on Municipal Budget Shift}
+  \label{fig:expenditures-main}
+\end{figure}
+```
+
+## Spending in Audited Municipalities
+
+```{=tex}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.48\textwidth}
+    \includegraphics[width=\linewidth]{../../figures/pgs_share_mod.png}
+    \caption{Public Goods Expenditures}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \includegraphics[width=\linewidth]{../../figures/employment_share_mod.png}
+    \caption{Employment Expenditures}
+  \end{subfigure}
+  \caption{Impact of Hosting NGO Project on Municipal Budget Shift}
+  \label{fig:expenditures-moderator}
+\end{figure}
+```
+
+- Any severe corruption violation from CGU audit = 1, 0 otherwise
+
+## Municipal Civil Service Composition
+
+```{=tex}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.48\textwidth}
+    \includegraphics[width=\linewidth]{../../figures/new_prop_civ_serv.png}
+    \caption{New Contracts}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \includegraphics[width=\linewidth]{../../figures/prop_civ_serv.png}
+    \caption{Entire Municipal Administration}
+  \end{subfigure}
+  \caption{Impact of Hosting NGO Project on Municipal Employee Composition}
+  \label{fig:civ_serv_ctrct}
+\end{figure}
+```
+
+## Employment Composition Shifts
+
+```{=tex}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.48\textwidth}
+    \includegraphics[width=\linewidth]{../../figures/new_prop_long.png}
+    \caption{New Long-Term Contracts}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \includegraphics[width=\linewidth]{../../figures/new_prop_short.png}
+    \caption{New Temporary Contracts}
+  \end{subfigure}
+  \caption{Impact of Hosting NGO Project on Contract Hirings}
+  \label{fig:short_long_ctrct}
+\end{figure}
+```
+
+# Implications
+
+## Implications
+
+- Evidence is most consistent with an efficiency effect or a null effect
+- In settings with existing capacity to provide public goods, NGO service delivery may actually crowd-in more efficient resource allocations by the state
+- Additional work is needed to understand the effects of nonstate public goods delivery in other settings, these results may not translate elsewhere
+
+# Future Work
+## Next Steps
+
+- Inclusion of other cases (e.g., India) with greater local heterogeneity in institutional constraints
+- Reconstruction of corruption variable to instead proxy electoral reliance on clientelism with electoral expenditures
+- Examination of dynamics specifically in electoral years
+
+## Table of Contents {#toc}
+\tableofcontents
+
+# Robustness & Add'l Analysis
+## Parallel Trends {#robust-parallel}
+
+```{=tex}
+\begin{figure}[H]
+ \centering
+ \begin{subfigure}[t]{0.48\textwidth}
+   \includegraphics[width=\linewidth]{../../figures/parallel_example.png}
+   \caption{Parallel Trends}
+ \end{subfigure}
+ \hfill
+ \begin{subfigure}[t]{0.48\textwidth}
+   \includegraphics[width=\linewidth]{../../figures/sensitivity_plot.png}
+   \caption{Sensitivity Analysis}
+ \end{subfigure}
+ \caption{Inference of Parallel Trends Holding}
+ \label{fig:placebo_test}
+\end{figure}
+```
+
+## Placebo Test {#robust-placebo}
+
+```{=tex}
+\begin{figure}[H]
+ \centering
+ \begin{subfigure}[t]{0.48\textwidth}
+   \includegraphics[width=\linewidth]{../../figures/placebo_pgs.png}
+   \caption{Public Goods Spending}
+ \end{subfigure}
+ \hfill
+ \begin{subfigure}[t]{0.48\textwidth}
+   \includegraphics[width=\linewidth]{../../figures/placebo_civ_serv.png}
+   \caption{Proportion New Civil Serivce Contracts}
+ \end{subfigure}
+ \caption{Placebo Tests for Outcome Measures}
+ \label{fig:placebo_test}
+\end{figure}
+```
+
+## Public Goods Public Opinion {#robust-opinion}
+
+```{=tex}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\linewidth]{../../figures/lapop.png}
+\end{figure}
+```
