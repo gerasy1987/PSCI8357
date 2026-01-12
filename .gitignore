@@ -18,5 +18,3 @@ recitation_material/*
 problem_sets/*
 _data/*
 !_data/.gitkeep
-_images/*
-!_images/.gitkeep
