@@ -240,7 +240,7 @@ $$
 \E [\E [X \given Y]] &\class{fragment}{{}= \sum_{y \in \mathcal{Y}} \E [X \given Y = y] p_{Y} (y)} \\
 &\class{fragment}{{}= \sum_{y \in \mathcal{Y}} \left[\sum_{x \in \mathcal{X}} x \frac{p_{X,Y} (x, y)}{p_{Y} (y)} \right] p_Y (y) \quad \text{($\because$ definition)}} \\
 &\class{fragment}{{}= \sum_{y \in \mathcal{Y}} \sum_{x \in \mathcal{X}} x p_{X,Y} (x, y) \quad \text{($\because$ distribute and cancel $p_{Y} (y)$)}} \\
-&\class{fragment}{{}= \sum_{x \in \mathcal{X}} x \sum_{y \in \mathcal{Y}} p_{X,Y} (x, y) \quad \text{($\because$ reorder sums)}} \\
+&\class{fragment}{{}= \sum_{x \in \mathcal{X}} \left[ x \sum_{y \in \mathcal{Y}} p_{X,Y} (x, y) \right] \quad \text{($\because$ reorder sums)}} \\
 &\class{fragment}{{}= \sum_{x \in \mathcal{X}} x p_X(x) \quad \text{($\because$ marginalize over $Y$)}} \\
 &\class{fragment}{{}= \E [X]}
 \end{align*}
@@ -405,7 +405,7 @@ $$
 
 ## The Critique
 
-<br>
+<br><br>
 
 - Conventional regression studies often create _"pseudo-general pseudo-facts."_ 
 
@@ -476,8 +476,8 @@ $$
 
 | Aspect                  | Conventional Regression                     | Causal Empiricism                      |
 |-------------------------|---------------------------------------------|----------------------------------------|
-| Identification          | Relies on informal controls, model-dependent| Explicit use of identifying variation. |
-| Generalization          | Claims broad applicability                  | Accepts locality, builds from specifics|
+| Identification          | Relies on informal controls, model-dependent| Explicit use of identifying variation |
+| Generalization          | Claims broad applicability                  | Accepts locality, builds from specifics via research programs|
 | Validity                | Internal validity often compromised         | Prioritizes internal validity          |
 | Research focus          | Theory and generalization in one study      | Division of labor, research programs   |
 : {tbl-colwidths="[20,40,40]"}

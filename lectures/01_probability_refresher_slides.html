@@ -442,7 +442,7 @@
   <meta name="generator" content="quarto-1.8.26">
 
   <meta name="author" content="Georgiy (Gosha) Syunyaev">
-  <meta name="dcterms.date" content="2026-01-07">
+  <meta name="dcterms.date" content="2026-01-11">
   <title>Probability Refresher</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1183,7 +1183,7 @@ Georgiy (Gosha) Syunyaev
     </div>
 </div>
 
-  <p class="date">January 7, 2026</p>
+  <p class="date">January 11, 2026</p>
 </section><section id="TOC">
 <nav role="doc-toc"> 
 <h2 id="toc-title">Plan</h2>
@@ -1404,7 +1404,7 @@ Georgiy (Gosha) Syunyaev
 {\mathbb{E}}[{\mathbb{E}}[X {\:\vert\:}Y]] &amp;\class{fragment}{{}= \sum_{y \in \mathcal{Y}} {\mathbb{E}}[X {\:\vert\:}Y = y] p_{Y} (y)} \\
 &amp;\class{fragment}{{}= \sum_{y \in \mathcal{Y}} \left[\sum_{x \in \mathcal{X}} x \frac{p_{X,Y} (x, y)}{p_{Y} (y)} \right] p_Y (y) \quad \text{($\because$ definition)}} \\
 &amp;\class{fragment}{{}= \sum_{y \in \mathcal{Y}} \sum_{x \in \mathcal{X}} x p_{X,Y} (x, y) \quad \text{($\because$ distribute and cancel $p_{Y} (y)$)}} \\
-&amp;\class{fragment}{{}= \sum_{x \in \mathcal{X}} x \sum_{y \in \mathcal{Y}} p_{X,Y} (x, y) \quad \text{($\because$ reorder sums)}} \\
+&amp;\class{fragment}{{}= \sum_{x \in \mathcal{X}} \left[ x \sum_{y \in \mathcal{Y}} p_{X,Y} (x, y) \right] \quad \text{($\because$ reorder sums)}} \\
 &amp;\class{fragment}{{}= \sum_{x \in \mathcal{X}} x p_X(x) \quad \text{($\because$ marginalize over $Y$)}} \\
 &amp;\class{fragment}{{}= {\mathbb{E}}[X]}
 \end{align*}
@@ -1614,7 +1614,7 @@ Y = \alpha + \beta T + X&#39; \gamma + \varepsilon
 </section>
 <section id="the-critique" class="slide level2">
 <h2>The Critique</h2>
-<p><br></p>
+<p><br><br></p>
 <ul>
 <li>Conventional regression studies often create <em>“pseudo-general pseudo-facts.”</em></li>
 </ul>
@@ -1709,12 +1709,12 @@ Y = \alpha + \beta T + X&#39; \gamma + \varepsilon
 <tr class="odd">
 <td>Identification</td>
 <td>Relies on informal controls, model-dependent</td>
-<td>Explicit use of identifying variation.</td>
+<td>Explicit use of identifying variation</td>
 </tr>
 <tr class="even">
 <td>Generalization</td>
 <td>Claims broad applicability</td>
-<td>Accepts locality, builds from specifics</td>
+<td>Accepts locality, builds from specifics via research programs</td>
 </tr>
 <tr class="odd">
 <td>Validity</td>
