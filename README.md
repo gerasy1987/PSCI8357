@@ -420,7 +420,7 @@ role="doc-biblioref">1986</a>)</span></li>
 <td style="text-align: left;">Regression and Causality</td>
 <td style="text-align: left;">CEF and its properties, selection on
 observables, conditional ignorability, <strong>problem set 1 is posted
-on 1/21</strong></td>
+on 1/26</strong></td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="angrist2009mostly">Angrist and
 Pischke (<a href="#ref-angrist2009mostly" role="doc-biblioref">2009</a>,
@@ -463,7 +463,7 @@ DESIGNS</strong></td>
 <td style="text-align: left;">target quantities (SATE, PATE), inference
 for the SATE and PATE in an idealized experiment, randomization
 inference, imbalance, <strong>problem set 2 is posted on
-2/2</strong></td>
+2/4</strong></td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="gerber2012field">Gerber and Green
 (<a href="#ref-gerber2012field" role="doc-biblioref">2012</a>, Ch.
@@ -493,7 +493,7 @@ FOR CAUSAL INFERENCE</strong></td>
 <td style="text-align: left;">distance metrics, exact matching, nearest
 neighbor matching, propensity score matching, balancing property,
 sensitivity analysis, weighting, doubly robust estimators
-<strong>problem set 3 is posted on 2/16</strong></td>
+<strong>problem set 3 is posted on 2/18</strong></td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="angrist2009mostly">Angrist and
 Pischke (<a href="#ref-angrist2009mostly" role="doc-biblioref">2009</a>,
@@ -513,7 +513,7 @@ role="doc-biblioref">2008</a>)</span></li>
 <td style="text-align: left;">Instrumental Variables</td>
 <td style="text-align: left;">Local Average Treatment Effects, IV
 estimator, one-/two-sided non-compliance, 2SLS estimator and its bias,
-<strong>problem set 4 is posted on 3/2</strong>, <strong>experimental
+<strong>problem set 4 is posted on 3/4</strong>, <strong>experimental
 replication is due on 3/2</strong></td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="angrist2009mostly">Angrist and
@@ -585,7 +585,7 @@ role="doc-biblioref">2015</a>, Ch. 11.3)</span></li>
 <td style="text-align: left;">Synthetic Control</td>
 <td style="text-align: left;">identification, estimation and statistical
 inference, interactive FEs, <strong>problem set 6 is posted on
-3/25</strong></td>
+3/30</strong></td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="abadie2010synthetic">Abadie,
 Diamond, and Hainmueller (<a href="#ref-abadie2010synthetic"
@@ -617,7 +617,7 @@ role="doc-biblioref">2016</a>)</span></li>
 <td style="text-align: left;">Mediation Effects</td>
 <td style="text-align: left;">natural direct and indirect effects,
 controlled direct and indirect effects <strong>problem set 7 is posted
-on 4/6</strong>, <strong>observational replication is due on
+on 4/8</strong>, <strong>observational replication is due on
 4/13</strong></td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="gerber2012field">Gerber and Green

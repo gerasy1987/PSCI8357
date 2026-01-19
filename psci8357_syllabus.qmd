@@ -227,7 +227,7 @@ If you have questions or concerns about what is allowed, or how to document AI u
 
 *   - **1/26 1/28**
     - Regression and Causality
-    - CEF and its properties, selection on observables, conditional ignorability, **problem set 1 is posted on 1/21**
+    - CEF and its properties, selection on observables, conditional ignorability, **problem set 1 is posted on 1/26**
     -   - @angrist2009mostly [Ch. 3.1-3.2.2]
         - @morgan2015counterfactuals [Ch. 6.1-6.2]
         - @cinelli2024crash
@@ -245,7 +245,7 @@ If you have questions or concerns about what is allowed, or how to document AI u
 
 *   - **2/4 2/9**
     - Basics of Experimental Design
-    - target quantities (SATE, PATE), inference for the SATE and PATE in an idealized experiment, randomization inference, imbalance, **problem set 2 is posted on 2/2**
+    - target quantities (SATE, PATE), inference for the SATE and PATE in an idealized experiment, randomization inference, imbalance, **problem set 2 is posted on 2/4**
     -   - @gerber2012field [Ch. 3]
 
 *   - **2/11 2/16**
@@ -258,7 +258,7 @@ If you have questions or concerns about what is allowed, or how to document AI u
 
 *   - **2/18 2/23 2/25**
     - Matching
-    - distance metrics, exact matching, nearest neighbor matching, propensity score matching, balancing property, sensitivity analysis, weighting, doubly robust estimators **problem set 3 is posted on 2/16**
+    - distance metrics, exact matching, nearest neighbor matching, propensity score matching, balancing property, sensitivity analysis, weighting, doubly robust estimators **problem set 3 is posted on 2/18**
     -   - @angrist2009mostly [Ch. 3]
         - @morgan2015counterfactuals [Ch. 5]
         - @sekhon2009opiates
@@ -266,7 +266,7 @@ If you have questions or concerns about what is allowed, or how to document AI u
 
 *   - **3/2 3/4**
     - Instrumental Variables
-    - Local Average Treatment Effects, IV estimator, one-/two-sided non-compliance, 2SLS estimator and its bias, **problem set 4 is posted on 3/2**, **experimental replication is due on 3/2**
+    - Local Average Treatment Effects, IV estimator, one-/two-sided non-compliance, 2SLS estimator and its bias, **problem set 4 is posted on 3/4**, **experimental replication is due on 3/2**
     -   - @angrist2009mostly [Ch. 4]
         - @morgan2015counterfactuals [Ch. 9.1-9.3]
         - @angrist1996identification
@@ -297,7 +297,7 @@ If you have questions or concerns about what is allowed, or how to document AI u
 
 *   - **3/30**
     - Synthetic Control
-    - identification, estimation and statistical inference, interactive FEs, **problem set 6 is posted on 3/25**
+    - identification, estimation and statistical inference, interactive FEs, **problem set 6 is posted on 3/30**
     -   - @abadie2010synthetic
 
 *   - **4/1 4/6**
@@ -310,7 +310,7 @@ If you have questions or concerns about what is allowed, or how to document AI u
 
 *   - **4/8 4/13**
     - Mediation Effects
-    - natural direct and indirect effects, controlled direct and indirect effects **problem set 7 is posted on 4/6**, **observational replication is due on 4/13**
+    - natural direct and indirect effects, controlled direct and indirect effects **problem set 7 is posted on 4/8**, **observational replication is due on 4/13**
     -   - @gerber2012field [Ch. 9-10]
 
 *   - **4/15**
