@@ -389,7 +389,7 @@ $$
 
 . . .
 
-- Why is $\tau_{ATT} \neq \tau_{ATT}$? When would they be equal?
+- Why is $\tau_{ATT} \neq \tau_{ATE}$? When would they be equal?
 
 # SUTVA?
 
@@ -512,13 +512,13 @@ $$
 $$
 \begin{align*}
 \hat\tau &= \E[Y_i \given T_i = 1]-\E[Y_i \given T_i = 0] \\
-    &= \underbrace{\E[Y_{i} (1) - Y_{i} (0) \given T_i = 1]}_{\tau_{ATC}} +\underbrace{\E[Y_{i} (1) \given T_i=1]-\E[Y_{i} (1) \given T_i=0]}_{\text{Selection bias wrt $Y_i(1)$}}
+    &= \underbrace{\E[Y_{i} (1) - Y_{i} (0) \given T_i = 0]}_{\tau_{ATC}} + \underbrace{\E[Y_{i} (1) \given T_i=1]-\E[Y_{i} (1) \given T_i=0]}_{\text{Selection bias wrt $Y_i(1)$}}
 \end{align*}
 $$
 
 . . .
 
-- Can we decompose the difference in means, $\hat\tau$, using $ATE$ instead of $ATT$?
+- Can we decompose the difference in means, $\hat\tau$, using $ATE$ instead of $ATT$ or $ATC$?
 
 . . .
 
@@ -531,7 +531,9 @@ $$
 
 . . .
 
-- [Note]{.note}: This could be rewritten in terms of selection bias wrt to $Y_i(1)$'s and $\tau_i$ as well.
+- [Intuition]{.note}: What do these decompositions tell us about possibility of recovering $ATT$/$ATC$ vs $ATE$?
+
+- [Note]{.note}: This could be rewritten in terms of selection bias _wrt_ to $Y_i(1)$'s and $\tau_i$ as well.
 
 # Components of Causal Inference
 
@@ -545,7 +547,7 @@ $$
    - With an _infinite_ amount of data, can we learn about our causal estimand? **$\Rightarrow$ Identification is independent of the dataset size.**
    - Focus on [**causal estimand**]{.highlight} (not the same as [**statistical estimand**]{.highlight}).
    - Can we express causal estimands solely in terms of observed outcomes?
-   - What (if any) [identification assumptions] do we need for this?
+   - What (if any) [identification assumptions]{.highlight} do we need for this?
    :::
 
 . . .
@@ -649,7 +651,7 @@ $$
 
 ## An Alternative Causal Model: Causal Graphs
 
-- Did social scientists not do causal inference before Rubin? [No!]{.alert}
+- Did social scientists do causal inference before Rubin? [YES!]{.alert}
 
 . . .
 

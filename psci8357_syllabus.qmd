@@ -4,7 +4,7 @@ title: |
     |   Statistics for Political Research (STAT) II
 subtitle: |
     |   WHEN: M/W 4:30 – 5:45PM
-    |   WHERE: COMMONS 320
+    |   WHERE: COMMONS 349
 date-modified: "**`r Sys.Date()`**"
 format-links: false
 format: 
