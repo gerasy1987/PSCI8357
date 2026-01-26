@@ -16,5 +16,6 @@ lectures/*
 recitation_material/*
 !recitation_material/.gitkeep
 problem_sets/*
+!problem_sets/ps_template*
 _data/*
 !_data/.gitkeep

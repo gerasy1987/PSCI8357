@@ -1,0 +1,215 @@
+---
+title: "Problem Set Answer Template"
+author: "Your Name"
+date-format: long
+date: "`r Sys.Date()`"
+format:
+   pdf:
+      keep-tex: true
+      toc: false
+      number-sections: false
+      tbl-cap-location: bottom
+      fig-cap-location: bottom
+      pdf-engine: pdflatex
+      code-block-bg: "#e3e3e3"
+      highlight-style: arrow
+      colorlinks: true
+      geometry: margin=1in
+      link-citations: true
+      link-bibliography: true
+      include-in-header: 
+         text: |
+            \usepackage{multicol}
+            \usepackage{enumitem}
+            \usepackage{ragged2e}
+            \usepackage{float}
+      code-line-numbers: true
+execute:
+   echo: true
+   warning: false
+   message: false
+   eval: true
+editor: source
+fontsize: 11pt
+bibliography: ps.bib
+bibliographystyle: chicago
+---
+
+
+```{=tex}
+% these are some useful custom latex operators you can use.
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\textrm{Pr}}
+\newcommand{\var}{\mathbb{V}}
+\newcommand{\cov}{\mathrm{cov}}
+\newcommand{\corr}{\mathrm{corr}}
+\newcommand{\argmin}{\arg\!\min}
+\newcommand{\argmax}{\arg\!\max}
+\newcommand{\qedknitr}{\hfill\rule{1.2ex}{1.2ex}}
+\newcommand{\given}{\:\vert\:}
+\newcommand{\indep}{\mbox{$\perp\!\!\!\perp$}}
+```
+
+## Question 1
+
+_(placehoder for analytical question)_
+
+**Answer:**
+
+We need to prove the additive property of expectations: if $X$ and $Y$ are random variables, then $\E[X + Y] = \E[X] + \E[Y]$.
+
+By the definition of expectation, we have:
+
+- The expectation of the sum $X + Y$ is given by:
+
+   $$
+   \E[X + Y] = \int_{-\infty}^\infty (x + y) f_{X,Y}(x, y) \, dx \, dy,
+   $$ {#eq-expect-sum}
+
+- Using the linearity of integration, we can separate the terms inside the integral in @eq-expect-sum:
+
+   $$
+   \E[X + Y] = \int_{-\infty}^\infty x f_X(x) \, dx + \int_{-\infty}^\infty y f_Y(y) \, dy.
+   $$
+
+- Simplifying, we obtain:
+
+   $$
+   \E[X + Y] = \E[X] + \E[Y]. \hspace{20pt} \qedknitr
+   $$
+
+
+## Question 2
+
+_(placeholder for question involving data analyses in [R]{.proglang})_
+
+**Answer:**
+
+```{r}
+#| label: setup
+#| include: false
+
+if (!require(pacman)) install.packages("pacman")
+
+# load (and install if needed) packages
+pacman::p_load(tidyverse, modelsummary, estimatr, ggplot2)
+
+# make simulations reproducible (note, order of execution matters)
+set.seed(1234)
+
+```
+
+We use @angrist2009mostly in the answer. @tbl-variables describes the variables we will simulate.
+
+| Variable | Description |
+|:--------:|:------------|
+| $X_1$      | Random variable drawn from a normal distribution with mean $5$ and standard deviation $2$. |
+| $X_2$      | Categorical variable with levels `"A"`, `"B"`, and `"C"`, sampled randomly with replacement. |
+| $X_3$      | Binary variable drawn from a Bernoulli distribution with probability $0.5$. |
+| $Y$       | Dependent variable calculated as `3 + 2 * x1 + 1.5 * as.numeric(x2) + 0.8 * x3` plus some random noise. |
+
+: Variable description. {#tbl-variables tbl-colwidths="\[10,80\]"}
+
+Code below simulates a dataset with 100 observations according to the description in @tbl-variables and adds some random missingness to variables $X_2$ and $X_3$. @tbl-gen-data shows the top 6 rows of this dataset.
+
+\small
+```{r}
+#| label: tbl-gen-data
+#| tbl-cap: "Simulated data."
+#| tbl-pos: "!h"
+#| eval: true
+#| echo: true
+
+# Generate a sample dataset
+data <- dplyr::tibble(
+   x1 = rnorm(100, mean = 5, sd = 2),
+   x2 = factor(sample(c("A", "B", "C"), 100, replace = TRUE)),
+   x3 = rbinom(100, 1, prob = 0.5),
+   y = 3 + 2 * x1 + 1.5 * as.numeric(x2) + 0.8 * x3 + rnorm(100)
+)
+
+# Introduce some NAs into x2 and x3
+data$x2[sample(1:100, 10)] <- NA
+data$x3[sample(1:100, 10)] <- NA
+
+dplyr::sample_n(data, size = 6) |>
+   knitr::kable(
+      format = "latex", digits = 3,
+      align = "c", booktabs = TRUE, linesep = ""
+   )
+
+```
+\normalsize
+
+
+\small
+```{r}
+#| label: get-estimates
+#| echo: false
+#| eval: true
+
+# Run regression model
+mod1 <-
+   data |> estimatr::lm_robust(y ~ x1, data = _)
+
+
+mod2 <-
+   data |> estimatr::lm_robust(y ~ x1 + x2 * x3, data = _)
+
+```
+\normalsize
+
+Code below produces @tbl-regression that shows point and uncertainty estimates for the model $Y = \alpha_1 + \beta_1 X_1 + \varepsilon$ (column 1) and $Y = \alpha_2 + \beta_2 X_1 + \beta_3 X_2 + \beta_4 X_3 + \varepsilon$ (column 2).
+
+\small
+```{r}
+#| label: tbl-regression
+#| tbl-cap: "Regression output."
+#| tbl-pos: "!h"
+#| eval: true
+#| echo: true
+
+modelsummary::modelsummary(
+   list(mod1, mod2), stars = TRUE,
+   gof_omit = "BIC|AIC|RMSE",
+   coef_omit = "(Intercept)", output = "latex")
+
+```
+\normalsize
+
+
+The code below produces @fig-regression with two panels. @fig-regression-1 shows scatter plot of $X_1$ against $Y$ with linear trend, while @fig-regression-2 shows histogram of categorical variable $X_2$.
+
+\small
+```{r}
+#| label: fig-regression
+#| eval: true
+#| fig-cap: "Example figures."
+#| fig-pos: "H"
+#| fig-width: 5
+#| fig-height: 2.5
+#| fig-subcap:
+#|   - "Scatter plot of $X_1$ vs $Y$ variable and linear trend."
+#|   - "Histogram of $X_2$ variable."
+#| layout-ncol: 1
+
+ggplot(data, aes(x = x1, y = y)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal(base_size = 10)
+
+ggplot(data, aes(x = x2)) +
+   geom_bar() +
+   theme_minimal(base_size = 10) +
+   labs(x = "x2 Categories", y = "Count", title = "")
+
+```
+\normalsize
+
+\clearpage
+
+## References \vspace{-1em}
+
+::: {#refs}
+:::
