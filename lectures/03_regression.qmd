@@ -1,0 +1,2174 @@
+---
+title: "Regression?<br>Regression!"
+subtitle: "PSCI 8357 - STAT II"
+author: Georgiy Syunyaev
+institute: "Department of Political Science, Vanderbilt University"
+date: today
+date-format: long
+format: 
+  revealjs:
+    toc: true
+    toc-depth: 1
+    toc-title: "Plan"
+    slide-number: c/t
+    # preview-links: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    html-math-method: mathjax
+    # logo: images/wzb_logo.png
+    self-contained-math: true
+    css: ../_supp/styles.css
+    theme: [serif,"../_supp/custom.scss"]
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    # progress: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+    fig-cap-location: top
+    include-before: [ '<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {enableAssistiveMml: false}});</script>']
+fontsize: 26px
+editor: source
+aspectratio: 169
+bibliography: ../_supp/psci8357.bib
+---
+
+
+## {data-visibility="hidden"}
+
+\(
+  \def\E{{\mathbb{E}}}
+  \def\Pr{{\textrm{Pr}}}
+  \def\var{{\mathbb{V}}}
+  \def\cov{{\mathrm{cov}}}
+  \def\corr{{\mathrm{corr}}}
+  \def\argmin{{\arg\!\min}}
+  \def\argmax{{\arg\!\max}}
+  \def\qedknitr{{\hfill\rule{1.2ex}{1.2ex}}}
+  \def\given{{\:\vert\:}}
+  \def\indep{{\mbox{$\perp\!\!\!\perp$}}}
+\)
+
+```{r}
+#|  label: preamble
+#|  include: false
+
+# load necessary libraries
+pacman::p_load(tidyverse, future, future.apply, pbapply)
+
+future::plan(multisession, workers = max(1, parallel::detectCores() - 4))
+
+# set theme for plots
+thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
+
+get_bias <- function(tau = .5, delta = 0.3, gamma = 0.3, n = 1000) {
+  # confounder
+  confounder <- rnorm(n, mean = 50, sd = 10)
+
+  # Democratic institutions (correlated with confounder)
+  democracy_score <- delta * confounder + rnorm(n, mean = 0, sd = 5)
+
+  # Economic growth (influenced by both investment and democratic institutions)
+  growth <- tau *
+    democracy_score +
+    gamma * confounder +
+    rnorm(n, mean = 0, sd = 5)
+
+  # Regression ignoring the confounder
+  model_biased <- lm(growth ~ democracy_score)
+  # summary(model_biased)
+
+  # True regression including the confounder
+  model_unbiased <- lm(growth ~ democracy_score + confounder)
+  # summary(model_unbiased)
+
+  return(
+    c(
+      biased = unname(model_biased$coefficients[2] - tau),
+      unbiased = unname(model_unbiased$coefficients[2] - tau)
+    )
+  )
+}
+
+get_bias_het <- function(
+    tau_base = .5,
+    assignment_fun = function(x) .5 + 0.01 * x,
+    het_fun = function(x) tau_base + 0.01 * x) {
+  n <- 1000 # sample size
+  gamma <- 0.1 # effect of X on outcome
+
+  X <- sample(x = 1:100, replace = T, size = n) # some covariate
+  tau_total <- sum(sapply(1:100, het_fun) / 100) # total treatment effect (assuming heterogeneity)
+
+  # democratic institutions (correlated with confounder)
+  democracy_high <- rbinom(n, size = 1, prob = .5)
+  democracy_high_2 <-
+    rbinom(n, size = 1, prob = sapply(X, assignment_fun))
+
+  # economic growth (influenced by both investment and democratic institutions)
+  growth <-
+    het_fun(X) * democracy_high + gamma * X + rnorm(n, mean = 0, sd = 5)
+
+  growth_2 <-
+    het_fun(X) * democracy_high_2 + gamma * X + rnorm(n, mean = 0, sd = 5)
+
+  # regression ignoring the confounder
+  bias1 <- lm(growth ~ democracy_high + factor(X))$coefficients[2] - tau_total
+
+  # regression ignoring the confounder
+  bias2 <- lm(growth_2 ~ democracy_high_2 + factor(X))$coefficients[2] -
+    tau_total
+
+  return(c(het1 = unname(bias1), het2 = unname(bias2)))
+}
+```
+
+
+## DiM vs. Regression
+
+<br>
+
+- So far we considered difference in means as our naive estimator of causal quantities.
+
+. . .
+
+- This week we will see, that we might use regression _agnostically_ to estimate causal estimands as well.
+
+  - this makes our life easier, especially if we would like to rely on [conditional ignorability]{.highlight} assumption. (Why?)
+
+. . .
+
+- [BUT]{.note} this only solves the estimation problem.
+
+  - We still have to make assumptions to achieve causal identification!
+
+. . .
+
+- [Problem]{.alert}: If we want to learn about relationship between $X$ and $Y$
+
+  - The ideal is to learn about $f_{YX}(\cdot)$, 
+  - In practice we learn about $\E [Y \given X]$.
+
+# CEF
+
+## Conditional Expectation Function (CEF)
+
+:::{.callout-important icon="false" title="CEF"}
+
+The [CEF]{.highlight}, $\E [Y_i \given X_i]$, is the expected value of $Y_i$ across values of $X_i$:
+
+  - For continuous $Y_i$
+  $$
+  \E [Y_i \given X_i] = \int_{\mathcal{Y}} y f(y \given X_i) \, dy
+  $$
+
+  - For discrete $Y_i$:
+  $$
+  \E [Y_i \given X_i] = \sum_{\mathcal{Y}} y p(y \given X_i)
+  $$
+:::
+
+. . .
+
+- **Population-Level Function**: Describes the relationship between $Y_i$ and $X_i$ in the population (_finite_ or _super_).
+- **Functional Flexibility**: Can be non-linear (!).
+
+## Decomposition of Observed Outcomes
+
+:::{.callout-important icon="false" title="CEF Decomposition Property"}
+$$
+Y_i = \underbrace{\E [Y_i \given X_i]}_{\text{explained by $X_i$}} + \underbrace{\varepsilon_i}_{\text{unexplained}},
+$$
+
+where $\E[\varepsilon_i \given X_i] = 0$ and $\varepsilon_i$ is uncorrelated with any function of $X_i$
+:::
+
+- [Intuition]{.note}: The CEF isolates the systematic component of $Y_i$ explained by $X_i$, while $\varepsilon_i$ captures noise.
+
+. . .
+
+- To see this property recall
+
+  $$
+  \begin{align*}
+  \varepsilon_i &= Y_i - \E [Y_i \given X_i] \quad \implies\\
+  \E [\varepsilon_i \given X_i] &= \E [Y_i - \E [Y_i \given X_i] \given X_i] = 0
+  \end{align*}
+  $$
+
+- also $\E [h(X_i) \varepsilon_i] = 0$. (How can we use Law of Iterated Expectations to prove this?)
+
+## Best Minimal MSE Predictor
+
+:::{.callout-important icon="false" title="CEF Prediction Property"}
+$$
+\E[Y_i \given X_i] = \argmin_{g(X_i)} \E \left[ (Y_i - g(X_i))^2 \right],
+$$
+where $g(X_i)$ is any function of $X_i$.
+:::
+
+- [Intuition]{.note}: CEF is the best method for predicting $Y_i$ in the least squares sense.
+
+. . .
+
+- To see this property decompose the squared expression:
+
+$$
+\begin{align*}
+(Y_i - g(X_i))^2 &= \left(Y_i - \E [Y_i \given X_i] + \E [Y_i \given X_i] - g(X_i)\right)^2 \\
+&= \left(Y_i - \E [Y_i \given X_i]\right)^2 + 2\left(Y_i - \E [Y_i \given X_i]\right)\left(\E [Y_i \given X_i] - g(X_i)\right) \\
+&\quad + \left(\E [Y_i \given X_i] - g(X_i)\right)^2.
+\end{align*}
+$$
+
+## Discrete Case CEF
+
+<br>
+
+```{r}
+#| label: cef_example
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 5
+#| fig-cap: "Density distributions show the spread of $Y$ values at each discrete $X$; black line connects the conditional means."
+
+cef_df <- data.frame(
+  X = rep(0:20, each = 100),
+  Y = unlist(
+    lapply(
+      0:20,
+      function(x) rnorm(100, mean = 6 + x * runif(1, 0.15, 0.25), sd = 0.5)
+    )
+  )
+)
+
+# Summarize data for the CEF line
+cef_line <- cef_df |>
+  group_by(X) |>
+  summarise(mean_Y = mean(Y))
+
+# Create plot
+ggplot(cef_df, aes(x = X, y = Y)) +
+  ggdist::stat_halfeye(
+    adjust = .33, ## bandwidth
+    width = .67,
+    color = NA, ## remove slab interval
+    fill = "#b16286", ## remove slab interval
+    position = position_nudge(x = .15),
+    alpha = 0.8
+  ) +
+  geom_jitter(
+    size = 1,
+    alpha = 0.3,
+    width = .1,
+    height = 0,
+    color = "#458588"
+  ) + # Scatter of data points
+  geom_line(
+    data = cef_line,
+    aes(x = X, y = mean_Y),
+    color = "black",
+    linewidth = 1
+  ) + # CEF line
+  geom_point(
+    data = cef_line,
+    aes(x = X, y = mean_Y),
+    color = "black",
+    size = 1.5
+  ) + # CEF line
+  labs(
+    x = "X",
+    y = "Y"
+  )
+
+```
+
+- The CEF is the _average line_ through the scatter of data points for each discrete $X$.
+ 
+# Regression Justification
+
+## Regression?
+
+<br><br>
+
+- The $\E [Y_i \given X_i]$ quantity looks very familiar, we already used in $\E [Y_i \given T_i]$ or $\E [Y_i \given T_i, X_i]$.
+
+- We want to see if regression helps us with estimating these quantities. Especially when we want to estimate differences in means.
+
+. . .
+
+- [Note]{.note}: There is nothing _causal_ in $\E [Y_i \given T_i]$ or $\E [Y_i \given T_i, X_i]$, so we still need identification
+
+  - We can for example rely on strong or conditional ignorability.
+
+## Some Regression Coefficient Properties
+
+- Before we move on to this, we need to recall important facts about regression coefficients
+
+  :::incremental
+  1. Population regression coefficients vector is given by (directly follows from $\E [X_i \varepsilon_i] = 0$)
+  $$
+  \beta = \E [X_i X_i^{\prime}]^{-1} \E [X_i Y_i]
+  $$
+
+  2. Regression coefficient in single covariate case is given by (population and sample analog)
+  $$
+  \beta = \frac{\cov(Y_i,X_i)}{\var (X_i)}, \quad \widehat{\beta} = \frac{\sum_{i = 1}^{n} (Y_i - \bar{Y})(X_i - \bar{X})}{\sum_{i = 1}^{n} (X_i - \bar{X})^2}
+  $$
+
+  3. Regression coefficient in multiple covariate case is given by
+  $$
+  \beta_{k} = \frac{\cov(\tilde{Y}_i,\tilde{X}_{ki})}{\var (\tilde{X}_{ki})},
+  $$
+  where $\tilde{X}_{ki}$ is the residual from regressing $X_k$ on $X_{-k}$
+  :::
+
+## Justification 1: Linearity
+
+<br>
+
+:::{.callout-important icon="false" title="Theorem: Linear CEF"}
+If CEF $\E [Y_i \given X_i]$ is linear in $X_i$, then the population regression function $X_i^{\prime} \beta$ returns exactly $\E [Y_i \given X_i]$.
+:::
+
+. . .
+
+- To see this property we can 
+
+  - Use decomposition property of CEF to see $\E[ X_i (Y_i - \E [Y_i \given X_i]) ] = 0$
+
+  - Substitute for $\E [Y_i \given X_i] = X_i^{\prime} b$ and solve
+
+. . .
+
+- How plausible is this _linearity_ assumption in practice?
+
+. . .
+
+- Always true in the simple case where $T_i$ is a binary treatment indicator: $\E [Y_i \given T_i] = \beta_0 + \beta_1 T_i$.
+
+## Binary Case CEF
+
+<br>
+
+```{r}
+#| label: cef_binary
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 5
+
+cef_bin_df <- data.frame(
+  X = rep(0:1, each = 100),
+  Y = unlist(
+    lapply(
+      0:1,
+      function(x) rnorm(100, mean = 6 + x * runif(1, 0.15, 0.25), sd = 0.5)
+    )
+  )
+)
+
+# Summarize data for the CEF line
+cef_bin_line <- cef_bin_df |>
+  group_by(X) |>
+  summarise(mean_Y = mean(Y))
+
+# Create plot
+ggplot(cef_bin_df, aes(x = X, y = Y)) +
+  geom_jitter(
+    size = 1,
+    alpha = 0.3,
+    width = .05,
+    height = 0,
+    color = "#458588"
+  ) +
+  # same line
+  stat_smooth(method = "lm", se = FALSE) +
+  # same line
+  geom_line(
+    data = cef_bin_line,
+    aes(x = X, y = mean_Y),
+    color = "black",
+    linewidth = 1
+  ) +
+  geom_point(
+    data = cef_bin_line,
+    aes(x = X, y = mean_Y),
+    color = "black",
+    size = 1.5
+  ) +
+  scale_x_continuous(breaks = c(0, 1)) +
+  labs(
+    x = "T",
+    y = "Y"
+  )
+
+```
+
+## Justification 2: Linear Approximation
+
+- What if the CEF is not linear?
+
+. . .
+
+- Regression can still be used to approximate the CEF:
+
+:::{.callout-important icon="false" title="CEF Prediction Property"}
+The function $X_i' \beta$ provides the Minimal MSE linear approximation to $\E [Y_i | X_i]$, that is:
+
+$$
+\beta = \argmin_b \E \left[ (\E [Y_i | X_i] - X_i' b)^2 \right].
+$$
+:::
+
+. . .
+
+- [Intuition]{.note}: Even if CEF is not linear we can use regression to approximate it and make substantive conclusions
+
+. . .
+
+- To see this we can decompose the squared error function minimized by OLS
+
+$$
+\begin{align*}
+(Y_i - X_i' b)^2 &= \left( (Y_i - \E [Y_i | X_i]) + (\E [Y_i | X_i] - X_i' b) \right)^2 \\
+&= (Y_i - \E [Y_i | X_i])^2 + (\E [Y_i | X_i] - X_i' b)^2 \\
+&\quad + 2 (Y_i - \E [Y_i | X_i]) (\E [Y_i | X_i] - X_i' b).
+\end{align*}
+$$
+
+  - The first term doesn't involve $b$.
+  - The last term has an expectation of zero due to the CEF-decomposition property.
+
+## Approximation of Discrete Case CEF
+
+<br>
+
+```{r}
+#| label: cef_approximation_example
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 5
+
+# Create plot
+ggplot(cef_df, aes(x = X, y = Y)) +
+  geom_jitter(
+    size = 1,
+    alpha = 0.3,
+    width = .1,
+    height = 0,
+    color = "#458588"
+  ) + # Scatter of data points
+  stat_smooth(method = "lm", se = FALSE, color = "#cc241d") +
+  geom_line(
+    data = cef_line,
+    aes(x = X, y = mean_Y),
+    color = "black",
+    linewidth = 1
+  ) + # CEF line
+  geom_point(
+    data = cef_line,
+    aes(x = X, y = mean_Y),
+    color = "black",
+    size = 1.5
+  ) + # CEF line
+  labs(
+    x = "X",
+    y = "Y"
+  )
+
+```
+
+## What Does This All Mean?
+
+<br><br><br>
+
+- In the case of CEF with respect to binary $X_i$ (think $T_i$), OLS provides estimate of $\E [Y_i \given X_i]$ which is the same as difference in means.
+
+. . .
+
+- In the case of CEF linear in $X_i$, OLS provides estimate of $\E [Y_i \given X_i]$ which is (constant) increase in means of $Y_i$.
+
+. . .
+
+- In the case of CEF non-linear in $X_i$, OLS provides best linear approximation of $\E [Y_i \given X_i]$
+
+# Regression and Potential Outcomes
+
+## Back to Simple Binary Setup
+
+<br>
+
+- Suppose $\mathcal{T} = \{0, 1\}$
+
+- Under SUTVA (no interference and consistency) POs are $Y_{i} (1)$ and $Y_{i} (0)$.
+
+- A unit-level treatment effect is, $\tau_i = Y_{i} (1) - Y_{i} (0)$
+
+  - $\E [\tau_i] = \E [Y_{i} (1) - Y_{i} (0)] = \tau_{ATE}$ is the average treatment effect ($ATE$).
+
+- We observe $X_i$, $T_i$ and, $Y_i = T_i Y_{i} (1) + (1 - T_i )Y_{i} (0)$.
+
+. . .
+
+- In this simple case OLS estimator solves the least squares problem:
+  
+  $$
+  (\widehat{\tau}, \widehat{\alpha}) = \argmin_{\tau, \alpha} \sum_{i=1}^n \left(Y_i - \alpha - \tau T_i\right)^2
+  $$
+
+- Coefficient $\tau$ is mechanically the difference in means ($\tau_{DiM}$):
+  
+  $$
+  \widehat{\tau} = \bar{Y}_1 - \bar{Y}_0 = \widehat{\tau}_{DiM}
+  $$
+
+## Regression Justification
+
+- Key assumptions: **linearity** and **mean independence of errors**.  (why do we care about the latter?)
+
+. . .
+
+- Using switching equation we can show that:
+
+$$
+\begin{align*}
+Y_i &= T_i Y_i(1) + (1 - T_i) Y_i(0) \\
+&= Y_i(0) + T_i ( Y_i(1) - Y_i(0) ) \quad\text{($\because$ distribute)}\\
+&= Y_i(0) + \tau_i T_i \quad \text{($\because$ unit treatment definition)}\\
+&= \E [Y_i(0)] + \tau T_i + ( Y_i(0) - \E [Y_i(0)] ) + T_i (\tau_i - \tau) \quad (\because \pm \E [Y_i(0)] + \tau T_i)\\
+&= \E [Y_i(0)] + \tau T_i + (1 - T_i)( Y_i(0) - \E [Y_i(0)] ) + T_i (Y_i(1) - \E [Y_i(1)]) \quad\text{($\because$ distribute)}\\
+&= \alpha + \tau T_i + \eta_i
+\end{align*}
+$$
+
+. . .
+
+- _Linear_ functional form fully justified by SUTVA assumption alone:
+  
+  - [Intercept]{.highlight}: $\alpha = \E [Y_i(0)]$ (average control outcome).
+  - [Slope]{.highlight}: $\tau = \E [Y_i(1) - Y_i(0)]$ (average treatment effect).
+  - [Error]{.highlight}: deviation of control PO + treatment effect heterogeneity. What is the second interpretation?
+
+## Mean independent errors
+
+- The error is given by
+
+$$
+\eta_i = (1 - T_i)( Y_i(0) - \E [Y_i(0)] ) + T_i (Y_i(1) - \E [Y_i(1)])
+$$
+
+- In regression context we would like $\E [\eta_i \given T_i] = 0$?
+
+. . .
+
+$$
+\begin{align*}
+\E [\eta_i \given T_i] &= \E [(1 - T_i)( Y_i(0) - \E [Y_i(0)] ) + T_i (Y_i(1) - \E [Y_i(1)]) \given T_i] \\
+&= (1 - T_i) (\E [Y_i(0) \given T_i] - \E [Y_i(0)]) + T_i (\E [Y_i(1) \given T_i] - \E [Y_i(1)])
+\end{align*}
+$$
+
+- Does this look familiar? [This is selection wrt to $Y_i(0)$ and $Y_i(1)$.]{.fragment}
+
+. . .
+
+- When would this be equal to zero? [E.g. under random assignment (strong ignorability)]{.fragment}
+
+. . .
+
+  $$
+  \E [\eta_i \given T_i] = (1 - T_i) (\E [Y_i(0)] - \E [Y_i(0)]) + T_i (\E [Y_i(1)] - \E [Y_i(1)]) = 0
+  $$
+
+- **Randomization + consistency allow linear model.**
+
+  - Does not imply homoskedasticity or normal errors, though... Need to assume that!
+
+# Regression with Covariates
+
+## Selection on Observables
+
+<br>
+
+- Under strong ignorability we can use regression to estimate causal effects of interest.
+
+- What if instead we assume that selection depends on a set of observed covariates $X_{i}$, i.e. there is [selection on observables]{.highlight}?
+
+. . .
+
+- This implies the [conditional ignorability]{.highlight} assumption, i.e.
+
+$$
+\{ Y_i(0), Y_i(1) \} \indep T_i \given X_i. 
+$$
+
+. . .
+
+- This in turn implies $\eta_i \indep T_i \given X_i$ (Why?)
+
+. . .
+
+- [Note]{.note}: If conditional ignorability is true and we are able to condition on $X_i$, the following is also true
+
+$$
+\eta_i \indep T_i  \given X_i \implies \E [\eta_i \given T_i=1, X_i] = \E [\eta_i \given T_i=0, X_i] = \E [\eta_i \given X_i]. 
+$$
+
+## Linear POs
+
+- Now assume constant linear treatment effects
+
+$$
+f_i(t) = \alpha + \tau t + \eta_i
+$$  
+
+. . .
+
+- Observed outcomes are given by:  
+
+  $$
+  Y_i = f_i(T_i) = \alpha + \tau T_i + \eta_i,
+  $$  
+
+  where $\eta_i$ captures all variable determinants of $f_i(T_i)$ other than $T_i$.
+
+. . .
+
+- We also assume linear decomposition of $\eta_i$:  
+
+  $$
+  \eta_i = X_i^{\prime} \gamma + \nu_i,
+  $$
+  
+  
+  where $\gamma$ is the population regression solution.
+
+- Orthogonality of residuals to regressors in the population implies $\E [X_i \nu_i] = 0$.
+
+
+## Linear POs
+
+<br>
+
+- We further assume linearity in $X_i$ as well (!)  
+
+$$
+\E [\eta_i | X_i] = X_i^\prime \gamma
+$$  
+  
+
+. . .
+
+- Under this model we have
+    
+  $$
+  f_i(t) \indep T_i \given X_i \implies \nu_i \indep T_i \given X_i,
+  $$  
+    
+  since when $X_i$ is fixed only $\nu_i$ is varying in $\eta_i$.
+
+. . .
+
+- With strong ignorability and linearity, we obtain:  
+
+  $$
+  Y_i = \alpha + \tau T_i + X_i^{\prime} \gamma + \nu_i,
+  $$ 
+
+  where $\nu_i$ is uncorrelated with $X_i$ and also with $T_i$ conditional on $X_i$.
+
+## From Linear POs to Regression
+
+- By conditional ignorability,  
+
+$$
+\E [f_i(t) \given T_i = t, X_i] = \E [f_i(t) \given X_i] = \alpha + \tau t + X_i^{\prime} \gamma.
+$$
+
+. . .
+
+- Then,
+
+$$
+\begin{align*}
+\E [f_i(t) &- f_i(t - v) \given X_i] \\
+&= (\alpha + \tau t + X_i^{\prime} \gamma) - (\alpha + \tau (t - v) + X_i^{\prime} \gamma) \\
+&= \tau v
+\end{align*}
+$$
+
+- _($X_i$ disappeared because of the linearly separable confounding.)_
+
+. . .
+
+- [Result]{.note}:
+
+  - So, $\tau$ is the **causal effect** of a unit change in $t$.
+  - $\nu_i$ is uncorrelated with $X_i$ and $T_i$, so OLS is consistent for $\tau$.
+
+# Omitted Variable Bias
+
+## Omitted Variable Bias (OVB) {#ovb}
+
+- Now suppose we _erroneously_ omit $X_i$, and just regress $Y_i$ on $T_i$ via OLS.  
+
+. . .
+
+- To see [omitted variable bias]{.highlight} we look at what the coefficient on $T_i$ estimates, $\frac{\cov(Y_i, T_i)}{\var(T_i)}$ assuming that the true model should include $X_i$:
+
+$$
+\begin{align*}
+\cov(Y_i, T_i) &= \cov(\alpha + \tau T_i + X_i' \gamma + \nu_i,\, T_i) \\
+&= \tau \cov(T_i, T_i) + \cov(X_{1i} \gamma_1 + \ldots + X_{Ki} \gamma_K, T_i) \\
+&= \tau \var (T_i) + \gamma_1 \cov(X_{1i}, T_i) + \ldots + \gamma_K \cov(X_{Ki}, T_i)
+\end{align*}
+$$  
+
+. . .
+
+$$
+\implies \frac{\cov(Y_i, T_i)}{\var (T_i)} = \tau + \underbrace{\gamma^{\prime} \delta}_{\text{OVB}}
+$$
+
+where $\delta$ are coefficients from regressions of $X_1, \ldots, X_K$ on $T_i$.
+
+. . .
+
+- By the [Frisch–Waugh–Lovell theorem](#fwl-theorem), if we include some of $X_i$ we will get $\frac{\cov(\tilde{Y}_i, \tilde{T}_i)}{\var (\tilde{T}_i)} = \tau + \tilde{\gamma}^{\prime}\tilde{\delta}$, where $\tilde{\cdot}$ means residualized with respect to included terms from $X_i$.
+
+## Omitted Variable Bias
+
+<br>
+
+- [OVB]{.highlight} = $\gamma^\prime \delta$, where
+
+  - $\gamma$ is the vector of effects of [confounders]{.highlight} on the outcome.
+  - $\delta$ is the vector of associations between [confounders and treatment]{.highlight} — i.e., the degree of confounder-induced imbalance in treatment assignment.
+
+. . .
+
+- Same holds when we consider the case where we include _some_ controls: 
+  
+  $$
+  \text{OVB} = \tilde{\gamma}' \tilde{\delta}.
+  $$
+  
+  Everything is just defined in terms of variables that have been residualized with respect to the included controls.
+
+- OVB = [confounder impact $\times$ imbalance]{.highlight} [@cinelli2020making].
+
+## Omitted Variable Bias
+
+
+- Let's practice applying the OVB formula:
+
+  OVB = $(X_{ki}, Y_i)$ relationships $\times$ $(X_{ki}, T_i)$ relationships
+
+```{dot}
+//| fig-width: 4
+//| fig-height: 2
+//| fig-align: center
+digraph G {
+  bgcolor="transparent"
+  rankdir="LR"
+  newrank=true;
+  edge [
+		arrowsize=0.5,
+		// fontname="Helvetica,Arial,sans-serif"
+		labeldistance=3,
+		// labelfontcolor="#00000080"
+		penwidth=2
+		// style=dotted // dotted style symbolizes data transfer
+	]
+  node [
+    shape=plaintext,
+    fontsize=24,
+    penwidth=2
+  ]
+  Y;
+  T->Y;
+
+  subgraph U {
+    node [
+      shape=plaintext
+      fontcolor="#cc241d"
+      fontsize=24
+      penwidth=2
+    ]
+		edge [color = "#cc241d"]
+  X->Y;X->T;
+}
+}
+```
+
+. . .
+
+1.	Effect of democratic institutions on growth, estimated via regression of growth on democratic institutions.
+
+2.	Effect of exposure to negative advertisements on turnout, estimated via regression of turnout on the number of ads seen.
+
+- [Question]{.note}: What is a possible omitted variable? How will this bias the estimate?
+
+## OVB: Simulate DAG Relationship
+
+```{r}
+#| echo: true
+#| eval: true
+#| output: asis
+
+set.seed(20250127) # set seed
+
+n <- 1000 # sample size
+tau <- 0.5 # ATE
+gamma <- 0.3 # effect of confounder on outcome
+delta <- 0.3 # proportional to effect of treatment on confounder (only if less than sd ratio)
+
+# confounder
+confounder <- rnorm(n, mean = 50, sd = 10)
+
+# democratic institutions (correlated with confounder)
+democracy_score <- delta * confounder + rnorm(n, mean = 0, sd = 5)
+
+# economic growth (influenced by both investment and democratic institutions)
+growth <- tau *
+  democracy_score +
+  gamma * confounder +
+  rnorm(n, mean = 0, sd = 5)
+
+# true regression including the confounder
+model_unbiased <- lm(growth ~ democracy_score + confounder)
+cat("Unbiased model error:", unname(model_unbiased$coefficients[2]) - tau, "\n")
+
+# regression ignoring the confounder
+model_biased <- lm(growth ~ democracy_score)
+cat("Biased model error:", unname(model_biased$coefficients[2]) - tau, "\n")
+```
+
+## OVB: High $\gamma$, High $\delta$
+
+```{r}
+#| label: ovb_hg_hd
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 5
+
+# Convert sims matrix to long format dataframe
+sims_df <-
+  pbapply::pbreplicate(
+    1000,
+    get_bias(delta = 0.5, gamma = 0.5),
+    cl = "future"
+  ) |>
+  t() |>
+  as.data.frame() |>
+  rename(Biased = biased, Unbiased = unbiased) |>
+  pivot_longer(
+    cols = c(Biased, Unbiased),
+    names_to = "Type",
+    values_to = "Value"
+  )
+
+# Plot using ggplot2
+ggplot(sims_df, aes(x = Value, fill = Type)) +
+  geom_histogram(alpha = 0.5, position = "identity", bins = 100) +
+  scale_fill_manual(values = c("#458588", "#cc241d"), name = "Model") +
+  geom_vline(
+    data = summarize(group_by(sims_df, Type), mean_val = mean(Value)),
+    aes(xintercept = mean_val, color = Type),
+    linetype = "dashed",
+    linewidth = 1
+  ) +
+  scale_color_manual(values = c("#458588", "#cc241d"), name = "Model") +
+  scale_x_continuous(limits = c(-0.15, 0.8)) +
+  labs(
+    x = "Deviation from True Value",
+    y = "Frequency"
+  )
+```
+
+## OVB: High $\gamma$, Low $\delta$
+
+```{r}
+#| label: ovb_hg_ld
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 5
+
+# Convert sims matrix to long format dataframe
+sims_df <-
+  pbapply::pbreplicate(
+    1000,
+    get_bias(delta = 0.1, gamma = 0.5),
+    cl = "future"
+  ) |>
+  t() |>
+  as.data.frame() |>
+  rename(Biased = biased, Unbiased = unbiased) |>
+  pivot_longer(
+    cols = c(Biased, Unbiased),
+    names_to = "Type",
+    values_to = "Value"
+  )
+
+# Plot using ggplot2
+ggplot(sims_df, aes(x = Value, fill = Type)) +
+  geom_histogram(alpha = 0.5, position = "identity", bins = 100) +
+  scale_fill_manual(values = c("#458588", "#cc241d"), name = "Model") +
+  geom_vline(
+    data = summarize(group_by(sims_df, Type), mean_val = mean(Value)),
+    aes(xintercept = mean_val, color = Type),
+    linetype = "dashed",
+    linewidth = 1
+  ) +
+  scale_color_manual(values = c("#458588", "#cc241d"), name = "Model") +
+  scale_x_continuous(limits = c(-0.15, 0.8)) +
+  labs(
+    x = "Deviation from True Value",
+    y = "Frequency"
+  )
+```
+
+## OVB: Low $\gamma$, High $\delta$
+
+```{r}
+#| label: ovb_lg_hd
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 5
+
+# Convert sims matrix to long format dataframe
+sims_df <-
+  pbapply::pbreplicate(
+    1000,
+    get_bias(delta = 0.5, gamma = 0.1),
+    cl = "future"
+  ) |>
+  t() |>
+  as.data.frame() |>
+  rename(Biased = biased, Unbiased = unbiased) |>
+  pivot_longer(
+    cols = c(Biased, Unbiased),
+    names_to = "Type",
+    values_to = "Value"
+  )
+
+# Plot using ggplot2
+ggplot(sims_df, aes(x = Value, fill = Type)) +
+  geom_histogram(alpha = 0.5, position = "identity", bins = 100) +
+  scale_fill_manual(values = c("#458588", "#cc241d"), name = "Model") +
+  geom_vline(
+    data = summarize(group_by(sims_df, Type), mean_val = mean(Value)),
+    aes(xintercept = mean_val, color = Type),
+    linetype = "dashed",
+    linewidth = 1
+  ) +
+  scale_color_manual(values = c("#458588", "#cc241d"), name = "Model") +
+  scale_x_continuous(limits = c(-0.15, 0.8)) +
+  labs(
+    x = "Deviation from True Value",
+    y = "Frequency"
+  )
+```
+
+## OVB: Low $\gamma$, Low $\delta$
+
+```{r}
+#| label: ovb_lg_ld
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 5
+
+# Convert sims matrix to long format dataframe
+sims_df <-
+  pbapply::pbreplicate(
+    1000,
+    get_bias(delta = 0.1, gamma = 0.1),
+    cl = "future"
+  ) |>
+  t() |>
+  as.data.frame() |>
+  rename(Biased = biased, Unbiased = unbiased) |>
+  pivot_longer(
+    cols = c(Biased, Unbiased),
+    names_to = "Type",
+    values_to = "Value"
+  )
+
+# Plot using ggplot2
+ggplot(sims_df, aes(x = Value, fill = Type)) +
+  geom_histogram(alpha = 0.5, position = "identity", bins = 100) +
+  scale_fill_manual(values = c("#458588", "#cc241d"), name = "Model") +
+  geom_vline(
+    data = summarize(group_by(sims_df, Type), mean_val = mean(Value)),
+    aes(xintercept = mean_val, color = Type),
+    linetype = "dashed",
+    linewidth = 1
+  ) +
+  scale_color_manual(values = c("#458588", "#cc241d"), name = "Model") +
+  scale_x_continuous(limits = c(-0.15, 0.8)) +
+  labs(
+    x = "Deviation from True Value",
+    y = "Frequency"
+  )
+```
+
+
+## Be Careful!
+
+<br><br>
+
+- **Omitted variables** is a misleading term because it could suggest that you want to include *any* variable that is correlated with treatment and outcomes.
+
+- But remember [bad controls]{.highlight} exist:
+
+  - Common descendants of treatment and outcome
+  - $M$-bias variables
+  - We will examine examples of each in the following slides
+
+## Two Ways to Adjust for Covariates
+
+<br>
+
+- The discussion of OVB suggests that we can use regression to adjust for variables ($X_i$) to estimate the treatment effect ($\tau$) in two ways.
+
+  1. [_Long_ regression]{.highlight}: Include covariates $X_i$ directly in the regression model.
+
+  2. [Residualized regression]{.highlight}:
+     a. Purge variation in $Y_i$ due to $X_i$ $\rightarrow$ Regress $Y_i$ on $X_i$ and calculate residual outcomes: $\tilde{Y}_i = Y_i - \widehat{Y}_i$.
+     b. Purge variation in $T_i$ due to $X_i$ $\rightarrow$ Regress $T_i$ on $X_i$ and calculate residual treatments: $\tilde{T}_i = T_i - \widehat{T}_i$.
+     c. Regress $\tilde{Y}_i$ on $\tilde{T}_i$.
+
+- [Result]{.note}: Coefficient on $T_{i}$ in _long_ regression and on $\tilde{T}_i$ in residualized regression are identical.
+
+# Back-Door Criterion
+
+## Identification Analysis with Causal Graphs
+
+- An alternative, perhaps more intuitive, way to think about confounding is in terms of DAGs.
+- Suppose we want to estimate the $ATE$ of $T$ on $Y$; which covariates do we need to measure?
+
+. . .
+
+- Pearl develops criteria, which can be directly read off the graph alone.
+- Before studying the criteria, we need to define some new concepts.
+
+. . .
+
+:::{.columns}
+::: {.column width="70%"}
+
+- [Nodes]{.highlight}: $T$, $Y$, $Z_1$, $Z_2$, and $Z_3$.
+
+- [Paths]{.highlight}: $T \to Y$, $T \leftarrow Z_3 \to Y$, $T \leftarrow Z_1 \to Z_3 \leftarrow Z_2 \to Y$, etc.
+
+- $Z_1$ is a [parent]{.highlight} of $T$ and $Z_3$. 
+
+- $T$ and $Z_3$ are [children]{.highlight} of $Z_1$.
+
+- $Z_1$ is an [ancestor]{.highlight} of $Y$. 
+
+- $Y$ is a [descendant]{.highlight} of $Z_1$.
+
+:::
+
+::: {.column width="30%"}
+```{dot}
+//| fig-width: 3
+//| fig-height: 3
+//| fig-align: center
+digraph G {
+  bgcolor="transparent"
+  rankdir="TB"
+  edge [
+		arrowsize=0.5, labeldistance=3, penwidth=2]
+  node [
+    shape=plaintext,fontsize=24,penwidth=2]
+    // Nodes
+    T;
+    Y;
+    Z_1;
+    Z_2;
+    Z_3;
+
+    // Edges
+    Z_1 -> T;
+    Z_1 -> Z_3;
+    Z_2 -> Y;
+    Z_2 -> Z_3;
+    Z_3 -> T;
+    Z_3 -> Y;
+    T -> Y;
+    {{ rank=min; Z_1;Z_2};}
+    {{ rank=max; T;Y};}
+}
+```
+:::
+:::
+  
+
+## Blocked Paths and $d$-separation
+
+:::{.columns}
+::: {.column width="65%"}
+::: {.callout-important icon="false" title="Definition: Blocked Paths"}
+
+A set of nodes $X$ **blocks** a path $p$ if either:
+
+1. $p$ contains at least one *arrow-emitting node* in $X$, OR
+2. $p$ contains at least one *collision node* that is outside $X$ and has no descendant in $X$.
+:::
+
+:::{.fragment}
+- $T \leftarrow W_1 \leftarrow Z_1 \to Z_3 \to Y$ is blocked by $\{W_1\}$, $\{Z_1\}$, $\{Z_1, Z_3\}$, etc.
+- $T \leftarrow W_1 \leftarrow Z_1 \to Z_3 \leftarrow Z_2 \to W_2 \to Y$ is blocked by $\{\emptyset\}$ (an empty set).
+:::
+
+:::
+
+::: {.column width="35%"}
+```{dot}
+//| fig-width: 3
+//| fig-height: 3
+//| fig-align: center
+digraph G {
+  bgcolor="transparent"
+  rankdir="TB"
+  edge [
+		arrowsize=0.5, labeldistance=3, penwidth=2]
+  node [
+    shape=plaintext,fontsize=24,penwidth=2]
+    // Nodes
+    T;
+    Y;
+    Z_1;
+    Z_2;
+    Z_3;
+
+    // Edges
+    Z_1 -> W_1 -> T;
+    Z_1 -> Z_3;
+    Z_2 -> W_2 -> Y;
+    Z_2 -> Z_3;
+    Z_3 -> T;
+    Z_3 -> Y;
+    T -> W_3 -> Y;
+    {{ rank=min; Z_1;Z_2};}
+    {{ rank=same; W_1;Z_3;W_2};}
+    {{ rank=max; T;W_3;Y};}
+}
+```
+:::
+:::
+
+. . .
+
+::: {.callout-important icon="false" title="Definition: $d$-separation"}
+If $X$ blocks all paths from $T$ to $Y$, then $X$ [$d$-separates]{.highlight} $T$ and $Y$.  
+If $X$ $d$-separates $T$ and $Y$, then $Y \indep T \given X$.
+:::
+
+- $W_1$ and $Z_3$ are $d$-separated by set $X = \{Z_1\}$.
+
+## The Back-Door Criterion for Causal Identification
+
+::: {.callout-important icon="false" title="Theorem: The Back-Door Criterion"}
+A set $X$ is sufficient for adjustment to identify the causal effect of $T$ on $Y$ if:
+  
+  1. The elements of $X$ block all [back-door paths]{.highlight} from $T$ to $Y$ (confounders, but not colliders), **and**
+  2. No element of $X$ is a descendant of $T$ on a direct path to $Y$ (no post-treatment),
+:::
+
+- [Important]{.note}: The [back-door criterion]{.highlight} tells you which covariates to condition on to identify a causal effect, given a hypothesized DAG.
+
+. . .
+
+:::{.columns}
+::: {.column width="40%"}
+```{dot}
+//| fig-width: 4
+//| fig-height: 3
+//| fig-align: center
+digraph G {
+  bgcolor="transparent"
+  rankdir="TB"
+  edge [
+		arrowsize=0.5, labeldistance=3, penwidth=2]
+  node [
+    shape=plaintext,fontsize=24,penwidth=2]
+    // Nodes
+    T;
+    Y;
+    Z_1;
+    Z_2;
+    Z_3;
+
+    // Edges
+    Z_1 -> W_1 -> T;
+    Z_1 -> Z_3;
+    Z_2 -> W_2 -> Y;
+    Z_2 -> Z_3;
+    Z_3 -> T;
+    Z_3 -> Y;
+    T -> W_3 -> Y;
+    {{ rank=min; Z_1;Z_2};}
+    {{ rank=same; W_1;Z_3;W_2};}
+    {{ rank=max; T;W_3;Y};}
+}
+```
+:::
+
+::: {.column width="60%"}
+
+<br>
+
+- [Example]{.note}: Which variables should we control for to identify the effect of $T$ on $Y$?
+  - $X = \{W_1, W_2\}$? [**No.**]{.fragment}
+  - $X = \{Z_1, Z_3\}$? [**Yes!**]{.fragment}
+  - $X = \{Z_3\}$? [**No**, because it [unblocks]{.highlight} $T \leftarrow W_1 \leftarrow Z_1 \to Z_3 \leftarrow Z_2 \to W_2 \to Y$.]{.fragment}
+:::
+:::
+
+# _The Good, The Bad, The Ugly..._ Controls
+
+## Good Controls 1
+
+:::{.columns}
+::: {.column  width="50%"}
+
+<br>
+
+- [confounder]{.highlight} is a common cause of main explanatory variable, $X$, and outcome of interest, $Y$.
+
+:::fragment
+- In model (a) $Z$ is a common cause of $X$ and $Y$. Controlling for $Z$ blocks the back-door path.
+:::
+
+:::fragment
+- In models (b) and (c) $Z$ is not a common cause, but controlling for $Z$ blocks the back-door path due to unobserved confounder $U$.
+:::
+
+:::
+::: {.column  width="50%"}
+
+```{dot}
+//| fig-width: 4
+//| fig-height: 6
+//| fig-align: center
+digraph G {
+  bgcolor="transparent"
+  rankdir=LR;
+  edge [
+		arrowsize=0.5,
+		// fontname="Helvetica,Arial,sans-serif"
+		labeldistance=5,
+		// labelfontcolor="#00000080"
+		penwidth=2
+		// style=dotted // dotted style symbolizes data transfer
+	]
+  node [
+    fontsize=24,
+    penwidth=2
+  ]
+  
+  // Diagram (c)
+  subgraph cluster_c {
+    label="(c)";
+    peripheries=0;
+    X_c [label="X"];
+    Y_c [label="Y"];
+    Z_c [shape=circle, style=filled, fillcolor=red, label="Z"];
+    U_c [style=dashed, label="U"];
+    
+    U_c -> X_c -> Y_c;
+    U_c -> Z_c -> Y_c;
+    { rank=min; Z_c}
+    { rank=max; X_c;Y_c}
+  }
+
+  // Diagram (b)
+  subgraph cluster_b {
+    label="(b)";
+    peripheries=0;
+    X_b [label="X"];
+    Y_b [label="Y"];
+    Z_b [shape=circle, style=filled, fillcolor=red, label="Z"];
+    U_b [style=dashed, label="U"];
+    
+    U_b -> Z_b -> X_b -> Y_b;
+    U_b -> Y_b;
+    { rank=min; Z_b}
+    { rank=max; X_b;Y_b}
+  }
+
+  // Diagram (a)
+  subgraph cluster_a {
+    label="(a)";
+    peripheries=0;
+
+    Z [shape=circle, style=filled, fillcolor=red, label="Z"];
+    
+    Z -> X -> Y;
+    Z -> Y;
+    { rank=min; Z}
+    { rank=max; X;Y}
+  }
+
+}
+```
+:::
+:::
+
+## Good Controls 2
+
+:::{.columns}
+::: {.column  width="55%"}
+
+<br><br>
+
+- [Intuition]{.note}: Common causes of $X$ and any mediator $M$ (between $X$ and $Y$) also
+confound the effect of $X$ on $Y$. 
+
+:::fragment
+- Models (a)-(c) are analogous to the models without mediator -- controlling for $Z$ blocks the back-door path from $X$ to $Y$ (through $M$) and produces an unbiased estimate of the $ATE$.
+:::
+
+:::
+::: {.column  width="45%"}
+
+```{dot}
+//| fig-width: 4
+//| fig-height: 6
+//| fig-align: center
+digraph G {
+  bgcolor="transparent"
+  rankdir=LR;
+  edge [
+		arrowsize=0.5,
+		// fontname="Helvetica,Arial,sans-serif"
+		labeldistance=5,
+		// labelfontcolor="#00000080"
+		penwidth=2
+		// style=dotted // dotted style symbolizes data transfer
+	]
+  node [
+    fontsize=24,
+    penwidth=2
+  ]
+  
+  // Diagram (c)
+  subgraph cluster_c {
+    label="(c)";
+    peripheries=0;
+    X_c [label="X"];
+    M_c [label="M"];
+    Y_c [label="Y"];
+    Z_c [shape=circle, style=filled, fillcolor=red, label="Z"];
+    U_c [style=dashed, label="U"];
+    
+    U_c -> X_c -> M_c -> Y_c;
+    U_c -> Z_c -> M_c;
+    { rank=min; Z_c}
+    { rank=same; X_c;M_c}
+    { rank=max; Y_c}
+  }
+
+  // Diagram (b)
+  subgraph cluster_b {
+    label="(b)";
+    peripheries=0;
+    X_b [label="X"];
+    M_b [label="M"];
+    Y_b [label="Y"];
+    Z_b [shape=circle, style=filled, fillcolor=red, label="Z"];
+    U_b [style=dashed, label="U"];
+    
+    U_b -> Z_b -> X_b -> M_b -> Y_b;
+    U_b -> M_b;
+    { rank=min; Z_b}
+    { rank=same; X_b;M_b}
+    { rank=max; Y_b}
+  }
+
+  // Diagram (a)
+  subgraph cluster_a {
+    label="(a)";
+    peripheries=0;
+
+    Z [shape=circle, style=filled, fillcolor=red, label="Z"];
+    
+    Z -> X -> M -> Y;
+    Z -> M;
+    { rank=min; Z}
+    { rank=same; X;M}
+    { rank=max; Y}
+  }
+
+}
+```
+
+:::
+:::
+
+## Neutral (?) Controls
+
+:::{.columns}
+::: {.column  width="55%"}
+
+<br><br>
+
+- [Intuition]{.note}: Ancestors of only $X$, only $Y$, or only $M$ (mediator) do not introduce bias. Controling for these factors will reduce variation in respective variable that is _not_ related to the variation in other variable.
+
+:::fragment
+- In model (a) reduction in variation is good! $\rightarrow$ higher precision
+
+- In model (b) reduction in variation is bad! $\rightarrow$ lower precision
+
+- In model (c) reduction in variation is good again! $\rightarrow$ higher precision
+:::
+
+:::
+::: {.column  width="45%"}
+
+```{dot}
+//| fig-width: 4
+//| fig-height: 6
+//| fig-align: center
+digraph G {
+  bgcolor="transparent"
+  rankdir=LR;
+  edge [
+		arrowsize=0.5,
+		// fontname="Helvetica,Arial,sans-serif"
+		labeldistance=5,
+		// labelfontcolor="#00000080"
+		penwidth=2
+		// style=dotted // dotted style symbolizes data transfer
+	]
+  node [
+    fontsize=24,
+    penwidth=2
+  ]
+
+  // Diagram (c)
+  subgraph cluster_c {
+    label="(c)";
+    peripheries=0;
+    X_c [label="X"];
+    M_c [label="M"];
+    Y_c [label="Y"];
+    Z_c [shape=circle, style=filled, fillcolor=red, label="Z"];
+    
+    X_c -> M_c -> Y_c;
+    Z_c -> M_c;
+    { rank=min; X_c}
+    { rank=same; Z_c;M_c}
+    { rank=max; Y_c}
+  }
+
+  // Diagram (b)
+  subgraph cluster_b {
+    label="(b)";
+    peripheries=0;
+    X_b [label="X"];
+    Y_b [label="Y"];
+    Z_b [shape=circle, style=filled, fillcolor=red, label="Z"];
+    
+    Z_b -> X_b -> Y_b;
+    {rank=same; Z_b;X_b};
+  }
+
+  // Diagram (a)
+  subgraph cluster_a {
+    label="(a)";
+    peripheries=0;
+    Z [shape=circle, style=filled, fillcolor=red];
+    X;
+    Y;
+    
+    Z -> Y;
+    X -> Y;
+    {rank=same; Z;Y};
+  }
+}
+```
+
+:::
+:::
+
+## Bad Controls: Selection Bias
+
+:::{.columns}
+::: {.column  width="55%"}
+
+<br><br>
+
+- [Intuition]{.note}: We do not want to control for colliders or their descendants. This induces selection bias
+
+:::fragment
+- In models (a) and (b) controlling for $Z$ unblocks back-door paths and induces relationship between $X$ and $Y$.
+
+- In models (c) and (d) controlling for $Z$ will unblock the back-door path $X \rightarrow Z \leftarrow U \rightarrow Y$.
+:::
+
+:::
+::: {.column  width="45%"}
+
+```{dot}
+//| fig-width: 4
+//| fig-height: 6
+//| fig-align: center
+digraph G {
+  bgcolor="transparent"
+  rankdir=LR;
+  edge [
+		arrowsize=0.5,
+		// fontname="Helvetica,Arial,sans-serif"
+		labeldistance=5,
+		// labelfontcolor="#00000080"
+		penwidth=2
+		// style=dotted // dotted style symbolizes data transfer
+	]
+  node [
+    fontsize=24,
+    penwidth=2
+  ]
+
+  // Diagram (d)
+  subgraph cluster_d {
+    label="(d)";
+    peripheries=0;
+    X_d [label="X"];
+    Y_d [label="Y"];
+    Z_d [shape=circle, style=filled, fillcolor=red, label="Z"];
+    U1_d [style=dashed, label="U1"];
+    U2_d [style=dashed, label="U2"];
+    
+    U1_d -> Z_d;
+    U2_d -> Z_d;
+    Z_d -> Y_d;
+    U1_d -> X_d;
+    U2_d -> Y_d;
+    X_d -> Y_d;
+    { rank=min; U1_d;X_d}
+    { rank=same; Z_d;}
+    { rank=max; U2_d;Y_d;}
+  }
+
+  // Diagram (c)
+  subgraph cluster_c {
+    label="(c)";
+    peripheries=0;
+    X_c [label="X"];
+    Y_c [label="Y"];
+    Z_c [shape=circle, style=filled, fillcolor=red, label="Z"];
+    U1_c [style=dashed, label="U1"];
+    U2_c [style=dashed, label="U2"];
+    
+    U1_c -> Z_c;
+    U2_c -> Z_c;
+    U1_c -> X_c;
+    U2_c -> Y_c;
+    X_c -> Y_c;
+    { rank=min; U1_c;X_c}
+    { rank=same; Z_c;}
+    { rank=max; U2_c;Y_c;}
+  }
+
+  // Diagram (b)
+  subgraph cluster_b {
+    label="(b)";
+    peripheries=0;
+    X_b [label="X"];
+    Y_b [label="Y"];
+    U_b [style=dashed, label="U"];
+    Z_b [shape=circle, style=filled, fillcolor=red, label="Z"];
+    
+    X_b -> Z_b ;
+    U_b -> Z_b;
+    U_b -> Y_b;
+    X_b -> Y_b;
+    { rank=min; X_b}
+    { rank=same; Z_b;U_b}
+    { rank=max; Y_b;}
+  }
+
+  // Diagram (a)
+  subgraph cluster_a {
+    label="(a)";
+    peripheries=0;
+    Z [shape=circle, style=filled, fillcolor=red];
+    X;
+    Y;
+    
+    X -> Y -> Z;
+    X -> Z;
+    { rank=min; X}
+    { rank=same; Z}
+    { rank=max; Y}
+  }
+}
+```
+:::
+:::
+
+## Bad Controls: Selection Bias
+
+![](../_images/selection_bias.png){fig-align="center"}
+
+## Bad Controls: Post-Treatment Bias
+
+:::{.columns}
+::: {.column  width="55%"}
+
+<br><br>
+
+- [Intuition]{.note}: We do not want to block the _channels_ through which the effect goes (unless we are interested in $CATE$). This induces post-treatment bias
+
+:::fragment
+
+- In models (a) and (b) controlling for $Z$ blocks the causal path.
+
+- In model (c) controlling for $Z$ blocks part of the causal path.
+
+- In model (d) controlling for $Z$ will **not** block the causal path or induce any bias.
+
+:::
+
+:::
+::: {.column  width="45%"}
+
+```{dot}
+//| fig-width: 4
+//| fig-height: 6
+//| fig-align: center
+digraph G {
+  bgcolor="transparent"
+  rankdir=LR;
+  edge [
+		arrowsize=0.5,
+		// fontname="Helvetica,Arial,sans-serif"
+		labeldistance=5,
+		// labelfontcolor="#00000080"
+		penwidth=2
+		// style=dotted // dotted style symbolizes data transfer
+	]
+  node [
+    fontsize=24,
+    penwidth=2
+  ]
+
+  // Diagram (d)
+  subgraph cluster_d {
+    label="(d)";
+    peripheries=0;
+    X_d [label="X"];
+    Y_d [label="Y"];
+    Z_d [shape=circle, style=filled, fillcolor=red, label="Z"];
+    
+    X_d -> Z_d;
+    X_d -> Y_d;
+    { rank=min; X_d}
+    { rank=same; Z_d}
+    { rank=max; Y_d}
+  }
+
+  // Diagram (c)
+  subgraph cluster_c {
+    label="(c)";
+    peripheries=0;
+    X_c [label="X"];
+    Y_c [label="Y"];
+    Z_c [shape=circle, style=filled, fillcolor=red, label="Z"];
+    
+    X_c -> Z_c -> Y_c;
+    X_c -> Y_c;
+    { rank=min; X_c}
+    { rank=same; Z_c}
+    { rank=max; Y_c}
+  }
+
+  // Diagram (b)
+  subgraph cluster_b {
+    label="(b)";
+    peripheries=0;
+    X_b [label="X"];
+    M_b [label="M"];
+    Y_b [label="Y"];
+    Z_b [shape=circle, style=filled, fillcolor=red, label="Z"];
+    
+    X_b -> M_b -> Y_b;
+    M_b -> Z_b
+    {rank=same; M_b;Z_b};
+  }
+
+  // Diagram (a)
+  subgraph cluster_a {
+    label="(a)";
+    peripheries=0;
+    Z [shape=circle, style=filled, fillcolor=red];
+    X;
+    Y;
+    
+    X -> Z -> Y;
+  }
+}
+```
+
+:::
+:::
+
+## Bad Controls: Post-Treatment Bias
+
+<br>
+
+- To see the intuition behind [post-treatment bias]{.highlight} consider the following example
+
+- Suppose $X = 0, 1$ randomly assigned, and then
+
+  $$
+  \begin{align*}
+  Z &= X + \varepsilon_Z, \\
+  Y &= \beta X + \gamma Z + \varepsilon_Y,
+  \end{align*}
+  $$
+
+  where $\varepsilon_Z$ and $\varepsilon_Y$ are independent standard normal draws.
+
+. . .
+
+- Substituting in $Y$:  
+  
+  $$
+  Y = (\beta + \gamma)X + \gamma \varepsilon_Z + \varepsilon_Y
+  $$
+
+. . .
+
+- Effect of $X$ on $Y$ is $\beta + \gamma$.
+
+- Controlling for $Z$, we would estimate an effect of $\beta$.
+
+- The bias, $-\gamma$, is the portion of the effect that has been "stolen away" by conditioning on $Z$.
+
+## Controls Conclusion
+
+<br><br>
+
+- Be mindful of what controls you include in your analysis (even if it is an experiment).
+
+- Draw a DAG with controls you plan to include and see whether
+  
+  - You need them to _block_ any back-door paths.
+  - They might be colliders or introduce post-treatment bias.
+  - Do not use "kitchen sink" approach!
+
+- Be also mindful of the sizes of the effects of potential confounders. If the effect on main independent and dependent variable can be proven to be limited, the OVB is small!
+
+# Regression with Heterogeneous Treatments
+
+## Effect Heterogeneity
+
+<br>
+
+- Thus far we have simplified things by assuming [constant effects]{.highlight} ($\tau_i = \tau$ for all $i$) and [linearity]{.highlight} ($\E [\eta_i \given X_i] = X'_i \gamma$).
+
+. . .
+
+- These are strong assumptions!
+
+- What if they are false? Let’s see.
+
+. . .
+
+- Suppose 
+
+  - $\mathcal{T} = \{0,1\}$,
+  - Potential outcomes $(Y_{i} (0), Y_{i} (1))$, 
+  - Heterogeneous treatment effects, $\tau_i = Y_{i} (1) - Y_{i} (0)$,
+  - $\E [\eta_i \given X_i] = f(X_i)$
+
+- Let [conditional independence]{.highlight} assumption (CIA) hold: $Y_{i} (0), Y_{i} (1)) \indep T_i \given X_i$.
+
+## Effect Heterogeneity
+
+- In this case the effect of interest is still 
+
+  $$
+  \begin{align*}
+  \tau_{ATE} &= \E_{X} [\E [Y_i (1) \given X_i] - \E [Y_i (0) \given X_i]] \\
+  &= \E_{X} [\E [Y_i (1) \given T_i = 1, X_i] - \E [Y_i (0) \given T_i = 0, X_i]] \\
+  &= \sum_{X} \tau_x \Pr (X_i = x),
+  \end{align*}
+  $$
+
+  where $\tau_x \equiv \E [Y_i (1) \given X_i = x] - \E [Y_i (0) \given X_i = x]$
+
+. . .
+
+- How would we estimate this using regression?
+
+. . .
+
+- We can use [_saturated_]{.highlight} (or one-way fixed effects) OLS regression model
+
+  $$
+  Y_i = \alpha_0 + \tau T_i + \mathbb{1} [X_i = x_2] \alpha_{x_2} + \dots + \mathbb{1} [ X_i = x_L ] \alpha_{x_L} +   \varepsilon_i,
+  $$
+
+  where $\mathbb{1} [\cdot]$ denotes indicator of event $\cdot$; $x_2, \dots, x_L$ exhausts all possible $X_i$ values omitting one (?) from the specification.
+
+. . .
+
+- This is the best we can do with OLS regression with controls. (Why?)
+
+## Regression Anatomy
+
+- Recall [regression anatomy]{.highlight}: $\widehat{\tau} = \frac{\cov(\tilde{Y}_i, \tilde{T}_i)}{\var(\tilde{T}_i)}$, where $\tilde{T}_i$ is residuals from regression of $T_i$ on other regressors
+
+- Let's see if it actually works
+
+. . .
+
+```{r}
+#| label: regression_anatomy
+#| echo: true
+#| code-line-numbers: "1-5|7-8|10-12|14-18"
+#| output-location: column-fragment
+
+# simulate data
+n <- 1000
+X <- rnorm(n)
+D <- 0.5 * X + rnorm(n) # do not use T!!!
+Y <- 2 * D + 1 * X + rnorm(n)
+
+# standard regression
+standard <- coef(lm(Y ~ D + X))["D"]
+
+# make Y tilde and D tilde
+tilde_Y <- lm(Y ~ X)$residuals
+tilde_D <- lm(D ~ X)$residuals
+
+# regression anatomy
+anatomy <- coef(lm(tilde_Y ~ tilde_D))["tilde_D"]
+
+# simplified regression anatomy
+anatomy_simp <- coef(lm(Y ~ tilde_D))["tilde_D"]
+
+data.frame(
+  Method = c("Standard", "Regression Anatomy", 
+  "Regression Anatomy (Simplified)"),
+  Coefficient = c(standard, anatomy, anatomy_simp)
+) |>
+  knitr::kable(digits = 3)
+```
+
+## Regression Anatomy
+
+- Recall that $\widehat{\tau} = \frac{\cov(Y_i, \tilde{T_i})}{\var(\tilde{T_i})}$, where $\tilde{T_i}$ is residuals from regression of $T_i$ on other regressors
+
+  $$
+  \begin{align*}
+  \widehat{\tau} &= \frac{\cov(Y_i, \tilde{T_i})}{\var(\tilde{T_i})}\\
+  &= \frac{\E [\E [Y_i \given T_i, X_i](T_i - \E [T_i \given X_i])] - \textcolor{#d65d0e}{\E [Y_i \given T_i, X_i]\E [T_i - \E [T_i   \given X_i]]} ] }{\E [(T_i - \E [T_i \given X_i])^2]}\\
+  &= \frac{\E [\E [Y_i \given T_i, X_i](T_i - \E [T_i \given X_i])]}{\E [(T_i - \E [T_i \given X_i])^2]}.  \quad  \text{($\because$ independence of residuals)}
+  \end{align*}
+  $$
+
+. . .
+
+- Now let's look at the first term in the numerator
+
+  $$
+  \begin{align*}
+  \E [Y_i \given T_i, X_i] &= T_i\E [Y_{i} (1) - Y_{i} (0) \given T_i, X_i]  + \textcolor{#458588}{\E [Y_{i} (0) \given T_i, X_i]} \quad \text{($\because$ switching equation)}\\
+  &= T_i\E [Y_{i} (1) - Y_{i} (0) \given T_i, X_i]  + \E [\textcolor{#458588}{Y_{i} (0)} \given T_i = 0, X_i] \quad \text{($\because$  CIA)}\\
+  &= T_i \textcolor{#458588}{\E [Y_{i} (1) - Y_{i} (0) \given T_i, X_i]}  + \E [Y_{i} \given T_i = 0, X_i] \quad \text{($\because$  switching equation)}\\
+  &= T_i \tau_X  + \E [Y_{i} \given T_i = 0, X_i] \quad \text{($\because$ definition of $\tau_X$)}
+  \end{align*}
+  $$
+
+## Regression Anatomy
+
+$$
+  \begin{align*}
+  \widehat{\tau} &= \frac{\E [\E [Y_i \given T_i, X_i](T_i - \E [T_i \given X_i])]}{\E [(T_i - \E [T_i \given X_i])^2]} \\
+  &= \frac{\E [\textcolor{#458588}{\left( T_i \tau_X  + \E [Y_{i} \given T_i = 0, X_i] \right)} (T_i - \E [T_i \given X_i])]}{\E [(T_i - \E [T_i \given X_i])^2]} \quad \text{($\because$ plug in result)}\\
+  &\class{fragment}{{}= \frac{\E [ \textcolor{#458588}{T_i \tau_X} (T_i - \E [T_i \given X_i])  + \textcolor{#458588}{\E [Y_{i} \given T_i = 0, X_i]} (T_i - \E [T_i \given X_i]) ]}{\E [(T_i - \E [T_i \given X_i])^2]}  \quad \text{($\because$ distribute)}} \\
+  &\class{fragment}{{}= \frac{\E [ \textcolor{#d65d0e}{T_i} \tau_X \textcolor{#d65d0e}{(T_i - \E [T_i \given X_i])} ]}{\E [(T_i - \E [T_i \given X_i])^2]}  \quad \text{($\because$ independence of residuals)}} \\
+  &\class{fragment}{{}= \frac{\E_X [ \tau_X \textcolor{#d65d0e}{\E [ T_i^2 - T_i \E [T_i \given X_i] \given X_i]} ]}{\E_X [ \textcolor{#d65d0e}{\E [ (T_i - \E [T_i \given X_i])^2 \given X_i ]} ]}  \quad \text{($\because$ iterated $\E$ )}} \\
+  &\class{fragment}{{}= \frac{\E_X [ \tau_X \textcolor{#d65d0e}{\var (T_i \given X_i)} ]}{\E_X [ \textcolor{#d65d0e}{\var (T_i \given X_i)} ] }  \quad \text{($\because$ definition of $\var$ )}}\\
+  &\class{fragment}{{}= \frac{\sum_X \tau_X \textcolor{#d65d0e}{\Pr (T_i = 1 \given X_i = x) (1 - \Pr (T_i = 1 \given X_i = x))} \Pr(X_i = x)}{\sum_X \textcolor{#d65d0e}{\Pr(T_i = 1 \given X_i = x) (1 - \Pr (T_i = 1 \given X_i = x))} \Pr(X_i = x)}.  \quad \text{($\because$ binary $T_i$)}}
+  \end{align*}
+$$
+
+## What Was This?
+
+![](../_images/phew.png){fig-align="center"}
+
+## Effect Heterogeneity
+
+<br>
+
+- Compare
+
+  $$
+  \tau_{ATE} = \sum_{X} \tau_x \Pr (X_i = x),
+  $$
+
+  versus
+
+  $$
+  \widehat{\tau} = \frac{\sum_X \tau_X \textcolor{#d65d0e}{\Pr (T_i = 1 \given X_i = x) (1 - \Pr (T_i = 1 \given X_i = x))} \Pr(X_i = x)}  {\sum_X \textcolor{#d65d0e}{\Pr(T_i = 1 \given X_i = x) (1 - \Pr (T_i = 1 \given X_i = x))} \Pr(X_i = x)}
+  $$
+
+. . .
+
+- $\widehat{\tau}$ aggregates via [conditional variance weighting]{.highlight} with respect to $T_i$ instead of just probability.
+
+- If $\tau_i$ was constant _wrt_ $X_i$, the precision weighting _could_ be good from an efficiency standpoint.
+
+- If $T_i \indep X_i$, then $\widehat{\tau}$ reduces to weighting by the number of units with $X_i = x$.
+
+## Truth about Regression
+
+<br>
+
+- Logic carries through to continuous treatments [@angrist2009mostly, 77–80; @aronow2016does].
+
+- @aronow2016does show that for arbitrary $T_i$ and $X_i$,
+
+  $$
+  \widehat{\tau} \xrightarrow{p} \frac{\E [w_i \tau_i]}{\E [w_i]}, \quad \text{where } w_i = (T_i - \E [T_i | X_i])^2,
+  $$
+
+  in which case
+
+  $$
+  \E [w_i | X_i] = \var [T_i \given X_i].
+  $$
+
+. . .
+
+- The [effective sample]{.highlight} is weighted by $\widehat{w}_i = (T_i - \widehat{\E}[T_i | X_i])^2$  (squared residual from regression of $T_i$ on covariates).
+
+- Even with a representative sample, regression estimates may not aggregate effects in a representative manner. Regression estimates are _local_ to an effective sample.
+
+
+## Let's Try a Simulation
+
+<br>
+
+```{r}
+#| echo: true
+#| eval: true
+#| output: asis
+#| code-line-numbers: "1-5|7-11|13-29|31-35"
+
+set.seed(20250202) # set seed
+
+n <- 1000 # sample size
+tau_base <- 0.5
+gamma <- 0.1 # effect of X on outcome
+
+# some discrete covariate
+X <- sample(x = 1:100, size = n, replace = T)
+
+# total treatment effect (assuming possible heterogeneity)
+tau_total <- sum((tau_base + 0.01 * 1:100) / 100)
+
+# democratic institutions (correlated with confounder)
+democracy_high <- rbinom(n, size = 1, prob = .5)
+democracy_high_2 <-
+  rbinom(n, size = 1, prob = sapply(X, function(x) .5 + 0.01 * x))
+
+# economic growth (influenced by both investment and democratic institutions)
+growth <-
+  (tau_base + 0.01 * X) *
+  democracy_high +
+  gamma * X +
+  rnorm(n, mean = 0, sd = 5)
+
+growth_2 <-
+  (tau_base + 0.01 * X) *
+  democracy_high_2 +
+  gamma * X +
+  rnorm(n, mean = 0, sd = 5)
+
+# regression ignoring the confounder
+bias1 <- lm(growth ~ democracy_high + factor(X))$coefficients[2] - tau_total
+
+# regression ignoring the confounder
+bias2 <- lm(growth_2 ~ democracy_high_2 + factor(X))$coefficients[2] - tau_total
+```
+
+## Heterogeneous $\tau$ and Assignment
+
+```{r}
+#| label: tau_het_treat_tau
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 5
+
+sims_df <-
+  pbapply::pbreplicate(
+    n = 1000,
+    get_bias_het(),
+    cl = "future"
+  ) |>
+  t() |>
+  as.data.frame() |>
+  dplyr::rename(`Variable` = het2, `Constant` = het1) |>
+  pivot_longer(
+    cols = c(Variable, Constant),
+    names_to = "Assignment",
+    values_to = "Value"
+  )
+
+# Plot using ggplot2
+ggplot(sims_df, aes(x = Value, fill = Assignment)) +
+  geom_histogram(alpha = 0.5, position = "identity", bins = 100) +
+  scale_fill_manual(values = c("#cc241d", "#458588"), name = "Assignment") +
+  geom_vline(
+    data = summarize(group_by(sims_df, Assignment), mean_val = mean(Value)),
+    aes(xintercept = mean_val, color = Assignment),
+    linetype = "dashed",
+    linewidth = 1
+  ) +
+  scale_color_manual(values = c("#cc241d", "#458588"), name = "Assignment") +
+  scale_x_continuous(limits = c(-2, 2)) +
+  labs(
+    x = "Deviation from True Value",
+    y = "Frequency"
+  )
+```
+
+## Heterogeneous $\tau$ Only
+
+```{r}
+#| label: tau_het_treat
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 5
+
+sims_df <-
+  pbapply::pbreplicate(
+    n = 1000,
+    get_bias_het(assignment_fun = function(x) .6),
+    cl = "future"
+  ) |>
+  t() |>
+  as.data.frame() |>
+  dplyr::rename(`Variable` = het2, `Constant` = het1) |>
+  pivot_longer(
+    cols = c(Variable, Constant),
+    names_to = "Assignment",
+    values_to = "Value"
+  )
+
+# Plot using ggplot2
+ggplot(sims_df, aes(x = Value, fill = Assignment)) +
+  geom_histogram(alpha = 0.5, position = "identity", bins = 100) +
+  scale_fill_manual(values = c("#cc241d", "#458588"), name = "Assignment") +
+  geom_vline(
+    data = summarize(group_by(sims_df, Assignment), mean_val = mean(Value)),
+    aes(xintercept = mean_val, color = Assignment),
+    linetype = "dashed",
+    linewidth = 1
+  ) +
+  scale_color_manual(values = c("#cc241d", "#458588"), name = "Assignment") +
+  scale_x_continuous(limits = c(-2, 2)) +
+  labs(
+    x = "Bias (Deviation from True Value)",
+    y = "Frequency"
+  )
+```
+
+## Heterogeneous Assignment Only
+
+```{r}
+#| label: tau_het_tau
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 5
+
+sims_df <-
+  pbapply::pbreplicate(
+    n = 1000,
+    get_bias_het(het_fun = function(x) tau_base),
+    cl = "future"
+  ) |>
+  t() |>
+  as.data.frame() |>
+  dplyr::rename(`Variable` = het2, `Constant` = het1) |>
+  pivot_longer(
+    cols = c(Variable, Constant),
+    names_to = "Assignment",
+    values_to = "Value"
+  )
+
+# Plot using ggplot2
+ggplot(sims_df, aes(x = Value, fill = Assignment)) +
+  geom_histogram(alpha = 0.5, position = "identity", bins = 100) +
+  scale_fill_manual(values = c("#cc241d", "#458588"), name = "Assignment") +
+  geom_vline(
+    data = summarize(group_by(sims_df, Assignment), mean_val = mean(Value)),
+    aes(xintercept = mean_val, color = Assignment),
+    linetype = "dashed",
+    linewidth = 1
+  ) +
+  scale_color_manual(values = c("#cc241d", "#458588"), name = "Assignment") +
+  scale_x_continuous(limits = c(-2, 2)) +
+  labs(
+    x = "Bias (Deviation from True Value)",
+    y = "Frequency"
+  )
+```
+
+
+
+## Lessons
+
+- Regression is a useful tool for estimating causal effects and accounting for CIA:
+  - **Binary treatments**: regression can provide consistent estimates of $ATE$.
+  - **Discrete or continuous treatments**: Estimates provide a best linear approximation when relationship is non-linear.
+  - **Heterogeneous treatments**: Regression estimates are weighted by conditional variance and could be biased and apply to [effective sample]{.highlight} only.
+
+. . .
+
+- Beware of [OVB]{.highlight}:
+  - Avoid _"bad controls"_ that may introduce post-treatment bias or inadvertently open [back-door paths]{.highlight}.
+
+. . .
+
+- Steps to take:
+  1. Be explicit about the assumption you need to make to make regression _causal_.
+  2. Use DAGs and the back-door criterion to identify covariates to control for.
+  3. Make sure you know how to interpret regression coefficients.
+  4. Use simulations and/or [Dagitty](https://www.dagitty.net) to validate model assumptions and relationships.
+
+# Appendix
+
+## Frisch-Waugh-Lovell Theorem [🔙](#ovb) {#fwl-theorem visibility="uncounted"}
+
+<br>
+
+- Consider a multiple regression model: $Y_i = \alpha + \tau T_i + X_i^\prime \beta + \nu_i$.
+
+- To find $\tau$, the coefficient on $T_i$, the [Frisch-Waugh-Lovell Theorem]{.highlight} states that:
+
+  1. Regress $Y_i$ on $X_i$ and obtain the residuals $\tilde{Y}_i = Y_i - X_i^\prime \widehat{\beta}$.
+  
+  2. Regress $T_i$ on $X_i$ and obtain the residuals $\tilde{T}_i = T_i - X_i^\prime \widehat{\delta}$.
+  
+  3. Regress $\tilde{Y}_i$ on $\tilde{T}_i$ to obtain $\beta_1$.
+
+  In addition, the $R^2$ and F-statistics of these regressions will be the same as those from the full model regression. 
+
+- [Intuition]{.note}:
+  - The Frisch-Waugh-Lovell theorem decomposes the estimation process.
+  - Adjusts $Y_i$ and $T_i$ for covariates $X_i$ separately, highlighting the direct effect of $T_i$.
+
+## References {visibility="uncounted"}

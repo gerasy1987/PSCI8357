@@ -13,6 +13,7 @@ lectures/*
 !lectures/.gitkeep
 !lectures/01_*
 !lectures/02_*
+!lectures/03_*
 recitation_material/*
 !recitation_material/.gitkeep
 problem_sets/*
