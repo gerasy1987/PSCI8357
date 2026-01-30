@@ -495,7 +495,7 @@ ggplot(cef_df, aes(x = X, y = Y)) +
 
 - In the case of CEF non-linear in $X_i$, OLS provides best linear approximation of $\E [Y_i \given X_i]$
 
-# Regression and Potential Outcomes
+# Regression and Causality
 
 ## Back to Simple Binary Setup
 
@@ -619,7 +619,7 @@ $$
 
 ## Linear POs
 
-- Now assume constant linear treatment effects
+- Now assume constant linear treatment effects, i.e. POs are given by
 
 $$
 f_i(t) = \alpha + \tau t + \eta_i
@@ -637,7 +637,7 @@ $$
 
 . . .
 
-- We also assume linear decomposition of $\eta_i$:  
+- We also allow $\eta_i$ to depend on covariates we identified:  
 
   $$
   \eta_i = X_i^{\prime} \gamma + \nu_i,
@@ -662,23 +662,21 @@ $$
 
 . . .
 
-- Under this model we have
+- Since when $X_i$ is fixed only $\nu_i$ is varying in $\eta_i$, under this model we have
     
   $$
   f_i(t) \indep T_i \given X_i \implies \nu_i \indep T_i \given X_i,
-  $$  
-    
-  since when $X_i$ is fixed only $\nu_i$ is varying in $\eta_i$.
+  $$
 
 . . .
 
 - With strong ignorability and linearity, we obtain:  
 
-  $$
-  Y_i = \alpha + \tau T_i + X_i^{\prime} \gamma + \nu_i,
-  $$ 
+$$
+Y_i = \alpha + \tau T_i + X_i^{\prime} \gamma + \nu_i,
+$$ 
 
-  where $\nu_i$ is uncorrelated with $X_i$ and also with $T_i$ conditional on $X_i$.
+   where $\nu_i$ is uncorrelated with $X_i$ and also with $T_i$ conditional on $X_i$.
 
 ## From Linear POs to Regression
 
@@ -700,7 +698,7 @@ $$
 \end{align*}
 $$
 
-- _($X_i$ disappeared because of the linearly separable confounding.)_
+- _($X_i$ disappeared because of the linearly confounding.)_
 
 . . .
 
@@ -1022,11 +1020,11 @@ ggplot(sims_df, aes(x = Value, fill = Type)) +
 
 - **Omitted variables** is a misleading term because it could suggest that you want to include *any* variable that is correlated with treatment and outcomes.
 
-- But remember [bad controls]{.highlight} exist:
+- But remember [bad controls]{.highlight} exist, e.g.
 
-  - Common descendants of treatment and outcome
-  - $M$-bias variables
-  - We will examine examples of each in the following slides
+   - Common descendants of treatment and outcome (colliders)
+   - Block causal path by controling for mediator
+   - $M$-bias variables
 
 ## Two Ways to Adjust for Covariates
 
