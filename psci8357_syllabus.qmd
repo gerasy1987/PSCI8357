@@ -124,7 +124,7 @@ A final exam will be scheduled during the final examination week (the week of Ap
 ## Grading and Deadlines
 
 -   **35% Problem sets** (every two weeks, see schedule below)
--   **40% Replications** (due March 2nd and April 13th)
+-   **40% Replications** (due March 4th and April 15th)
 -   **25% Take-home final exam** (Week of April 20th)
 
 Late work will not be accepted without documented proof of a family or medical emergency.
@@ -206,7 +206,7 @@ If you have questions or concerns about what is allowed, or how to document AI u
 
 *   - **1/12**
     - What is Identification?
-    - observation versus intervention, potential outcomes (ATE, ATT, probability of necessity), ATE under SUTVA and strong ignorability, causal effects with potential outcomes
+    - observation versus intervention, potential outcomes (ATE, ATT, probability of necessity)
     -   - @gerber2012field [Ch. 2]
         - @angrist2009mostly [Ch. 1-2]
         - @morgan2015counterfactuals [Ch. 1-2]
@@ -219,22 +219,27 @@ If you have questions or concerns about what is allowed, or how to document AI u
 
 *   - **1/21**
     - What is Identification (cont.)?
-    - observation versus intervention, potential outcomes (ATE, ATT, probability of necessity), ATE under SUTVA and strong ignorability, causal effects with potential outcomes, 
+    - causal estimands, SUTVA, selection bias, causal diagrams (DAGs) 
     -   - @gerber2012field [Ch. 2]
         - @angrist2009mostly [Ch. 1-2]
         - @morgan2015counterfactuals [Ch. 1-2]
         - @holland1986statistics
 
 *   - **1/26 1/28**
+    - No Class
+    - Winter Storm, **problem set 1 is posted on 1/26**
+    -
+
+*   - **2/2 2/4**
     - Regression and Causality
-    - CEF and its properties, selection on observables, conditional ignorability, **problem set 1 is posted on 1/26**
+    - CEF and its properties, selection on observables, conditional ignorability, positivity assumption
     -   - @angrist2009mostly [Ch. 3.1-3.2.2]
         - @morgan2015counterfactuals [Ch. 6.1-6.2]
         - @cinelli2024crash
 
-*   - **2/2**
+*   - **2/9**
     - The Truth about Regression
-    - regression anatomy, omitted variable bias, positivity assumption
+    - regression anatomy, omitted variable bias, Back-Door Criterion and bad controls
     -   - @angrist2009mostly [Ch. 3.2.3-3.5]
         - @morgan2015counterfactuals [Ch. 6.3]
         - @clarke2005phantom
@@ -243,64 +248,64 @@ If you have questions or concerns about what is allowed, or how to document AI u
 *   -
     - []{colspan=3} **EXPERIMENTAL DESIGNS**
 
-*   - **2/4 2/9**
+*   - **2/11 2/16**
     - Basics of Experimental Design
-    - target quantities (SATE, PATE), inference for the SATE and PATE in an idealized experiment, randomization inference, imbalance, **problem set 2 is posted on 2/4**
+    - target quantities (SATE, PATE), inference for the SATE and PATE in an idealized experiment, randomization inference, imbalance, **problem set 2 is posted on 2/11**
     -   - @gerber2012field [Ch. 3]
 
-*   - **2/11 2/16**
+*   - **2/18 2/23**
     - Complex Experimental Designs and Power Analysis
     - cluster and block randomization, factorial designs, MDE and power analysis
     -   - @gerber2012field [Ch. 4]
 
-*   - 
+*   -
     - []{colspan=3} **OBSERVATIONAL DESIGNS FOR CAUSAL INFERENCE**
 
-*   - **2/18 2/23 2/25**
+*   - **2/25 3/2 3/4**
     - Matching
-    - distance metrics, exact matching, nearest neighbor matching, propensity score matching, balancing property, sensitivity analysis, weighting, doubly robust estimators **problem set 3 is posted on 2/18**
+    - distance metrics, exact matching, nearest neighbor matching, propensity score matching, balancing property, sensitivity analysis, weighting, doubly robust estimators, **problem set 3 is posted on 2/25**, **experimental replication is due on 3/4**
     -   - @angrist2009mostly [Ch. 3]
         - @morgan2015counterfactuals [Ch. 5]
         - @sekhon2009opiates
         - @caliendo2008some
 
-*   - **3/2 3/4**
+*   - **3/9 3/11**
+    - No Class
+    - Spring Break
+    -
+
+*   - **3/16 3/18**
     - Instrumental Variables
-    - Local Average Treatment Effects, IV estimator, one-/two-sided non-compliance, 2SLS estimator and its bias, **problem set 4 is posted on 3/4**, **experimental replication is due on 3/2**
+    - Local Average Treatment Effects, IV estimator, one-/two-sided non-compliance, 2SLS estimator and its bias, **problem set 4 is posted on 3/18**
     -   - @angrist2009mostly [Ch. 4]
         - @morgan2015counterfactuals [Ch. 9.1-9.3]
         - @angrist1996identification
         - @sovey2011instrumental
 
-*   - **3/4**
+*   - **3/18**
     - Difference-in-Differences
     - two-period DID, pre-trends, event study
     -   - @angrist2009mostly [Ch. 5.2]
         - @bertrand2004much
 
-*   - **3/9 3/11**
-    - No Class
-    - Spring Break
-    - 
-
-*   - **3/16 3/18**
+*   - **3/23 3/25**
     - Difference-in-Differences (cont.)
-    - conditional DID, continuous treatment DID, event-by-event estimation, **problem set 5 is posted on 3/16**
+    - conditional DID, continuous treatment DID, event-by-event estimation, **problem set 5 is posted on 3/23**
     -   - @angrist2009mostly [Ch. 5.2]
         - @bertrand2004much
 
-*   - **3/23 3/25**
+*   - **3/30 4/1**
     - Panel Data
     - staggered adoption design, fixed effects, TWFE estimator and its bias
     -   - @angrist2009mostly [Ch. 5.1, 5.4]
         - @morgan2015counterfactuals [Ch. 11.3]
 
-*   - **3/30**
+*   - **4/6**
     - Synthetic Control
-    - identification, estimation and statistical inference, interactive FEs, **problem set 6 is posted on 3/30**
+    - identification, estimation and statistical inference, interactive FEs, **problem set 6 is posted on 4/6**
     -   - @abadie2010synthetic
 
-*   - **4/1 4/6**
+*   - **4/8 4/13**
     - Regression Discontinuity Designs
     - parametric, non-parametric local regression, optimized RD and honest inference, threats, fuzzy RDD
     -   - @angrist2009mostly [Ch. 6]
@@ -308,20 +313,15 @@ If you have questions or concerns about what is allowed, or how to document AI u
         - @imbens2008regression
         - @de2016misunderstandings
 
-*   - **4/8 4/13**
+*   - **4/15 4/20**
     - Mediation Effects
-    - natural direct and indirect effects, controlled direct and indirect effects **problem set 7 is posted on 4/8**, **observational replication is due on 4/13**
+    - natural direct and indirect effects, controlled direct and indirect effects, **problem set 7 is posted on 4/15**, **observational replication is due on 4/15**
     -   - @gerber2012field [Ch. 9-10]
 
-*   - **4/15**
+*   - **4/22**
     - Effect Heterogeneity
     - interaction effects, decomposing effect heterogeneity, optimal treatment regimes
     - TBD
-
-*   - **4/20**
-    - Course Wrap-Up
-    - 
-    - 
 :::
 
 ------------------------------------------------------------------------
