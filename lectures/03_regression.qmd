@@ -29,7 +29,15 @@ format:
     transition: fade
     reference-location: document
     fig-cap-location: top
-    include-before: [ '<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {enableAssistiveMml: false}});</script>']
+    include-in-header:
+      - text: |
+          <script>
+          window.MathJax = {
+            options: {
+              enableAssistiveMml: false
+            }
+          };
+          </script>
 fontsize: 26px
 editor: source
 aspectratio: 169
@@ -287,7 +295,25 @@ ggplot(cef_df, aes(x = X, y = Y)) +
 ```
 
 - The CEF is the _average line_ through the scatter of data points for each discrete $X$.
- 
+
+## Why Does CEF Matter?
+
+<br><br>
+
+- The CEF properties we just established are important because:
+
+  1. [Decomposition]{.highlight}: Any outcome can be split into a systematic part (explained by covariates) and noise.
+
+  2. [Optimality]{.highlight}: The CEF is the best predictor of $Y_i$ given $X_i$ in the MSE sense.
+
+. . .
+
+- [Key insight]{.note}: If we can estimate $\E[Y_i \given T_i]$ or $\E[Y_i \given T_i, X_i]$ well, we can estimate differences in conditional means—which under the right assumptions are causal effects.
+
+. . .
+
+- The question becomes: **Can regression help us estimate the CEF?**
+
 # Regression Justification
 
 ## Regression?
@@ -519,7 +545,7 @@ ggplot(cef_df, aes(x = X, y = Y)) +
   (\widehat{\tau}, \widehat{\alpha}) = \argmin_{\tau, \alpha} \sum_{i=1}^n \left(Y_i - \alpha - \tau T_i\right)^2
   $$
 
-- Coefficient $\tau$ is mechanically the difference in means ($\tau_{DiM}$):
+- Coefficient $\tau$ is algebraically equivalent to the difference in means ($\tau_{DiM}$):
   
   $$
   \widehat{\tau} = \bar{Y}_1 - \bar{Y}_0 = \widehat{\tau}_{DiM}
@@ -577,15 +603,15 @@ $$
 
 - When would this be equal to zero? [E.g. under random assignment (strong ignorability)]{.fragment}
 
-. . .
+<!-- $$\E [\eta_i \given T_i] = (1 - T_i) (\E [Y_i(0)] - \E [Y_i(0)]) + T_i (\E [Y_i(1)] - \E [Y_i(1)]) = 0$$ -->
 
-  $$
-  \E [\eta_i \given T_i] = (1 - T_i) (\E [Y_i(0)] - \E [Y_i(0)]) + T_i (\E [Y_i(1)] - \E [Y_i(1)]) = 0
-  $$
+. . .
 
 - **Randomization + consistency allow linear model.**
 
-  - Does not imply homoskedasticity or normal errors, though... Need to assume that!
+  - Does not imply homoskedasticity or normal errors, though!
+
+  - [Practical implication]{.note}: Use heteroskedasticity-robust (HC2) standard errors for inference, e.g. via `lm_robust()`.
 
 # Regression with Covariates
 
@@ -698,7 +724,7 @@ $$
 \end{align*}
 $$
 
-- _($X_i$ disappeared because of the linearly confounding.)_
+- _($X_i$ disappeared because confounding enters linearly and cancels out.)_
 
 . . .
 
@@ -1230,6 +1256,19 @@ digraph G {
 :::
 
 # _The Good, The Bad, The Ugly..._ Controls
+
+## Choosing Controls: A Taxonomy
+
+<br><br>
+
+- Follow @cinelli2024crash which provides a systematic framework for thinking about control variables.
+
+- [Key insight]{.note}: Not all variables that are correlated with treatment and outcome should be controlled for!
+
+- We will classify controls as:
+  1. [Good controls]{.highlight}: Block back-door paths without introducing bias
+  2. [Neutral controls]{.highlight}: Neither help nor hurt identification (but may affect precision)
+  3. [Bad controls]{.highlight}: Introduce bias through collider conditioning or post-treatment adjustment
 
 ## Good Controls 1
 
