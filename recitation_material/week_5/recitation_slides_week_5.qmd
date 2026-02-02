@@ -1,0 +1,183 @@
+---
+title: "Replete Replications: Best Practices for You"
+author: "Alexander Dean"
+subtitle: "Recitation Period Week 5"
+institute: "Vanderbilt University"
+email: "alexander.r.dean@vanderbilt.edu"
+date: today
+format: 
+  revealjs:
+    theme: dark
+    footer: "Alexander Dean (Vanderbilt University)"
+    slide-number: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    self-contained-math: true
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+fontsize: 32px
+editor: source
+---
+
+# Introductory Spiel
+
+## What We Will Cover Today
+
+1. What replication is (and isn't)
+2. Why good replication practices matter
+3. What you can implement
+4. A replication exercise
+
+## Why You Should Pay Attention to Today's Recitation
+
+1. Your output is your reputation
+2. Your work must be reproducible
+3. Implementing these best practices will save you time and stress
+
+# What Is Replication?
+
+## The Concept of Replication
+- Let's brainstorm a definition!
+
+. . . 
+
+- Dictionary Definition: The action or process of reproducing or duplicating
+- Social Science Definition: 
+    1. Re-analysis of an empirical project using the same model and estimation methods
+    2. Re-analysis using comparable data, variable constructions, models, and estimation methods 
+
+# Good Replication Practices
+
+## Replication starts in R (pt. 1)
+
+```{r}
+#| eval: false
+#| echo: true
+
+################################################################################
+################# This R Script Does the Following: ############################
+### Cleans MUNIC data from 2005 for AM radio station coverage at the municipal
+### level. This will be merged with the panel df in the same folder later on.
+################################################################################
+### Set working directory and load packages
+# Working Directory
+setwd("/Users/alexdean/Documents/Research/ngos_windfalls/scripts")
+options(scipen = 999)
+
+# Packages (re-run if installing for first time)
+if (!require(tidyverse)) install.packages("tidyverse")
+
+# Load data:
+
+# MUNIC survey 2005
+data <- readxl::read_xls("../data/radio/munic_2005.xls", sheet = 10)
+
+# IBGE codes for future merging
+ibge <- read.csv("../data/covariates/br_bd_diretorios_brasil_municipio.csv")
+```
+
+- Extensive code commenting
+- Includes a "ReadME" at the top of the script
+
+## Replication starts in R (pt. 2)
+
+```{r}
+#| eval: false
+#| echo: true
+
+##### Wrangling ################################################################
+### Subsetting and renaming vars for data df
+# We only need the IBGE codes and am_radio binary question
+data <- data |> 
+  rename(
+    ibge_6 = A1,
+    am_radio = A286
+  ) |> 
+  mutate(
+    # Switching am_radio from categorical variable to binary
+    am_radio = if_else(am_radio == "Sim", 1, 0),
+    # Creating a year variable for merging into panel later on
+    year = 2005
+    ) |> 
+  select(
+    ibge_6, am_radio, year
+  )
+
+### Subsetting to ibge codes for ibge
+# The MUNIC data uses the 6-digit IBGE codes, while the rest of my workflow for
+# the project uses the newer 7-digit IBGE codes, I'm merging the IBGE directory
+# .csv to add the 7-digit codes and remove the 6-digit codes
+ibge <- ibge |> 
+  rename(
+    ibge = id_municipio,
+    ibge_6 = id_municipio_6
+  ) |> 
+  select(
+    ibge, ibge_6
+  )
+
+### Joining ibge and data
+data <- data |> 
+  left_join(
+    ibge, by = "ibge_6"
+  )
+
+### Final removal of uneccesasry columns (the old 6-digit IBGE code)
+data <- data |> 
+  select(ibge, year, am_radio)
+
+##### Saving .csv ##############################################################
+write_csv(data, "../data/cleaned/am_radio_2005.csv")
+################################################################################
+```
+
+- Clearly comments what each line of code is doing
+- Separates major tasks in each script with a standard workflow
+
+## Best Practice Tips
+
+1. Keep a separate .r script for each major part of your empirical data project
+2. Keep a "ReadME" at the top of each script
+3. Comment your code (and be specific!)
+4. Keep an administrative log (diary) for each time you sit down and work on a project
+5. Use Git, another version control software, or create new scripts whenever you make major changes
+
+# A Replication Exercise
+
+## Breznau et al. 2022 PNAS Article
+
+- What is the relationship between immigration rates and support for government provision of social policies?
+
+. . . 
+
+- 73 research teams used the same dataset to answer this question. You get to do the same now as well!
+- Instructions:
+    - Pair into groups of 3
+    - Open the .r script in the GitHub folder and follow the instructions to produce (i) a regression table and (ii) visualization
+    - Regroup when done to discuss your results and their (dis)similarity
+
+# Resources
+
+## Repliation Resources
+
+- [Breznau et al. 2022](https://www.pnas.org/doi/10.1073/pnas.2203150119) PNAS article from recitation exercise
+- [Importance of replication](https://gking.harvard.edu/sites/g/files/omnuum7116/files/gking/files/replication.pdf) article from Gary King
+- [Economics perspective on replication](https://www.aeaweb.org/articles?id=10.1257/aer.p20171031) in the AER
+- [Replication with LLMs](https://arthurspirling.org/documents/BarriePalmerSpirling_TrustMeBro.pdf) working paper
+- [Article overview of replication practices](https://journals.sagepub.com/doi/10.1177/20531680241233439) in political science published in Research and Politics
+
+## Tips for your Replication Exercise
+
+1. Spend less than 10 minutes picking your experiment
+2. Read the paper 2-3 times before starting the exercise
+3. Create your own .r script and descriptively look at the data first
+4. Code original analysis without directly copy-pasting 
+5. Think through two well-justified extensions
+6. Review your output and think if Gosha or I can follow your code and the choices you made without difficulty
+7. Follow guidelines for formatting, we want our work to look nice!
