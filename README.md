@@ -23,7 +23,7 @@
 #### **TA:** Alexander (Alex) Dean
 
 -   **Recitations:** Friday, 11 AM - 12 PM in Commons 349
--   **Office hours:** Monday, 1 PM - 3 PM in Commons 317
+-   **Office hours:** Monday, 1 PM - 3 PM in Commons 312
 
 ------------------------------------------------------------------------
 

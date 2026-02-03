@@ -441,7 +441,7 @@ ggplot(cef_bin_df, aes(x = X, y = Y)) +
 
 - Regression can still be used to approximate the CEF:
 
-:::{.callout-important icon="false" title="CEF Prediction Property"}
+:::{.callout-important icon="false" title="Regression Prediction Property"}
 The function $X_i' \beta$ provides the Minimal MSE linear approximation to $\E [Y_i | X_i]$, that is:
 
 $$

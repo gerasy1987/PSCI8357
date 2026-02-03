@@ -1046,7 +1046,7 @@ $$
 
   - Admissions process where $T$ is students' grades, $Y$ is motivation, both influencing $X$, the admission decision.
   
-  - Conditioning on $X$ (e.g. admitted) can create a misleading relationship between $Z$ and $Y$...
+  - Conditioning on $X$ (e.g. admitted) can create a misleading relationship between $T$ and $Y$...
 
 :::
 ::: {.column}
@@ -1160,7 +1160,7 @@ digraph {
 :::
 
 
-## DAGs $\leftrightarrow$ Potential Outcomes
+## DAGs $\Leftrightarrow$ Potential Outcomes
 
 <br>
 
@@ -1180,7 +1180,7 @@ digraph {
 
 - Because of this fundamental equivalence, we will mostly work with potential outcomes, currently the standard framework in social sciences.  
 
-- [Note]{.note}: Graphs are useful for expressing and visualizing a causal model in empirical research.
+- [Note]{.note}: Graphs are useful for expressing and visualizing a causal model in empirical research and identifying _bad controls_.
 
 ## Potential Outcomes vs. DAGs Controversy
 
