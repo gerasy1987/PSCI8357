@@ -58,6 +58,7 @@ bibliography: ../_supp/psci8357.bib
   \def\qedknitr{{\hfill\rule{1.2ex}{1.2ex}}}
   \def\given{{\:\vert\:}}
   \def\indep{{\mbox{$\perp\!\!\!\perp$}}}
+  \def\notindep{{\mbox{$\centernot{\perp\!\!\!\perp}$}}}
 \)
 
 ```{r}
@@ -615,123 +616,169 @@ $$
 
 # Regression with Covariates
 
-## Selection on Observables
+## Why Control for Covariates?
 
 <br>
 
-- Under strong ignorability we can use regression to estimate causal effects of interest.
+- We just showed: under [strong ignorability]{.highlight} (random assignment), regression estimates causal effects.
 
-- What if instead we assume that selection depends on a set of observed covariates $X_{i}$, i.e. there is [selection on observables]{.highlight}?
-
-. . .
-
-- This implies the [conditional ignorability]{.highlight} assumption, i.e.
-
-$$
-\{ Y_i(0), Y_i(1) \} \indep T_i \given X_i. 
-$$
+- But what if treatment is **not** randomly assigned?
 
 . . .
 
-- This in turn implies $\eta_i \indep T_i \given X_i$ (Why?)
+- [Key insight]{.note}: If we can identify variables $X_i$ that explain _why_ some units are treated and others are not, we may still recover causal effects.
 
 . . .
 
-- [Note]{.note}: If conditional ignorability is true and we are able to condition on $X_i$, the following is also true
+- This is the [selection on observables]{.highlight} framework:
 
-$$
-\eta_i \indep T_i  \given X_i \implies \E [\eta_i \given T_i=1, X_i] = \E [\eta_i \given T_i=0, X_i] = \E [\eta_i \given X_i]. 
-$$
-
-## Linear POs
-
-- Now assume constant linear treatment effects, i.e. POs are given by
-
-$$
-f_i(t) = \alpha + \tau t + \eta_i
-$$  
+  - Treatment assignment depends on observable characteristics $X_i$
+  - Once we account for $X_i$, treatment is "as good as random"
+  - We can use regression to adjust for $X_i$ and estimate causal effects
 
 . . .
 
-- Observed outcomes are given by:  
+- [Question]{.alert}: What assumptions do we need? And how do we implement this with regression?
 
-  $$
-  Y_i = f_i(T_i) = \alpha + \tau T_i + \eta_i,
-  $$  
-
-  where $\eta_i$ captures all variable determinants of $f_i(T_i)$ other than $T_i$.
-
-. . .
-
-- We also allow $\eta_i$ to depend on covariates we identified:  
-
-  $$
-  \eta_i = X_i^{\prime} \gamma + \nu_i,
-  $$
-  
-  
-  where $\gamma$ is the population regression solution.
-
-- Orthogonality of residuals to regressors in the population implies $\E [X_i \nu_i] = 0$.
-
-
-## Linear POs
+## Conditional Ignorability
 
 <br>
 
-- We further assume linearity in $X_i$ as well (!)  
-
+:::{.callout-important icon="false" title="Assumption: Conditional Ignorability (CIA)"}
 $$
-\E [\eta_i | X_i] = X_i^\prime \gamma
-$$  
-  
+\{ Y_i(0), Y_i(1) \} \indep T_i \given X_i
+$$
+
+Given covariates $X_i$, treatment assignment is independent of potential outcomes.
+:::
 
 . . .
 
-- Since when $X_i$ is fixed only $\nu_i$ is varying in $\eta_i$, under this model we have
-    
-  $$
-  f_i(t) \indep T_i \given X_i \implies \nu_i \indep T_i \given X_i,
-  $$
+- [Interpretation]{.note}: Within groups defined by $X_i$, treatment is effectively randomized.
+
+  - Units with the same $X_i$ who are treated vs. untreated are comparable.
+  - Any remaining differences in outcomes reflect the causal effect of treatment.
 
 . . .
 
-- With strong ignorability and linearity, we obtain:  
+- This is weaker than strong ignorability: we allow $T_i$ to depend on $X_i$, just not on $(Y_i(0), Y_i(1))$ after conditioning on $X_i$.
+
+. . .
+
+- [Critical requirement]{.alert}: We must observe and correctly measure _all_ confounders $X_i$.
+
+## Modeling Potential Outcomes with Covariates
+
+- To connect CIA to regression, we need to model how potential outcomes relate to covariates.
+
+. . .
+
+- Assume [constant treatment effects]{.highlight}: $\tau_i = \tau$ for all $i$.
+
+- Potential outcomes follow: $f_i(t) = \alpha + \tau t + \eta_i$
+
+  - $\alpha$: baseline expected outcome
+  - $\tau$: constant causal effect of treatment
+  - $\eta_i$: individual-specific deviation (captures everything else affecting $Y_i$)
+
+. . .
+
+- The error $\eta_i$ may depend on covariates. Decompose it as:
 
 $$
-Y_i = \alpha + \tau T_i + X_i^{\prime} \gamma + \nu_i,
-$$ 
+\eta_i = X_i^{\prime} \gamma + \nu_i,
+$$
 
-   where $\nu_i$ is uncorrelated with $X_i$ and also with $T_i$ conditional on $X_i$.
+  where $\gamma$ captures the linear relationship between $X_i$ and outcomes, and $\nu_i$ is the residual variation.
 
-## From Linear POs to Regression
+. . .
 
-- By conditional ignorability,  
+- [Assumption]{.highlight}: $\E [\eta_i \given X_i] = X_i^\prime \gamma$ (linearity in covariates) $\Rightarrow$ $\E [\nu_i \given X_i] = 0$.
+
+## From Potential Outcomes to Regression
+
+- Substituting the error decomposition into observed outcomes:
 
 $$
-\E [f_i(t) \given T_i = t, X_i] = \E [f_i(t) \given X_i] = \alpha + \tau t + X_i^{\prime} \gamma.
+Y_i = f_i(T_i) = \alpha + \tau T_i + X_i^{\prime} \gamma + \nu_i
 $$
 
 . . .
 
-- Then,
+- This looks like a regression equation. But when does OLS identify $\tau$ causally?
+
+. . .
+
+- Under CIA, $f_i(t) \indep T_i \given X_i$, which implies:
+
+$$
+\nu_i \indep T_i \given X_i
+$$
+
+  - [Why?]{.note} Since $X_i$ is fixed, only $\nu_i$ varies in $\eta_i$. CIA on POs transfers to $\nu_i$.
+
+. . .
+
+- [Result]{.highlight}: The regression error $\nu_i$ is:
+
+  1. Uncorrelated with $X_i$ (by construction of $\gamma$)
+  2. Uncorrelated with $T_i$ conditional on $X_i$ (by CIA)
+
+- Therefore, OLS on $Y_i = \alpha + \tau T_i + X_i^{\prime} \gamma + \nu_i$ yields consistent estimates.
+
+## Causal Identification with Covariates
+
+- Let's verify that $\tau$ captures the causal effect under our assumptions.
+
+. . .
+
+- By CIA, conditioning on $X_i$ removes selection bias:
+
+$$
+\E [f_i(t) \given T_i = t, X_i] = \E [f_i(t) \given X_i] = \alpha + \tau t + X_i^{\prime} \gamma
+$$
+
+. . .
+
+- The causal effect of changing treatment from $(t-v)$ to $t$:
 
 $$
 \begin{align*}
-\E [f_i(t) &- f_i(t - v) \given X_i] \\
-&= (\alpha + \tau t + X_i^{\prime} \gamma) - (\alpha + \tau (t - v) + X_i^{\prime} \gamma) \\
+\E [f_i(t) - f_i(t - v) \given X_i] &= (\alpha + \tau t + X_i^{\prime} \gamma) - (\alpha + \tau (t - v) + X_i^{\prime} \gamma) \\
 &= \tau v
 \end{align*}
 $$
 
-- _($X_i$ disappeared because confounding enters linearly and cancels out.)_
+. . .
+
+- [Key observation]{.note}: The $X_i^{\prime} \gamma$ terms cancel out!
+
+  - Confounding enters the model additively and is differenced away.
+  - The coefficient $\tau$ represents the causal effect of a unit change in $T_i$.
+
+## Regression with Covariates: Takeaways
+
+<br>
+
+- [What we assumed]{.highlight}:
+
+  1. **Conditional ignorability**: $(Y_i(0), Y_i(1)) \indep T_i \given X_i$
+  2. **Constant effects**: $\tau_i = \tau$ for all units
+  3. **Linearity**: $\E [\eta_i \given X_i] = X_i^\prime \gamma$
 
 . . .
 
-- [Result]{.note}:
+- [What we achieved]{.highlight}:
 
-  - So, $\tau$ is the **causal effect** of a unit change in $t$.
-  - $\nu_i$ is uncorrelated with $X_i$ and $T_i$, so OLS is consistent for $\tau$.
+  - OLS regression of $Y_i$ on $T_i$ and $X_i$ consistently estimates the causal effect $\tau$
+  - Covariates "absorb" confounding, leaving only causal variation in $T_i$
+
+. . .
+
+- [Critical question]{.alert}: What happens if we **omit** important confounders from $X_i$?
+
+  - If CIA fails because we missed a confounder, our estimate will be biased.
+  - This leads us to [omitted variable bias]{.highlight}...
 
 # Omitted Variable Bias
 
@@ -1042,15 +1089,14 @@ ggplot(sims_df, aes(x = Value, fill = Type)) +
 
 ## Be Careful!
 
-<br><br>
+<br><br><br>
 
 - **Omitted variables** is a misleading term because it could suggest that you want to include *any* variable that is correlated with treatment and outcomes.
 
 - But remember [bad controls]{.highlight} exist, e.g.
 
    - Common descendants of treatment and outcome (colliders)
-   - Block causal path by controling for mediator
-   - $M$-bias variables
+   - Block causal path by controling for post-treatment variables
 
 ## Two Ways to Adjust for Covariates
 
@@ -1088,11 +1134,11 @@ ggplot(sims_df, aes(x = Value, fill = Type)) +
 
 - [Paths]{.highlight}: $T \to Y$, $T \leftarrow Z_3 \to Y$, $T \leftarrow Z_1 \to Z_3 \leftarrow Z_2 \to Y$, etc.
 
-- $Z_1$ is a [parent]{.highlight} of $T$ and $Z_3$. 
+- $Z_1$ is a [parent]{.highlight} of $T$ and $Z_3$.
 
 - $T$ and $Z_3$ are [children]{.highlight} of $Z_1$.
 
-- $Z_1$ is an [ancestor]{.highlight} of $Y$. 
+- $Z_1$ is an [ancestor]{.highlight} of $Y$.
 
 - $Y$ is a [descendant]{.highlight} of $Z_1$.
 
@@ -1110,49 +1156,166 @@ digraph G {
 		arrowsize=0.5, labeldistance=3, penwidth=2]
   node [
     shape=plaintext,fontsize=24,penwidth=2]
-    // Nodes
+    // Main nodes
     T;
     Y;
-    Z_1;
-    Z_2;
-    Z_3;
+    
+    // Confounders
+    Z1 [label=<Z<sub>1</sub>>];
+    Z2 [label=<Z<sub>2</sub>>];
+    Z3 [label=<Z<sub>3</sub>>];
 
-    // Edges
-    Z_1 -> T;
-    Z_1 -> Z_3;
-    Z_2 -> Y;
-    Z_2 -> Z_3;
-    Z_3 -> T;
-    Z_3 -> Y;
-    T -> Y;
-    {{ rank=min; Z_1;Z_2};}
+    // Causal path
+    T -> Y [color="#458588", penwidth=3];
+
+    // Back-door paths (confounding)
+    Z1 -> T [color="#cc241d"];
+    Z1 -> Z3 [color="#cc241d"];
+    Z2 -> Y [color="#cc241d"];
+    Z2 -> Z3 [color="#cc241d"];
+    Z3 -> T [color="#cc241d"];
+    Z3 -> Y [color="#cc241d"];
+
+    {{ rank=min; Z1;Z2};}
+    {{ rank=same; Z3};}
     {{ rank=max; T;Y};}
 }
 ```
 :::
 :::
-  
 
-## Blocked Paths and $d$-separation
+## Back-Door vs. Causal Paths
+
+:::{.columns}
+::: {.column width="60%"}
+
+::: {.callout-important icon="false" title="Definition: Types of Paths"}
+
+A [causal (front-door) path]{.highlight} from $T$ to $Y$ is a path where every arrow points **away from** $T$ toward $Y$: $T \to \cdots \to Y$
+
+A [back-door path]{.highlight} from $T$ to $Y$ is any path that starts with an arrow **into** $T$: $T \leftarrow \cdots$
+
+:::
+
+::: {.fragment fragment-index=1}
+- [Causal paths]{.highlight} transmit the effect of $T$ on $Y$ — we want to keep these open!
+
+- [Back-door paths]{.highlight} create spurious associations (confounding) — we want to block these.
+:::
+
+:::
+
+::: {.column width="40%"}
+```{dot}
+//| fig-width: 3.5
+//| fig-height: 3.5
+//| fig-align: center
+digraph G {
+  bgcolor="transparent"
+  rankdir="TB"
+  edge [
+		arrowsize=0.5, labeldistance=3, penwidth=2]
+  node [
+    shape=plaintext,fontsize=24,penwidth=2]
+    T;
+    Y;
+    Z;
+    W;
+
+    // Causal path
+    T -> W [color="#458588"];
+    W -> Y [color="#458588"];
+
+    // Back-door path
+    Z -> T [color="#cc241d"];
+    Z -> Y [color="#cc241d"];
+
+    {{ rank=min; Z};}
+    {{ rank=same; T;W};}
+    {{ rank=max; Y};}
+}
+```
+:::
+:::
+
+::: {.fragment fragment-index=2}
+- [Example]{.note}: $T \to W \to Y$ is a [causal path]{style="color:#458588"}. $T \leftarrow Z \to Y$ is a [back-door path]{style="color:#cc241d"}.
+
+- [Intuition]{.note}: Back-door paths are "alternative explanations" for why $T$ and $Y$ might be correlated, even if $T$ has no causal effect on $Y$.
+:::
+
+## Colliders: A Key Concept
+
+<br>
 
 :::{.columns}
 ::: {.column width="65%"}
-::: {.callout-important icon="false" title="Definition: Blocked Paths"}
 
-A set of nodes $X$ **blocks** a path $p$ if either:
+- A [collider]{.highlight} on a path is a node where two arrows "collide" (point into it): $\to C \leftarrow$
 
-1. $p$ contains at least one *arrow-emitting node* in $X$, OR
-2. $p$ contains at least one *collision node* that is outside $X$ and has no descendant in $X$.
+::: {.fragment fragment-index=1}
+- [Key insight]{.note}: Colliders have special properties:
+
+  - A path through a collider is [naturally blocked]{.highlight} — no information flows through it.
+  - [Conditioning on a collider **opens** the path!]{.alert} This can create spurious associations.
 :::
 
-:::{.fragment}
-- $T \leftarrow W_1 \leftarrow Z_1 \to Z_3 \to Y$ is blocked by $\{W_1\}$, $\{Z_1\}$, $\{Z_1, Z_3\}$, etc.
-- $T \leftarrow W_1 \leftarrow Z_1 \to Z_3 \leftarrow Z_2 \to W_2 \to Y$ is blocked by $\{\emptyset\}$ (an empty set).
+::: {.fragment fragment-index=2}
+- [Example]{.note}: $Z_3$ is a collider on the path $Z_1 \to Z_3 \leftarrow Z_2$.
+
+  - Without conditioning: $Z_1 \indep Z_2$ (path blocked).
+  - Conditioning on $Z_3$: $Z_1 \notindep Z_2 \given Z_3$ (path opened!).
 :::
 
 :::
 
 ::: {.column width="35%"}
+```{dot}
+//| fig-width: 3
+//| fig-height: 2.5
+//| fig-align: center
+digraph G {
+  bgcolor="transparent"
+  rankdir="TB"
+  edge [
+		arrowsize=0.5, labeldistance=3, penwidth=2.5]
+  node [
+    shape=plaintext,fontsize=24,penwidth=2]
+    Z1 [label=<Z<SUB>1</SUB>>];
+    Z2 [label=<Z<SUB>2</SUB>>];
+    // Collider highlighted
+    Z3 [label=<Z<SUB>3</SUB>>, fontcolor="#cc241d"];
+
+    // Arrows pointing INTO collider
+    Z1 -> Z3 [color="#cc241d"];
+    Z2 -> Z3 [color="#cc241d"];
+    {{ rank=min; Z1;Z2};}
+    {{ rank=max; Z3};}
+}
+```
+:::
+:::
+
+## Blocking Paths
+
+:::{.columns}
+::: {.column width="60%"}
+::: {.callout-important icon="false" title="Definition: Blocked Paths"}
+
+A path $p$ is **blocked** by a set of nodes $X$ if:
+
+1. $p$ contains a [non-collider]{.highlight} that is in $X$ (conditioning blocks flow), **OR**
+2. $p$ contains a [collider]{.highlight} where neither the collider nor its descendants are in $X$ (naturally blocked).
+
+:::
+
+::: {.fragment fragment-index=1}
+- [Intuition]{.note}: Conditioning on non-colliders blocks information flow; conditioning on colliders opens it.
+:::
+
+:::
+
+::: {.column width="40%"}
 ```{dot}
 //| fig-width: 3
 //| fig-height: 3
@@ -1164,50 +1327,86 @@ digraph G {
 		arrowsize=0.5, labeldistance=3, penwidth=2]
   node [
     shape=plaintext,fontsize=24,penwidth=2]
-    // Nodes
+    // Main nodes
     T;
     Y;
-    Z_1;
-    Z_2;
-    Z_3;
+    // Collider (special)
+    Z3 [label=<Z<SUB>3</SUB>>];
+    // Other nodes
+    Z1 [label=<Z<SUB>1</SUB>>];
+    Z2 [label=<Z<SUB>2</SUB>>];
+    W1 [label=<W<SUB>1</SUB>>];
+    W2 [label=<W<SUB>2</SUB>>];
+    W3 [label=<W<SUB>3</SUB>>];
 
-    // Edges
-    Z_1 -> W_1 -> T;
-    Z_1 -> Z_3;
-    Z_2 -> W_2 -> Y;
-    Z_2 -> Z_3;
-    Z_3 -> T;
-    Z_3 -> Y;
-    T -> W_3 -> Y;
-    {{ rank=min; Z_1;Z_2};}
-    {{ rank=same; W_1;Z_3;W_2};}
-    {{ rank=max; T;W_3;Y};}
+    // Back-door paths
+    Z1 -> W1 [color="#cc241d"];
+    W1 -> T [color="#cc241d"];
+    Z1 -> Z3 [color="#cc241d"];
+    Z2 -> W2 [color="#cc241d"];
+    W2 -> Y [color="#cc241d"];
+    Z2 -> Z3 [color="#cc241d"];
+    Z3 -> T [color="#cc241d"];
+    Z3 -> Y [color="#cc241d"];
+
+    // Causal path
+    T -> W3 [color="#458588", penwidth=3];
+    W3 -> Y [color="#458588", penwidth=3];
+
+    {{ rank=min; Z1;Z2};}
+    {{ rank=same; W1;Z3;W2};}
+    {{ rank=max; T;W3;Y};}
 }
 ```
 :::
 :::
 
-. . .
+::: {.fragment fragment-index=2}
+- $T \leftarrow W_1 \leftarrow Z_1 \to Z_3 \to Y$: blocked by $\{W_1\}$ or $\{Z_1\}$ (non-colliders).
+- $T \leftarrow W_1 \leftarrow Z_1 \to Z_3 \leftarrow Z_2 \to W_2 \to Y$: blocked by $\{\emptyset\}$ ($Z_3$ is a collider).
+:::
+
+## $d$-Separation
+
+<br><br><br>
 
 ::: {.callout-important icon="false" title="Definition: $d$-separation"}
-If $X$ blocks all paths from $T$ to $Y$, then $X$ [$d$-separates]{.highlight} $T$ and $Y$.  
+A set $X$ [$d$-separates]{.highlight} $T$ and $Y$ if $X$ blocks **all** paths between $T$ and $Y$.
+
 If $X$ $d$-separates $T$ and $Y$, then $Y \indep T \given X$.
 :::
 
-- $W_1$ and $Z_3$ are $d$-separated by set $X = \{Z_1\}$.
+- [Intuition]{.note}: $d$-separation is a graphical criterion for conditional independence — if all paths are blocked, the variables are independent given $X$.
 
-## The Back-Door Criterion for Causal Identification
+## The Back-Door Criterion
 
 ::: {.callout-important icon="false" title="Theorem: The Back-Door Criterion"}
-A set $X$ is sufficient for adjustment to identify the causal effect of $T$ on $Y$ if:
-  
-  1. The elements of $X$ block all [back-door paths]{.highlight} from $T$ to $Y$ (confounders, but not colliders), **and**
-  2. No element of $X$ is a descendant of $T$ on a direct path to $Y$ (no post-treatment),
+A set $X$ satisfies the back-door criterion relative to $(T, Y)$ if:
+
+  1. $X$ [blocks ($d$-separates) all back-door paths]{.highlight} from $T$ to $Y$, **and**
+  2. No element of $X$ is a [descendant of $T$]{.highlight}.
 :::
 
-- [Important]{.note}: The [back-door criterion]{.highlight} tells you which covariates to condition on to identify a causal effect, given a hypothesized DAG.
+::: {.fragment fragment-index=1}
+- [Why condition 1?]{.note} Blocking back-door paths eliminates confounding — the spurious association between $T$ and $Y$.
 
-. . .
+- [Why condition 2?]{.note} Descendants of $T$ are post-treatment variables. Conditioning on them could _block_ part of the causal effect (if they’re mediators), and/or induce collider/selection bias (if they’re affected by $T$ and share causes with $Y$, etc.).
+:::
+
+::: {.fragment fragment-index=2}
+- [Result]{.highlight}: If $X$ satisfies the back-door criterion, then it implies conditional ignorability ($Y_i(t) \indep T_i \given X_i$):
+
+$$
+\begin{align*}
+\E[Y_i(t)] &= \E_X[\E[Y_i \given T_i = t, X_i]] \implies \\
+\implies\ \tau_{ATE} &= \E[Y_i(1)] - \E[Y_i(0)] = \E_X[\E[Y_i \given T_i = 1, X_i] - \E[Y_i \given T_i = 0, X_i]]
+\end{align*}
+$$
+:::
+
+## Back-Door Criterion: Example
+
+<br>
 
 :::{.columns}
 ::: {.column width="40%"}
@@ -1222,36 +1421,54 @@ digraph G {
 		arrowsize=0.5, labeldistance=3, penwidth=2]
   node [
     shape=plaintext,fontsize=24,penwidth=2]
-    // Nodes
+    // Main nodes
     T;
     Y;
-    Z_1;
-    Z_2;
-    Z_3;
+    // Collider (special - conditioning opens paths!)
+    Z3 [label=<Z<SUB>3</SUB>>];
+    // Other confounders
+    Z1 [label=<Z<SUB>1</SUB>>];
+    Z2 [label=<Z<SUB>2</SUB>>];
+    W1 [label=<W<SUB>1</SUB>>];
+    W2 [label=<W<SUB>2</SUB>>];
+    // Post-treatment (descendant of T)
+    W3 [label=<W<SUB>3</SUB>>];
 
-    // Edges
-    Z_1 -> W_1 -> T;
-    Z_1 -> Z_3;
-    Z_2 -> W_2 -> Y;
-    Z_2 -> Z_3;
-    Z_3 -> T;
-    Z_3 -> Y;
-    T -> W_3 -> Y;
-    {{ rank=min; Z_1;Z_2};}
-    {{ rank=same; W_1;Z_3;W_2};}
-    {{ rank=max; T;W_3;Y};}
+    // Back-door paths (red)
+    Z1 -> W1 [color="#cc241d"];
+    W1 -> T [color="#cc241d"];
+    Z1 -> Z3 [color="#cc241d"];
+    Z2 -> W2 [color="#cc241d"];
+    W2 -> Y [color="#cc241d"];
+    Z2 -> Z3 [color="#cc241d"];
+    Z3 -> T [color="#cc241d"];
+    Z3 -> Y [color="#cc241d"];
+
+    // Causal path (blue, thicker)
+    T -> W3 [color="#458588", penwidth=3];
+    W3 -> Y [color="#458588", penwidth=3];
+
+    {{ rank=min; Z1;Z2};}
+    {{ rank=same; W1;Z3;W2};}
+    {{ rank=max; T;W3;Y};}
 }
 ```
 :::
 
 ::: {.column width="60%"}
 
-<br>
+- [Back-door paths]{.highlight} from $T$ to $Y$:
+  1. $T \leftarrow Z_3 \to Y$
+  2. $T \leftarrow W_1 \leftarrow Z_1 \to Z_3 \to Y$
+  3. $T \leftarrow W_1 \leftarrow Z_1 \to Z_3 \leftarrow Z_2 \to W_2 \to Y$
 
-- [Example]{.note}: Which variables should we control for to identify the effect of $T$ on $Y$?
-  - $X = \{W_1, W_2\}$? [**No.**]{.fragment}
-  - $X = \{Z_1, Z_3\}$? [**Yes!**]{.fragment}
-  - $X = \{Z_3\}$? [**No**, because it [unblocks]{.highlight} $T \leftarrow W_1 \leftarrow Z_1 \to Z_3 \leftarrow Z_2 \to W_2 \to Y$.]{.fragment}
+::: {.fragment fragment-index=1}
+- [Example]{.note}: Which sets satisfy the back-door criterion?
+  - $X = \{W_1, W_2\}$? [**No** — doesn't block path 1.]{.fragment fragment-index=2}
+  - $X = \{Z_3\}$? [**No** — opens path 3 (collider!).]{.fragment fragment-index=3}
+  - $X = \{Z_1, Z_3\}$? [**Yes!** Blocks all back-door paths.]{.fragment fragment-index=4}
+  - $X = \{W_3\}$? [**No** — $W_3$ is a descendant of $T$.]{.fragment fragment-index=5}
+:::
 :::
 :::
 
@@ -1806,64 +2023,76 @@ digraph G {
 
 # Regression with Heterogeneous Treatments
 
-## Effect Heterogeneity
+## What If Treatment Effects Vary?
 
-<br>
+<br><br>
 
-- Thus far we have simplified things by assuming [constant effects]{.highlight} ($\tau_i = \tau$ for all $i$) and [linearity]{.highlight} ($\E [\eta_i \given X_i] = X'_i \gamma$).
+- Thus far we assumed [constant effects]{.highlight} ($\tau_i = \tau$) and [linearity]{.highlight} ($\E [\eta_i \given X_i] = X'_i \gamma$).
 
-. . .
-
-- These are strong assumptions!
-
-- What if they are false? Let’s see.
+- These are strong assumptions! What happens if treatment effects vary across units?
 
 . . .
 
-- Suppose 
+- Setup with [heterogeneous effects]{.highlight}:
 
-  - $\mathcal{T} = \{0,1\}$,
-  - Potential outcomes $(Y_{i} (0), Y_{i} (1))$, 
-  - Heterogeneous treatment effects, $\tau_i = Y_{i} (1) - Y_{i} (0)$,
-  - $\E [\eta_i \given X_i] = f(X_i)$
+  - Binary treatment: $T_i \in \{0,1\}$
+  - Potential outcomes: $Y_{i}(0)$, $Y_{i}(1)$
+  - Unit-level treatment effect: $\tau_i = Y_{i}(1) - Y_{i}(0)$ (varies across $i$!)
+  - Discrete covariate: $X_i \in \{x_1, x_2, \ldots, x_L\}$
 
-- Let [conditional independence]{.highlight} assumption (CIA) hold: $Y_{i} (0), Y_{i} (1)) \indep T_i \given X_i$.
+. . .
 
-## Effect Heterogeneity
+- Maintain [conditional ignorability]{.highlight} (CIA): $\{ Y_{i}(0), Y_{i}(1) \} \indep T_i \given X_i$
 
-- In this case the effect of interest is still 
+- [Goal]{.note}: Estimate $\tau_{ATE} = \E[\tau_i]$ using regression.
+
+## The Target: Average Treatment Effect
+
+<br><br>
+
+- Under CIA, the ATE can be written as a weighted average of [conditional ATEs]{.highlight}:
 
   $$
   \begin{align*}
-  \tau_{ATE} &= \E_{X} [\E [Y_i (1) \given X_i] - \E [Y_i (0) \given X_i]] \\
-  &= \E_{X} [\E [Y_i (1) \given T_i = 1, X_i] - \E [Y_i (0) \given T_i = 0, X_i]] \\
-  &= \sum_{X} \tau_x \Pr (X_i = x),
+  \tau_{ATE} &= \E[\tau_i] = \E_{X} [\E [Y_i(1) - Y_i(0) \given X_i]] \\
+  &= \E_{X} [\underbrace{\E [Y_i(1) \given X_i] - \E [Y_i(0) \given X_i]}_{\tau_x}] \\
+  &= \sum_{x} \tau_x \Pr(X_i = x),
   \end{align*}
   $$
 
-  where $\tau_x \equiv \E [Y_i (1) \given X_i = x] - \E [Y_i (0) \given X_i = x]$
+  where $\tau_x \equiv \E [Y_i(1) - Y_i(0) \given X_i = x]$ is the CATE for stratum $x$.
 
 . . .
 
-- How would we estimate this using regression?
+- [Key insight]{.note}: The ATE averages stratum-specific effects $\tau_x$ by their population shares $\Pr(X_i = x)$.
 
-. . .
+## Estimating with Saturated Regression
 
-- We can use [_saturated_]{.highlight} (or one-way fixed effects) OLS regression model
+<br><br>
+
+- To flexibly control for $X_i$, use a [saturated regression]{.highlight} (fixed effects for each $X_i$ value):
 
   $$
-  Y_i = \alpha_0 + \tau T_i + \mathbb{1} [X_i = x_2] \alpha_{x_2} + \dots + \mathbb{1} [ X_i = x_L ] \alpha_{x_L} +   \varepsilon_i,
+  Y_i = \alpha_1 \mathbb{1}[X_i = x_1] + \cdots + \alpha_L \mathbb{1}[X_i = x_L] + \tau T_i + \varepsilon_i,
   $$
 
-  where $\mathbb{1} [\cdot]$ denotes indicator of event $\cdot$; $x_2, \dots, x_L$ exhausts all possible $X_i$ values omitting one (?) from the specification.
+  where $\mathbb{1}[\cdot]$ is the indicator function. (One $\alpha$ omitted if including intercept.)
 
 . . .
 
-- This is the best we can do with OLS regression with controls. (Why?)
+- [Why saturated?]{.note}
+
+  - Makes no assumption about functional form of $\E[Y_i \given X_i]$
+  - Each stratum $x$ gets its own intercept $\alpha_x$
+  - This is the most flexible linear specification for discrete $X_i$
+
+. . .
+
+- [Question]{.alert}: Does $\widehat{\tau}$ from this regression estimate $\tau_{ATE}$?
 
 ## Regression Anatomy
 
-- Recall [regression anatomy]{.highlight}: $\widehat{\tau} = \frac{\cov(\tilde{Y}_i, \tilde{T}_i)}{\var(\tilde{T}_i)}$, where $\tilde{T}_i$ is residuals from regression of $T_i$ on other regressors
+- [Regression anatomy]{.highlight} is: $\widehat{\tau} = \frac{\cov(\tilde{Y}_i, \tilde{T}_i)}{\var(\tilde{T}_i)} = \frac{\cov(Y_i, \tilde{T_i})}{\var(\tilde{T_i})}$, where $\tilde{T}_i$ is residuals from regression of $T_i$ on other regressors.
 
 - Let's see if it actually works
 
@@ -1902,42 +2131,64 @@ data.frame(
   knitr::kable(digits = 3)
 ```
 
-## Regression Anatomy
+## Deriving What OLS Estimates
 
-- Recall that $\widehat{\tau} = \frac{\cov(Y_i, \tilde{T_i})}{\var(\tilde{T_i})}$, where $\tilde{T_i}$ is residuals from regression of $T_i$ on other regressors
+- Define the [residualized treatment]{.highlight}: $\tilde{T}_i \equiv T_i - \E[T_i \given X_i]$
+
+- [Key property]{.note}: $\E[\tilde{T}_i] = 0$ (residuals have mean zero)
+
+. . .
+
+- Start from regression anatomy and simplify the covariance:
 
   $$
   \begin{align*}
-  \widehat{\tau} &= \frac{\cov(Y_i, \tilde{T_i})}{\var(\tilde{T_i})}\\
-  &= \frac{\E [\E [Y_i \given T_i, X_i](T_i - \E [T_i \given X_i])] - \textcolor{#d65d0e}{\E [Y_i \given T_i, X_i]\E [T_i - \E [T_i   \given X_i]]} ] }{\E [(T_i - \E [T_i \given X_i])^2]}\\
-  &= \frac{\E [\E [Y_i \given T_i, X_i](T_i - \E [T_i \given X_i])]}{\E [(T_i - \E [T_i \given X_i])^2]}.  \quad  \text{($\because$ independence of residuals)}
+  \widehat{\tau} &= \frac{\cov(Y_i, \tilde{T}_i)}{\var(\tilde{T}_i)} = \frac{\E[Y_i \tilde{T}_i] - \E[Y_i]\textcolor{#d65d0e}{\E[\tilde{T}_i]}}{\E[\tilde{T}_i^2]} \\
+  &= \frac{\E[Y_i \tilde{T}_i]}{\E[\tilde{T}_i^2]}  \quad \text{($\because$ $\E[\tilde{T}_i] = 0$)}
   \end{align*}
   $$
 
 . . .
 
-- Now let's look at the first term in the numerator
+- Apply [law of iterated expectations]{.highlight} to the numerator:
+
+  $$
+  \E[Y_i \tilde{T}_i] = \E\big[\E[Y_i \given T_i, X_i]  \tilde{T}_i\big]
+  $$
+
+  This works because $\tilde{T}_i$ is not a function of $T_i$ or $X_i$.
+
+. . .
+
+- So we have: $\widehat{\tau} = \frac{\E\big[\E[Y_i \given T_i, X_i]  \tilde{T}_i\big]}{\E[\tilde{T}_i^2]}$
+
+## Expanding the Conditional Expectation
+
+<br><br><br>
+
+- Expand $\E [Y_i \given T_i, X_i]$ using the [switching equation]{.highlight}: $Y_i = T_i Y_i(1) + (1-T_i) Y_i(0)$
 
   $$
   \begin{align*}
-  \E [Y_i \given T_i, X_i] &= T_i\E [Y_{i} (1) - Y_{i} (0) \given T_i, X_i]  + \textcolor{#458588}{\E [Y_{i} (0) \given T_i, X_i]} \quad \text{($\because$ switching equation)}\\
-  &= T_i\E [Y_{i} (1) - Y_{i} (0) \given T_i, X_i]  + \E [\textcolor{#458588}{Y_{i} (0)} \given T_i = 0, X_i] \quad \text{($\because$  CIA)}\\
-  &= T_i \textcolor{#458588}{\E [Y_{i} (1) - Y_{i} (0) \given T_i, X_i]}  + \E [Y_{i} \given T_i = 0, X_i] \quad \text{($\because$  switching equation)}\\
-  &= T_i \tau_X  + \E [Y_{i} \given T_i = 0, X_i] \quad \text{($\because$ definition of $\tau_X$)}
+  \E [Y_i \given T_i, X_i] &= T_i \E [Y_{i}(1) \given T_i, X_i] + (1-T_i) \E [Y_{i}(0) \given T_i, X_i] \\
+  &= T_i \E [Y_{i}(1) \given X_i] + (1-T_i) \E [Y_{i}(0) \given X_i] \quad \text{($\because$ CIA)}\\
+  &= T_i \big(\E [Y_{i}(1) \given X_i] - \E [Y_{i}(0) \given X_i]\big) + \E [Y_{i}(0) \given X_i] \quad \text{($\because$ rearrange)}\\
+  &= T_i \tau_x + \E[Y_i(0) \given X_i]
   \end{align*}
   $$
 
-## Regression Anatomy
+## Completing the Derivation
+
+- Substitute $\E[Y_i \given T_i, X_i] = T_i \tau_x + \E[Y_i(0) \given X_i]$ into our expression:
 
 $$
   \begin{align*}
-  \widehat{\tau} &= \frac{\E [\E [Y_i \given T_i, X_i](T_i - \E [T_i \given X_i])]}{\E [(T_i - \E [T_i \given X_i])^2]} \\
-  &= \frac{\E [\textcolor{#458588}{\left( T_i \tau_X  + \E [Y_{i} \given T_i = 0, X_i] \right)} (T_i - \E [T_i \given X_i])]}{\E [(T_i - \E [T_i \given X_i])^2]} \quad \text{($\because$ plug in result)}\\
-  &\class{fragment}{{}= \frac{\E [ \textcolor{#458588}{T_i \tau_X} (T_i - \E [T_i \given X_i])  + \textcolor{#458588}{\E [Y_{i} \given T_i = 0, X_i]} (T_i - \E [T_i \given X_i]) ]}{\E [(T_i - \E [T_i \given X_i])^2]}  \quad \text{($\because$ distribute)}} \\
-  &\class{fragment}{{}= \frac{\E [ \textcolor{#d65d0e}{T_i} \tau_X \textcolor{#d65d0e}{(T_i - \E [T_i \given X_i])} ]}{\E [(T_i - \E [T_i \given X_i])^2]}  \quad \text{($\because$ independence of residuals)}} \\
-  &\class{fragment}{{}= \frac{\E_X [ \tau_X \textcolor{#d65d0e}{\E [ T_i^2 - T_i \E [T_i \given X_i] \given X_i]} ]}{\E_X [ \textcolor{#d65d0e}{\E [ (T_i - \E [T_i \given X_i])^2 \given X_i ]} ]}  \quad \text{($\because$ iterated $\E$ )}} \\
-  &\class{fragment}{{}= \frac{\E_X [ \tau_X \textcolor{#d65d0e}{\var (T_i \given X_i)} ]}{\E_X [ \textcolor{#d65d0e}{\var (T_i \given X_i)} ] }  \quad \text{($\because$ definition of $\var$ )}}\\
-  &\class{fragment}{{}= \frac{\sum_X \tau_X \textcolor{#d65d0e}{\Pr (T_i = 1 \given X_i = x) (1 - \Pr (T_i = 1 \given X_i = x))} \Pr(X_i = x)}{\sum_X \textcolor{#d65d0e}{\Pr(T_i = 1 \given X_i = x) (1 - \Pr (T_i = 1 \given X_i = x))} \Pr(X_i = x)}.  \quad \text{($\because$ binary $T_i$)}}
+  \widehat{\tau} &= \frac{\E\big[(T_i \tau_x + \E[Y_i(0) \given X_i])  \tilde{T}_i\big]}{\E[\tilde{T}_i^2]} \\
+  &\class{fragment}{{}= \frac{\E[T_i \tau_x \tilde{T}_i] + \E[\E[Y_i(0) \given X_i] \tilde{T}_i]}{\E[\tilde{T}_i^2]}  \quad \text{($\because$ distribute)}} \\
+  &\class{fragment}{{}= \frac{\E[T_i \tau_x \tilde{T}_i]}{\E[\tilde{T}_i^2]}  \quad \text{($\because$ $\E[\E[Y_i(0) \given X_i] \tilde{T}_i] = 0$ since $\E[\tilde{T}_i \given X_i] = 0$)}} \\
+  &\class{fragment}{{}= \frac{\E_X[\tau_x \E[T_i \tilde{T}_i \given X_i]]}{\E_X[\E[\tilde{T}_i^2 \given X_i]]}  \quad \text{($\because$ law of iterated expectations)}} \\
+  &\class{fragment}{{}= \frac{\E_X[\tau_x \E[T_i (T_i - \E[T_i \given X_i]) \given X_i] ]}{\E_X[\E[(T_i - \E[T_i \given X_i])^2 \given X_i]]}  \quad \text{($\because$ definition of $\tilde{T}_i$ )}} \\
+  &\class{fragment}{{}= \frac{\E_X[\tau_x  \var(T_i \given X_i)]}{\E_X[\var(T_i \given X_i)]}  \quad \text{($\because$ $\E[T_i \tilde{T}_i \given X_i] = \var(T_i \given X_i)$)}}
   \end{align*}
 $$
 
@@ -1945,29 +2196,29 @@ $$
 
 ![](../_images/phew.png){fig-align="center"}
 
-## Effect Heterogeneity
+## Comparing ATE vs. OLS Estimand
 
-<br>
-
-- Compare
+- Compare the [target]{.highlight} vs. [what OLS estimates]{.highlight}:
 
   $$
-  \tau_{ATE} = \sum_{X} \tau_x \Pr (X_i = x),
+  \tau_{ATE} = \sum_{x} \tau_x  \Pr(X_i = x),
   $$
 
-  versus
+  versus (in binary $T_i$ case)
 
   $$
-  \widehat{\tau} = \frac{\sum_X \tau_X \textcolor{#d65d0e}{\Pr (T_i = 1 \given X_i = x) (1 - \Pr (T_i = 1 \given X_i = x))} \Pr(X_i = x)}  {\sum_X \textcolor{#d65d0e}{\Pr(T_i = 1 \given X_i = x) (1 - \Pr (T_i = 1 \given X_i = x))} \Pr(X_i = x)}
+  \widehat{\tau} \xrightarrow{p} \frac{\E_X[\tau_x  \var(T_i \given X_i)]}{\E_X[\var(T_i \given X_i)]} = \frac{\sum_x \tau_x  \textcolor{#d65d0e}{p_x(1-p_x)}  \Pr(X_i = x)}{\sum_x \textcolor{#d65d0e}{p_x(1-p_x)}  \Pr(X_i = x)}
   $$
+
+  where $p_x = \Pr(T_i = 1 \given X_i = x)$.
 
 . . .
 
-- $\widehat{\tau}$ aggregates via [conditional variance weighting]{.highlight} with respect to $T_i$ instead of just probability.
+- $\widehat{\tau}$ aggregates via [conditional variance weighting]{.highlight} with respect to $T_i$ instead of just population shares.
 
-- If $\tau_i$ was constant _wrt_ $X_i$, the precision weighting _could_ be good from an efficiency standpoint.
+- If $\tau_x$ was constant across $X_i$, regression recovers ATE, but variance weighting _could_ reduce efficiency (more uncertainty).
 
-- If $T_i \indep X_i$, then $\widehat{\tau}$ reduces to weighting by the number of units with $X_i = x$.
+- If $T_i \indep X_i$, then $p_x(1-p_x)$ is constant across strata and cancels out, so $\widehat{\tau}$ reduces to weighting by $\Pr(X_i = x)$.
 
 ## Truth about Regression
 
@@ -2082,47 +2333,6 @@ ggplot(sims_df, aes(x = Value, fill = Assignment)) +
   )
 ```
 
-## Heterogeneous $\tau$ Only
-
-```{r}
-#| label: tau_het_treat
-#| fig-align: center
-#| fig-width: 8
-#| fig-height: 5
-
-sims_df <-
-  pbapply::pbreplicate(
-    n = 1000,
-    get_bias_het(assignment_fun = function(x) .6),
-    cl = "future"
-  ) |>
-  t() |>
-  as.data.frame() |>
-  dplyr::rename(`Variable` = het2, `Constant` = het1) |>
-  pivot_longer(
-    cols = c(Variable, Constant),
-    names_to = "Assignment",
-    values_to = "Value"
-  )
-
-# Plot using ggplot2
-ggplot(sims_df, aes(x = Value, fill = Assignment)) +
-  geom_histogram(alpha = 0.5, position = "identity", bins = 100) +
-  scale_fill_manual(values = c("#cc241d", "#458588"), name = "Assignment") +
-  geom_vline(
-    data = summarize(group_by(sims_df, Assignment), mean_val = mean(Value)),
-    aes(xintercept = mean_val, color = Assignment),
-    linetype = "dashed",
-    linewidth = 1
-  ) +
-  scale_color_manual(values = c("#cc241d", "#458588"), name = "Assignment") +
-  scale_x_continuous(limits = c(-2, 2)) +
-  labs(
-    x = "Bias (Deviation from True Value)",
-    y = "Frequency"
-  )
-```
-
 ## Heterogeneous Assignment Only
 
 ```{r}
@@ -2159,7 +2369,7 @@ ggplot(sims_df, aes(x = Value, fill = Assignment)) +
   scale_color_manual(values = c("#cc241d", "#458588"), name = "Assignment") +
   scale_x_continuous(limits = c(-2, 2)) +
   labs(
-    x = "Bias (Deviation from True Value)",
+    x = "Deviation from True Value",
     y = "Frequency"
   )
 ```
@@ -2171,7 +2381,7 @@ ggplot(sims_df, aes(x = Value, fill = Assignment)) +
 - Regression is a useful tool for estimating causal effects and accounting for CIA:
   - **Binary treatments**: regression can provide consistent estimates of $ATE$.
   - **Discrete or continuous treatments**: Estimates provide a best linear approximation when relationship is non-linear.
-  - **Heterogeneous treatments**: Regression estimates are weighted by conditional variance and could be biased and apply to [effective sample]{.highlight} only.
+  - **Heterogeneous treatments**: Regression estimates are weighted by conditional variance and could be [biased]{.highlight} and apply to [effective sample]{.highlight} only.
 
 . . .
 
@@ -2192,17 +2402,17 @@ ggplot(sims_df, aes(x = Value, fill = Assignment)) +
 
 <br>
 
-- Consider a multiple regression model: $Y_i = \alpha + \tau T_i + X_i^\prime \beta + \nu_i$.
+- Consider a multiple regression model: $Y_i = \alpha + \tau T_i + X_i^\prime \gamma + \nu_i$.
 
-- To find $\tau$, the coefficient on $T_i$, the [Frisch-Waugh-Lovell Theorem]{.highlight} states that:
+- To find $\widehat{\tau}$, the coefficient on $T_i$, the [Frisch-Waugh-Lovell Theorem]{.highlight} states that:
 
-  1. Regress $Y_i$ on $X_i$ and obtain the residuals $\tilde{Y}_i = Y_i - X_i^\prime \widehat{\beta}$.
-  
-  2. Regress $T_i$ on $X_i$ and obtain the residuals $\tilde{T}_i = T_i - X_i^\prime \widehat{\delta}$.
-  
-  3. Regress $\tilde{Y}_i$ on $\tilde{T}_i$ to obtain $\beta_1$.
+  1. Regress $Y_i$ on $X_i$ and obtain the residuals $\tilde{Y}_i = Y_i - X_i^\prime \widehat{\pi}_Y$.
 
-  In addition, the $R^2$ and F-statistics of these regressions will be the same as those from the full model regression. 
+  2. Regress $T_i$ on $X_i$ and obtain the residuals $\tilde{T}_i = T_i - X_i^\prime \widehat{\pi}_T$.
+
+  3. Regress $\tilde{Y}_i$ on $\tilde{T}_i$ to obtain $\widehat{\tau}$.
+
+  In addition, the $R^2$ and F-statistics of these regressions will be the same as those from the full model regression.
 
 - [Intuition]{.note}:
   - The Frisch-Waugh-Lovell theorem decomposes the estimation process.
