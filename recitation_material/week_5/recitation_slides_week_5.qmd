@@ -31,8 +31,7 @@ editor: source
 
 1. What replication is (and isn't)
 2. Why good replication practices matter
-3. What you can implement
-4. A replication exercise
+3. A replication exercise
 
 ## Why You Should Pay Attention to Today's Recitation
 
@@ -137,7 +136,7 @@ write_csv(data, "../data/cleaned/am_radio_2005.csv")
 ################################################################################
 ```
 
-- Clearly comments what each line of code is doing
+- Clearly comments for what each line (chunk) of code is doing
 - Separates major tasks in each script with a standard workflow
 
 ## Best Practice Tips
@@ -158,8 +157,8 @@ write_csv(data, "../data/cleaned/am_radio_2005.csv")
 
 - 73 research teams used the same dataset to answer this question. You get to do the same now as well!
 - Instructions:
-    - Pair into groups of 3
-    - Open the .r script in the GitHub folder and follow the instructions to produce (i) a regression table and (ii) visualization
+    - Pair into groups of 2-3
+    - Open the .r script in the GitHub folder and follow the instructions to produce (i) a regression table
     - Regroup when done to discuss your results and their (dis)similarity
 
 # Resources
@@ -180,4 +179,4 @@ write_csv(data, "../data/cleaned/am_radio_2005.csv")
 4. Code original analysis without directly copy-pasting 
 5. Think through two well-justified extensions
 6. Review your output and think if Gosha or I can follow your code and the choices you made without difficulty
-7. Follow guidelines for formatting, we want our work to look nice!
+7. Follow guidelines for formatting!
