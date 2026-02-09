@@ -140,13 +140,13 @@ get_bias_het <- function(
 
 <br>
 
-- So far we considered difference in means as our naive estimator of causal quantities.
+- So far we considered the difference in means as our naive estimator of causal quantities.
 
 . . .
 
-- This week we will see, that we might use regression _agnostically_ to estimate causal estimands as well.
+- This week we will see that we might use regression _agnostically_ to estimate causal estimands as well.
 
-  - this makes our life easier, especially if we would like to rely on [conditional ignorability]{.highlight} assumption. (Why?)
+  - this makes our life easier, especially if we would like to rely on the [conditional ignorability]{.highlight} assumption. (Why?)
 
 . . .
 
@@ -156,7 +156,7 @@ get_bias_het <- function(
 
 . . .
 
-- [Problem]{.alert}: If we want to learn about relationship between $X$ and $Y$
+- [Problem]{.alert}: If we want to learn about the relationship between $X$ and $Y$
 
   - The ideal is to learn about $f_{YX}(\cdot)$, 
   - In practice we learn about $\E [Y \given X]$.
@@ -167,7 +167,7 @@ get_bias_het <- function(
 
 :::{.callout-important icon="false" title="CEF"}
 
-The [CEF]{.highlight}, $\E [Y_i \given X_i]$, is the expected value of $Y_i$ across values of $X_i$:
+The [CEF]{.highlight}, $\E [Y_i \given X_i]$, is the expected value of $Y_i$ given (conditional on) $X_i$:
 
   - For continuous $Y_i$
   $$
@@ -321,7 +321,7 @@ ggplot(cef_df, aes(x = X, y = Y)) +
 
 <br><br>
 
-- The $\E [Y_i \given X_i]$ quantity looks very familiar, we already used in $\E [Y_i \given T_i]$ or $\E [Y_i \given T_i, X_i]$.
+- The $\E [Y_i \given X_i]$ quantity looks very familiar, we already used it in $\E [Y_i \given T_i]$ or $\E [Y_i \given T_i, X_i]$.
 
 - We want to see if regression helps us with estimating these quantities. Especially when we want to estimate differences in means.
 
@@ -443,10 +443,10 @@ ggplot(cef_bin_df, aes(x = X, y = Y)) +
 - Regression can still be used to approximate the CEF:
 
 :::{.callout-important icon="false" title="Regression Prediction Property"}
-The function $X_i' \beta$ provides the Minimal MSE linear approximation to $\E [Y_i | X_i]$, that is:
+The function $X_i' \beta$ provides the Minimal MSE linear approximation to $\E [Y_i \given X_i]$, that is:
 
 $$
-\beta = \argmin_b \E \left[ (\E [Y_i | X_i] - X_i' b)^2 \right].
+\beta = \argmin_b \E \left[ (\E [Y_i \given X_i] - X_i' b)^2 \right].
 $$
 :::
 
@@ -460,9 +460,9 @@ $$
 
 $$
 \begin{align*}
-(Y_i - X_i' b)^2 &= \left( (Y_i - \E [Y_i | X_i]) + (\E [Y_i | X_i] - X_i' b) \right)^2 \\
-&= (Y_i - \E [Y_i | X_i])^2 + (\E [Y_i | X_i] - X_i' b)^2 \\
-&\quad + 2 (Y_i - \E [Y_i | X_i]) (\E [Y_i | X_i] - X_i' b).
+(Y_i - X_i' b)^2 &= \left( (Y_i - \E [Y_i \given X_i]) + (\E [Y_i \given X_i] - X_i' b) \right)^2 \\
+&= (Y_i - \E [Y_i \given X_i])^2 + (\E [Y_i \given X_i] - X_i' b)^2 \\
+&\quad + 2 (Y_i - \E [Y_i \given X_i]) (\E [Y_i \given X_i] - X_i' b).
 \end{align*}
 $$
 
@@ -512,7 +512,7 @@ ggplot(cef_df, aes(x = X, y = Y)) +
 
 <br><br><br>
 
-- In the case of CEF with respect to binary $X_i$ (think $T_i$), OLS provides estimate of $\E [Y_i \given X_i]$ which is the same as difference in means.
+- In the case of CEF with respect to binary $X_i$ (think $T_i$), OLS provides an estimate of $\E [Y_i \given X_i]$ which is the same as difference in means.
 
 . . .
 
@@ -520,7 +520,7 @@ ggplot(cef_df, aes(x = X, y = Y)) +
 
 . . .
 
-- In the case of CEF non-linear in $X_i$, OLS provides best linear approximation of $\E [Y_i \given X_i]$
+- In the case of CEF non-linear in $X_i$, OLS provides the best linear approximation of $\E [Y_i \given X_i]$
 
 # Regression and Causality
 
@@ -534,7 +534,7 @@ ggplot(cef_df, aes(x = X, y = Y)) +
 
 - A unit-level treatment effect is, $\tau_i = Y_{i} (1) - Y_{i} (0)$
 
-  - $\E [\tau_i] = \E [Y_{i} (1) - Y_{i} (0)] = \tau_{ATE}$ is the average treatment effect ($ATE$).
+  - $\E [\tau_i] = \E [Y_{i} (1) - Y_{i} (0)] = \tau_{ATE}$ is the average treatment effect (_ATE_).
 
 - We observe $X_i$, $T_i$ and, $Y_i = T_i Y_{i} (1) + (1 - T_i )Y_{i} (0)$.
 
@@ -558,7 +558,7 @@ ggplot(cef_df, aes(x = X, y = Y)) +
 
 . . .
 
-- Using switching equation we can show that:
+- Using the switching equation we can show that:
 
 $$
 \begin{align*}
@@ -587,7 +587,7 @@ $$
 \eta_i = (1 - T_i)( Y_i(0) - \E [Y_i(0)] ) + T_i (Y_i(1) - \E [Y_i(1)])
 $$
 
-- In regression context we would like $\E [\eta_i \given T_i] = 0$?
+- In the regression context we would like $\E [\eta_i \given T_i] = 0$?
 
 . . .
 
@@ -598,7 +598,7 @@ $$
 \end{align*}
 $$
 
-- Does this look familiar? [This is selection wrt to $Y_i(0)$ and $Y_i(1)$.]{.fragment}
+- Does this look familiar? [This is selection with respect to $Y_i(0)$ and $Y_i(1)$.]{.fragment}
 
 . . .
 
@@ -895,7 +895,7 @@ set.seed(20250127) # set seed
 n <- 1000 # sample size
 tau <- 0.5 # ATE
 gamma <- 0.3 # effect of confounder on outcome
-delta <- 0.3 # proportional to effect of treatment on confounder (only if less than sd ratio)
+delta <- 0.3 # effect of confounder on treatment
 
 # confounder
 confounder <- rnorm(n, mean = 50, sd = 10)
@@ -1096,7 +1096,7 @@ ggplot(sims_df, aes(x = Value, fill = Type)) +
 - But remember [bad controls]{.highlight} exist, e.g.
 
    - Common descendants of treatment and outcome (colliders)
-   - Block causal path by controling for post-treatment variables
+   - Block causal path by controlling for post-treatment variables
 
 ## Two Ways to Adjust for Covariates
 
@@ -1118,7 +1118,7 @@ ggplot(sims_df, aes(x = Value, fill = Type)) +
 ## Identification Analysis with Causal Graphs
 
 - An alternative, perhaps more intuitive, way to think about confounding is in terms of DAGs.
-- Suppose we want to estimate the $ATE$ of $T$ on $Y$; which covariates do we need to measure?
+- Suppose we want to estimate the _ATE_ of $T$ on $Y$; which covariates do we need to measure?
 
 . . .
 
@@ -1586,7 +1586,7 @@ digraph G {
 confound the effect of $X$ on $Y$. 
 
 :::fragment
-- Models (a)-(c) are analogous to the models without mediator -- controlling for $Z$ blocks the back-door path from $X$ to $Y$ (through $M$) and produces an unbiased estimate of the $ATE$.
+- Models (a)-(c) are analogous to the models without mediator -- controlling for $Z$ blocks the back-door path from $X$ to $Y$ (through $M$) and produces an unbiased estimate of the _ATE_.
 :::
 
 :::
@@ -2092,7 +2092,7 @@ digraph G {
 
 ## Regression Anatomy
 
-- [Regression anatomy]{.highlight} is: $\widehat{\tau} = \frac{\cov(\tilde{Y}_i, \tilde{T}_i)}{\var(\tilde{T}_i)} = \frac{\cov(Y_i, \tilde{T_i})}{\var(\tilde{T_i})}$, where $\tilde{T}_i$ is residuals from regression of $T_i$ on other regressors.
+- [Regression anatomy]{.highlight} is: $\widehat{\tau} = \frac{\cov(\tilde{Y}_i, \tilde{T}_i)}{\var(\tilde{T}_i)} = \frac{\cov(Y_i, \tilde{T}_i)}{\var(\tilde{T}_i)}$, where $\tilde{T}_i$ is residuals from regression of $T_i$ on other regressors.
 
 - Let's see if it actually works
 
@@ -2156,7 +2156,7 @@ data.frame(
   \E[Y_i \tilde{T}_i] = \E\big[\E[Y_i \given T_i, X_i]  \tilde{T}_i\big]
   $$
 
-  This works because $\tilde{T}_i$ is not a function of $T_i$ or $X_i$.
+  This works because $\tilde{T}_i$ is a function only of $T_i$ and $X_i$ and is constant when $T_i$ and $X_i$ are fixed.
 
 . . .
 
@@ -2229,18 +2229,18 @@ $$
 - @aronow2016does show that for arbitrary $T_i$ and $X_i$,
 
   $$
-  \widehat{\tau} \xrightarrow{p} \frac{\E [w_i \tau_i]}{\E [w_i]}, \quad \text{where } w_i = (T_i - \E [T_i | X_i])^2,
+  \widehat{\tau} \xrightarrow{p} \frac{\E [w_i \tau_i]}{\E [w_i]}, \quad \text{where } w_i = (T_i - \E [T_i \given X_i])^2,
   $$
 
   in which case
 
   $$
-  \E [w_i | X_i] = \var [T_i \given X_i].
+  \E [w_i \given X_i] = \var [T_i \given X_i].
   $$
 
 . . .
 
-- The [effective sample]{.highlight} is weighted by $\widehat{w}_i = (T_i - \widehat{\E}[T_i | X_i])^2$  (squared residual from regression of $T_i$ on covariates).
+- The [effective sample]{.highlight} is weighted by $\widehat{w}_i = (T_i - \widehat{\E}[T_i \given X_i])^2$  (squared residual from regression of $T_i$ on covariates).
 
 - Even with a representative sample, regression estimates may not aggregate effects in a representative manner. Regression estimates are _local_ to an effective sample.
 
@@ -2285,10 +2285,10 @@ growth_2 <-
   gamma * X +
   rnorm(n, mean = 0, sd = 5)
 
-# regression ignoring the confounder
+# regression with constant assignment
 bias1 <- lm(growth ~ democracy_high + factor(X))$coefficients[2] - tau_total
 
-# regression ignoring the confounder
+# regression with variable assignment
 bias2 <- lm(growth_2 ~ democracy_high_2 + factor(X))$coefficients[2] - tau_total
 ```
 
@@ -2379,7 +2379,7 @@ ggplot(sims_df, aes(x = Value, fill = Assignment)) +
 ## Lessons
 
 - Regression is a useful tool for estimating causal effects and accounting for CIA:
-  - **Binary treatments**: regression can provide consistent estimates of $ATE$.
+  - **Binary treatments**: regression can provide consistent estimates of _ATE_.
   - **Discrete or continuous treatments**: Estimates provide a best linear approximation when relationship is non-linear.
   - **Heterogeneous treatments**: Regression estimates are weighted by conditional variance and could be [biased]{.highlight} and apply to [effective sample]{.highlight} only.
 
