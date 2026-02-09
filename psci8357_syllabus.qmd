@@ -124,7 +124,7 @@ A final exam will be scheduled during the final examination week (the week of Ap
 ## Grading and Deadlines
 
 -   **35% Problem sets** (every two weeks, see schedule below)
--   **40% Replications** (due March 4th and April 15th)
+-   **40% Replications** (due March 16th and April 15th)
 -   **25% Take-home final exam** (Week of April 20th)
 
 Late work will not be accepted without documented proof of a family or medical emergency.
@@ -263,7 +263,7 @@ If you have questions or concerns about what is allowed, or how to document AI u
 
 *   - **2/25 3/2 3/4**
     - Matching
-    - distance metrics, exact matching, nearest neighbor matching, propensity score matching, balancing property, sensitivity analysis, weighting, doubly robust estimators, **problem set 3 is posted on 2/25**, **experimental replication is due on 3/4**
+    - distance metrics, exact matching, nearest neighbor matching, propensity score matching, balancing property, sensitivity analysis, weighting, doubly robust estimators, **problem set 3 is posted on 2/25**
     -   - @angrist2009mostly [Ch. 3]
         - @morgan2015counterfactuals [Ch. 5]
         - @sekhon2009opiates
@@ -276,7 +276,7 @@ If you have questions or concerns about what is allowed, or how to document AI u
 
 *   - **3/16 3/18**
     - Instrumental Variables
-    - Local Average Treatment Effects, IV estimator, one-/two-sided non-compliance, 2SLS estimator and its bias, **problem set 4 is posted on 3/18**
+    - Local Average Treatment Effects, IV estimator, one-/two-sided non-compliance, 2SLS estimator and its bias, **experimental replication is due on 3/16**, **problem set 4 is posted on 3/18**
     -   - @angrist2009mostly [Ch. 4]
         - @morgan2015counterfactuals [Ch. 9.1-9.3]
         - @angrist1996identification

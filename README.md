@@ -202,7 +202,7 @@ so that we can arrange an alternative time. The final will constitute
 ## Grading and Deadlines
 
 -   **35% Problem sets** (every two weeks, see schedule below)
--   **40% Replications** (due March 4th and April 15th)
+-   **40% Replications** (due March 16th and April 15th)
 -   **25% Take-home final exam** (Week of April 20th)
 
 Late work will not be accepted without documented proof of a family or
@@ -497,8 +497,7 @@ FOR CAUSAL INFERENCE</strong></td>
 <td style="text-align: left;">distance metrics, exact matching, nearest
 neighbor matching, propensity score matching, balancing property,
 sensitivity analysis, weighting, doubly robust estimators,
-<strong>problem set 3 is posted on 2/25</strong>, <strong>experimental
-replication is due on 3/4</strong></td>
+<strong>problem set 3 is posted on 2/25</strong></td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="angrist2009mostly">Angrist and
 Pischke (<a href="#ref-angrist2009mostly" role="doc-biblioref">2009</a>,
@@ -524,6 +523,7 @@ role="doc-biblioref">2008</a>)</span></li>
 <td style="text-align: left;">Instrumental Variables</td>
 <td style="text-align: left;">Local Average Treatment Effects, IV
 estimator, one-/two-sided non-compliance, 2SLS estimator and its bias,
+<strong>experimental replication is due on 3/16</strong>,
 <strong>problem set 4 is posted on 3/18</strong></td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="angrist2009mostly">Angrist and
@@ -800,7 +800,7 @@ Angrist, Joshua D, Guido W Imbens, and Donald B Rubin. 1996.
 *Journal of the American Statistical Association* 91 (434): 444–55.
 
 Angrist, Joshua D, and Jörn-Steffen Pischke. 2009. *Mostly Harmless
-Wconometrics: An Wmpiricist’s Companion*. Princeton University Press.
+Econometrics: An Empiricist’s Companion*. Princeton University Press.
 
 Aronow, Peter M, and Cyrus Samii. 2016. “Does Regression Produce
 Representative Estimates of Causal Effects?” *American Journal of

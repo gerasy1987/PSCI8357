@@ -20,3 +20,6 @@ problem_sets/*
 !problem_sets/ps_template*
 _data/*
 !_data/.gitkeep
+quality_reports/*
+_archive/*
+replications/*
