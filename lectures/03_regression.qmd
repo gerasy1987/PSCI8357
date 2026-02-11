@@ -1257,7 +1257,7 @@ digraph G {
 - [Key insight]{.note}: Colliders have special properties:
 
   - A path through a collider is [naturally blocked]{.highlight} — no information flows through it.
-  - [Conditioning on a collider **opens** the path!]{.alert} This can create spurious associations.
+  - [Conditioning on a collider **opens** the path!]{.alert} This can create spurious associations or mask real relationship.
 :::
 
 ::: {.fragment fragment-index=2}
@@ -1295,6 +1295,10 @@ digraph G {
 ```
 :::
 :::
+
+## Colliders in Real Life
+
+![](../_images/selection_bias.png){fig-align="center"}
 
 ## Blocking Paths
 
@@ -1460,6 +1464,7 @@ digraph G {
 - [Back-door paths]{.highlight} from $T$ to $Y$:
   1. $T \leftarrow Z_3 \to Y$
   2. $T \leftarrow W_1 \leftarrow Z_1 \to Z_3 \to Y$
+  3. $T \leftarrow Z_3 \leftarrow Z_2 \to W_2 \to Y$
   3. $T \leftarrow W_1 \leftarrow Z_1 \to Z_3 \leftarrow Z_2 \to W_2 \to Y$
 
 ::: {.fragment fragment-index=1}
@@ -1868,10 +1873,6 @@ digraph G {
 :::
 :::
 
-## Bad Controls: Selection Bias
-
-![](../_images/selection_bias.png){fig-align="center"}
-
 ## Bad Controls: Post-Treatment Bias
 
 :::{.columns}
@@ -2029,7 +2030,7 @@ digraph G {
 
 - Thus far we assumed [constant effects]{.highlight} ($\tau_i = \tau$) and [linearity]{.highlight} ($\E [\eta_i \given X_i] = X'_i \gamma$).
 
-- These are strong assumptions! What happens if treatment effects vary across units?
+- These are strong assumptions! What happens if treatment effects vary across units, e.g. with respect to $X$?
 
 . . .
 

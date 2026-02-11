@@ -11,9 +11,7 @@ PSCI8357_statistics_for_political_research_ii.Rproj
 .DS_Store
 lectures/*
 !lectures/.gitkeep
-!lectures/01_*
-!lectures/02_*
-!lectures/03_*
+!lectures/0[1-4]_*
 recitation_material/*
 !recitation_material/.gitkeep
 problem_sets/*
@@ -23,3 +21,4 @@ _data/*
 quality_reports/*
 _archive/*
 replications/*
+CLAUDE.md

@@ -1,0 +1,2297 @@
+---
+title: "Randomized Experiments"
+subtitle: "PSCI 8357 - STAT II"
+author: Georgiy Syunyaev
+institute: "Department of Political Science, Vanderbilt University"
+date: today
+date-format: long
+format: 
+  revealjs:
+    toc: true
+    toc-depth: 1
+    toc-title: "Plan"
+    slide-number: c/t
+    # preview-links: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    html-math-method: mathjax
+    # logo: images/wzb_logo.png
+    self-contained-math: true
+    css: ../_supp/styles.css
+    theme: [serif,"../_supp/custom.scss"]
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    # progress: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+    fig-cap-location: top
+    include-before: [ '<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {enableAssistiveMml: false}});</script>']
+fontsize: 26px
+editor: source
+aspectratio: 169
+bibliography: ../_supp/psci8357.bib
+---
+
+
+## {data-visibility="hidden"}
+
+\(
+  \def\E{{\mathbb{E}}}
+  \def\Pr{{\textrm{Pr}}}
+  \def\var{{\mathbb{V}}}
+  \def\cov{{\mathrm{cov}}}
+  \def\corr{{\mathrm{corr}}}
+  \def\argmin{{\arg\!\min}}
+  \def\argmax{{\arg\!\max}}
+  \def\qedknitr{{\hfill\rule{1.2ex}{1.2ex}}}
+  \def\given{{\:\vert\:}}
+  \def\indep{{\mbox{$\perp\!\!\!\perp$}}}
+  \def\notindep{{\mbox{$\centernot{\perp\!\!\!\perp}$}}}
+\)
+
+```{r}
+#|  label: preamble
+#|  include: false
+
+# load necessary libraries
+pacman::p_load(tidyverse, future, future.apply, pbapply)
+
+future::plan(multisession, workers = parallel::detectCores() - 2)
+
+# set theme for plots
+thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
+```
+
+## Overview
+
+- A randomized experiment is _the gold standard_ for making causal inferences
+
+. . .
+
+- Randomization of the treatment will make the treatment and control groups similar on average with respect to *observed* and *unobserved* covariates
+
+- **Advantage 1**: Identification is justified by design of experiments
+  
+  - We control the treatment assignment mechanism.
+  - We do not need to make _CIA_-type assumptions.
+
+- **Advantage 2**: Estimation is simple
+  
+  - Difference-in-means (_DiM_) or some weighted averages of _DiM_.
+
+- **Advantage 3**: Inference is simple
+  
+  - We can again use the known treatment assignment mechanism as a "reason basis for inference".
+
+. . .
+
+- Many identification strategies in observational studies aim to mimic the logic of randomized experiments
+
+## Overview
+
+- [**Neyman Approach**]{.blue}
+
+  1. Causal estimand is the _ATE_.
+  2. Standard analysis tools for most experiments.
+
+  - **Limitation 1**: Asymptotic approximation is required for inference
+
+    $\rightsquigarrow$ Inference is not reliable with small sample size
+
+  - **Limitation 2**: Variance can be complicated for complex experimental designs.
+
+. . .
+
+- [**Fisherian Approach**]{.purple}
+
+  1. Focus on a [sharp null]{.highlight} hypothesis (no effect for every unit).
+  2. Assumption-free (valid for any sample size).
+  3. Flexible: can accommodate any complex experimental designs.
+
+. . .
+
+- [Note]{.note}: Both are design-based inference (the primary source of randomness comes from treatment assignment)
+
+# Motivating Example
+
+## Example: Social Pressure Experiment
+
+<br>
+
+- Voter turnout theories based on rational self-interested behavior generally fail to predict significant turnout unless they account for the utility that citizens receive from performing their civic duty.
+
+. . .
+
+- Two aspects of this type of utility, intrinsic satisfaction from behaving in accordance with a norm and extrinsic incentives to comply.
+
+. . .
+
+- @gerber2008social test intrinsic motives in a large scale field experiment by applying varying degrees of extrinsic pressure on voters using series of mailings to 180,002 households before the August 2006 primary election in Michigan.
+  
+  - $Y_i$: Voted in the primary election (Outcome)
+  - $T_i$: Type of mailing (Treatment)
+
+## Example: Social Pressure Experiment
+
+<br>
+
+- **T1: Civic Duty**
+  - Encouraged to vote.
+
+- **T2: Hawthorne**
+  - Encouraged to vote.
+  - Told that researchers would be checking on whether they voted.
+
+- **T3: Self**
+  - Encouraged to vote.
+  - Told that whether one votes is a matter of public record.
+  - Shown whether members of their own household voted in the last two elections.
+
+- **T4: Neighbors**
+  - Like **Self** but in addition recipients are shown whether the neighbors on the block voted in the last two elections.
+
+## Example: Social Pressure Experiment
+
+![](../_images/gerber_treat.jpeg){fig-align="center"}
+
+## Example: Social Pressure Experiment
+
+<br><br><br>
+
+:::{.small-font}
+| | **Control**<br>(Not Mailed) | **Civic Duty**<br>(Encouraged to Vote) | **Hawthorne**<br>(Encouraged & Monitored) | **Self**<br>(Encouraged, Monitored, Shown Own Past Voting) | **Neighbors**<br>(Encouraged, Monitored, Shown Own & Others' Past Voting) |
+|:---|:--:|:--:|:--:|:--:|:--:|
+| **Percent Voting** | $29.7\%$ | $31.5\%$ | $32.2\%$ | $34.5\%$ | $37.8\%$ |
+| **$N$ of Individuals** | $191,243$ | $38,218$ | $38,204$ | $38,218$ | $38,201$ |
+: {tbl-colwidths="[20,16,16,16,16,16]"}
+:::
+
+<br><br>
+
+:::small-font
+- Data available at <https://isps.yale.edu/research/data/d001>.
+:::
+
+# Basic Setup
+
+## Basic Setup for Randomized Experiment
+
+<br>
+
+- **Units**: $i \in \{1, \ldots, N\}$
+
+- **Treatment**: $T_i \in \{0, 1\}$, randomly assigned.
+
+- **Potential outcomes**: $Y_i(0)$ and $Y_i(1)$.
+
+- **Observed outcome**: $Y_i = T_i Y_i(1) + (1-T_i) Y_i(0)$ (consistency).
+
+- **Treatment Assignment Mechanism**:
+  
+  1. [Complete randomization]{.highlight}: Exactly $N_1$ units are treated.
+  2. [Bernoulli (simple) randomization]{.highlight}: Each unit is independently assigned to treatment with probability $p$.
+
+. . .
+
+- Randomization (complete or simple) implies
+  
+$$
+\{Y_i(1), Y_i(0)\} \ \indep \ T_i 
+$$
+
+## Identification of _ATE_
+
+- **Causal Estimand**: Still _ATE_.
+  
+  $$
+    \tau_{ATE} \equiv \E \{Y_i(1) - Y_i(0)\}
+  $$
+
+- Still not directly estimable as we don't observe $Y_i(1) - Y_i(0)$ for each unit 
+
+. . .
+
+- **Identification Question**: Can we write down $\tau_{ATE}$ only with observed data ($Y_i, T_i$)?
+
+:::{.callout-important icon="false" title="RESULT: Identification under Randomization"}
+$$
+\begin{aligned}
+  \E\{Y_i(1) - Y_i(0)\} &= \E\{Y_i(1)\} - \E\{Y_i(0)\} \quad \text{($\because$ linearity of $\E$)} \\
+  &= \E\{Y_i(1) \given T_i = 1\} - \E\{Y_i(0) \given T_i = 0\} \quad \text{($\because$ randomization of $T_i$)} \\
+  &= \E [Y_i \given T_i = 1] - \E [Y_i \given T_i = 0] \quad \text{($\because$ consistency of PO)}
+\end{aligned}
+$$
+:::
+
+. . .
+
+- **Estimation Question**: Can we estimate $\E [Y_i \given T_i = 1] - \E [Y_i \given T_i = 0]$?
+
+$$
+\frac{1}{N_1} \sum_{i=1}^N T_i Y_i - \frac{1}{N_0} \sum_{i=1}^N (1 - T_i) Y_i 
+$$
+
+## Without Randomization
+
+- Without randomization we have $\{Y_i(1), Y_i(0)\} \notindep T_i$.
+
+. . .
+
+- This implies 
+  $$
+    \E\{Y_i(1)\} \neq \E\{Y_i(1) \given T_i = 1\}, \quad \E\{Y_i(0)\} \neq \E\{Y_i(0) \given T_i = 0\}
+  $$
+  
+  - e.g., people who read newspapers are more interested in politics.
+
+. . .
+
+- Without randomization, treatment and control groups are different with respect to pre-treatment covariates.
+
+- Pre-treatment covariates: Variables that are not affected by the treatment.
+
+- Importantly, potential outcomes are pre-treatment covariates! 
+
+- [Note]{.note}: observed outcomes are post-treatment covariates! 
+
+. . .
+
+- [Intuition]{.note}: Randomization makes treatment and control groups similar on average with respect to all observed and unobserved pre-treatment covariates.
+
+# Estimation of _SATE_
+
+## Design-Based Inference
+
+- Consider finite population and focus on [design-based inference]{.highlight}
+  
+  :::small-font
+  - Essentially: focus only on the randomness induced by the treatment assignment.
+  - e.g. finite-population inference or (later) randomization inference.
+  :::
+
+. . .
+
+- Treatment variables $(T_1, \ldots, T_N)$ are random.
+
+- Units and potential outcomes ($Y_i(1), Y_i(0)$) are _fixed_.
+
+- We now distinguish [Sample Average Treatment Effect]{.highlight} (_SATE_):
+  
+  $$
+    \tau_{SATE} \equiv \frac{1}{N} \sum_{i=1}^N \{Y_i(1) - Y_i(0)\}
+  $$
+
+- Randomization is the _"reason basis for inference"_ [@fisher1936design]
+
+- Design-based inference:
+  
+  :::small-font
+  - [Advantage]{.highlight}: Rely only on the treatment assignment mechanism that researchers control instead of untestable distributional assumptions (e.g., i.i.d data, normal errors, outcome models).
+  - Disadvantage: sometimes less flexible
+  :::
+
+## Unbiasedness of Difference-in-Means
+
+- [Difference-in-Means (_DiM_) estimator]{.highlight} is $\widehat{\tau}_{DiM} \equiv \frac{1}{N_1} \sum_{i=1}^N T_i Y_i - \frac{1}{N_0} \sum_{i=1}^N (1 - T_i) Y_i$
+
+. . .
+
+- Unbiased for the _SATE_ under [complete randomization]{.highlight} (as opposed to simple random assignment) -- **no modeling assumption is needed**.
+
+- First suppose, $\mathcal{O}_N = \{Y_i(1), Y_i(0)\}_{i=1}^N$, then:
+  
+:::{.small-font}
+$$
+  \begin{aligned}
+    \E [\widehat{\tau}_{DiM} \given \mathcal{O}_N] &\class{fragment}{{}= \frac{1}{N_1} \sum_{i=1}^N \E [T_i Y_i \given \mathcal{O}_N] - \frac{1}{N_0} \sum_{i=1}^N \E [(1 - T_i) Y_i \given \mathcal{O}_N] \quad \text{($\because$ linearity of $\E$)}} \\
+    &\class{fragment}{{}= \frac{1}{N_1} \sum_{i=1}^N \E [T_i Y_i(1) \given \mathcal{O}_N] - \frac{1}{N_0} \sum_{i=1}^N \E [(1 - T_i) Y_i(0) \given \mathcal{O}_N] \quad \text{($\because$ consistency of PO)}} \\
+    &\class{fragment}{{}= \frac{1}{N_1} \sum_{i=1}^N \E [T_i \given \mathcal{O}_N] Y_i(1) - \frac{1}{N_0} \sum_{i=1}^N \E [1 - T_i \given \mathcal{O}_N] Y_i(0) \quad \text{($\because$ POs are fixed)}} \\
+    &\class{fragment}{{}= \frac{1}{N} \sum_{i=1}^N Y_i(1) - \frac{1}{N} \sum_{i=1}^N Y_i(0) \quad \text{($\because$ complete randomization)}}
+  \end{aligned}
+$$
+:::
+
+## _IPW_ Estimator as Generalization {#ipw-unbiased}
+
+- [Inverse Probability Weighting Estimator]{.highlight} (Horvitz–Thompson estimator) for the _SATE_:
+  
+  $$
+  \widehat{\tau}_{IPW} \equiv \frac{1}{N} \sum_{i=1}^N \left\{\frac{T_iY_i}{p_i} - \frac{(1 - T_i) Y_i}{(1 - p_i)}\right\},
+  $$
+  
+  where $p_i = \Pr(T_i = 1 \given \mathcal{O}_N)$.
+
+. . .
+
+- Can prove that if probabilities of assignment are fixed, i.e. $\forall i:\: p_i = p$, we have $\E [ \widehat{\tau}_{IPW} \given \mathcal{O}_N ] = \tau_{SATE}$. (_How would you approach this?_) ([proof](#proof-ipw-unbiased)) 
+
+. . .
+
+- This estimator is **more general**:
+
+  :::incremental
+  1. _DiM_ is a special case of _IPW_ estimator when... [$\forall i:\: p_i = N_1/N$. [Note]{.note}: $p_i$'s do not have to be $0.5$!]{.fragment}
+  2. _IPW_ allows to account for complex designs with unequal probabilities of assignment _across_ units.
+  3. _IPW_ estimator will show up in observational studies as well.
+  :::
+
+## Finite Population Correction
+
+- Under complete randomization, treatment is assigned [**without replacement**]{.highlight}: exactly $N_1$ of $N$ units are treated
+
+. . .
+
+- This is analogous to [simple random sampling without replacement (SRSWOR)]{.highlight} from a finite population
+
+. . .
+
+- For SRSWOR of $n$ units from a population of $N$, the variance of the sample mean is:
+
+$$
+\var[\overline{Y}] = \frac{S^2}{n} \underbrace{\frac{N - n}{N}}_{FPC}
+$$
+
+. . .
+
+- [Intuition]{.note}: The factor $\frac{N-n}{N} = 1 - \frac{n}{N}$ reduces variance because sampling w/o replacement removes variability by removing units from population
+
+  - When $n \ll N$: FPC $\approx 1$ (negligible correction)
+  - When $n = N$: FPC $= 0$ (no randomness left -- census!)
+
+## Variance of _DiM_
+
+<br>
+
+- Using the _FPC_ for each group mean, $\overline{Y}_t = \frac{1}{N_t} \sum_{j=1}^N \mathbb{1} [T_i = t]  Y_j$, we can derive the variance of the _DiM_:
+
+:::{.small-font}
+$$
+  \begin{align*}
+  \var [\widehat{\tau}_{DiM} \given \mathcal{O}_N] &= \var [\overline{Y}_1 \given \mathcal{O}_N] + \var [\overline{Y}_0 \given \mathcal{O}_N] - 2 \cov(\overline{Y}_1, \overline{Y}_0 \given \mathcal{O}_N) \quad \text{($\because$ variance of difference)} \\
+  &= \frac{S_1^2}{N_1} \frac{N - N_1}{N} + \frac{S_0^2}{N_0} \frac{N - N_0}{N} + 2 \frac{\textcolor{#d65d0e}{S_{10}}}{N} \quad \text{($\because$ \textit{FPC})} \\
+  &= \frac{S_1^2}{N_1} + \frac{S_0^2}{N_0} - \frac{S_1^2 + S_0^2 -2 \textcolor{#d65d0e}{S_{10}}}{N} \quad \text{($\because$ rearranging terms)} \\
+  &= \frac{S_1^2}{N_1} + \frac{S_0^2}{N_0} - \frac{\textcolor{#d65d0e}{S_{\tau}^2}}{N} \quad \text{($\because$ variance of difference)}
+  \end{align*}
+$$
+:::
+
+- $S_{t}^2$: Sample variance of $Y_i(t)$ for $t \in \{0,1\}$ $\rightarrow$ [_identified_]{.green}
+- $S_{10}^2$: Sample covariance of $Y_i(1)$ and $Y_i (0)$ $\rightarrow$ [_unidentified_]{.highlight}
+- $S^2_{\tau}$: Sample variance of $Y_i(1) - Y_i(0)$ $\rightarrow$ [_unidentified_]{.highlight}
+
+## What about Variance of _DiM_?
+
+- How do we deal with unidentified part? [**Be conservative**]{.fragment}
+
+. . .
+
+- [Conservative estimator]{.highlight}: $\E [\widehat{\sigma}^2 \given \mathcal{O}_N ] \geq \var [\widehat{\tau}_{DiM} \given \mathcal{O}_N]$
+
+:::{.callout-important icon="false" .fragment title="RESULT: Conservative Variance Estimator"}
+$$
+\widehat{\sigma}^2= \frac{1}{N_1} \widehat{S}_{1}^2 + \frac{1}{N_0} \widehat{S}_{0}^2
+$$
+where $\widehat{S}_{t}^2 = \frac{1}{N_t - 1} \sum_{i=1}^N \mathbb{1} [T_i = t] (Y_i - \overline{Y}_t)^2$, and in turn $\overline{Y}_t = \frac{1}{N_t} \sum_{j=1}^N \mathbb{1} [T_i = t]  Y_j$.
+:::
+
+. . .
+
+- This estimator achieves its highest value, i.e. $\var [\widehat{\tau}_{DiM} \given \mathcal{O}_N]$ when... [treatment effects are constant across units.]{.fragment}
+
+. . .
+
+- Leads to **conservative inferences**:
+  - Standard errors, $\widehat{\sigma}$, will be in expectation at least as big as they should be.
+  - Confidence intervals using $\widehat{\sigma}$ will be in expectation at least wide as they should be.
+  - Type I (false positive) error rates will still be correct, power will be lower.
+
+# Estimation of _PATE_
+
+## _SATE_ $\rightarrow$ _PATE_
+
+<br><br>
+
+- So far, we have assumed for simplicity that our data represent the entire population.
+
+- In reality, we often treat our experiment as a _sample_ from the population.
+
+. . .
+
+- Sampling introduces an additional layer of uncertainty in causal inference:
+  
+  1. $N$ units are randomly sampled from the population.
+  2. $N_1$ units are then randomly assigned to the treatment.
+  
+    $\rightsquigarrow$ Focus on [Population _ATE_]{.highlight}.
+
+. . .
+
+- How does this aﬀect our inference, in terms of:
+
+  - **Point estimates**: Is observed diﬀerence in means ($\widehat{\tau}$) still unbiased?
+  - **Uncertainty estimates**: Is the conventional standard error still valid?
+
+## Estimation of _PATE_
+
+<br>
+
+- **Assumption**: simple _random sampling_ from a [super-population]{.highlight}
+
+  - $(Y_i(1), Y_i(0)) \stackrel{\rm i.i.d}{\sim}$ unknown super-population
+
+. . .
+
+- [Population Average Treatment Effect]{.highlight} (_PATE_) is:
+  
+  $$
+    \tau_{PATE} \equiv \E [Y_i(1) - Y_i(0)]
+  $$
+
+. . .
+
+- _DiM_ is unbiased (over repeated sampling and treatment assignment):
+  
+  $$
+    \E [\widehat{\tau}_{DiM}] =  \E \left[ \E [\widehat{\tau}_{DiM} \given \mathcal{O}_N] \right] = \E [\tau_{SATE}] = \E [Y_i(1) - Y_i(0)] = \tau_{PATE}
+  $$
+
+  - [Note]{.note}: This requires a _true_ random sampling from the population.
+
+- **Important**: Often obtaining such a sample is impossible $\rightsquigarrow$ [External Validity]{.highlight}
+
+  - In such a case: focus on _SATE_ and interpret as such (estimate is still internally valid, but no longer externally valid)
+
+## Variance for _PATE_
+
+- Now let's characterize total uncertainty (sampling + design) for _SATE_, $\var[\widehat{\tau}_{DiM}]$.
+
+- [Law of Total Variance]{.highlight}: $\underbrace{\var(Y)}_{\text{total variance}} = \underbrace{\E[\var(Y\mid X)]}_{\text{(mean of) "within" variance}} + \underbrace{\var(\E[Y\mid X])}_{\text{"between" variance}}$ [see @angrist2009mostly, Ch. 3].
+
+. . .
+
+- Applying the LTV and denoting the _population_ variance of $Y_i(t)$ and $\tau$ as $\sigma_{t}^2$ and $\sigma_{\tau}^2$:
+
+  $$
+  \begin{align*}
+  \var[\widehat{\tau}_{DiM}] &= \E \left[\var[\widehat{\tau}_{DiM} \given \mathcal{O}_N]\right] + \var\left[\E [\widehat{\tau}_{DiM}\mid \mathcal{O}_N]\right] \\
+  &= \E \left[\frac{S_{Y_1}^2}{N_1} + \frac{S_{Y_0}^2}{N_0} - \frac{S_{\tau}^2}{N}\right] + \var[\tau_{SATE}] \\
+  &= \E \left[\frac{S_{Y_1}^2}{N_1} + \frac{S_{Y_0}^2}{N_0} - \frac{S_{\tau}^2}{N}\right] + \var\left[\frac{1}{N}\sum_{i \in \mathcal{O}_N}\tau_i\right] \\
+  &= \E \left[\frac{S_{Y_1}^2}{N_1} + \frac{S_{Y_0}^2}{N_0} - \frac{S_{\tau}^2}{N}\right] + \frac{\sigma_{\tau}^2}{N} \\
+  &= \frac{\sigma_{1}^2}{N_1} + \frac{\sigma_{0}^2}{N_0}.
+  \end{align*}
+  $$ 
+
+## Variance for _PATE_
+
+<br>
+
+- [Note]{.note}: The same variance estimator is unbiased for the variance of the difference-in-means as an estimator for the _PATE_. 
+  $$
+    \E [\widehat{\sigma}^2] = \var [\widehat{\tau}_{DiM}] = \frac{1}{N_1} \sigma_{1}^2 + \frac{1}{N_0} \sigma_{0}^2
+  $$
+
+. . .
+
+- This is in contrast to the result for the _SATE_:
+  
+  $$
+    \E [\widehat{\sigma}^2 \given \mathcal{O}_N] \geq \var [\widehat{\tau}_{DiM} \given \mathcal{O}_N]
+  $$
+
+- [Intuition]{.note}: This variance estimator was always too large for _SATE_--we overestimated the variability.
+
+- But for _PATE_, because we have additional uncertainty, this becomes an unbiased estimator.
+
+  - Further reading: @imbens2015causal [Ch. 6].
+
+# Neyman Inference for _SATE_ or _PATE_
+
+## Weak Null
+
+- ["Weak" null hypothesis (for _PATE_)]{.highlight} (Neyman):
+
+  $$
+  H_0^{\text{weak}}: \E [Y_i(1) - Y_i(0)] = 0 \quad \text{vs.} \quad H_a^{\text{weak}}: \E [Y_i(1) - Y_i(0)] \neq 0 \quad (\text{two-sided})
+  $$
+
+. . .
+
+- _PATE_
+  
+  :::small-font
+  - Consistency via the law of large numbers: $\widehat{\tau}_{DiM} \xrightarrow{p} \tau_{PATE}$.
+  - Asymptotic normality via the CLT 
+    
+  $$
+  \frac{\widehat{\tau}_{DiM}- \tau_{PATE}}{\sqrt{\sigma^2_1/N_1 + \sigma_0^2/N_0}} \xrightarrow{d} \mathcal{N}(0, 1)
+  $$
+  :::
+
+. . .
+
+- _SATE_
+  
+  :::small-font
+  - Finite population CLT [@li2017general].
+
+  $$
+  \frac{\widehat{\tau}_{DiM}- \tau_{SATE}}{\sqrt{S^2_1/N_1 + S_0^2/N_0 - S^2_{10}/N}} \xrightarrow{d} \mathcal{N}(0, 1)
+  $$
+  :::
+
+. . .
+
+- $(1 - \alpha) \times 100$\% CI: $[\widehat{\tau}_{DiM} - \widehat{\sigma} \times z_{1 - \alpha/2}, \widehat{\tau}_{DiM} + \widehat{\sigma} \times z_{1 - \alpha/2}]$
+
+
+## Neyman Inference with Regression
+
+- For a binary treatment ($T_i \in \{0,1\}$) we can show:
+
+  - **Simple regression coefficient** is _numerically equal_ to DiM:
+  
+  $$
+  \widehat\beta_{OLS} \ \equiv \ \frac{\sum_{i=1}^N(Y_i - \overline{Y})(T_i - \overline{T})}{\sum_{i=1}^N(T_i - \overline{T})^2} \ = \ \widehat{\tau}_{DiM}
+  $$
+
+  :::fragment
+  - [Heteroskedasticity-robust variance]{.highlight} (the $HC2$ variant) is also _numerically equal_ to the conservative Neyman variance:
+    
+  $$
+  \widehat\sigma^2_{HC2} \ = \frac{1}{N_1} \widehat{S}_1^2 + \frac{1}{N_0} \widehat{S}_0^2
+  $$
+  :::
+
+. . .
+
+- In practice in a completely randomized experiment:
+  
+  1. Regress $Y_i$ on $T_i$ (w/ intercept) and get the coefficient on $T_i$.
+  2. Calculate the robust standard error (`estimatr::lm_robust()`).
+  3. Calculate confidence intervals, etc. as usual.
+
+## Neyman in Practice: Point Estimates
+
+<br>
+
+```{r}
+#| label: estimates
+#| echo: true
+#| output-location: column
+#| code-line-numbers: "1-8|10-15|17-32|34-41"
+
+# load packages
+pacman::p_load(
+  tidyverse,
+  labelled,
+  haven,
+  estimatr,
+  sandwich
+)
+
+# load data
+gerber <- haven::read_dta("../_data/gerber.dta")
+
+# check how treatment and outcome are coded
+# labelled::get_value_labels(gerber$treatment)
+# labelled::get_value_labels(gerber$voted)
+
+# calculate difference-in-means by hand
+est_dim <-
+  gerber |>
+    (
+      \(.)
+        c(
+          hawthorne = mean(.$voted[.$treatment == 1]) -
+            mean(.$voted[.$treatment == 0]),
+          civic = mean(.$voted[.$treatment == 2]) -
+            mean(.$voted[.$treatment == 0]),
+          neighbor = mean(.$voted[.$treatment == 3]) -
+            mean(.$voted[.$treatment == 0]),
+          self = mean(.$voted[.$treatment == 4]) -
+            mean(.$voted[.$treatment == 0])
+        )
+    )()
+
+# calculate difference-in-means using regression
+est_lm <-
+  estimatr::lm_robust(
+    voted ~ factor(treatment),
+    data = gerber
+  ) |>
+    estimatr::tidy() |>
+    dplyr::pull(estimate)
+
+bind_cols(
+  treatment = names(est_dim),
+  est_dim = unname(est_dim),
+  est_lm = est_lm[-1]
+) |>
+  knitr::kable(digits = 3) |>
+  kableExtra::kable_minimal(font_size = 20)
+```
+
+
+## Neyman in Practice: Uncertainty
+
+<br>
+
+```{r}
+#| label: neyman_inference
+#| echo: true
+#| output-location: column
+#| code-line-numbers: "1-22|24-29|31-39"
+
+# calculate standard errors by hand
+s_2 <-
+  gerber |>
+    (
+      \(.)
+        c(
+          control = var(.$voted[.$treatment == 0]) /
+            sum(.$treatment == 0),
+          hawthorne = var(.$voted[.$treatment == 1]) /
+            sum(.$treatment == 1),
+          civic = var(.$voted[.$treatment == 2]) /
+            sum(.$treatment == 2),
+          neighbor = var(.$voted[.$treatment == 3]) /
+            sum(.$treatment == 3),
+          self = var(.$voted[.$treatment == 4]) /
+            sum(.$treatment == 4)
+        )
+    )()
+
+se_hand <- sapply(2:5, function(i) {
+  sqrt(s_2[i] + s_2["control"])
+})
+
+# can calculate by hand
+se_sandwich <-
+  lm(voted ~ factor(treatment), data = gerber) |>
+    vcovHC(type = "HC2") |>
+    diag() |>
+    sqrt()
+
+# can get it directly now
+se_robust <-
+  estimatr::lm_robust(
+    voted ~ factor(treatment),
+    data = gerber,
+    se_type = "HC2"
+  ) |>
+    estimatr::tidy() |>
+    dplyr::pull(std.error)
+
+bind_cols(
+  treatment = names(s_2[-1]),
+  se_hand = se_hand,
+  se_sandwich = se_sandwich[-1],
+  se_robust = se_robust[-1],
+) |>
+  knitr::kable(digits = 5) |>
+  kableExtra::kable_minimal(font_size = 20)
+
+```
+
+# Fisher Inference for _SATE_
+
+## Foundations of Statistics
+
+![](../_images/lady_tasting_tea.png){fig-align="center" width="90%"}
+
+## Lady Tasting Tea
+
+<br>
+
+- @fisher1936design: Does tea taste different depending on whether the tea was poured into the milk or whether the milk was poured into the tea?
+
+. . .
+
+- [Lady Tasting Tea Experiment]{.highlight}
+  
+  - **Units**: 8 identical cups
+  
+  - **Randomization**: Randomly choose 4 cups into which the tea is poured first, and for the other four, the milk was poured first
+  
+  - **Null hypothesis**: the lady cannot tell the difference
+  
+  - **Statistic**: the number of correctly classified cups    
+  
+  - **Outcome**: The lady classified all 8 cups correctly!
+
+. . .
+
+- Did this happen by chance?
+
+## Permutation Test
+
+:::columns
+:::{.column .small-font width="60%"}
+
+:::r-stack
+
+:::{.fragment .fade-in-then-out}
+| cup  | actual | guess | $\qquad$  | $\qquad$ | $\qquad$ | $\qquad$ |
+|:------|:-------:|:--------:|:-----------:|:-----------:|:-----------:|:-----------:|
+| 1    | M     | [M]{.orange}      | $\qquad$ | $\qquad$ | $\qquad$ | $\qquad$ |
+| 2    | T     | [T]{.orange}      | $\qquad$| $\qquad$ | $\qquad$ | $\qquad$ |
+| 3    | T     | [T]{.orange}      | $\qquad$      | $\qquad$ | $\qquad$ | $\qquad$ |
+| 4    | M     | [M]{.orange}      | $\qquad$ | $\qquad$ | $\qquad$ | $\qquad$ |
+| 5    | M     | [M]{.orange}      | $\qquad$         | $\qquad$ | $\qquad$ | $\qquad$ |
+| 6    | T     | [T]{.orange}      | $\qquad$ | $\qquad$ | $\qquad$ | $\qquad$ |
+| 7    | T     | [T]{.orange}      | $\qquad$ | $\qquad$ | $\qquad$ | $\qquad$ |
+| 8    | M     | [M]{.orange}      | $\qquad$         | $\qquad$ | $\qquad$ | $\qquad$ |
+| $N$ correct |  | 8 | | | | |
+: {tbl-colwidths="[50,25,25,25,25,25,25]"}
+:::
+
+:::{.fragment .fade-in-then-out}
+| cup  | actual | guess | sc. 1  | $\qquad$ | $\qquad$ | $\qquad$ |
+|:------|:-------:|:--------:|:-----------:|:-----------:|:-----------:|:-----------:|
+| 1    | M     | [M]{.orange}      | T         | $\qquad$ | $\qquad$ | $\qquad$ |
+| 2    | T     | [T]{.orange}      | [T]{.orange}         | $\qquad$ | $\qquad$ | $\qquad$ |
+| 3    | T     | [T]{.orange}      | [T]{.orange}         | $\qquad$ | $\qquad$ | $\qquad$ |
+| 4    | M     | [M]{.orange}      | T         | $\qquad$ | $\qquad$ | $\qquad$ |
+| 5    | M     | [M]{.orange}      | [M]{.orange}         | $\qquad$ | $\qquad$ | $\qquad$ |
+| 6    | T     | [T]{.orange}      | M         | $\qquad$ | $\qquad$ | $\qquad$ |
+| 7    | T     | [T]{.orange}      | M         | $\qquad$ | $\qquad$ | $\qquad$ |
+| 8    | M     | [M]{.orange}      | [M]{.orange}         | $\qquad$ | $\qquad$ | $\qquad$ |
+| $N$ correct |  | 8 | 4 | | | |
+: {tbl-colwidths="[40,25,25,25,25,25,25]"}
+:::
+
+:::{.fragment .fade-in-then-out}
+| cup  | actual | guess | sc. 1  | sc. 2  | $\qquad$ | $\qquad$ |
+|:------|:-------:|:--------:|:-----------:|:-----------:|:-----------:|:-----------:|
+| 1    | M     | [M]{.orange}      | T         | T         | $\qquad$ | $\qquad$ |
+| 2    | T     | [T]{.orange}      | [T]{.orange}         | [T]{.orange}         | $\qquad$ | $\qquad$ | $\qquad$ |
+| 3    | T     | [T]{.orange}      | [T]{.orange}         | [T]{.orange}         | $\qquad$ | $\qquad$ | $\qquad$ |
+| 4    | M     | [M]{.orange}      | T         | [M]{.orange}         | $\qquad$ | $\qquad$ |
+| 5    | M     | [M]{.orange}      | [M]{.orange}         | [M]{.orange}         | $\qquad$ | $\qquad$ |
+| 6    | T     | [T]{.orange}      | M         | M         | $\qquad$ | $\qquad$ |
+| 7    | T     | [T]{.orange}      | M         | [T]{.orange}         | $\qquad$ | $\qquad$ |
+| 8    | M     | [M]{.orange}      | [M]{.orange}         | [M]{.orange}         | $\qquad$ | $\qquad$ |
+| $N$ correct |  | 8 | 4 | 6 | | |
+: {tbl-colwidths="[35,25,25,25,25,25,25]"}
+:::
+
+:::{.fragment .fade-in-then-out}
+| cup  | actual | guess | sc. 1  | sc. 2  |sc. 3  | $\qquad$ |
+|:------|:-------:|:--------:|:-----------:|:-----------:|:-----------:|:-----------:|
+| 1    | M     | [M]{.orange}      | T         | T         |T         | $\qquad$ |
+| 2    | T     | [T]{.orange}      | [T]{.orange}         | [T]{.orange}         |M         | $\qquad$ | 
+| 3    | T     | [T]{.orange}      | [T]{.orange}         | [T]{.orange}         |[T]{.orange}         | $\qquad$ | 
+| 4    | M     | [M]{.orange}      | T         | [M]{.orange}         |T         | $\qquad$ |
+| 5    | M     | [M]{.orange}      | [M]{.orange}         | [M]{.orange}         |[M]{.orange}         | $\qquad$ |
+| 6    | T     | [T]{.orange}      | M         | M         |M         | $\qquad$ |
+| 7    | T     | [T]{.orange}      | M         | [T]{.orange}         |M         | $\qquad$ |
+| 8    | M     | [M]{.orange}      | [M]{.orange}         | [M]{.orange}         |T         | $\qquad$ |
+| $N$ correct |  | 8 | 4 | 6 | 2| |
+: {tbl-colwidths="[35,25,25,25,25,25,25]"}
+:::
+
+:::{.fragment .fade-in}
+| cup  | actual | guess | sc. 1  | sc. 2| sc. 3| $\cdots$  |
+|:-----|:-----:|:------:|:-----------:|:---------:|:--------:|:---------:|
+| 1    | M     | [M]{.orange}      | T           | T         |T         | $\cdots$  |
+| 2    | T     | [T]{.orange}      | [T]{.orange}           | [T]{.orange}         |M         | $\cdots$  |
+| 3    | T     | [T]{.orange}      | [T]{.orange}           | [T]{.orange}         |[T]{.orange}         | $\cdots$  |
+| 4    | M     | [M]{.orange}      | T           | [M]{.orange}         |T         | $\cdots$  |
+| 5    | M     | [M]{.orange}      | [M]{.orange}           | [M]{.orange}         |[M]{.orange}         | $\cdots$  |
+| 6    | T     | [T]{.orange}      | M           | M         |M         | $\cdots$  |
+| 7    | T     | [T]{.orange}      | M           | [T]{.orange}         |M         | $\cdots$  |
+| 8    | M     | [M]{.orange}      | [M]{.orange}           | [M]{.orange}         |T         | $\cdots$  |
+| $N$ correct |  | 8 | 4 | 6 | 2         | $\cdots$  |
+: {tbl-colwidths="[35,25,25,25,25,25,25]"}
+:::
+:::
+:::
+
+:::{.column width="40%"}
+
+:::fragment
+```{r}
+#| label: permutation_test
+#| echo: false
+#| fig-align: center
+#| fig-width: 5
+#| fig-height: 4
+
+set.seed(20250205)
+
+# set up the experiment
+cups <- 8
+tea_first <- sample(1:cups, size = 4)
+milk_first <- (1:cups)[-tea_first]
+
+# generate all possible permutations
+permutations <- combn(cups, 4)
+
+# function to calculate the number of correct guesses
+correct_guesses <- function(permutation) {
+  sum(permutation %in% tea_first) + sum((1:cups)[-permutation] %in% milk_first)
+}
+
+# calculate the number of correct guesses for each permutation
+results <- apply(permutations, 2, correct_guesses)
+
+# calculate the p-value
+observed_correct <- 8  # The lady classified all 8 cups correctly
+p_value <- mean(results >= observed_correct)
+
+# generate a histogram for the randomization inference distribution using ggplot2
+ggplot(data.frame(results), aes(x = results)) +
+  geom_histogram(binwidth = 2, fill = "#98971a", color = "black", alpha = 0.75) +
+  geom_vline(xintercept = observed_correct, color = "#cc241d", linetype = "dashed", size = 1) +
+  scale_x_continuous(breaks = c(0,2,4,6,8)) +
+  labs(title = "Distribution of Correct Guesses",
+       x = "Number of Correct Guesses",
+       y = "Count") +
+  theme_minimal() +
+  theme(text = element_text(size = 16))
+```
+:::
+
+:::
+:::
+
+. . .
+
+- $\binom{8}{4}=70$ ways to pour teas and each arrangement is equally likely 
+
+- Under the null hypothesis, the probability that the lady classifies all cups correctly is $1/70 \approx 0.014$.
+
+- $p$-value: $p = \Pr(\text{obtaining the observed test statistic} \given \text{null}) = 0.014$.
+
+- The lady may have possessed an ability to tell the difference.
+
+## Basic Setup for Fisher's Exact Test
+
+- **Units**: $i \in \{1, \ldots, N\}$
+- **Treatment**: $T_i \in \{0, 1\}$, randomly assigned     
+- **Potential outcomes**: $Y_i(0)$ and $Y_i(1)$
+- **Observed outcome**: $Y_i = T_i Y_i(1) + (1-T_i) Y_i(0)$ (consistency) 
+
+. . .
+
+- Treatments are assigned with some known treatment assignment mechanism 
+  - If researchers can reproduce it, fine to be very complicated 
+  - e.g., complete, Bernoulli, Block, Cluster, or any complex randomization
+
+. . .
+
+- ["Sharp" null hypothesis]{.highlight} of no treatment effect:
+  $$
+  H^{sharp}_0: Y_i(1) = Y_i(0) \: \forall i \quad \text{vs.} \quad H^{sharp}_a: \exists i:\: Y_i(1) \neq Y_i(0)
+  $$
+
+. . .
+
+- Very different from the _"weak" null hypothesis_!
+
+## Sharp Null
+
+<br>
+
+- Fisher's sharp null hypothesis: $Y_i(1) = Y_i(0)$ for all units.
+
+- **Key idea**: Under the _sharp_ null, we "observe" all potential outcomes!
+
+- We can compute the _exact_ $p$-value to test this sharp null hypothesis.
+
+. . .
+
+- [Example]{.note}: GOTV experiments:
+
+:::small-font
+| Voters $i$ | Contact $T_i$ | Turnout $Y_i$ | Potential Turnout $Y_i(1)$ | Potential Turnout $Y_i(0)$ |
+|:----------:|:-------------:|:-------------:|:--------------------------:|:--------------------------:|
+| 1          | 1             | 1             | 1                          | [?]{.alert}                      |
+| 2          | 0             | 0             | [?]{.alert}                      | 0                          | 
+| 3          | 1             | 1             | 1                          | [?]{.alert}                      |
+| 4          | 1             | 0             | 0                          | [?]{.alert}                      |
+| 5          | 0             | 1             | [?]{.alert}                      | 1                          |
+: {tbl-colwidths="[25,25,25,25,25]"}
+:::
+
+- Estimate: $\widehat{\tau} = \frac{2}{3} - \frac{1}{2} = \frac{1}{6}$ 
+
+- Is this statistically significant? How do we compute $p$-value?
+
+## Computing the Null Distribution
+
+
+<br>
+
+:::small-font
+| Voters $i$ | Turnout $Y_i$ | Contact $T_i$ | $\widetilde{T}^1_i$ | $\widetilde{T}^2_i$ | $\widetilde{T}^3_i$ | $\ldots$ |
+|:----------:|:-------------:|:-------------:|:-----------------------------------------------:|:-------------------:|:-------------------:|:--------:|
+| 1          | 1             | 1             | 1                                             | 1                   | 1                   | $\ldots$ |
+| 2          | 0             | 0             | 1                                             | 1                   | 0                   | $\ldots$ |
+| 3          | 1             | 1             | 1                                             | 0                   | 1                   | $\ldots$ |
+| 4          | 0             | 1             | 0                                             | 1                   | 0                   | $\ldots$ |
+| 5          | 1             | 0             | 0                                             | 0                   | 1                   | $\ldots$ |
+| $\widehat{\tau}$ |             |             | $\frac{1}{6}$                                 | $-\frac{2}{3}$       | $1$         | $\ldots$ |
+: {tbl-colwidths="[25,25,25,25,25,25,25]"}
+:::
+
+. . .
+
+- The null ($\approx$ _sampling_) distribution of the test statistic is $\{\widehat{\tau}_k\}_{k=1}^K$, where
+  $$
+  \widehat{\tau}_k = \frac{\sum_{i=1}^N \widetilde{T}^k_i  Y_i}{\sum_{i=1}^N \widetilde{T}^k_i} -
+  \frac{\sum_{i=1}^N (1-\widetilde{T}^k_i)  Y_i}{\sum_{i=1}^N (1-\widetilde{T}^k_i)}
+  $$
+
+- Exact (two-sided) $p$-value is $p = \frac{1}{K} \sum_{k=1}^K \mathbb{1} \left[ |\widehat{\tau}_k| > |\widehat{\tau}|\right]$, where $\widehat{\tau}$ is the observed test statistic
+
+. . .
+
+- [Note]{.note}: If $K$ (the number of potential treatment assignment) is large, use simulations!
+
+## Example: Social Pressure Experiment
+
+<br>
+
+```{r}
+#| label: ri
+#| echo: true
+#| eval: false
+#| output: asis
+#| output-location: default
+#| code-line-numbers: "1-2|4-6|8-17|19-23"
+
+# load data
+gerber <- haven::read_dta("../_data/gerber.dta")
+
+# observed test statistics
+lm_obs <- lm(voted ~ factor(treatment), data = gerber)
+obs_dim <- coef(lm_obs)[2:5]
+
+# Fisher’s exact test
+sim_dim <-
+  pbapply::pbreplicate(1000, {
+    sim_treatment <-
+      sample(gerber$treatment,
+        size = length(gerber$treatment), replace = FALSE
+      )
+    lm_sim <- lm(gerber$voted ~ factor(sim_treatment))
+    coef(lm_sim)[2:5]
+  }, cl = 8)
+
+# p-values
+mean(abs(sim_dim[1,]) > abs(obs_dim[1])) # two-sided for Hawthorne
+mean(abs(sim_dim[2,]) > abs(obs_dim[2])) # two-sided for Civic
+mean(abs(sim_dim[3,]) > abs(obs_dim[3])) # two-sided for Neighbors
+mean(abs(sim_dim[4,]) > abs(obs_dim[4])) # two-sided for Self
+```
+
+## Example: Results
+
+```{r}
+#| label: gerber_h
+#| fig-align: center
+#| fig-width: 5
+#| fig-height: 2.5
+#| fig-subcap: 
+#|   - "For Hawthorne treatment"
+#|   - "For Neighbors treatment"
+#|   - "For Civic Duty treatment"
+#|   - "For Self treatment"
+#| layout-ncol: 2
+
+# observed test statistics
+lm_obs <- lm(voted ~ factor(treatment), data = gerber)
+obs_dim <- coef(lm_obs)[2:5]
+
+sim_dim <- readr::read_rds(file = "../_data/gerber_sims.rds")
+
+# Plot using ggplot2
+ggplot(tibble(x = sim_dim[1,]), aes(x = x)) +
+  geom_histogram(alpha = 0.7, position = "identity", bins = 100, fill = "#458588") +
+  geom_vline(
+    aes(xintercept = obs_dim[1]), color = "#cc241d",
+    linetype = "dashed", size = 1
+  ) +
+  geom_vline(
+    aes(xintercept = 0), color = "black",
+    linetype = "dashed", size = 1, alpha = .5
+  ) +
+  scale_x_continuous(limits = c(-0.02, 0.1)) +
+  labs(
+    x = "Test-statistic",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+# Plot using ggplot2
+ggplot(tibble(x = sim_dim[3,]), aes(x = x)) +
+  geom_histogram(alpha = 0.7, position = "identity", bins = 100, fill = "#458588") +
+  geom_vline(
+    aes(xintercept = obs_dim[3]), color = "#cc241d",
+    linetype = "dashed", size = 1
+  ) +
+  geom_vline(
+    aes(xintercept = 0), color = "black",
+    linetype = "dashed", size = 1, alpha = .5
+  ) +
+  scale_x_continuous(limits = c(-0.02, 0.1)) +
+  labs(
+    x = "Test-statistic",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+# Plot using ggplot2
+ggplot(tibble(x = sim_dim[2,]), aes(x = x)) +
+  geom_histogram(alpha = 0.7, position = "identity", bins = 100, fill = "#458588") +
+  geom_vline(
+    aes(xintercept = obs_dim[2]), color = "#cc241d",
+    linetype = "dashed", size = 1
+  ) +
+  geom_vline(
+    aes(xintercept = 0), color = "black",
+    linetype = "dashed", size = 1, alpha = .5
+  ) +
+  scale_x_continuous(limits = c(-0.02, 0.1)) +
+  labs(
+    x = "Test-statistic",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+# Plot using ggplot2
+ggplot(tibble(x = sim_dim[4,]), aes(x = x)) +
+  geom_histogram(alpha = 0.7, position = "identity", bins = 100, fill = "#458588") +
+  geom_vline(
+    aes(xintercept = obs_dim[4]), color = "#cc241d",
+    linetype = "dashed", size = 1
+  ) +
+  geom_vline(
+    aes(xintercept = 0), color = "black",
+    linetype = "dashed", size = 1, alpha = .5
+  ) +
+  scale_x_continuous(limits = c(-0.02, 0.1)) +
+  labs(
+    x = "Test-statistic",
+    y = "Count"
+  ) +
+  theme_minimal()
+```
+
+## General Procedure for Fisher's Exact Test
+
+<br>
+
+1. Specify a **sharp null hypothesis**  
+   
+   - $H_0: Y_i(1) - Y_i(0) = \tau_{0i}$, where we set $\tau_{0i} = 0$ for all $i$.
+   - No effect implies no heterogeneous effect, no spillover effect, etc.
+
+. . .
+
+2. Choose a **test statistic** $S = f(\{Y_i, T_i, \tau_{0i}\}_{i=1}^N)$  
+   
+   - Difference-in-Means, Rank-sum test statistic, etc.
+   - Any statistic gives a valid and exact $p$-value but power may differ
+   - Could use regression models or machine learning algorithms
+
+. . .
+
+3. Compute the **reference distribution** and $p$-value based on the randomized distribution of treatment assignment  
+   - Exact distribution in small samples
+   - Monte Carlo approximation as a general strategy
+
+  
+## Test Statistics
+
+<br>
+
+1. [Difference-in-Means]{.highlight} (or an estimator of the _ATE_):
+   
+   - Under the sharp null, this test statistic has mean zero.
+   - Easy to interpret.
+   - **Disadvantage**: The power might be lower than alternatives.
+
+. . .
+
+2. [Difference-in-Mean-Ranks]{.highlight} (for continuous outcomes):
+   
+   $$
+   S = \left|\frac{\sum_{i=1}^N T_i R_i}{\sum_{i=1}^N T_i} - \frac{\sum_{i=1}^N (1-T_i) R_i}{\sum_{i=1}^N (1-T_i)} \right|
+   $$  
+   
+   
+   - Rank of the outcome for unit $i$: $R_i = R_i(Y_1(T_1), \ldots, Y_N(T_N))$.
+   - **Advantages**: Reference distribution does not depend on scale and is not sensitive to outliers.
+
+
+. . .
+
+- To learn more read @imbens2015causal [Ch. 5].
+
+## Application Beyond Randomized Experiments
+
+- The California Alphabet Lottery [@ho2006randomization].
+
+- Randomization sometimes occurs in the real world.
+
+- Started in 1975: _"[B]oth the 'incumbent first' and 'alphabetical order' procedures are constitutionally impermissible."_ (Gould v. Grubb, 14 Cal. 3d 661, 676).
+
+- A random alphabet is drawn for every statewide election that applies to all statewide offices.
+
+- Candidates are ordered by this randomized alphabet for the first of 80 assembly districts and are rotated for each subsequent assembly district.
+
+:::{layout-ncol=2}
+![Lottery Drawing](../_images/CAdraw.jpg){width="75%"}
+
+![Lottery Cannisters](../_images/CAcannister.jpg){width="80%"}
+:::
+
+
+## California Elections Code 13112(a)
+
+<br><br><br>
+
+_"Each letter of the alphabet shall be written on a separate slip of paper, each of which shall be folded and inserted into a capsule. Each capsule shall be opaque and of uniform weight, color, size, shape, and texture. The capsules shall be placed in a container, which shall be **shaken vigorously** in order to mix the capsules thoroughly. The container then shall be opened and the capsules removed **at random** one at a time. As each is removed, it shall be opened and the letter on the slip of paper read aloud and written down. The resulting random order of letters constitutes the **randomized alphabet**, which is to be used in the same manner as the conventional alphabet in determining the order of all candidates in all elections. For example, if two candidates with the surnames Campbell and Carlson are running for the same office, their order on the ballot will depend on the order in which the letters M and R were drawn in the randomized alphabet drawing."_
+
+
+## Fisher's Exact Test for the Natural Experiment
+
+- Take into account the complex lottery procedure
+  
+  1. Randomize alphabet.
+  2. Sort candidates by randomized alphabet.
+  3. Rotate the candidate order.
+
+    $\rightsquigarrow$ **Impossible via model-based inference!**
+
+. . .
+
+- @ho2006randomization rely on data from the 2003 CA Gubernatorial Recall Election
+  
+  - 135 candidates.
+  - Ballot order differs across 80 districts.
+
+. . .
+
+- Setup:
+
+  - **Null hypothesis**: no causal effect of ballot order.
+  - Permutation test for _each_ candidate.
+  - **Test statistic**: _DiM_ between being on the first ballot page and being on other ballot pages.
+  - Reference (randomization) distribution via Monte Carlo.
+
+
+## Distribution of Exact $p$-values across Candidates
+
+![](../_images/CApvalues.png){fig-align="center" width="90%"}
+
+
+## Diagnose Design via Placebo Tests
+
+<br>
+
+- Placebo tests: used when effects are known to be zero
+- Null hypothesis is assumed to be true
+- Ballot order should not affect pre-election covariates
+
+<br>
+
+![](../_images/CApexog.png){fig-align="center" width="90%"}
+
+
+
+## Practical Considerations and Extensions
+
+<br>
+
+- **Practical Considerations**
+
+
+
+  - In most experiments, researchers focus on the _ATE_ and use the Neyman approach to construct confidence intervals.
+  
+  - Because a sharp null hypothesis is often not interesting to social scientists.
+  
+  - Consider the Fisherian exact test
+
+  1. When you have a small sample size (avoid if possible!), or
+   
+  2. When you have a complex treatment assignment mechanism (e.g., natural experiment).
+
+. . .
+
+- **Extensions**
+  
+  - Can be extended to deal with non-sharp null, e.g. in the interference setting [@athey2018exact].
+
+# Imbalance
+
+## Covariates in Experiments?
+
+![](../_images/potential_outcomes_covariates.png){fig-align="center" width="90%"}
+
+## Treatment Imbalance
+
+<br>
+
+- Randomization balances both _observed_ and _unobserved_ pre-treatment covariates between the treated and untreated in large samples $\rightsquigarrow$ [covariate imbalance]{.highlight} is generally not a concern.
+
+. . .
+
+- **But**
+  - In small samples, you may get unlucky and suffer from [imbalance]{.highlight}.
+  - In a _"natural"_ randomized experiment, it's important to check whether randomization occurred as you thought.
+
+. . .
+
+- **Common practice:** Conduct balance checks with respect to observed pre-treatment covariates.
+
+  - Compare means, standard deviations, etc., between the treated and untreated.
+  - Can also regress treatment indicator on covariates.
+  - Visual inspection of histograms/density plots.
+  - Many packages have balance tests, e.g. `RItools::xbalance()`.
+
+## What If You Found Imbalance?
+
+<br><br>
+
+- Can correct imbalance via regression, matching, weighting, etc. (_more on matching and weighting later_).
+
+- Post-randomization adjustment can also improve [efficiency]{.highlight}--that is, reduce the randomization/sampling distribution variance of our estimate of $\tau$ while maintaining consistency.
+
+- **But** [it may also produce bias, such as:]{.fragment}
+
+  :::fragment
+  - Adjusting for covariates can bias the estimator.
+  - Bias due to post-hoc analysis (**p-hacking**).
+  - Bias due to incorrectly adjusting **post-treatment covariates**.
+  :::
+
+## Covariate Adjustment with Regression
+
+- So, is it a good idea to control for pre-treatment covariates via linear regression in a randomized experiment?
+
+. . .
+
+- We need to look at [bias-variance tradeoff]{.highlight}.
+
+. . .
+
+- Generally speaking, in large samples, the bias introduced by simple covariate adjustment is negligible.
+
+- @lin2013agnostic shows that demeaning covariates and including interaction terms yields biased but consistent estimators of _ATE_:
+
+$$
+Y_i = \alpha + \tau T_i + (X_i - \overline{X})' \gamma + T_i (X_i - \overline{X})' \delta + \varepsilon_i
+$$
+
+- [Intuition]{.note}: De-meaning covariates ensures that the interaction terms $(X_i - \overline{X})' \delta$ are orthogonal to the treatment indicator $T_i$ and $\widehat{\tau}$ preserves interpreation. At the same time inclusion of covariates allows to improve precision if $X_i$ are predictive of outcome. As $N \rightarrow \infty$ the bias introduced by this method diminishes (consistency).
+
+## @lin2013agnostic Covariate Adjustment
+
+<br>
+
+```{r}
+#| label: lin_adjustment
+#| echo: true
+#| output-location: column
+#| code-line-numbers: "1-9|11-13|15-25"
+
+# simulate data
+set.seed(20250206)
+
+N <- 100
+X <- rnorm(N, mean = 0)
+D <- randomizr::complete_ra(N)
+Y <- 
+  2 + 1.5 * D + 0.5 * X + 
+  0.5 * D * X + rnorm(N, sd = 0.5)
+
+# unadjusted model
+unadjusted_model <-
+  estimatr::lm_robust(Y ~ D + X) |> estimatr::tidy()
+
+# demean covariates
+X_centered <- X - mean(X)
+
+# adjusted model with centered covariates and interaction
+adjusted_model <-
+  estimatr::lm_robust(Y ~ D * X_centered) |> estimatr::tidy()
+
+# adjusted model with centered covariates and interaction
+adjusted_model2 <-
+  estimatr::lm_lin(Y ~ D, covariates = ~X) |>
+  estimatr::tidy()
+
+bind_rows(
+  unadjusted_model, adjusted_model, adjusted_model2
+) |>
+  dplyr::filter(term == "D") |>
+  dplyr::mutate(model = c("unadj", "adj_hand", "adj_estimatr")) |>
+  dplyr::select(model, term, estimate, std.error) |>
+  knitr::kable(digits = 5, align = "lccc") |>
+  kableExtra::kable_minimal(font_size = 20)
+
+```
+
+## @lin2013agnostic Covariate Adjustment
+
+<br>
+
+```{r}
+#| label: lin
+#| fig-align: center
+#| fig-width: 5
+#| fig-height: 5
+#| fig-subcap:
+#|   - "w/o adjustment"
+#|   - "w/ adjustment"
+#| layout-ncol: 2
+
+# plot X against Y coloring by D
+plot_data <- tibble(X, Y, D)
+
+ggplot(plot_data, aes(x = X, y = Y, color = factor(D), shape = factor(D))) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, size = .5, linetype = "dashed") +
+  geom_function(fun = function(x) {
+    unadjusted_model[1, 2] + unadjusted_model[2, 2] + x * unadjusted_model[3, 2]
+  }, color = "#cc241d", size = 1) +
+  geom_function(fun = function(x) {
+    unadjusted_model[1, 2] + x * unadjusted_model[3, 2]
+  }, color = "#458588", size = 1) +
+  scale_color_manual(values = c("#458588", "#cc241d")) +
+  scale_shape_manual(values = c(17, 1)) +
+  labs(
+    subtitle = bquote(hat(tau)[SATE] ~ "is" ~ .(round(unadjusted_model[2, 2], 4))),
+    x = "X",
+    y = "Y",
+    color = "D = ",
+    shape = "D = "
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+ggplot(plot_data, aes(x = X, y = Y, color = factor(D), shape = factor(D))) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, size = .5, linetype = "dashed") +
+  geom_function(fun = function(x) {
+    adjusted_model2[1, 2] + adjusted_model2[2, 2] + x * (adjusted_model2[3, 2] + adjusted_model2[4, 2])
+  }, color = "#cc241d", size = 1) +
+  geom_function(fun = function(x) {
+    adjusted_model2[1, 2] + x * adjusted_model2[3, 2]
+  }, color = "#458588", size = 1) +
+  scale_color_manual(values = c("#458588", "#cc241d")) +
+  scale_shape_manual(values = c(17, 1)) +
+  labs(
+    subtitle = bquote(hat(tau)[SATE] ~ "is" ~ .(round(adjusted_model2[2, 2], 4))),
+    x = "X",
+    y = "Y",
+    color = "D = ",
+    shape = "D = "
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+
+```
+
+# Experimental Design Considerations
+
+## Unequal Probabilities of Assignment
+
+<br><br>
+
+- In some experiments, units may have different probabilities of being assigned to the treatment group.
+
+- This can occur due to:
+  
+  - Block (stratified) randomization with different probabilities within strata or unequal sized clusters.
+  
+  - Practical constraints or ethical considerations.
+  
+  - Adaptive designs where probabilities change over time [@offer2021adaptive].
+
+. . .
+
+- **Problem**: Unequal probabilities can bias the Difference-in-Means (_DiM_) estimator.
+
+- **Solution**: Use the [Inverse Probability Weighting (IPW)]{.highlight} that we introduced before estimator to account for unequal probabilities.
+
+## Bias in Difference-in-Means
+
+- Recall the _DiM_ estimator: $\widehat{\tau}_{DiM} = \frac{1}{N_1} \sum_{i=1}^N T_i Y_i - \frac{1}{N_0} \sum_{i=1}^N (1 - T_i) Y_i$
+
+- Suppose $p_i = \Pr(T_i = 1)$ varies across units, but we have complete random assignment ($N_1$ and $N_0$ are fixed).
+
+. . .
+
+- The expected value of the _DiM_ estimator is:
+
+$$
+\begin{align*}
+\E[\widehat{\tau}] &= \E \left[ \frac{1}{N_1}\sum_{i=1}^N T_i Y_i(1) \right] - \E \left[ \frac{1}{N_0}\sum_{i=1}^N (1 - T_i) Y_i(0) \right] \\
+&= \sum_{i=1}^N \E \left[\frac{T_i}{N_1}\right] Y_i(1) - \sum_{i=1}^N \E \left[\frac{(1 - T_i)}{N_0}\right] Y_i(0) \\
+&= \frac{\sum_{i=1}^N p_i\,Y_i(1)}{\sum_{j=1}^N p_j} - \frac{\sum_{i=1}^N (1-p_i)\,Y_i(0)}{\sum_{j=1}^N (1-p_j)} \\
+&\neq \tau_{ATE}.
+\end{align*}
+$$
+
+- [Intuition]{.note}: The _DiM_ over-weights observations with higher assignment probabilities and is generally not equal to the true _ATE_ (unless $p_i$ is constant for all units or $\tau_i$ is constant).
+
+## Inverse Probability Weighting (IPW)
+
+<br>
+
+- The [IPW estimator]{.highlight} corrects for unequal probabilities:
+
+$$
+\widehat{\tau}_{IPW} = \frac{1}{N} \sum_{i=1}^N \left( \frac{T_i Y_i}{p_i} - \frac{(1 - T_i) Y_i}{1 - p_i} \right)
+$$
+
+. . .
+
+- **Properties**: 
+  - The IPW estimator is unbiased for the _ATE_: $\E [\widehat{\tau}_{IPW}] = \tau_{ATE}$
+  - Can be used for estimation of _SATE_ or _PATE_.
+  - Can be obtained using regression with inverse probability weights (e.g. `estimatr::lm_robust()` with `weights` argument).
+
+- [Intuition]{.note}: Weight each unit by the inverse of its probability of receiving the observed treatment to compensate for over-weighting.
+
+- [Note]{.note}: The IPW estimator is unbiased and consistent if the treatment assignment mechanism is known and correctly specified.
+
+## Example: Bias of DiM vs IPW Estimator
+
+![](../_images/ipw_dim_bias.gif){fig-align="center" width="90%"}
+
+# Cluster Randomized Experiments
+
+## Cluster Randomization
+
+- So far, we have assumed treatments are assigned at the individual level.
+
+- Sometimes random assignment occurs at the [cluster level]{.highlight} for various reasons:
+  
+  - Treatment only makes sense at the group level, but the outcome is measured for individuals.
+  
+  - Treatment too costly to implement individually.
+  
+  - SUTVA only plausible if treatment is defined at the group level.
+    
+  - [Example]{.note}: Effect of classroom teaching method on student performance.
+
+. . .
+
+- Standard errors ignoring cluster randomization are usually **too small** (opposite of conservative).
+
+- This is due to units within the same cluster typically being more similar than units in different clusters.
+
+. . .
+
+:::{.callout-warning icon="false" title=""}
+_"Analyses of group randomized trials that ignore clustering are an exercise in self-deception."_ [@cornfield1978symposium]
+:::
+
+
+## Randomization at the Group Level
+
+![](../_images/potential_outcomes_cluster.png){fig-align="center" width="90%"}
+
+## Bias of DiM in Cluster-Randomized Experiments
+
+<br>
+
+- When clusters have **unequal sizes**, the _DiM_ estimator can produce biased estimates of $\tau_{ATE}$ if the cluster sizes are correlated with the potential outcomes.
+
+  - [Example]{.note}: If larger clusters tend to have higher potential outcomes, the _DiM_ estimator will overestimate the treatment effect.
+
+- [Intuition]{.note}: The _DiM_ estimator gives equal weight to each cluster, regardless of size, which can lead to biased estimates if cluster sizes are not balanced.
+
+. . .
+
+- To address the issue, as before, we can:
+
+  - Use weighted estimators, such as the [IPW estimator]{.highlight}, or 
+  - Regression weighted by inverse of probabilities of assignment to account for unequal cluster sizes.
+
+## Intracluster Correlation
+
+<br>
+
+- Recall the [Law of Total Variance]{.highlight}: $\var(Y) = \E[\var(Y\mid X)] + \var(\E[Y\mid X])$
+
+- This implies the decomposition of heterogeneity in outcomes:
+
+$$
+\underbrace{\sum_{j=1}^G \sum_{i=1}^{N_j} (Y_{ij} - \overline{Y})^2}_{\text{overall variance, } \sigma^2} = \underbrace{\sum_{j=1}^G \sum_{i=1}^{N_j} (Y_{ij} - \overline{Y}_{j})^2}_{\text{within-cluster variance, } \sigma^2_W} + \underbrace{\sum_{j=1}^G N_{j}(\overline{Y}_{j} - \overline{Y})^2,}_{\text{between-cluster variance, } \sigma^2_B}
+$$
+
+where $\overline{Y_{j}}$ is mean of $Y_{ij}$ in cluster $j$ and $\overline{Y}$ is mean of all $Y_{ij}$.
+
+. . .
+
+- Then we can define the [intracluster correlation]{.highlight}: $\rho = \frac{\sigma^2_B}{\sigma^2} = 1 - \frac{\sigma^2_W}{\sigma^2}$
+
+- [Intuition]{.note}: When $\rho$ is $1$ ($0$), responses are identical (uncorrelated) within each cluster.
+
+## Inference in Cluster-Randomized Experiments
+
+- We can show cluster randomization **inflates** the sampling variance (compared to complete randomization) approximately by [Moulton factor]{.highlight} (design effect):
+
+$$
+\frac{\var(\hat\tau_{CL})}{\var(\hat\tau_{R})} = 1 + (\overline{N} - 1)\rho, \quad \text{where} \quad \bar{N} = \frac{1}{G} \sum_{j=1}^G N_j
+$$
+
+- [Intuition]{.note}: When $\rho = 1$, outcomes do not vary within clusters ($\sigma^2_{W} = 0$), each cluster is essentially one observation. As a result, the _effective sample_ size is number of clusters, not number of units, and variance is inflated. When $\rho = 0$ all clusters are _similar_ to the whole sample.
+
+. . .
+
+- **Valid inference**:
+
+  - OLS and _DiM_ estimators are unbiased for $\tau_{ATE}$ if clusters are _equally_ sized.
+  - Possible bias if cluster sizes vary and are correlated with potential outcomes.
+  - Rely on [cluster-robust standard errors]{.highlight} (_CR2_) or randomization inference.
+
+- [Note]{.note}: When $G$ is small, $\rho$ will be poorly estimated and cluster SEs will be unreliable $\rightsquigarrow$ prefer increasing $G$ over sample size per cluster ($N_j$).
+
+## Simulation: Ignoring Clustering in SE Estimates
+
+
+
+:::{.columns}
+
+:::{.column width="50%"}
+- Ignoring clustering in standard error estimates can result in overly _"optimistic"_ confidence intervals and increased [Type I error]{.highlight} (_false-positives_) rates.
+
+- The simulation shows how [coverage]{.highlight}--probability of 95% CIs including the true _ATE_ across replications of the experiment--is affected by ratio of between- to within-cluster variance:
+
+  - We would expect the these CIs will include true _ATE_ in 95% of the cases.
+  - _HC2_ are CIs based on heteroskedastisity robust standard errors.
+  - _CR2_ are CIs based on cluster robust standard errors.
+
+:::
+
+::: {.column width="50%"}
+<br>
+
+![](../_images/cr2_coverage.gif){fig-align="center" width="90%"}
+:::
+
+:::
+
+## Example: Field Experiment in Benin
+
+<br><br><br><br>
+
+![@wantchekon2003clientelism](../_images/wantchekon_experiment_citations.png){fig-align="center" width="80%"}
+
+## Example: Field Experiment in Benin
+
+![](../_images/wantchekon_experiment_table.png){fig-align="center" width="90%"}
+
+## Example: Field Experiment in Benin
+
+![](../_images/wantchekon_experiment_table2.png){fig-align="center" width="90%"}
+
+# Block Randomized Experiments
+
+## Pre- vs. Post-treatment Adjustment
+
+- We discussed pros/cons for covariate adjustment after randomization
+
+- But, why not do adjustment before randomization?
+
+- [Basic idea]{.highlight}: If you have data on pre-treatment characteristics $X_i$, why leave it to _pure chance_, to balance them?
+
+. . .
+
+- [Example]{.note}: $n = 4$ with two males and two females.
+  
+  - Complete randomization will place two females in the same treatment group $\frac{1}{3}$ of the time.
+  
+  - If that happens, how can we tell the treatment eﬀect from gender diﬀerence?
+
+. . .
+
+- [Solution]{.highlight}: Pre-stratify the sample, and then randomize completely within each stratum
+
+  1. Blocking will perfectly balance $X_i$.
+  2. Randomization will balance the rest in expectation.
+
+  :::{.callout-note icon="false" title=""}
+  $\rightsquigarrow$ _"Block what you can; randomize what you cannot."_ (George Box)
+  :::
+
+
+
+## Simple Two Block Example
+
+- In GOTV experiment, what if we have _previous turnout_ data from the voter file?
+  
+  - Create blocks: $V_i = 1$ if voted in last election, $V_i = 0$ otherwise.
+  - $N_\text{v}$ is the number of previous voters.
+  - $N_\text{nv} = N - N_\text{v}$ is the number of previous nonvoters.
+
+. . .
+
+- _SATE_ within blocks is defined by $V_i$:
+
+$$
+\tau_\text{v} = \frac{1}{N_\text{v}} \sum_{i:V_i=1} [ Y_i(1) - Y_i(0) ], \qquad \tau_\text{nv} = \frac{1}{N_\text{nv}} \sum_{i:V_i=0} [ Y_i(1) - Y_i(0) ]
+$$
+
+. . .
+
+- Using Law of Iterated Expectation:
+
+$$
+\tau_{SATE} = \underbrace{\left( \frac{N_\text{v}}{N_\text{v} + N_\text{nv}} \right)}_{\text{share voters}} \tau_\text{v} + 
+\underbrace{\left( \frac{N_\text{nv}}{N_\text{v} + N_\text{nv}} \right)}_{\text{share non-voters}} \tau_\text{nv}
+$$
+
+## Block Randomized Design
+
+- [Block (stratified) randomized experiment]{.highlight}:
+  
+  - Each block is _essentially_ completely randomized experiment.
+  - Choose $N_{1,\text{v}}$ voters to be treated, $N_{0,\text{v}} = N_{\text{v}} − N_{1,\text{v}}$
+control.
+  - Choose $N_{1,\text{nv}}$ non-voters to be treated, $N_{0,\text{nv}} = N_{\text{nv}} − N_{1,\text{nv}}$ control.
+
+. . .
+
+- Probability of treatment in each group called the [propensity score]{.highlight}:
+
+  - Prob. of treatment for voters: $\Pr(T_i = 1 \given V_i = 1) = p_{\text{v}} = \frac{N_{1,\text{v}}}{N_{\text{v}}}$.
+  - Prob. of treatment for non-voters: $\Pr(T_i = 1 \given V_i = 0) = p_{\text{nv}} = \frac{N_{1,\text{nv}}}{N_{\text{nv}}}$.
+
+. . .
+
+- Blocking ensures balance across blocks:
+  
+  - When $p_{\text{v}} = p_{\text{nv}}$, distribution of treatment is exactly the same in each block.
+  - With complete randomization, treatment might be very _imbalanced_ (in absolute terms) across $V_i$.
+  - **Benefit**: No possibility of _chance_ imbalances skewing the estimates.
+
+## Estimators in Blocked Designs
+
+- [Within-strata _DiM's_]{.highlight} are:
+
+$$
+\begin{align*}
+\widehat{\tau}_\text{v} &= \overline{Y}_{1,\text{v}} - \overline{Y}_{0,\text{v}} = \frac{1}{N_{1,\text{v}}} \sum_{i:V_i=1} T_i Y_i - \frac{1}{N_{0,\text{v}}} \sum_{i:V_i=0} (1 - T_i) Y_i \\
+\widehat{\tau}_\text{nv} &= \overline{Y}_{1,\text{nv}} - \overline{Y}_{0,\text{nv}} = \frac{1}{N_{1,\text{nv}}} \sum_{i:V_i=1} T_i Y_i - \frac{1}{N_{0,\text{nv}}} \sum_{i:V_i=0} (1 - T_i) Y_i
+\end{align*}
+$$
+
+  - **Property**: Unbiased for the within-strata _SATE's_: $\E [\widehat{\tau}_\text{v} \given \mathcal{O}] = \tau_\text{v}$.
+
+. . .
+
+- Unbiased estimator for the overall _SATE_ for block design:
+
+$$
+\widehat{\tau}_{BR} = \left(\frac{N_\text{v}}{N}\right) \widehat{\tau}_\text{v} + \left(\frac{N_\text{nv}}{N}\right) \widehat{\tau}_\text{nv}
+$$
+
+  - **Property**: Equivalent to the regular _DiM_ if $p_\text{v} = p_\text{nv} = \frac{1}{2}$.
+  - Otherwise, standard $\widehat{\tau}_{DiM}$ under block design will be **biased**.
+
+## Sampling Variance of Blocking Estimator
+
+- Each block is a completely randomized experiment so we have:
+
+$$
+\var [\widehat{\tau}_\text{v} \given \mathcal{O}] = \frac{S^2_{1,\text{v}}}{N_{1,\text{v}}} + \frac{S^2_{0,\text{v}}}{N_{0,\text{v}}} - \frac{S^2_{\tau,\text{v}}}{N_{\text{v}}},
+$$ 
+
+  where $S^2_{t,\text{v}}$ is the within-block sample variances of the $T_i = t$ potential outcomes or $\tau$.
+
+. . .
+
+- Finite sample variance of the blocked (_BR_) estimator:
+
+$$
+\var [\widehat{\tau}_{BR} \given \mathcal{O}] = \left(\frac{N_\text{v}}{N}\right)^2 \var [\widehat{\tau}_\text{v} \given \mathcal{O}] + \left(\frac{N_\text{nv}}{N}\right)^2 \var [\widehat{\tau}_\text{nv} \given \mathcal{O}]
+$$
+
+. . .
+
+- Use the conservative variance estimators from each strata to get:
+
+$$
+\widehat{\sigma}_{BR} = \left(\frac{N_\text{v}}{N}\right)^2 \left(\frac{\widehat{\sigma}^2_{1,\text{v}}}{N_{1,\text{v}}} + \frac{\widehat{\sigma}^2_{0,\text{v}}}{N_{0,\text{v}}}\right) + \left(\frac{N_\text{nv}}{N}\right)^2 \left(\frac{\widehat{\sigma}^2_{1,\text{nv}}}{N_{1,\text{nv}}} + \frac{\widehat{\sigma}^2_{0,\text{nv}}}{N_{0,\text{nv}}}\right),
+$$
+
+where $\widehat{\sigma}^2_{t,\text{v}}$ are the within-strata **observed outcome variances**.
+
+
+## General Blocking Notation
+
+- Blocks, $j \in \{1, \dots, J\}$.
+
+  - Block indicator $B_i = j$ if $i$ is in block $j$.
+  - Sizes: $N_j > 2$ and proportions $w_j = N_j / N$.
+  - Number treated in each block: $N_{1,j}$ and $N_{0,j} = N_j - N_{1,j}$.
+
+. . .
+
+- [Within-block estimators]{.highlight}:
+
+$$
+\begin{align*}
+\widehat{\tau}_j &= \frac{1}{N_{1,j}} \sum_{i:B_i=j} T_i Y_i - \frac{1}{N_{0,j}} \sum_{i:B_i=j} (1 - T_i) Y_i, \\
+\widehat{\sigma}_j &= \frac{\widehat{\sigma}^2_{1,j}}{N_{1,j}} + \frac{\widehat{\sigma}^2_{0,j}}{N_{0,j}}
+\end{align*}
+$$
+
+. . .
+
+- [Aggregate blocking estimators]{.highlight}:
+
+$$
+\widehat{\tau}_{BR} = \sum_{j} w_j \widehat{\tau}_j, \qquad \widehat{\sigma}_{BR} = \sum_{j} w_j^2 \widehat{\sigma}(\widehat{\tau}_j)
+$$
+
+## Efficiency of Blocking
+
+- Efficiency of block versus complete randomization (_R_) depends on the sampling scheme.
+
+  - Usually, blocking will be more efficient (lower variance), **but not always**.
+
+. . .
+
+- Finite sample difference in sampling variances can be given by $\widehat{\sigma}_{R} - \widehat{\sigma}_{BR} = \frac{1}{n-1} (B - W)$, where measures of **between- and within-block variation**:
+
+$$
+\begin{align*}
+B &= \sum_{j=1}^{J} \left(\frac{N_j}{N}\right) (\overline{Y}_j(1) + \overline{Y}_j(0) - (\overline{Y}(1) + \overline{Y}(0)))^2 \\
+W &= \sum_{j=1}^{J} \frac{N_j}{N} \frac{N_{1,j} N_{0,j}}{N_j} \widehat{\sigma}(\widehat{\tau}_j \given \mathcal{O})
+\end{align*}
+$$
+
+. . .
+
+- Difference can be **positive or negative** [@pashley2022block]:
+
+  - [Intuition]{.note}: Blocking is better when outcomes vary a lot across blocks, not much within blocks (blocks are predictive of outcomes, so usually the case).
+  - Blocking is also more efficient for **_PATE_ under stratified sampling**.
+
+## How to Block
+
+<br><br>
+
+- **Discrete covariates** $\rightsquigarrow$ blocks by unique combinations.
+
+- **Alternative**: create blocks by forming homogeneous groups in $\mathbf{X}$.
+
+  - Choose a distance metric, such as the **Mahalanobis distance**:
+
+  $$
+  M(\mathbf{X}_i, \mathbf{X}_k) = \sqrt{(\mathbf{X}_i - \mathbf{X}_k)' \hat{V}(\mathbf{X})^{-1} (\mathbf{X}_i - \mathbf{X}_k)}
+  $$
+
+- **Challenges:**
+    
+  - Difficult/impossible to find optimal blocks in general, but **"greedy" algorithms** exist.
+  - Possible to get **optimal blocks with pair matching** ($J = n/2$).
+  - [R]{.proglang} packages `optmatch` and `blockTools` allow to perform matching.
+
+## Example: Forming Blocks using `blockTools`
+
+<br>
+
+```{r}
+#| label: blocking
+#| echo: true
+#| output-location: column
+#| code-line-numbers: "1-3|7-14|16-24|26-43"
+
+pacman::p_load(
+  blockTools, randomizr, RItools
+)
+
+set.seed(20250211)
+
+# simulate some data
+N <- 100
+data <- data.frame(
+  id = 1:N,
+  female = sample(c(0, 1), N, replace = TRUE),
+  age = round(truncnorm::rtruncnorm(N, a = 18, b = 80, mean = 30, sd = 10)),
+  education = sample(1:4, N, replace = TRUE) # 1: High School, 2: College, etc.
+)
+
+# form blocks using gender and age
+blocks <- block(
+  data,
+  id.vars = "id",
+  groups = "female",
+  n.tr = 2,
+  block.vars = c("age"),
+  distance = "mahalanobis"
+)
+
+# add block ids and random assignment
+data <- 
+  data |> 
+  dplyr::mutate(
+    block_id = 
+      blockTools::createBlockIDs(
+        obj = blocks, data = data, id.var = "id"),
+    treat1 = 
+      randomizr::complete_ra(N = n()),
+    treat2 = 
+      randomizr::block_ra(
+        blocks = female, 
+        prob = 0.5),
+    treat3 = 
+      randomizr::block_ra(
+        blocks = block_id, 
+        prob = 0.5)
+  )
+
+# output balance tests
+out <-
+lapply(
+  1:3,
+  function(x) {
+    RItools::xBalance(
+    fmla = as.formula(paste0("treat", x, "~ education + female + age")),
+    data = data,
+    report = c("adj.means", "std.diffs", "p.values"))$results[,,1] |> 
+      knitr::kable(
+        digits = 3, align = "cccc",
+        caption = c("Complete RA", "Block by female", "Block by female and age")[x]) |> 
+      kableExtra::kable_minimal(font_size = 20)
+  }
+)
+
+out[[1]]; out[[2]]; out[[3]]
+```
+
+## Regression for Block Randomized Experiments
+
+- Like in the classical experiment, one can use **linear regression** to obtain unbiased estimates in block-randomized experiments.
+
+. . .
+
+- **$p_j = p$**: Use [OLS with block dummies]{.highlight} (or fixed effects) to get an **unbiased estimate** of the _ATE_:
+
+$$
+Y_i = \alpha + \tau T_i + \sum_{j=2}^{M} \beta_j B_{ij} + \epsilon_i, \quad \text{where} \quad \E[\widehat{\tau}_{OLS}] = \tau
+$$
+
+- Valid uncertainty estimates can then be obtained via [HC2 standard errors]{.highlight} (or **clustered SE** if randomization was clustered within blocks).
+
+. . .
+
+- **$p_j$ varies by block**: Use [weighted least squares]{.highlight} instead of OLS, where the weight is the **inverse probability of treatment/control** for $i$ in block $j$:
+
+$$
+\forall i, j:\: w_{ij} =
+\begin{cases}
+\frac{1}{p_j}, & \text{if } T_i = 1 \\
+\frac{1}{(1 - p_j)}, & \text{if } T_i = 0
+\end{cases}
+$$
+
+# Statistical Power
+
+## What is _Power_?
+
+- Recall that for a statistical test:
+
+  - [Type 1 error (false-positives)]{.highlight}: Rejecting the null if the null is true ($\alpha$)
+  - [Type 2 error (false-negatives)]{.highlight}: Not rejecting the null if the null hypothesis is false ($\psi$)
+
+. . .
+
+- [Statistical power]{.highlight} of a design + test $\equiv$ the test's **probability of rejecting the null** in favor of the alternative when **the alternative is indeed true**, given the design.
+
+- [Example]{.note}: $H_0:\: \beta = 0$ and $H_a:\: |\beta| = \tau > 0$, giving rise to a two sided test. [Then power is given by, $\kappa = \Pr [\text{Reject } H_0 \given H_a \text{ is true; design, test}]$]{.fragment}.
+
+. . .
+
+- What does power depend on?
+
+  :::small-font
+  - True size of the effect ($\tau$),
+  - Sample size and proportion of the treated ($N$ and $p$),
+  - Variability of potential outcomes ($\sigma$),
+  - Test statistic,
+  - Number of treatments,
+  - Randomization scheme (simple, complete, clustered, blocked, etc.)
+  :::
+
+## Choice of Relative Treatment Group Size ($p$)
+
+<br>
+
+- Consider a randomized experiment with complete randomization.
+
+- **Problem**: For a given total sample size $N$, choose the optimal treatment allocation $p = N_1/N$ to minimize the variance of the estimator of the average treatment effect.
+
+. . .
+
+- Recall that our asymptotically valid variance expression is:
+
+$$
+\var(\hat\tau) = \frac{\sigma^2_1}{p N}+\frac{\sigma^2_0}{(1-p) N}
+$$
+
+. . .
+
+- How should we proceed? [**Solve a minimization problem!**]{.fragment}
+
+
+## Choice of Relative Treatment Group Size ($p$)
+
+<br>
+
+- Find the value $p^*$ that makes the derivative with respect to $p$ equal to zero:
+
+$$
+-\frac{\sigma^2_1}{p^{*2} N}+\frac{\sigma^2_0}{(1-p^*)^2 N}=0
+$$
+
+Therefore:
+
+$$
+\frac{1-p^*}{p^*} = \frac{\sigma_0}{\sigma_1} \implies p^* = \frac{\sigma_1}{\sigma_1+\sigma_0}=\frac{1}{1+\sigma_0/\sigma_1}
+$$
+
+- [Intuition]{.note}: A "rule of thumb" if you can assume $\sigma_1\approx \sigma_0$ is to have $p^{*}=0.5$
+
+- For _practical_ reasons it is sometimes better to choose unequal sample sizes (even if $\sigma_1\approx \sigma_0$).
+
+## Sampling Variance as Function of $p$
+
+- **Suppose**: $\sigma^2_1=\sigma^2_0=1$, $N=100$
+
+```{r}
+#| label: dim_variance_plot
+#| echo: true
+#| output-location: column-fragment
+#| fig-align: center
+#| fig-width: 6
+#| fig-height: 6
+
+# function to calculate variance of DiM
+variance_dim <- 
+  function(p, N, sigma1 = 1, sigma0 = 1) {
+    (sigma1^2 / (p * N)) + (sigma0^2 / ((1 - p) * N))
+  }
+
+# create a sequence of assignment p's
+# calculate variance for each p
+variance_data <- 
+  tibble(
+    N = 100,
+    p = seq(0.01, 0.99, by = 0.01), 
+    variance = 
+      map2_dbl(
+        N, p, 
+        \(x, y) variance_dim(p = y, N = x)))
+
+# plot using ggplot2
+ggplot(variance_data, aes(x = p, y = variance)) +
+  geom_line(color = "#458588", size = 1) +
+  labs(
+    x = bquote("Proportion of Treatment Group, " ~ N[1]/N),
+    y = bquote("Variance of DiM, " ~ V(bar(Y)(1) - bar(Y)(0)))
+  ) +
+  theme_minimal() +
+  theme(text = element_text(size = 16))
+
+```
+
+## Choice of Overall Sample Size ($N$)
+
+<br>
+
+- Suppose that $\sigma^2_0=\sigma^2_1$ and $Y_i (0) \sim (\mu_0, \sigma^2)$ and $Y_i (1) \sim (\mu_1, \sigma^2)$
+
+- Assume also that $p=0.5$, so $N_0=N_1=N/2$, and $\tau=\mu_1-\mu_0$.
+
+. . .
+
+- Then, for the $t$-statistic of equality of means, we have:
+
+$$
+\frac{\widehat{\tau}_{DiM}-\tau}{\sqrt{\frac{\sigma^2_1}{N_1}+\frac{\sigma^2_0}{N_0}}} = \frac{\widehat{\tau}_{DiM}-\tau}{\sqrt{\frac{2\sigma^2}{N}+\frac{2\sigma^2}{N}}} = \frac{\widehat{\tau}_{DiM}-\tau}{2\sigma/\sqrt{N}} \sim \mathcal{N} (0,1).
+$$
+
+. . .
+
+- Therefore:
+
+$$
+t = \frac{\widehat{\tau}_{DiM}}{\sqrt{\frac{\sigma^2_1}{N_1}+\frac{\sigma^2_0}{N_0}}} \sim \mathcal{N}\left(\frac{\tau\sqrt{N}}{2\sigma},1\right)
+$$
+
+## Choice of Overall Sample Size ($N$)
+
+<br><br>
+
+- The power, i.e. $\Pr\left(\text{Reject } \mu_1 - \mu_0 = 0 \given \mu_1 - \mu_0 = \tau \right)$ is then given by:
+
+$$
+\begin{align*}
+\Pr\left(|t| > 1.96\right) &= \Pr\left(t < -1.96\right) + \Pr\left(t > 1.96\right) \\
+&= \Pr\left(t-\frac{\tau \sqrt N}{2\sigma} < -1.96 - \frac{\tau \sqrt N}{2\sigma}\right) \\
+&\qquad + \Pr\left(t-\frac{\tau \sqrt N}{2\sigma}>1.96-\frac{\tau \sqrt N}{2\sigma}\right) \\
+&= \Phi\left(-1.96-\frac{\tau \sqrt N}{2\sigma}\right) + \left(1-\Phi\left(1.96-\frac{\tau \sqrt N}{2\sigma}\right)\right)
+\end{align*}
+$$
+
+
+## General Formula for the Power Function
+
+<br>
+
+$$
+\begin{align*}
+\Pr(\text{reject } \mu_1-\mu_0=0 &| \mu_1-\mu_0=\tau) = \\
+& \Phi\left(-1.96-\tau\Bigg/\sqrt{\frac{\sigma_1^2}{p N}+\frac{\sigma_0^2}{(1-p)N}}\right) \\
+& \qquad + \left(1-\Phi\left(1.96-\tau\Bigg/\sqrt{\frac{\sigma_1^2}{p N}+\frac{\sigma_0^2}{(1-p)N}}\right)\right)
+\end{align*}
+$$
+
+. . .
+
+- **To choose $N$ we need to specify:**
+
+  1. $\tau$: usually $0.25 \sigma_0$,
+  2. Target power value ($1- \psi$): usually 0.80 or higher,
+  3. $\sigma_1^2$ and $\sigma_0^2$: e.g. using previous measures,
+  4. $p$: proportion of observations in the treatment group
+
+## Power Functions
+
+<br>
+
+:::{.columns}
+
+::: {.column width="50%"}
+
+<br>
+
+- Power calculations for sample size assuming
+
+  - $\sigma^2 = \sigma_1^2 = \sigma_0^2 = 1$,
+  - $p=0.5$ and complete random assignment.
+
+:::fragment
+- [Intuition]{.note}: Larger sample size allows to detect smaller effect sizes. Increasing sample size has a diminishing return for precision.
+:::
+:::
+
+::: {.column width="50%"}
+![](../_images/power.gif)
+:::
+:::
+
+## Minimum Detectable Effect
+
+![](../_images/mde1.png){fig-align="center" height=350}
+
+. . .
+
+- Testing $H_0 : \beta = 0$ relative to $H_a : |\beta| = \mu > 0$.
+
+- Large-sample distribution of $\hat{\beta}$ under $H_0$, denoted by $F_{\hat{\beta}}\bigl(\cdot \mid \beta = 0\bigr)$.
+
+- For a test at $100\bigl(1 - \alpha\bigr)\%$ confidence, the distribution under $H_0$ defines the "rejection region."
+
+## Minimum Detectable Effect
+
+![](../_images/mde2.png){fig-align="center" height=350}
+
+. . .
+
+- Large-sample distribution of $\hat{\beta}$ under $H_a$, denoted by $F_{\hat{\beta}}\bigl(\cdot \given \beta = b_{H_a}\bigr)$.
+
+- Power is the probability of falling in the "rejection region":
+  
+  $$
+  \kappa = 1 - F_{\hat{\beta}}\bigl(t_{\alpha/2} \sigma_{\hat{\beta}} \mid \beta = b_{H_A}\bigr)
+  $$
+
+- For a test with power $\kappa$, need $b_{H_a}$ as in the picture.
+
+## Minimum Detectable Effect
+
+<br>
+
+- [Minimum detectable effect]{.highlight} [@bloom1995minimum] is
+
+$$
+\left| \beta_{\alpha, \kappa, \sigma_{\hat{\beta}}^{(0)}, \sigma_{\hat{\beta}}^{(a)}} \right| = t_{\alpha/2} \sigma_{\hat{\beta}}^{(0)} + t_{1-\kappa} \sigma_{\hat{\beta}}^{(a)}
+$$
+
+where,
+
+- $\alpha$ is the type I error rate (false positive rate),
+- $\kappa$ is the power of the test ($1 -$ false negative rate),
+- $\sigma_{\hat{\beta}}^{(h)}$ is the standard error for $\hat{\beta}$ (i.e., $\sqrt{\var[\hat{\beta}]}$), under hypothesis $h$, with $\sigma_{\hat{\beta}}^{(h)}$ a function of sample size ($N$ and $p$),
+- $t_{\alpha/2}$ and $t_{1-\kappa}$ are the absolute values of the $\alpha/2$ and $1 - \kappa$ quantiles of the reference distribution (e.g., large sample distribution of $(\hat{\beta} - \beta)/\sigma_{\hat{\beta}}^{(h)}$).
+
+## Minimum Detectable Effect
+
+- Let $\sigma_{\hat{\beta}} = \max\bigl(\sigma_{\hat{\beta}}^{(0)}, \sigma_{\hat{\beta}}^{(a)}\bigr)$.
+
+- Then define a conservative _MDE_ as
+
+:::{.callout-important icon="false" title="RESULT: Minimum Detectable Effect"}
+$$
+\underbrace{\left| \beta_{\alpha, \kappa, \sigma_{\hat{\beta}}} \right|}_{MDE} = \bigl(t_{\alpha/2} + t_{1-\kappa} \bigr) \sigma_{\hat{\beta}}.
+$$
+:::
+
+. . .
+
+- Suppose we test against $\mathcal{N} (0,1)$ with $\alpha = 0.05$ and $\kappa = 0.80$. _These are the standards in social science._ Then We have, $t_{\alpha/2} + t_{1-\kappa} = |z_{.025}| + |z_{.2}| = 1.96 + 0.84 = 2.80$.
+
+- Therefore, the _MDE_ is **2.8 times the conservative standard error of the effect estimator** for *any* study for which we use
+  
+  1. a two-sided test,  
+  2. a standard normal distribution as our reference distribution,  
+  3. $\alpha = .05$ and $\kappa = .80$
+
+- In all applications we have studied, the normal or $t$ distribution is a good approximation so long as the sample size is not too small.
+
+## Minimum Detectable Effect
+
+- Under complete random assignment we have,
+
+$$
+\var [\hat{\beta}] = \frac{1}{N} \left( \frac{\sigma^2_{1}}{p} + \frac{\sigma^2_{0}}{1 - p} \right)
+$$
+
+. . .
+
+- Plug into the expression for _MDE_ to get [sample size determination formula]{.highlight}.
+
+$$
+\begin{align*}
+MDE &= \bigl(t_{\alpha/2} + t_{1-\kappa} \bigr) \sqrt{\frac{1}{N} \left( \frac{\sigma^2_{1}}{p} + \frac{\sigma^2_{0}}{1 - p} \right)} \\
+\implies N &= \frac{\bigl(t_{\alpha/2} + t_{1-\kappa} \bigr)^2 \left( \frac{\sigma^2_{1}}{p} + \frac{\sigma^2_{0}}{1 - p} \right)}{MDE^2}.
+\end{align*}  
+$$
+
+. . .
+
+- [Note]{.note} Use standardized effect sizes to avoid ["power fallacy"]{.highlight}! 
+
+  - E.g., Effect size relative to the control group standard deviation, [*Glass's* $\Delta$]{.highlight}, $\Delta = MDE / \sigma_{0}$ (_normalize standard deviations too!_)
+
+## Conclusion on Power
+
+<br>
+
+- [Statistical power]{.highlight}  is the probability of rejecting the null hypothesis when it is indeed false.
+  
+  - It depends on _design_ and _test_!
+  
+. . .
+
+- **Optimal design considerations**:
+  - Balance treatment and control groups ($p \approx 0.5$) if you do not expect differences in potential outcomes variability.
+  - Increase sample size to detect smaller effects.
+  - Use blocking or stratification to improve precision.
+  
+- **Practical considerations**:
+    
+  - Ensure sufficient power to detect meaningful effects.
+  - Consider trade-offs between sample size and costs/harm.
+  - Use power analysis to plan experiments effectively (e.g. EGAP's [power calculators](https://egap.shinyapps.io/power-app/)).
+
+- Further reading: @blair2023research [Ch. 10-11].
+
+
+# Appendix {visibility="uncounted"}
+
+
+## Proof of $\E [ \widehat{\tau}_{IPW} \given \mathcal{O}_N ] = \tau_{SATE}$ [🔙](#ipw-unbiased) {#proof-ipw-unbiased visibility="uncounted"}
+
+<br>
+
+$$
+\begin{aligned}
+&\E [ \widehat{\tau}_{IPW} \given \mathcal{O}_N ] \\
+&= \E \left[ \frac{1}{N} \sum_{i=1}^N \left\{\frac{T_iY_i}{p} - \frac{(1 - T_i) Y_i}{(1 - p)}\right\} \Bigg| \mathcal{O}_N \right] \\
+&= \frac{1}{N} \sum_{i=1}^N \left\{ \E \left[ \frac{T_i Y_i (1)}{p} \given \mathcal{O}_N \right] - \E \left[ \frac{(1 - T_i) Y_i (0)}{(1 - p)} \given \mathcal{O}_N \right] \right\} \quad \text{($\because$ distribute $\E$/random assignment)}\\
+&= \frac{1}{N} \sum_{i=1}^N \left\{ \frac{Y_i(1)}{p} \E [ T_i \given \mathcal{O}_N ] - \frac{Y_i(0)}{1 - p} \E [ 1 - T_i \given \mathcal{O}_N ] \right\} \quad \text{($\because$ POs are fixed)}\\
+&= \frac{1}{N} \sum_{i=1}^N \left\{ \frac{Y_i (1)}{p} \cdot p - \frac{Y_i (0)}{1 - p} \cdot (1 - p) \right\} \quad \text{($\because$ definition of $\E$)}\\
+&= \frac{1}{N} \sum_{i=1}^N Y_i(1) - Y_i(0) = \tau_{SATE}
+\end{aligned}
+$$
+
+## Cluster Robust SEs
+
+- Assume the following model:  $Y_i = \tau T_i + \varepsilon_i, \E[\varepsilon_i] = 0$ where
+
+$$
+\var[\hat \tau ] = \var \left [\sum_i T_i \varepsilon_i \right ] / \left ( \sum_i T_i^2 \right )^2
+$$
+
+- If we assume:
+
+  - $\cov[\varepsilon_i,\varepsilon_j] = 0$, $\var[\varepsilon_i] = \sigma^2$, then $\var[\hat \tau ] = \sigma^2 / \sum_i T_i^2$ (**homoskedasticity**)
+  - $\cov[\varepsilon_i,\varepsilon_j] = 0, \var_{\textrm{HC2}}[\hat \tau] = \left ( \sum_i T_1^2 \cdot \var[\varepsilon_i] \right ) / \left ( \sum_i T_i^2 \right )^2$ (**heteroskedasticty**)
+  - $\cov[\varepsilon_i,\varepsilon_j] = 0$ *unless* observations $i$ and $j$ share the same cluster:
+
+$$
+\var_{\textrm{CR}}[\hat \tau] = \left (\sum_i \sum_j \textcolor{blue}{T_i T_j} \textcolor{red}{\cov[\varepsilon_i, \varepsilon_j]} \mathbb{1}[i,j \textrm{ in the same cluster}] \right) / \left(\sum_i T_i^2 \right )^2
+$$
+
+- $\var_{\textrm{CR}}[\hat \tau] > \var_{\textrm{HC2}}[\hat \tau]$ i.f.f $T_i$ and $T_j$ are correlated within clusters and $\cov[\varepsilon_i, \varepsilon_j] > 0$.
+
+## External Validity
+
+<br>
+
+- When it is possible, a randomized experiment is the best approach for estimating causal effects
+
+- Identification is justified by design + Estimation & Inference are simple
+
+- High Internal Validity: we can estimate the _SATE_ without bias, without making strong modeling assumptions
+
+- Common concern: [External Validity]{.highlight}
+
+- @egami2023elements propose a framework for systematic sources of external validity: 
+  
+  - [$X$-validity]{.highlight}: Generalizability of units.
+  - [$T$-validity]{.highlight}: Generalizability of treatments.
+  - [$Y$-validity]{.highlight}: Generalizability of outcomes.
+  - [$C$-validity]{.highlight}: Generalizability of contexts.
+
+## Addressing External Validity
+
+- **Statistical Adjustment**: Employ covariate adjustment techniques such as regression adjustment, matching (e.g., propensity score matching), and stratification to address differences in the distributions of $X$, $T$, $Y$, and $C$ between the study sample and the target population.
+
+. . .
+
+- **Weighting Methods**: Utilize inverse probability weighting (IPW) and propensity score weighting to reweight the study sample to mirror the target population. Methods include stabilized weights and entropy balancing.
+
+. . .
+
+- **Sensitivity Analysis**: Perform sensitivity analyses using methods like Rosenbaum bounds, $E$-values, and tipping point analysis to evaluate the robustness of findings to potential assumption violations.
+
+. . .
+
+- **Multilevel Modeling**: Apply hierarchical models such as mixed-effects models, random effects models, and Bayesian hierarchical models to account for clustering and variation at different levels (e.g., individual, group, context).
+
+. . .
+
+- **External Validation**: Replicate the study in various settings using techniques like cross-validation, split-sample validation, and external dataset validation to confirm the generalizability of the findings.
+
+
+## References {visibility="uncounted"}
