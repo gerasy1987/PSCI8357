@@ -2071,7 +2071,7 @@ digraph G {
 
 <br><br>
 
-- To flexibly control for $X_i$, use a [saturated regression]{.highlight} (fixed effects for each $X_i$ value):
+- To flexibly control for $X_i$, use a [saturated regression]{.highlight} with dummies for each unique value of $X_i$ (one-way fixed effects):
 
   $$
   Y_i = \alpha_1 \mathbb{1}[X_i = x_1] + \cdots + \alpha_L \mathbb{1}[X_i = x_L] + \tau T_i + \varepsilon_i,
@@ -2093,9 +2093,7 @@ digraph G {
 
 ## Regression Anatomy
 
-- [Regression anatomy]{.highlight} is: $\widehat{\tau} = \frac{\cov(\tilde{Y}_i, \tilde{T}_i)}{\var(\tilde{T}_i)} = \frac{\cov(Y_i, \tilde{T}_i)}{\var(\tilde{T}_i)}$, where $\tilde{T}_i$ is residuals from regression of $T_i$ on other regressors.
-
-- Let's see if it actually works
+- [Regression anatomy]{.highlight} can be written in two ways: $\widehat{\tau} = \frac{\cov(\tilde{Y}_i, \tilde{T}_i)}{\var(\tilde{T}_i)} = \frac{\cov(Y_i, \tilde{T}_i)}{\var(\tilde{T}_i)}$, where $\tilde{\cdot}_i$ is residuals from regression of $T_i$ on other regressors.
 
 . . .
 
@@ -2159,13 +2157,11 @@ data.frame(
 
   This works because $\tilde{T}_i$ is a function only of $T_i$ and $X_i$ and is constant when $T_i$ and $X_i$ are fixed.
 
-. . .
-
-- So we have: $\widehat{\tau} = \frac{\E\big[\E[Y_i \given T_i, X_i]  \tilde{T}_i\big]}{\E[\tilde{T}_i^2]}$
-
 ## Expanding the Conditional Expectation
 
-<br><br><br>
+<br><br>
+
+- So we have: $\widehat{\tau} = \frac{\E\big[\E[Y_i \given T_i, X_i]  \tilde{T}_i\big]}{\E[\tilde{T}_i^2]}$
 
 - Expand $\E [Y_i \given T_i, X_i]$ using the [switching equation]{.highlight}: $Y_i = T_i Y_i(1) + (1-T_i) Y_i(0)$
 
@@ -2186,7 +2182,7 @@ $$
   \begin{align*}
   \widehat{\tau} &= \frac{\E\big[(T_i \tau_x + \E[Y_i(0) \given X_i])  \tilde{T}_i\big]}{\E[\tilde{T}_i^2]} \\
   &\class{fragment}{{}= \frac{\E[T_i \tau_x \tilde{T}_i] + \E[\E[Y_i(0) \given X_i] \tilde{T}_i]}{\E[\tilde{T}_i^2]}  \quad \text{($\because$ distribute)}} \\
-  &\class{fragment}{{}= \frac{\E[T_i \tau_x \tilde{T}_i]}{\E[\tilde{T}_i^2]}  \quad \text{($\because$ $\E[\E[Y_i(0) \given X_i] \tilde{T}_i] = 0$ since $\E[\tilde{T}_i \given X_i] = 0$)}} \\
+  &\class{fragment}{{}= \frac{\E[T_i \tau_x \tilde{T}_i]}{\E[\tilde{T}_i^2]}  \quad \text{($\because$ $\E[\E[Y_i(0) \given X_i] (T_i - \E[T_i \given X_i])] = 0$)}} \\
   &\class{fragment}{{}= \frac{\E_X[\tau_x \E[T_i \tilde{T}_i \given X_i]]}{\E_X[\E[\tilde{T}_i^2 \given X_i]]}  \quad \text{($\because$ law of iterated expectations)}} \\
   &\class{fragment}{{}= \frac{\E_X[\tau_x \E[T_i (T_i - \E[T_i \given X_i]) \given X_i] ]}{\E_X[\E[(T_i - \E[T_i \given X_i])^2 \given X_i]]}  \quad \text{($\because$ definition of $\tilde{T}_i$ )}} \\
   &\class{fragment}{{}= \frac{\E_X[\tau_x  \var(T_i \given X_i)]}{\E_X[\var(T_i \given X_i)]}  \quad \text{($\because$ $\E[T_i \tilde{T}_i \given X_i] = \var(T_i \given X_i)$)}}
