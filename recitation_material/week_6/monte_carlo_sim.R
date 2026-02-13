@@ -6,8 +6,6 @@
 ### Load packages and set seed
 if (!require(fixest)) install.packages("fixest")
 if (!require(tidyverse)) install.packages("tidyverse")
-if (!require(parallel)) install.packages("parallel")
-if (!require(pbapply)) install.packages("pbapply")
 
 set.seed(02132026)
 
