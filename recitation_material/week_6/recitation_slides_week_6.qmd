@@ -1,0 +1,125 @@
+---
+title: "Usage of Resampling and Simulations in Empirical Work"
+author: "Alexander Dean"
+subtitle: "Recitation Period 3"
+institute: "Vanderbilt University"
+email: "alexander.r.dean@vanderbilt.edu"
+date: today
+format: 
+  revealjs:
+    theme: dark
+    footer: "Alexander Dean (Vanderbilt University)"
+    slide-number: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    self-contained-math: true
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+fontsize: 32px
+editor: source
+---
+
+
+# Introductory Spiel
+
+## What We Will Cover Today
+1. What is resampling?
+2. What does it mean to do a simulation?
+3. When are these techniques of use in emipirical political science?
+4. Demonstration in R
+
+# An Introduction to Resampling and Simulations
+
+## Some relevant questions
+- Have you ever asked?
+	- “If the world looked like X, how would my estimator behave?”
+	- “What’s my power under realistic assumptions?”
+	- “How biased is TWFE if my treatment effects are heterogeneous?”
+	- “How often would my confidence interval actually cover the true parameter?”
+
+## Defining Resampling
+
+- What is the definition of resampling?
+
+. . . 
+
+- Resampling methods approximate the sampling distribution of a statistic by generating data from your sample.
+
+## Defining Simualtions
+- What does it mean to simulate data?
+
+. . . 
+
+- Generate new data from a model you specify
+
+## Why Are These Relevant?
+
+1. Say we have some parameter of interest, $\hat{theta}$ that is our estimand
+2. How can we estimate it?
+  - Derive analytically
+  - Use Central Limit Theorem
+  - Asymptotics
+
+. . . 
+
+3. But sometimes we don't have those options available:
+  - High-dimensional data
+  - Complex clustering structure
+  - Staggered treatment assignment
+  - Small sample size
+
+## What can we use these techniques for?
+
+1. Estimating power for complex estimators
+2. Testing whether a new estimator is consistent and unbiased
+  - Especially helpful for weak instruments, matching estimators, TWFE with heterogenous treatment
+3. Evaluating CIs and standard errors
+4. Stress-testing your estimator:
+  - How much of a violation of parallel trends would change my results?
+  - What if there is some selection into POs?
+5. Randomization inference and permutation tests
+6. Markov Chain Monte Carlo Simulations (MCMC) for Bayesian methods
+
+# Monte Carlo Simulations
+## The Process
+
+1. Specify the data generating process (DGP)
+2. Generate many iid datasets (usually $n > 1000$)
+3. Apply the estimator/test to each dataset
+4. Evaluate performance (e.g., biasedness, power, coverage, etc.)
+
+# Bootstrapping
+## What it is
+
+1.	Draw bootstrap sample of size $n$ with replacement
+2.	Compute statistic $T^*$
+3.	Repeat $k$ times
+4.	Use empirical distribution of $T^*$
+
+## Visual Explanation
+
+![](/bootstrap.png)
+
+## Why bootstrap for autocorrelated standard errors
+1. Autocorrelation means that the residuals are correlated across time or space and this violates assumptions of independence of standard errors in standard OLS
+2. Std. errors are biased downwards, decreasing probability of not rejecting the null
+3. Bootstrapping generally outperforms clustering standard errors in this setting (Bertrand et al. 2004)
+
+# Resources and Demonstration
+## Resources
+
+1. [Oppression Beyond Plantations: The Effect of Emancipation on Incarceration in Urban Buenos Aires](https://www.journals.uchicago.edu/doi/abs/10.1086/738580?journalCode=jop)
+2. [How Much Should We Trust DiD Estimates?](https://academic.oup.com/qje/article-abstract/119/1/249/1876068)
+3. [This blog post](https://medium.com/pythoneers/monte-carlo-simulation-ideas-and-examples-for-advanced-day-to-day-applications-447ec3ce9063)
+
+## DiD with Clustered treatment
+
+1. Suppose you want to run a DiD on the efficacy of a municipal-level economic development program on individual-level outcomes.
+2. Your power is lower than if we assumed independent observations, especially if the ICC (intra-class correlation) is high
+3. Can we see how varying the number of clusters, number of individuals within clusters, effect size, and statistical noise affects power? Yes, let's see it!
