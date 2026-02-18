@@ -16,7 +16,7 @@ recitation_material/*
 !recitation_material/.gitkeep
 problem_sets/*
 !problem_sets/ps_template*
-_data/*
+_data/gerber*
 !_data/.gitkeep
 quality_reports/*
 _archive/*
