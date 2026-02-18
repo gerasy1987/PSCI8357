@@ -1390,11 +1390,11 @@ R W Q O J M V A H B S G Z X N T C I E K U P D Y F L
 
 . . .
 
-- [Pitfall 1 --- Overfitting]{.alert}: In cases where $X_i$ is weakly predictive of $Y_i$ naive adjustement introduces additional noise and can even bias estimates in small samples [@freedman2008regression]
+- [Pitfall 1 --- Overfitting]{.alert}: In cases where $X_i$ is weakly predictive of $Y_i$, naive adjustment introduces additional noise and can even bias estimates in small samples [@freedman2008regression].
 
 . . .
 
-- [Pitfall 2 --- Common-slope constraint]{.alert}: Naive adjustement forces parallel regression lines _wrt_ $X$ and **limits precision gains.**
+- [Pitfall 2 --- Common-slope constraint]{.alert}: Naive adjustment forces parallel regression lines with respect to $X$ and **limits precision gains.**
 
   - Natural fix is full interaction model, $Y_i = \alpha + \tau T_i + X_i^\prime \gamma + T_i X_i^\prime \xi$, to allow different slopes. But this induces $\cov(T_i, T_i \tilde{X}_i) \neq 0$ and $\tau$ is the treatment effect [at $X = 0$]{.highlight}, not the _ATE_.
 
@@ -1419,7 +1419,7 @@ $$
 
 . . .
 
-- Further reading: @lei2021regression propose procedure to debias Lin's estimator even in the small samples.
+- Further reading: @lei2021regression propose a procedure to debias Lin's estimator even in small samples.
 
 ## @lin2013agnostic Covariate Adjustment
 
@@ -1435,7 +1435,7 @@ $$
 set.seed(972)
 
 N <- 100
-X <- rnorm(N, mean = 0)
+X <- rnorm(N, mean = 3)
 D <- randomizr::complete_ra(N)
 Y <-
   2 + 1.5 * D + 0.1 * X +
@@ -1483,12 +1483,16 @@ bind_rows(
 #| fig-height: 4
 #| fig-subcap:
 #|   - "DiM: Y ~ D"
-#|   - "Common slopes: Y ~ D + X"
+#|   - "Naive: Y ~ D + X"
 #|   - "Lin: Y ~ D * (X − X̄)"
 #| layout-ncol: 3
 
 # plot X against Y coloring by D
 plot_data <- tibble(X, Y, D)
+
+# shared axis limits for visual comparison
+shared_xlim <- range(X) + c(-0.3, 0.3)
+shared_ylim <- range(Y) + c(-0.5, 0.5)
 
 # shared plot elements
 base_plot <- function() {
@@ -1498,6 +1502,7 @@ base_plot <- function() {
       se = FALSE, linewidth = .5, linetype = "dashed"),
     scale_color_manual(values = c("#458588", "#cc241d")),
     scale_shape_manual(values = c(17, 1)),
+    coord_cartesian(xlim = shared_xlim, ylim = shared_ylim),
     labs(x = "X", y = "Y", color = "D = ", shape = "D = "),
     theme(legend.position = "bottom")
   )
@@ -1514,10 +1519,10 @@ ggplot(plot_data, aes(x = X, y = Y, color = factor(D), shape = factor(D))) +
   geom_hline(yintercept = y_bar_1, color = "#cc241d", linewidth = 1) +
   annotate("segment", x = max(X) - 0.3, xend = max(X) - 0.3,
     y = y_bar_0, yend = y_bar_1,
-    color = "#d65d0e", linewidth = 1,
+    color = "#111111", linewidth = 1,
     arrow = arrow(ends = "both", length = unit(0.05, "inches"))) +
   annotate("text", x = max(X) + 0.1, y = (y_bar_0 + y_bar_1) / 2,
-    label = expression(hat(tau)[DiM]), color = "#d65d0e", size = 3) +
+    label = expression(hat(tau)[DiM]), color = "#111111", size = 3) +
   labs(subtitle = bquote(hat(tau)[DiM] ~ "=" ~ .(round(tau_dim, 3))))
 
 # MIDDLE panel: common slopes (forced parallel lines)
@@ -1529,24 +1534,28 @@ ggplot(plot_data, aes(x = X, y = Y, color = factor(D), shape = factor(D))) +
   base_plot() +
   geom_function(fun = function(x) a0 + td + x * bx, color = "#cc241d", linewidth = 1) +
   geom_function(fun = function(x) a0 + x * bx, color = "#458588", linewidth = 1) +
-  annotate("segment", x = 1.5, xend = 1.5,
-    y = a0 + 1.5 * bx, yend = a0 + td + 1.5 * bx,
-    color = "#d65d0e", linewidth = 1,
+  annotate("segment", x = 5, xend = 5,
+    y = a0 + 5 * bx, yend = a0 + td + 5 * bx,
+    color = "#111111", linewidth = 1,
     arrow = arrow(ends = "both", length = unit(0.05, "inches"))) +
-  annotate("text", x = 1.9, y = a0 + td / 2 + 1.5 * bx,
-    label = expression(hat(tau)[naive]), color = "#d65d0e", size = 3) +
+  annotate("text", x = 5.2, y = a0 + td / 2 + 5 * bx,
+    label = expression(hat(tau)[naive]), color = "#111111", size = 3) +
   labs(subtitle = bquote(hat(tau)[naive] ~ "=" ~ .(round(td, 3)) ~ "(parallel)"))
 
 # RIGHT panel: Lin estimator (different slopes, evaluated at X-bar)
 ggplot(plot_data, aes(x = X, y = Y, color = factor(D), shape = factor(D))) +
   base_plot() +
   geom_function(fun = function(x) {
-    adjusted_model2[1, 2] + adjusted_model2[2, 2] + x * (adjusted_model2[3, 2] + adjusted_model2[4, 2])
+    adjusted_model2[1, 2] + adjusted_model2[2, 2] + (x - mean(x)) * (adjusted_model2[3, 2] + adjusted_model2[4, 2])
   }, color = "#cc241d", linewidth = 1) +
   geom_function(fun = function(x) {
-    adjusted_model2[1, 2] + x * adjusted_model2[3, 2]
+    adjusted_model2[1, 2] + (x - mean(x)) * adjusted_model2[3, 2]
   }, color = "#458588", linewidth = 1) +
   geom_vline(xintercept = mean(X), linetype = "dotted", color = "#d65d0e", linewidth = 0.7) +
+  annotate("segment", x = mean(X), xend = mean(X),
+    y = adjusted_model2[1, 2], yend = adjusted_model2[1, 2] + adjusted_model2[2, 2],
+    color = "#111111", linewidth = 1,
+    arrow = arrow(ends = "both", length = unit(0.05, "inches"))) +
   annotate("text", x = mean(X) + 0.3, y = max(Y) + 0.3,
     label = "bar(X)", parse = TRUE, color = "#d65d0e", size = 3.5) +
   labs(subtitle = bquote(hat(tau)[Lin] ~ "=" ~ .(round(as.numeric(adjusted_model2[2, 2]), 3)) ~ "(at" ~ bar(X) ~ ")"))

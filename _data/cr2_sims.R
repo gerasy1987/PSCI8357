@@ -80,6 +80,15 @@ results_long <-
 # Plot animation
 p <-
   ggplot(results_long, aes(x = coverage, y = icc, color = method, shape = method)) +
+    annotate(
+      "rect",
+      xmin = -Inf,
+      xmax = 0.95,
+      ymin = -Inf,
+      ymax = Inf,
+      fill = "#fbe9dd",
+      alpha = 0.35
+    ) +
     geom_vline(
       xintercept = 0.95,
       linetype = "dashed",
