@@ -29,7 +29,8 @@ format:
     transition: fade
     reference-location: document
     fig-cap-location: top
-    include-before: [ '<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {enableAssistiveMml: false}});</script>']
+    include-before: ['<script type="text/x-mathjax-config">MathJax.Hub.Config({
+    tex2jax: {enableAssistiveMml: false}});</script>']
 fontsize: 26px
 editor: source
 aspectratio: 169
@@ -51,6 +52,7 @@ bibliography: ../_supp/psci8357.bib
   \def\given{{\:\vert\:}}
   \def\indep{{\mbox{$\perp\!\!\!\perp$}}}
   \def\notindep{{\mbox{$\centernot{\perp\!\!\!\perp}$}}}
+  \def\rank{{\mathrm{rank}}}
 \)
 
 ```{r}
@@ -63,6 +65,8 @@ pacman::p_load(tidyverse, future, future.apply, pbapply)
 future::plan(multisession, workers = parallel::detectCores() - 2)
 
 # set theme for plots
+ggplot2::theme_set(ggplot2::theme_minimal())
+
 thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 ```
 
@@ -262,6 +266,11 @@ $$
 
 - [Intuition]{.note}: Randomization makes treatment and control groups similar on average with respect to all observed and unobserved pre-treatment covariates.
 
+## The Struggle is Real
+
+![](../_images/sate_pate_meme.png){fig-align="center"}
+
+
 # Estimation of _SATE_
 
 ## Design-Based Inference
@@ -300,7 +309,7 @@ $$
 
 . . .
 
-- Unbiased for the _SATE_ under [complete randomization]{.highlight} (as opposed to simple random assignment) -- **no modeling assumption is needed**.
+- Unbiased for the _SATE_ under [complete randomization]{.highlight} -- **no modeling assumption is needed**.
 
 - First suppose, $\mathcal{O}_N = \{Y_i(1), Y_i(0)\}_{i=1}^N$, then:
   
@@ -327,7 +336,7 @@ $$
 
 . . .
 
-- Can prove that if probabilities of assignment are fixed, i.e. $\forall i:\: p_i = p$, we have $\E [ \widehat{\tau}_{IPW} \given \mathcal{O}_N ] = \tau_{SATE}$. (_How would you approach this?_) ([proof](#proof-ipw-unbiased)) 
+- Can prove that if probabilities of assignment are fixed, i.e. $\forall i:\: p_i = p$, we have $\E [ \widehat{\tau}_{IPW} \given \mathcal{O}_N ] = \tau_{SATE}$. (_How would you approach this?_) [[(proof)](#proof-ipw-unbiased)]{.note .small-font}
 
 . . .
 
@@ -362,7 +371,7 @@ $$
   - When $n \ll N$: FPC $\approx 1$ (negligible correction)
   - When $n = N$: FPC $= 0$ (no randomness left -- census!)
 
-## Variance of _DiM_
+## Variance of _DiM_ {#dim-variance}
 
 <br>
 
@@ -372,7 +381,7 @@ $$
 $$
   \begin{align*}
   \var [\widehat{\tau}_{DiM} \given \mathcal{O}_N] &= \var [\overline{Y}_1 \given \mathcal{O}_N] + \var [\overline{Y}_0 \given \mathcal{O}_N] - 2 \cov(\overline{Y}_1, \overline{Y}_0 \given \mathcal{O}_N) \quad \text{($\because$ variance of difference)} \\
-  &= \frac{S_1^2}{N_1} \frac{N - N_1}{N} + \frac{S_0^2}{N_0} \frac{N - N_0}{N} + 2 \frac{\textcolor{#d65d0e}{S_{10}}}{N} \quad \text{($\because$ \textit{FPC})} \\
+  &= \frac{S_1^2}{N_1} \frac{N - N_1}{N} + \frac{S_0^2}{N_0} \frac{N - N_0}{N} + 2 \frac{\textcolor{#d65d0e}{S_{10}}}{N} \quad \text{($\because$ \textit{FPC};}\; \cov(\overline{Y}_1, \overline{Y}_0) = -S_{10}/N \href{#proof-cov-neg}{\text{(proof)}}\text{)} \\
   &= \frac{S_1^2}{N_1} + \frac{S_0^2}{N_0} - \frac{S_1^2 + S_0^2 -2 \textcolor{#d65d0e}{S_{10}}}{N} \quad \text{($\because$ rearranging terms)} \\
   &= \frac{S_1^2}{N_1} + \frac{S_0^2}{N_0} - \frac{\textcolor{#d65d0e}{S_{\tau}^2}}{N} \quad \text{($\because$ variance of difference)}
   \end{align*}
@@ -407,7 +416,7 @@ where $\widehat{S}_{t}^2 = \frac{1}{N_t - 1} \sum_{i=1}^N \mathbb{1} [T_i = t] (
 - Leads to **conservative inferences**:
   - Standard errors, $\widehat{\sigma}$, will be in expectation at least as big as they should be.
   - Confidence intervals using $\widehat{\sigma}$ will be in expectation at least wide as they should be.
-  - Type I (false positive) error rates will still be correct, power will be lower.
+  - Type I (_false-positives_) error rates will still be correct, power will be lower.
 
 # Estimation of _PATE_
 
@@ -552,10 +561,14 @@ where $\widehat{S}_{t}^2 = \frac{1}{N_t - 1} \sum_{i=1}^N \mathbb{1} [T_i = t] (
 
 - For a binary treatment ($T_i \in \{0,1\}$) we can show:
 
-  - **Simple regression coefficient** is _numerically equal_ to DiM:
+  - **Simple regression coefficient** is _numerically equal_ to _DiM_:
   
   $$
-  \widehat\beta_{OLS} \ \equiv \ \frac{\sum_{i=1}^N(Y_i - \overline{Y})(T_i - \overline{T})}{\sum_{i=1}^N(T_i - \overline{T})^2} \ = \ \widehat{\tau}_{DiM}
+  \widehat\beta_{OLS}
+  \ \equiv\ 
+  \frac{\widehat{\cov}(Y_i, T_i)}{\widehat{\var}(T_i)}
+  \ =\ 
+  \widehat{\tau}_{DiM}
   $$
 
   :::fragment
@@ -729,97 +742,191 @@ bind_cols(
 
 ## Permutation Test
 
+```{r}
+#| label: perm_setup
+#| include: false
+
+actual <- c("M", "T", "T", "M", "M", "T", "T", "M")
+all_scenarios <- c("Actual", "Lady", "Perm 1", "Perm 2", "Perm 3")
+
+perm_df <- tibble(
+  scenario = rep(all_scenarios, each = 8),
+  cup = rep(1:8, 5),
+  type = c(
+    actual,
+    actual,
+    c("T", "T", "T", "T", "M", "M", "M", "M"),
+    c("T", "T", "T", "M", "M", "M", "T", "M"),
+    c("T", "M", "T", "T", "M", "M", "M", "T")
+  )
+) |>
+  mutate(
+    scenario = factor(scenario, levels = all_scenarios),
+    match = type == actual[cup],
+    shade = case_when(
+      scenario == "Actual" ~ "reference",
+      match ~ "correct",
+      TRUE ~ "incorrect"
+    )
+  )
+
+count_labels <- c(
+  "Actual" = "Actual",
+  "Lady" = "Lady\n(8 correct)",
+  "Perm 1" = "Perm 1\n(4 correct)",
+  "Perm 2" = "Perm 2\n(6 correct)",
+  "Perm 3" = "Perm 3\n(2 correct)"
+)
+
+plot_perms <- function(show_n = 0, show_dots = FALSE) {
+  visible <- c("Actual", "Lady")
+  if (show_n >= 1) visible <- c(visible, "Perm 1")
+  if (show_n >= 2) visible <- c(visible, "Perm 2")
+  if (show_n >= 3) visible <- c(visible, "Perm 3")
+
+  plot_data <- perm_df |> filter(scenario %in% visible)
+
+  x_labels <- ifelse(
+    all_scenarios %in% visible,
+    count_labels[all_scenarios], ""
+  )
+  names(x_labels) <- all_scenarios
+
+  p <- ggplot(plot_data, aes(x = scenario, y = factor(cup, levels = 8:1))) +
+    geom_tile(aes(fill = shade), color = "black", linewidth = 0.5) +
+    geom_text(aes(label = type, color = type), size = 5, fontface = "bold") +
+    scale_fill_manual(
+      values = c(
+        "reference" = "transparent",
+        "correct" = alpha("#427b58", 0.2),
+        "incorrect" = alpha("#9d0006", 0.2)
+      ),
+      guide = "none"
+    ) +
+    scale_color_manual(
+      values = c("T" = "#458588", "M" = "#d79921"),
+      labels = c("T" = "Tea first", "M" = "Milk first"),
+      name = NULL
+    ) +
+    scale_x_discrete(
+      limits = all_scenarios, labels = x_labels, drop = FALSE
+    ) +
+    scale_y_discrete(labels = paste("Cup", 8:1)) +
+    coord_cartesian(clip = "off") +
+    labs(x = NULL, y = NULL) +
+    theme_minimal(base_size = 14) +
+    theme(
+      panel.grid = element_blank(),
+      legend.position = "bottom",
+      legend.margin = margin(0, 0, -5, 0),
+      axis.text.x = element_text(size = 8, lineheight = 0.9),
+      plot.background = element_rect(fill = "transparent", color = NA),
+      panel.background = element_rect(fill = "transparent", color = NA),
+      legend.background = element_rect(fill = "transparent", color = NA),
+      legend.key = element_rect(fill = "transparent", color = NA),
+      plot.margin = margin(2, 25, 2, 2)
+    )
+
+  p <- p + annotate(
+    "text", x = 6, y = 4.5,
+    label = "cdots", parse = TRUE, size = 10,
+    color = if (show_dots) "black" else "transparent"
+  )
+
+  p
+}
+```
+
 :::columns
-:::{.column .small-font width="60%"}
+:::{.column style="margin-top: 1em; width:45%;"}
+
+:::{.fragment fragment-index=6}
+- $\binom{8}{4}= \frac{8!}{4!(8-4)!} = 70$ ways to pour teas each corresponding to number of correct guesses
+
+- **only $1$ corresponds to guessing all cups correctly!**
+:::
+
+:::{.fragment fragment-index=7}
+- Under the $H_0$ (_lady guessing at random_), the probability that the lady classifies all cups correctly is $1/70 \approx 0.014$.
+
+- $p = \Pr(\text{guessing all cups correctly}$ $\given \text{guessing at random}) = 0.014$ $\rightarrow$ **Reject the null of guessing at random!**
+:::
+
+:::
+
+:::{.column width="50%"}
 
 :::r-stack
 
-:::{.fragment .fade-in-then-out}
-| cup  | actual | guess | $\qquad$  | $\qquad$ | $\qquad$ | $\qquad$ |
-|:------|:-------:|:--------:|:-----------:|:-----------:|:-----------:|:-----------:|
-| 1    | M     | [M]{.orange}      | $\qquad$ | $\qquad$ | $\qquad$ | $\qquad$ |
-| 2    | T     | [T]{.orange}      | $\qquad$| $\qquad$ | $\qquad$ | $\qquad$ |
-| 3    | T     | [T]{.orange}      | $\qquad$      | $\qquad$ | $\qquad$ | $\qquad$ |
-| 4    | M     | [M]{.orange}      | $\qquad$ | $\qquad$ | $\qquad$ | $\qquad$ |
-| 5    | M     | [M]{.orange}      | $\qquad$         | $\qquad$ | $\qquad$ | $\qquad$ |
-| 6    | T     | [T]{.orange}      | $\qquad$ | $\qquad$ | $\qquad$ | $\qquad$ |
-| 7    | T     | [T]{.orange}      | $\qquad$ | $\qquad$ | $\qquad$ | $\qquad$ |
-| 8    | M     | [M]{.orange}      | $\qquad$         | $\qquad$ | $\qquad$ | $\qquad$ |
-| $N$ correct |  | 8 | | | | |
-: {tbl-colwidths="[50,25,25,25,25,25,25]"}
+:::{.fragment .fade-in-then-out fragment-index=1}
+```{r}
+#| label: perm_step1
+#| echo: false
+#| fig-align: center
+#| fig-width: 4.5
+#| fig-height: 3.2
+
+plot_perms(0)
+```
 :::
 
-:::{.fragment .fade-in-then-out}
-| cup  | actual | guess | sc. 1  | $\qquad$ | $\qquad$ | $\qquad$ |
-|:------|:-------:|:--------:|:-----------:|:-----------:|:-----------:|:-----------:|
-| 1    | M     | [M]{.orange}      | T         | $\qquad$ | $\qquad$ | $\qquad$ |
-| 2    | T     | [T]{.orange}      | [T]{.orange}         | $\qquad$ | $\qquad$ | $\qquad$ |
-| 3    | T     | [T]{.orange}      | [T]{.orange}         | $\qquad$ | $\qquad$ | $\qquad$ |
-| 4    | M     | [M]{.orange}      | T         | $\qquad$ | $\qquad$ | $\qquad$ |
-| 5    | M     | [M]{.orange}      | [M]{.orange}         | $\qquad$ | $\qquad$ | $\qquad$ |
-| 6    | T     | [T]{.orange}      | M         | $\qquad$ | $\qquad$ | $\qquad$ |
-| 7    | T     | [T]{.orange}      | M         | $\qquad$ | $\qquad$ | $\qquad$ |
-| 8    | M     | [M]{.orange}      | [M]{.orange}         | $\qquad$ | $\qquad$ | $\qquad$ |
-| $N$ correct |  | 8 | 4 | | | |
-: {tbl-colwidths="[40,25,25,25,25,25,25]"}
+:::{.fragment .fade-in-then-out fragment-index=2}
+```{r}
+#| label: perm_step2
+#| echo: false
+#| fig-align: center
+#| fig-width: 4.5
+#| fig-height: 3.2
+
+plot_perms(1)
+```
 :::
 
-:::{.fragment .fade-in-then-out}
-| cup  | actual | guess | sc. 1  | sc. 2  | $\qquad$ | $\qquad$ |
-|:------|:-------:|:--------:|:-----------:|:-----------:|:-----------:|:-----------:|
-| 1    | M     | [M]{.orange}      | T         | T         | $\qquad$ | $\qquad$ |
-| 2    | T     | [T]{.orange}      | [T]{.orange}         | [T]{.orange}         | $\qquad$ | $\qquad$ | $\qquad$ |
-| 3    | T     | [T]{.orange}      | [T]{.orange}         | [T]{.orange}         | $\qquad$ | $\qquad$ | $\qquad$ |
-| 4    | M     | [M]{.orange}      | T         | [M]{.orange}         | $\qquad$ | $\qquad$ |
-| 5    | M     | [M]{.orange}      | [M]{.orange}         | [M]{.orange}         | $\qquad$ | $\qquad$ |
-| 6    | T     | [T]{.orange}      | M         | M         | $\qquad$ | $\qquad$ |
-| 7    | T     | [T]{.orange}      | M         | [T]{.orange}         | $\qquad$ | $\qquad$ |
-| 8    | M     | [M]{.orange}      | [M]{.orange}         | [M]{.orange}         | $\qquad$ | $\qquad$ |
-| $N$ correct |  | 8 | 4 | 6 | | |
-: {tbl-colwidths="[35,25,25,25,25,25,25]"}
+:::{.fragment .fade-in-then-out fragment-index=3}
+```{r}
+#| label: perm_step3
+#| echo: false
+#| fig-align: center
+#| fig-width: 4.5
+#| fig-height: 3.2
+
+plot_perms(2)
+```
 :::
 
-:::{.fragment .fade-in-then-out}
-| cup  | actual | guess | sc. 1  | sc. 2  |sc. 3  | $\qquad$ |
-|:------|:-------:|:--------:|:-----------:|:-----------:|:-----------:|:-----------:|
-| 1    | M     | [M]{.orange}      | T         | T         |T         | $\qquad$ |
-| 2    | T     | [T]{.orange}      | [T]{.orange}         | [T]{.orange}         |M         | $\qquad$ | 
-| 3    | T     | [T]{.orange}      | [T]{.orange}         | [T]{.orange}         |[T]{.orange}         | $\qquad$ | 
-| 4    | M     | [M]{.orange}      | T         | [M]{.orange}         |T         | $\qquad$ |
-| 5    | M     | [M]{.orange}      | [M]{.orange}         | [M]{.orange}         |[M]{.orange}         | $\qquad$ |
-| 6    | T     | [T]{.orange}      | M         | M         |M         | $\qquad$ |
-| 7    | T     | [T]{.orange}      | M         | [T]{.orange}         |M         | $\qquad$ |
-| 8    | M     | [M]{.orange}      | [M]{.orange}         | [M]{.orange}         |T         | $\qquad$ |
-| $N$ correct |  | 8 | 4 | 6 | 2| |
-: {tbl-colwidths="[35,25,25,25,25,25,25]"}
+:::{.fragment .fade-in-then-out fragment-index=4}
+```{r}
+#| label: perm_step4
+#| echo: false
+#| fig-align: center
+#| fig-width: 4.5
+#| fig-height: 3.2
+
+plot_perms(3)
+```
 :::
 
-:::{.fragment .fade-in}
-| cup  | actual | guess | sc. 1  | sc. 2| sc. 3| $\cdots$  |
-|:-----|:-----:|:------:|:-----------:|:---------:|:--------:|:---------:|
-| 1    | M     | [M]{.orange}      | T           | T         |T         | $\cdots$  |
-| 2    | T     | [T]{.orange}      | [T]{.orange}           | [T]{.orange}         |M         | $\cdots$  |
-| 3    | T     | [T]{.orange}      | [T]{.orange}           | [T]{.orange}         |[T]{.orange}         | $\cdots$  |
-| 4    | M     | [M]{.orange}      | T           | [M]{.orange}         |T         | $\cdots$  |
-| 5    | M     | [M]{.orange}      | [M]{.orange}           | [M]{.orange}         |[M]{.orange}         | $\cdots$  |
-| 6    | T     | [T]{.orange}      | M           | M         |M         | $\cdots$  |
-| 7    | T     | [T]{.orange}      | M           | [T]{.orange}         |M         | $\cdots$  |
-| 8    | M     | [M]{.orange}      | [M]{.orange}           | [M]{.orange}         |T         | $\cdots$  |
-| $N$ correct |  | 8 | 4 | 6 | 2         | $\cdots$  |
-: {tbl-colwidths="[35,25,25,25,25,25,25]"}
-:::
-:::
+:::{.fragment .fade-in fragment-index=5}
+```{r}
+#| label: perm_step5
+#| echo: false
+#| fig-align: center
+#| fig-width: 4.5
+#| fig-height: 3.2
+
+plot_perms(3, show_dots = TRUE)
+```
 :::
 
-:::{.column width="40%"}
+:::
 
-:::fragment
+:::{.fragment fragment-index=6}
 ```{r}
 #| label: permutation_test
 #| echo: false
 #| fig-align: center
-#| fig-width: 5
-#| fig-height: 4
+#| fig-width: 4.5
+#| fig-height: 2.5
 
 set.seed(20250205)
 
@@ -851,25 +958,19 @@ ggplot(data.frame(results), aes(x = results)) +
   labs(title = "Distribution of Correct Guesses",
        x = "Number of Correct Guesses",
        y = "Count") +
-  theme_minimal() +
-  theme(text = element_text(size = 16))
+  theme(
+    plot.background = element_rect(fill = "transparent", color = NA),
+    panel.background = element_rect(fill = "transparent", color = NA)
+  )
 ```
 :::
 
 :::
 :::
 
-. . .
-
-- $\binom{8}{4}=70$ ways to pour teas and each arrangement is equally likely 
-
-- Under the null hypothesis, the probability that the lady classifies all cups correctly is $1/70 \approx 0.014$.
-
-- $p$-value: $p = \Pr(\text{obtaining the observed test statistic} \given \text{null}) = 0.014$.
-
-- The lady may have possessed an ability to tell the difference.
-
 ## Basic Setup for Fisher's Exact Test
+
+<br>
 
 - **Units**: $i \in \{1, \ldots, N\}$
 - **Treatment**: $T_i \in \{0, 1\}$, randomly assigned     
@@ -1003,6 +1104,7 @@ mean(abs(sim_dim[4,]) > abs(obs_dim[4])) # two-sided for Self
 #|   - "For Civic Duty treatment"
 #|   - "For Self treatment"
 #| layout-ncol: 2
+#| dev.args: !expr list(bg = "transparent")
 
 # observed test statistics
 lm_obs <- lm(voted ~ factor(treatment), data = gerber)
@@ -1025,8 +1127,7 @@ ggplot(tibble(x = sim_dim[1,]), aes(x = x)) +
   labs(
     x = "Test-statistic",
     y = "Count"
-  ) +
-  theme_minimal()
+  )
 
 # Plot using ggplot2
 ggplot(tibble(x = sim_dim[3,]), aes(x = x)) +
@@ -1043,8 +1144,7 @@ ggplot(tibble(x = sim_dim[3,]), aes(x = x)) +
   labs(
     x = "Test-statistic",
     y = "Count"
-  ) +
-  theme_minimal()
+  )
 
 # Plot using ggplot2
 ggplot(tibble(x = sim_dim[2,]), aes(x = x)) +
@@ -1061,8 +1161,7 @@ ggplot(tibble(x = sim_dim[2,]), aes(x = x)) +
   labs(
     x = "Test-statistic",
     y = "Count"
-  ) +
-  theme_minimal()
+  )
 
 # Plot using ggplot2
 ggplot(tibble(x = sim_dim[4,]), aes(x = x)) +
@@ -1079,37 +1178,12 @@ ggplot(tibble(x = sim_dim[4,]), aes(x = x)) +
   labs(
     x = "Test-statistic",
     y = "Count"
-  ) +
-  theme_minimal()
+  )
 ```
 
-## General Procedure for Fisher's Exact Test
-
-<br>
-
-1. Specify a **sharp null hypothesis**  
-   
-   - $H_0: Y_i(1) - Y_i(0) = \tau_{0i}$, where we set $\tau_{0i} = 0$ for all $i$.
-   - No effect implies no heterogeneous effect, no spillover effect, etc.
-
-. . .
-
-2. Choose a **test statistic** $S = f(\{Y_i, T_i, \tau_{0i}\}_{i=1}^N)$  
-   
-   - Difference-in-Means, Rank-sum test statistic, etc.
-   - Any statistic gives a valid and exact $p$-value but power may differ
-   - Could use regression models or machine learning algorithms
-
-. . .
-
-3. Compute the **reference distribution** and $p$-value based on the randomized distribution of treatment assignment  
-   - Exact distribution in small samples
-   - Monte Carlo approximation as a general strategy
-
-  
 ## Test Statistics
 
-<br>
+- Fisher's test also is flexible with respect to choice of specific test statistic.
 
 1. [Difference-in-Means]{.highlight} (or an estimator of the _ATE_):
    
@@ -1126,13 +1200,36 @@ ggplot(tibble(x = sim_dim[4,]), aes(x = x)) +
    $$  
    
    
-   - Rank of the outcome for unit $i$: $R_i = R_i(Y_1(T_1), \ldots, Y_N(T_N))$.
+   - Rank of the outcome for unit $i$: $R_i = \rank (Y_1(T_1), \ldots, Y_N(T_N))$.
    - **Advantages**: Reference distribution does not depend on scale and is not sensitive to outliers.
 
 
 . . .
 
 - To learn more read @imbens2015causal [Ch. 5].
+
+## General Procedure for Fisher's Exact Test
+
+<br>
+
+1. Specify a **sharp null hypothesis**  
+   
+   - $H_0: Y_i(1) - Y_i(0) = \tau_{0i}$, where we set some constant $\tau_{0i}$ for each $i$ (commonly you set $\tau_{0i} = 0$).
+   - No effect implies no heterogeneous effect, no spillover effect, etc.
+
+. . .
+
+2. Choose a **test statistic** $S = f(\{Y_i, T_i, \tau_{0i}\}_{i=1}^N)$  
+   
+   - Difference-in-Means, Difference-in-Mean-Ranks, etc.
+   - Any statistic gives a valid and exact $p$-value but power may differ
+   - Could use regression models or machine learning algorithms
+
+. . .
+
+3. Compute the **reference distribution** and $p$-value based on the randomized distribution of treatment assignment  
+   - Exact distribution in small samples
+   - Monte Carlo approximation as a general strategy
 
 ## Application Beyond Randomized Experiments
 
@@ -1176,20 +1273,30 @@ _"Each letter of the alphabet shall be written on a separate slip of paper, each
   
   - 135 candidates.
   - Ballot order differs across 80 districts.
+  - assembly district-counties that have more than one page ballots. 
 
 . . .
 
 - Setup:
 
-  - **Null hypothesis**: no causal effect of ballot order.
-  - Permutation test for _each_ candidate.
+  - **Null hypothesis**: no causal effect of being on first ballot page for _any candidate_.
   - **Test statistic**: _DiM_ between being on the first ballot page and being on other ballot pages.
-  - Reference (randomization) distribution via Monte Carlo.
+  - Reference (randomization) distribution via Monte Carlo simulations.
 
 
 ## Distribution of Exact $p$-values across Candidates
 
-![](../_images/CApvalues.png){fig-align="center" width="90%"}
+:::columns
+:::{.column style="margin-top: 2em; width:30%;"}
+**Randomized alphabet (2003 recall election):**
+
+R W Q O J M V A H B S G Z X N T C I E K U P D Y F L
+:::
+
+:::{.column width="70%"}
+![](../_images/CApvalues.png){fig-align="center" width="65%"}
+:::
+:::
 
 
 ## Diagnose Design via Placebo Tests
@@ -1212,17 +1319,15 @@ _"Each letter of the alphabet shall be written on a separate slip of paper, each
 
 - **Practical Considerations**
 
-
-
   - In most experiments, researchers focus on the _ATE_ and use the Neyman approach to construct confidence intervals.
   
   - Because a sharp null hypothesis is often not interesting to social scientists.
   
-  - Consider the Fisherian exact test
+  - **Consider the Fisherian exact test**
 
-  1. When you have a small sample size (avoid if possible!), or
+    1. When you have a small sample size (avoid if possible!), or
    
-  2. When you have a complex treatment assignment mechanism (e.g., natural experiment).
+    2. When you have a complex (but known!) treatment assignment mechanism (e.g., natural experiment).
 
 . . .
 
@@ -1237,8 +1342,6 @@ _"Each letter of the alphabet shall be written on a separate slip of paper, each
 ![](../_images/potential_outcomes_covariates.png){fig-align="center" width="90%"}
 
 ## Treatment Imbalance
-
-<br>
 
 - Randomization balances both _observed_ and _unobserved_ pre-treatment covariates between the treated and untreated in large samples $\rightsquigarrow$ [covariate imbalance]{.highlight} is generally not a concern.
 
@@ -1263,35 +1366,60 @@ _"Each letter of the alphabet shall be written on a separate slip of paper, each
 
 - Can correct imbalance via regression, matching, weighting, etc. (_more on matching and weighting later_).
 
-- Post-randomization adjustment can also improve [efficiency]{.highlight}--that is, reduce the randomization/sampling distribution variance of our estimate of $\tau$ while maintaining consistency.
+- Covariate adjustment can also improve [efficiency]{.highlight}--that is, reduce the randomization/sampling distribution variance of our estimate of $\tau$ while maintaining consistency.
 
 - **But** [it may also produce bias, such as:]{.fragment}
 
   :::fragment
-  - Adjusting for covariates can bias the estimator.
+  - Adjusting for covariates that are weakly predictive of outcomes in small samples.
   - Bias due to post-hoc analysis (**p-hacking**).
-  - Bias due to incorrectly adjusting **post-treatment covariates**.
+  - Bias due to incorrectly adjusting for **post-treatment covariates**.
   :::
 
-## Covariate Adjustment with Regression
+## Covariate Adjustment in Experiments
 
-- So, is it a good idea to control for pre-treatment covariates via linear regression in a randomized experiment?
+<br>
 
-. . .
-
-- We need to look at [bias-variance tradeoff]{.highlight}.
+- Is it a good idea to control for pre-treatment covariates via linear regression in a randomized experiment? We need to look at the [bias-variance tradeoff]{.highlight}.
 
 . . .
 
-- Generally speaking, in large samples, the bias introduced by simple covariate adjustment is negligible.
+- [Potential benefit]{.note}: If $X_i$ predicts $Y_i$, including it as covariate, $Y_i = \alpha + \tau T_i + X_i^\prime \gamma$, reduces residual variance $\Rightarrow$ smaller SEs $\Rightarrow$ precision gain.
 
-- @lin2013agnostic shows that demeaning covariates and including interaction terms yields biased but consistent estimators of _ATE_:
+. . .
+
+. . .
+
+- [Pitfall 1 --- Overfitting]{.alert}: In cases where $X_i$ is weakly predictive of $Y_i$ naive adjustement introduces additional noise and can even bias estimates in small samples [@freedman2008regression]
+
+. . .
+
+- [Pitfall 2 --- Common-slope constraint]{.alert}: Naive adjustement forces parallel regression lines _wrt_ $X$ and **limits precision gains.**
+
+  - Natural fix is full interaction model, $Y_i = \alpha + \tau T_i + X_i^\prime \gamma + T_i X_i^\prime \xi$, to allow different slopes. But this induces $\cov(T_i, T_i \tilde{X}_i) \neq 0$ and $\tau$ is the treatment effect [at $X = 0$]{.highlight}, not the _ATE_.
+
+## Covariate Adjustment with Regression {#lin-solution}
+
+<br>
+
+- @lin2013agnostic proposes demeaning covariates and including interaction terms:
 
 $$
 Y_i = \alpha + \tau T_i + (X_i - \overline{X})' \gamma + T_i (X_i - \overline{X})' \delta + \varepsilon_i
 $$
 
-- [Intuition]{.note}: De-meaning covariates ensures that the interaction terms $(X_i - \overline{X})' \delta$ are orthogonal to the treatment indicator $T_i$ and $\widehat{\tau}$ preserves interpreation. At the same time inclusion of covariates allows to improve precision if $X_i$ are predictive of outcome. As $N \rightarrow \infty$ the bias introduced by this method diminishes (consistency).
+. . .
+
+- This addresses [both pitfalls]{.highlight}:
+
+  1. **Interactions** $\Rightarrow$ remove common-slope constraint $\Rightarrow$ flexible fit
+  2. **Demeaning** $\Rightarrow$ $\tau$ is the effect at $\overline{X}$ ($\approx$ _ATE_); $\cov(T_i, T_i \tilde{X}_i) = 0$ by construction. [[(proof)](#proof-why-demean)]{.note .small-font}
+  3. **Variance guarantee**: asymptotic variance of $\widehat{\tau}_{Lin}$ $\leq$ variance of _DiM_ $\Rightarrow$ [you can only gain precision, never lose it]{.highlight}.
+  4. **Bias** is $O(1/N)$ and decreases with sample size $\Rightarrow$ consistent; use HC2 robust SEs for valid inference.
+
+. . .
+
+- Further reading: @lei2021regression propose procedure to debias Lin's estimator even in the small samples.
 
 ## @lin2013agnostic Covariate Adjustment
 
@@ -1301,103 +1429,127 @@ $$
 #| label: lin_adjustment
 #| echo: true
 #| output-location: column
-#| code-line-numbers: "1-9|11-13|15-25"
+#| code-line-numbers: "1-9|11-17|19-24|26-38"
 
 # simulate data
-set.seed(20250206)
+set.seed(972)
 
 N <- 100
 X <- rnorm(N, mean = 0)
 D <- randomizr::complete_ra(N)
-Y <- 
-  2 + 1.5 * D + 0.5 * X + 
-  0.5 * D * X + rnorm(N, sd = 0.5)
+Y <-
+  2 + 1.5 * D + 0.1 * X +
+  3 * D * (X - mean(X)) + rnorm(N, sd = 1.5)
 
-# unadjusted model
+# simple difference-in-means
+dim_model <-
+  estimatr::lm_robust(Y ~ D) |> estimatr::tidy()
+
+# naive covariate adjustment (common slopes)
 unadjusted_model <-
   estimatr::lm_robust(Y ~ D + X) |> estimatr::tidy()
 
 # demean covariates
 X_centered <- X - mean(X)
 
-# adjusted model with centered covariates and interaction
+# Lin estimator (hand-coded)
 adjusted_model <-
   estimatr::lm_robust(Y ~ D * X_centered) |> estimatr::tidy()
 
-# adjusted model with centered covariates and interaction
+# Lin estimator (estimatr)
 adjusted_model2 <-
   estimatr::lm_lin(Y ~ D, covariates = ~X) |>
   estimatr::tidy()
 
 bind_rows(
-  unadjusted_model, adjusted_model, adjusted_model2
+  dim_model, unadjusted_model, adjusted_model, adjusted_model2
 ) |>
   dplyr::filter(term == "D") |>
-  dplyr::mutate(model = c("unadj", "adj_hand", "adj_estimatr")) |>
+  dplyr::mutate(model = c("unadjusted", "naive", "Lin (hand)", "Lin (estimatr)")) |>
   dplyr::select(model, term, estimate, std.error) |>
   knitr::kable(digits = 5, align = "lccc") |>
-  kableExtra::kable_minimal(font_size = 20)
+  kableExtra::kable_minimal(font_size = 22)
 
 ```
 
 ## @lin2013agnostic Covariate Adjustment
 
-<br>
+<br><br>
 
 ```{r}
 #| label: lin
 #| fig-align: center
-#| fig-width: 5
-#| fig-height: 5
+#| fig-width: 4
+#| fig-height: 4
 #| fig-subcap:
-#|   - "w/o adjustment"
-#|   - "w/ adjustment"
-#| layout-ncol: 2
+#|   - "DiM: Y ~ D"
+#|   - "Common slopes: Y ~ D + X"
+#|   - "Lin: Y ~ D * (X − X̄)"
+#| layout-ncol: 3
 
 # plot X against Y coloring by D
 plot_data <- tibble(X, Y, D)
 
-ggplot(plot_data, aes(x = X, y = Y, color = factor(D), shape = factor(D))) +
-  geom_point() +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, size = .5, linetype = "dashed") +
-  geom_function(fun = function(x) {
-    unadjusted_model[1, 2] + unadjusted_model[2, 2] + x * unadjusted_model[3, 2]
-  }, color = "#cc241d", size = 1) +
-  geom_function(fun = function(x) {
-    unadjusted_model[1, 2] + x * unadjusted_model[3, 2]
-  }, color = "#458588", size = 1) +
-  scale_color_manual(values = c("#458588", "#cc241d")) +
-  scale_shape_manual(values = c(17, 1)) +
-  labs(
-    subtitle = bquote(hat(tau)[SATE] ~ "is" ~ .(round(unadjusted_model[2, 2], 4))),
-    x = "X",
-    y = "Y",
-    color = "D = ",
-    shape = "D = "
-  ) +
-  theme_minimal() +
-  theme(legend.position = "bottom")
+# shared plot elements
+base_plot <- function() {
+  list(
+    geom_point(),
+    geom_smooth(method = "lm", formula = y ~ poly(x, 2),
+      se = FALSE, linewidth = .5, linetype = "dashed"),
+    scale_color_manual(values = c("#458588", "#cc241d")),
+    scale_shape_manual(values = c(17, 1)),
+    labs(x = "X", y = "Y", color = "D = ", shape = "D = "),
+    theme(legend.position = "bottom")
+  )
+}
+
+# LEFT panel: difference-in-means (horizontal group means)
+y_bar_0 <- mean(Y[D == 0])
+y_bar_1 <- mean(Y[D == 1])
+tau_dim <- as.numeric(dim_model[2, 2])
 
 ggplot(plot_data, aes(x = X, y = Y, color = factor(D), shape = factor(D))) +
-  geom_point() +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, size = .5, linetype = "dashed") +
+  base_plot() +
+  geom_hline(yintercept = y_bar_0, color = "#458588", linewidth = 1) +
+  geom_hline(yintercept = y_bar_1, color = "#cc241d", linewidth = 1) +
+  annotate("segment", x = max(X) - 0.3, xend = max(X) - 0.3,
+    y = y_bar_0, yend = y_bar_1,
+    color = "#d65d0e", linewidth = 1,
+    arrow = arrow(ends = "both", length = unit(0.05, "inches"))) +
+  annotate("text", x = max(X) + 0.1, y = (y_bar_0 + y_bar_1) / 2,
+    label = expression(hat(tau)[DiM]), color = "#d65d0e", size = 3) +
+  labs(subtitle = bquote(hat(tau)[DiM] ~ "=" ~ .(round(tau_dim, 3))))
+
+# MIDDLE panel: common slopes (forced parallel lines)
+a0 <- as.numeric(unadjusted_model[1, 2])
+td <- as.numeric(unadjusted_model[2, 2])
+bx <- as.numeric(unadjusted_model[3, 2])
+
+ggplot(plot_data, aes(x = X, y = Y, color = factor(D), shape = factor(D))) +
+  base_plot() +
+  geom_function(fun = function(x) a0 + td + x * bx, color = "#cc241d", linewidth = 1) +
+  geom_function(fun = function(x) a0 + x * bx, color = "#458588", linewidth = 1) +
+  annotate("segment", x = 1.5, xend = 1.5,
+    y = a0 + 1.5 * bx, yend = a0 + td + 1.5 * bx,
+    color = "#d65d0e", linewidth = 1,
+    arrow = arrow(ends = "both", length = unit(0.05, "inches"))) +
+  annotate("text", x = 1.9, y = a0 + td / 2 + 1.5 * bx,
+    label = expression(hat(tau)[naive]), color = "#d65d0e", size = 3) +
+  labs(subtitle = bquote(hat(tau)[naive] ~ "=" ~ .(round(td, 3)) ~ "(parallel)"))
+
+# RIGHT panel: Lin estimator (different slopes, evaluated at X-bar)
+ggplot(plot_data, aes(x = X, y = Y, color = factor(D), shape = factor(D))) +
+  base_plot() +
   geom_function(fun = function(x) {
     adjusted_model2[1, 2] + adjusted_model2[2, 2] + x * (adjusted_model2[3, 2] + adjusted_model2[4, 2])
-  }, color = "#cc241d", size = 1) +
+  }, color = "#cc241d", linewidth = 1) +
   geom_function(fun = function(x) {
     adjusted_model2[1, 2] + x * adjusted_model2[3, 2]
-  }, color = "#458588", size = 1) +
-  scale_color_manual(values = c("#458588", "#cc241d")) +
-  scale_shape_manual(values = c(17, 1)) +
-  labs(
-    subtitle = bquote(hat(tau)[SATE] ~ "is" ~ .(round(adjusted_model2[2, 2], 4))),
-    x = "X",
-    y = "Y",
-    color = "D = ",
-    shape = "D = "
-  ) +
-  theme_minimal() +
-  theme(legend.position = "bottom")
+  }, color = "#458588", linewidth = 1) +
+  geom_vline(xintercept = mean(X), linetype = "dotted", color = "#d65d0e", linewidth = 0.7) +
+  annotate("text", x = mean(X) + 0.3, y = max(Y) + 0.3,
+    label = "bar(X)", parse = TRUE, color = "#d65d0e", size = 3.5) +
+  labs(subtitle = bquote(hat(tau)[Lin] ~ "=" ~ .(round(as.numeric(adjusted_model2[2, 2]), 3)) ~ "(at" ~ bar(X) ~ ")"))
 
 
 ```
@@ -2006,9 +2158,8 @@ ggplot(variance_data, aes(x = p, y = variance)) +
   labs(
     x = bquote("Proportion of Treatment Group, " ~ N[1]/N),
     y = bquote("Variance of DiM, " ~ V(bar(Y)(1) - bar(Y)(0)))
-  ) +
-  theme_minimal() +
-  theme(text = element_text(size = 16))
+  ) + 
+    theme(text = element_text(size = 16))
 
 ```
 
@@ -2138,8 +2289,8 @@ $$
 
 where,
 
-- $\alpha$ is the type I error rate (false positive rate),
-- $\kappa$ is the power of the test ($1 -$ false negative rate),
+- $\alpha$ is the type I error rate (_false-positives_ rate),
+- $\kappa$ is the power of the test ($1 -$ _false-negatives_ rate),
 - $\sigma_{\hat{\beta}}^{(h)}$ is the standard error for $\hat{\beta}$ (i.e., $\sqrt{\var[\hat{\beta}]}$), under hypothesis $h$, with $\sigma_{\hat{\beta}}^{(h)}$ a function of sample size ($N$ and $p$),
 - $t_{\alpha/2}$ and $t_{1-\kappa}$ are the absolute values of the $\alpha/2$ and $1 - \kappa$ quantiles of the reference distribution (e.g., large sample distribution of $(\hat{\beta} - \beta)/\sigma_{\hat{\beta}}^{(h)}$).
 
@@ -2219,10 +2370,35 @@ $$
 # Appendix {visibility="uncounted"}
 
 
-## Proof of $\E [ \widehat{\tau}_{IPW} \given \mathcal{O}_N ] = \tau_{SATE}$ [🔙](#ipw-unbiased) {#proof-ipw-unbiased visibility="uncounted"}
+## [[🔙](#lin-solution)]{.small-font} Why Demean? Orthogonality {#proof-why-demean visibility="uncounted"}
 
 <br>
 
+- In OLS, adding a regressor [orthogonal]{.highlight} to existing regressors doesn't change their coefficients--it only reduces residual variance $\Rightarrow$ smaller SEs.
+
+- In a randomized experiment, $T_i \indep X_i$ by design, so $\corr(T_i, X_i) \approx 0$. [Great!]{.note}
+
+- But for the interaction $T_i X_i$ (without demeaning):
+
+$$
+\begin{align*}
+\cov(T_i, T_i X_i) &= \E[T_i^2 X_i] - \E[T_i] \E[T_i X_i] \\
+&= \bigl(\E[T_i^2] - \E[T_i]^2\bigr) \E[X_i] \neq 0 \;\text{ if } \E[X_i] \neq 0
+\end{align*}
+$$
+
+  So $T_i$ and $T_i X_i$ are [correlated]{.alert} $\Rightarrow$ $\widehat{\tau}$ estimates the effect at $X = 0$, not the ATE.
+
+- With demeaning: $\E[\tilde{X}_i] = 0 \implies \cov(T_i, T_i \tilde{X}_i) = 0$ [by construction]{.note}.
+
+- Orthogonality restored $\Rightarrow$ $\widehat{\tau}_{Lin}$ is [shielded]{.highlight} from the interaction terms.
+
+
+## [[🔙](#ipw-unbiased)]{.small-font} Proof of $\E [ \widehat{\tau}_{IPW} \given \mathcal{O}_N ] = \tau_{SATE}$ {#proof-ipw-unbiased visibility="uncounted"}
+
+<br><br>
+
+:::{.small-font}
 $$
 \begin{aligned}
 &\E [ \widehat{\tau}_{IPW} \given \mathcal{O}_N ] \\
@@ -2233,6 +2409,23 @@ $$
 &= \frac{1}{N} \sum_{i=1}^N Y_i(1) - Y_i(0) = \tau_{SATE}
 \end{aligned}
 $$
+:::
+
+## [[🔙](#dim-variance)]{.small-font} Proof of $\cov(\overline{Y}_1, \overline{Y}_0 \given \mathcal{O}_N) = -S_{10}/N$ {#proof-cov-neg visibility="uncounted"}
+
+<br><br>
+
+:::{.small-font}
+$$
+\begin{aligned}
+\cov(\overline{Y}_1, \overline{Y}_0 \given \mathcal{O}_N) &= \frac{1}{N_1 N_0}\sum_i\sum_j Y_i(1)\,Y_j(0)\;\cov(T_i,\;1-T_j) = -\frac{1}{N_1 N_0}\sum_i\sum_j Y_i(1)\,Y_j(0)\;\cov(T_i, T_j) \\[6pt]
+&\text{Under CR: } \var(T_i) = \frac{N_1 N_0}{N^2}, \quad \cov(T_i, T_j)\big|_{i \neq j} = -\frac{N_1 N_0}{N^2(N-1)} \\[6pt]
+&= \underbrace{-\frac{1}{N^2}\sum_i Y_i(1)Y_i(0)}_{\text{diagonal } (i=j)} \;+\; \underbrace{\frac{1}{N^2(N-1)}\sum_{i \neq j} Y_i(1)Y_j(0)}_{\text{off-diagonal}} \\[6pt]
+&= -\frac{1}{N^2}\sum_i Y_i(1)Y_i(0) + \frac{1}{N^2(N-1)}\left[N^2\,\overline{Y(1)}\,\overline{Y(0)} - \sum_i Y_i(1)Y_i(0)\right] \\[6pt]
+&= -\frac{\sum_i Y_i(1)Y_i(0)}{N^2}\cdot\frac{N}{N-1} + \frac{\overline{Y(1)}\,\overline{Y(0)}}{N-1} = -\frac{1}{N}\underbrace{\frac{1}{N-1}\left[\sum_i Y_i(1)Y_i(0) - N\,\overline{Y(1)}\,\overline{Y(0)}\right]}_{= S_{10}} = -\frac{S_{10}}{N}
+\end{aligned}
+$$
+:::
 
 ## Cluster Robust SEs
 
