@@ -1,0 +1,184 @@
+---
+title: "Parallel Processing and Pre-Analysis Plans (PAPs)"
+author: "Alexander Dean"
+subtitle: "Recitation Period 4"
+institute: "Vanderbilt University"
+email: "alexander.r.dean@vanderbilt.edu"
+date: today
+format: 
+  revealjs:
+    theme: dark
+    footer: "Alexander Dean (Vanderbilt University)"
+    slide-number: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    self-contained-math: true
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+fontsize: 32px
+editor: source
+---
+
+
+# Introductory Spiel
+
+## What We Will Cover Today
+
+1. Why we use pre-analysis plans
+2. Common inclusions in pre-analysis plans
+3. Overview of parallel processing in R
+4. Implementation demonstration with parallel processing
+
+# Introducing PAPs
+
+## What is a pre-analysis plan?
+
+- What do you think would go into a pre-analysis plan?
+
+. . .
+
+- Broadly, a PAP documents your hypotheses, data collection methods, and analysis plan before collecting or examining (experimental) data.
+
+## Why we use pre-analysis plans
+
+1. Transparency
+    - Distinguishes between confirmatory and exploratory hypotheses
+    - Establishes ex ante hypotheses for study
+2. Promoting credible inference
+    - Decreases the ease of *p*-hacking
+    - Makes selective data reporting harder
+3. PAPs front-load some of the work for writing a paper, which can be beneficial
+
+## What pre-analysis plans don't solve
+
+1. Reviewers don't necessarily look at PAPs when reviewing
+2. Others won't necessarily abide by their PAP when conducing data analysis
+    - Doing some analysis that isn't in PAP is OK, just be honest about your pre-registered analysis vs. not
+3. PAPs are not commonplace for observational studies, should they be? Yes or No?
+
+# Common Features of PAP
+
+## RQ and Hypotheses
+
+1. Your research question
+2. Confirmatory Hypotheses
+    - "The main focus of most studies; these are the hypotheses your study is designed to test. Your analyses for these hypotheses will typically be well-powered and you will generally have a strong theory leading to these hypotheses *a priori*" (EGAP).
+3. Exploratory Hypotheses
+    - "Hypotheses you may wish to test but are not the main focus of your study. They are often secondary hypotheses about mechanisms, subgroups, heterogeneous effects, or downstream outcomes. The analyses guided by these hypotheses may not be well-powered and your theory may not focus on these effects, but analysis of these hypotheses may lead to surprising discoveries" (EGAP).
+
+## Experimental Design
+
+Include:
+
+- Unit of Analysis
+- Description of experiment
+- Treatment arms
+- Method of randomization (i.e., cluster, blocking, etc.)
+- Experimental intervention (IV)
+- Outcomes of interest (DVs)
+
+## Data Collection and Measurement
+
+Include:
+
+- Population the study is drawing from
+- Inclusion/exclusion criteria
+- Measurement/operationalization of your variables of interest
+    - IVs
+    - DVs
+    - Covariates
+- Some recommend that you include your code for measurement
+
+## Estimation Procedure
+
+Include:
+
+- Estimand
+- Estimator
+- Model specification
+- Some recommend that you include your code for estimationn
+
+## Inference Criteria
+
+1. Definition: The decision rules for determining the detectability of effects
+2. Standard inclusions:
+    - Type of standard errors (why this type)?
+    - One-tailed or two-tailed test?
+    - What's your $\alpha$ level?
+    - Are you adjusting for multiple comparisons?
+
+## Handling Data Issues
+
+1. Experiments never run smoothly (something will always happen)
+
+. . . 
+
+2. Common in PAPs to address two data issues:
+    - Missing data
+    - Extreme data points (outliers)
+
+. . . 
+
+3. Missing data:
+    - How do you handle missing covariates or missing outcomes?
+    - Dropping observations, imputing data, bounds analysis?
+    - Is the missing data/extreme data random or not? This can change your approach
+
+## Additional Resources
+- [eGAP methods guides](https://egap.org/methods-guides/)
+- [R example of family-wise error rate for multiple hypothesis comparisons](https://rviews.rstudio.com/2019/10/02/multiple-hypothesis-testing/)
+- [Intuition of problems with multiple hypothesis testing](https://benwhalley.github.io/just-enough-r/multiple-comparisons.html)
+- [J-PAL article on PAPs](https://www.povertyactionlab.org/resource/pre-analysis-plans)
+
+# Parallel Computing
+
+## What is Parallel Computing? 
+
+[Definition]{style="color:orange;"}: Splitting of computing process across multiple cores/processors.
+
+. . .
+
+![](cpu_example.png)
+
+- Theoretically cuts down computing process by $\frac{1}{N}$, but:
+    - Overhead (copying data to workers) slowdowns
+    - Amdahl's Law (Any serial parts slow down speed)
+
+## Forking vs. Socket
+
+1. There are two methods of parallel computing with R:
+    - Forking (Mac, Linux)
+    - Socket (Windows, Mac, Linux)
+
+. . .
+
+2. Forking: copies current R process to each core.
+    - Extra steps needed to handle randomization
+    - Easier to implement and quicker than socket
+3. Socket: launching new version of R on each core.
+    - No cross-contamination across cores
+    - Slower than forking and more complicated
+
+## When to Use Parallel Processing
+
+1. Simulations
+2. Bootstrapping
+3. Randomization Inference
+4. Large-N data applications:
+    - Group-wise model fitting
+    - Massive panel like RAIS
+5. ML
+6. Text analysis
+
+# Demonstration and Resources
+## Resources
+
+1. [Berkeley stats department](https://computing.stat.berkeley.edu/tutorial-parallelization/parallel-R.html) tutorial
+2. [This book](https://bookdown.org/rdpeng/rprogdatascience/parallel-computation.html) about working in R
+3. [UMich stats department](https://dept.stat.lsa.umich.edu/~jerrick/courses/stat506_f24/16-parallel-processing.html) tutorial
