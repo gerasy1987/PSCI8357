@@ -1321,7 +1321,7 @@ R W Q O J M V A H B S G Z X N T C I E K U P D Y F L
 
   - In most experiments, researchers focus on the _ATE_ and use the Neyman approach to construct confidence intervals.
   
-  - Because a sharp null hypothesis is often not interesting to social scientists.
+    - Often motivated by restrictiveness of a sharp null hypothesis (but the difference is marginal).
   
   - **Consider the Fisherian exact test**
 
@@ -1563,203 +1563,6 @@ ggplot(plot_data, aes(x = X, y = Y, color = factor(D), shape = factor(D))) +
 
 ```
 
-# Experimental Design Considerations
-
-## Unequal Probabilities of Assignment
-
-<br><br>
-
-- In some experiments, units may have different probabilities of being assigned to the treatment group.
-
-- This can occur due to:
-  
-  - Block (stratified) randomization with different probabilities within strata or unequal sized clusters.
-  
-  - Practical constraints or ethical considerations.
-  
-  - Adaptive designs where probabilities change over time [@offer2021adaptive].
-
-. . .
-
-- **Problem**: Unequal probabilities can bias the Difference-in-Means (_DiM_) estimator.
-
-- **Solution**: Use the [Inverse Probability Weighting (IPW)]{.highlight} that we introduced before estimator to account for unequal probabilities.
-
-## Bias in Difference-in-Means
-
-- Recall the _DiM_ estimator: $\widehat{\tau}_{DiM} = \frac{1}{N_1} \sum_{i=1}^N T_i Y_i - \frac{1}{N_0} \sum_{i=1}^N (1 - T_i) Y_i$
-
-- Suppose $p_i = \Pr(T_i = 1)$ varies across units, but we have complete random assignment ($N_1$ and $N_0$ are fixed).
-
-. . .
-
-- The expected value of the _DiM_ estimator is:
-
-$$
-\begin{align*}
-\E[\widehat{\tau}] &= \E \left[ \frac{1}{N_1}\sum_{i=1}^N T_i Y_i(1) \right] - \E \left[ \frac{1}{N_0}\sum_{i=1}^N (1 - T_i) Y_i(0) \right] \\
-&= \sum_{i=1}^N \E \left[\frac{T_i}{N_1}\right] Y_i(1) - \sum_{i=1}^N \E \left[\frac{(1 - T_i)}{N_0}\right] Y_i(0) \\
-&= \frac{\sum_{i=1}^N p_i\,Y_i(1)}{\sum_{j=1}^N p_j} - \frac{\sum_{i=1}^N (1-p_i)\,Y_i(0)}{\sum_{j=1}^N (1-p_j)} \\
-&\neq \tau_{ATE}.
-\end{align*}
-$$
-
-- [Intuition]{.note}: The _DiM_ over-weights observations with higher assignment probabilities and is generally not equal to the true _ATE_ (unless $p_i$ is constant for all units or $\tau_i$ is constant).
-
-## Inverse Probability Weighting (IPW)
-
-<br>
-
-- The [IPW estimator]{.highlight} corrects for unequal probabilities:
-
-$$
-\widehat{\tau}_{IPW} = \frac{1}{N} \sum_{i=1}^N \left( \frac{T_i Y_i}{p_i} - \frac{(1 - T_i) Y_i}{1 - p_i} \right)
-$$
-
-. . .
-
-- **Properties**: 
-  - The IPW estimator is unbiased for the _ATE_: $\E [\widehat{\tau}_{IPW}] = \tau_{ATE}$
-  - Can be used for estimation of _SATE_ or _PATE_.
-  - Can be obtained using regression with inverse probability weights (e.g. `estimatr::lm_robust()` with `weights` argument).
-
-- [Intuition]{.note}: Weight each unit by the inverse of its probability of receiving the observed treatment to compensate for over-weighting.
-
-- [Note]{.note}: The IPW estimator is unbiased and consistent if the treatment assignment mechanism is known and correctly specified.
-
-## Example: Bias of DiM vs IPW Estimator
-
-![](../_images/ipw_dim_bias.gif){fig-align="center" width="90%"}
-
-# Cluster Randomized Experiments
-
-## Cluster Randomization
-
-- So far, we have assumed treatments are assigned at the individual level.
-
-- Sometimes random assignment occurs at the [cluster level]{.highlight} for various reasons:
-  
-  - Treatment only makes sense at the group level, but the outcome is measured for individuals.
-  
-  - Treatment too costly to implement individually.
-  
-  - SUTVA only plausible if treatment is defined at the group level.
-    
-  - [Example]{.note}: Effect of classroom teaching method on student performance.
-
-. . .
-
-- Standard errors ignoring cluster randomization are usually **too small** (opposite of conservative).
-
-- This is due to units within the same cluster typically being more similar than units in different clusters.
-
-. . .
-
-:::{.callout-warning icon="false" title=""}
-_"Analyses of group randomized trials that ignore clustering are an exercise in self-deception."_ [@cornfield1978symposium]
-:::
-
-
-## Randomization at the Group Level
-
-![](../_images/potential_outcomes_cluster.png){fig-align="center" width="90%"}
-
-## Bias of DiM in Cluster-Randomized Experiments
-
-<br>
-
-- When clusters have **unequal sizes**, the _DiM_ estimator can produce biased estimates of $\tau_{ATE}$ if the cluster sizes are correlated with the potential outcomes.
-
-  - [Example]{.note}: If larger clusters tend to have higher potential outcomes, the _DiM_ estimator will overestimate the treatment effect.
-
-- [Intuition]{.note}: The _DiM_ estimator gives equal weight to each cluster, regardless of size, which can lead to biased estimates if cluster sizes are not balanced.
-
-. . .
-
-- To address the issue, as before, we can:
-
-  - Use weighted estimators, such as the [IPW estimator]{.highlight}, or 
-  - Regression weighted by inverse of probabilities of assignment to account for unequal cluster sizes.
-
-## Intracluster Correlation
-
-<br>
-
-- Recall the [Law of Total Variance]{.highlight}: $\var(Y) = \E[\var(Y\mid X)] + \var(\E[Y\mid X])$
-
-- This implies the decomposition of heterogeneity in outcomes:
-
-$$
-\underbrace{\sum_{j=1}^G \sum_{i=1}^{N_j} (Y_{ij} - \overline{Y})^2}_{\text{overall variance, } \sigma^2} = \underbrace{\sum_{j=1}^G \sum_{i=1}^{N_j} (Y_{ij} - \overline{Y}_{j})^2}_{\text{within-cluster variance, } \sigma^2_W} + \underbrace{\sum_{j=1}^G N_{j}(\overline{Y}_{j} - \overline{Y})^2,}_{\text{between-cluster variance, } \sigma^2_B}
-$$
-
-where $\overline{Y_{j}}$ is mean of $Y_{ij}$ in cluster $j$ and $\overline{Y}$ is mean of all $Y_{ij}$.
-
-. . .
-
-- Then we can define the [intracluster correlation]{.highlight}: $\rho = \frac{\sigma^2_B}{\sigma^2} = 1 - \frac{\sigma^2_W}{\sigma^2}$
-
-- [Intuition]{.note}: When $\rho$ is $1$ ($0$), responses are identical (uncorrelated) within each cluster.
-
-## Inference in Cluster-Randomized Experiments
-
-- We can show cluster randomization **inflates** the sampling variance (compared to complete randomization) approximately by [Moulton factor]{.highlight} (design effect):
-
-$$
-\frac{\var(\hat\tau_{CL})}{\var(\hat\tau_{R})} = 1 + (\overline{N} - 1)\rho, \quad \text{where} \quad \bar{N} = \frac{1}{G} \sum_{j=1}^G N_j
-$$
-
-- [Intuition]{.note}: When $\rho = 1$, outcomes do not vary within clusters ($\sigma^2_{W} = 0$), each cluster is essentially one observation. As a result, the _effective sample_ size is number of clusters, not number of units, and variance is inflated. When $\rho = 0$ all clusters are _similar_ to the whole sample.
-
-. . .
-
-- **Valid inference**:
-
-  - OLS and _DiM_ estimators are unbiased for $\tau_{ATE}$ if clusters are _equally_ sized.
-  - Possible bias if cluster sizes vary and are correlated with potential outcomes.
-  - Rely on [cluster-robust standard errors]{.highlight} (_CR2_) or randomization inference.
-
-- [Note]{.note}: When $G$ is small, $\rho$ will be poorly estimated and cluster SEs will be unreliable $\rightsquigarrow$ prefer increasing $G$ over sample size per cluster ($N_j$).
-
-## Simulation: Ignoring Clustering in SE Estimates
-
-
-
-:::{.columns}
-
-:::{.column width="50%"}
-- Ignoring clustering in standard error estimates can result in overly _"optimistic"_ confidence intervals and increased [Type I error]{.highlight} (_false-positives_) rates.
-
-- The simulation shows how [coverage]{.highlight}--probability of 95% CIs including the true _ATE_ across replications of the experiment--is affected by ratio of between- to within-cluster variance:
-
-  - We would expect the these CIs will include true _ATE_ in 95% of the cases.
-  - _HC2_ are CIs based on heteroskedastisity robust standard errors.
-  - _CR2_ are CIs based on cluster robust standard errors.
-
-:::
-
-::: {.column width="50%"}
-<br>
-
-![](../_images/cr2_coverage.gif){fig-align="center" width="90%"}
-:::
-
-:::
-
-## Example: Field Experiment in Benin
-
-<br><br><br><br>
-
-![@wantchekon2003clientelism](../_images/wantchekon_experiment_citations.png){fig-align="center" width="80%"}
-
-## Example: Field Experiment in Benin
-
-![](../_images/wantchekon_experiment_table.png){fig-align="center" width="90%"}
-
-## Example: Field Experiment in Benin
-
-![](../_images/wantchekon_experiment_table2.png){fig-align="center" width="90%"}
-
 # Block Randomized Experiments
 
 ## Pre- vs. Post-treatment Adjustment
@@ -1809,7 +1612,7 @@ $$
 
 . . .
 
-- Using Law of Iterated Expectation:
+- By partitioning the population sum into subgroups, the overall _SATE_ is a share-weighted average of within-block _SATEs_:
 
 $$
 \tau_{SATE} = \underbrace{\left( \frac{N_\text{v}}{N_\text{v} + N_\text{nv}} \right)}_{\text{share voters}} \tau_\text{v} + 
@@ -1821,8 +1624,7 @@ $$
 - [Block (stratified) randomized experiment]{.highlight}:
   
   - Each block is _essentially_ completely randomized experiment.
-  - Choose $N_{1,\text{v}}$ voters to be treated, $N_{0,\text{v}} = N_{\text{v}} − N_{1,\text{v}}$
-control.
+  - Choose $N_{1,\text{v}}$ voters to be treated, $N_{0,\text{v}} = N_{\text{v}} − N_{1,\text{v}}$ control.
   - Choose $N_{1,\text{nv}}$ non-voters to be treated, $N_{0,\text{nv}} = N_{\text{nv}} − N_{1,\text{nv}}$ control.
 
 . . .
@@ -1837,7 +1639,7 @@ control.
 - Blocking ensures balance across blocks:
   
   - When $p_{\text{v}} = p_{\text{nv}}$, distribution of treatment is exactly the same in each block.
-  - With complete randomization, treatment might be very _imbalanced_ (in absolute terms) across $V_i$.
+  - Without block randomization, treatment might be very _imbalanced_ (in absolute terms) across $V_i$.
   - **Benefit**: No possibility of _chance_ imbalances skewing the estimates.
 
 ## Estimators in Blocked Designs
@@ -1846,8 +1648,8 @@ control.
 
 $$
 \begin{align*}
-\widehat{\tau}_\text{v} &= \overline{Y}_{1,\text{v}} - \overline{Y}_{0,\text{v}} = \frac{1}{N_{1,\text{v}}} \sum_{i:V_i=1} T_i Y_i - \frac{1}{N_{0,\text{v}}} \sum_{i:V_i=0} (1 - T_i) Y_i \\
-\widehat{\tau}_\text{nv} &= \overline{Y}_{1,\text{nv}} - \overline{Y}_{0,\text{nv}} = \frac{1}{N_{1,\text{nv}}} \sum_{i:V_i=1} T_i Y_i - \frac{1}{N_{0,\text{nv}}} \sum_{i:V_i=0} (1 - T_i) Y_i
+\widehat{\tau}_\text{v} &= \overline{Y}_{1,\text{v}} - \overline{Y}_{0,\text{v}} = \frac{1}{N_{1,\text{v}}} \sum_{i:V_i=1} T_i Y_i - \frac{1}{N_{0,\text{v}}} \sum_{i:V_i=1} (1 - T_i) Y_i \\
+\widehat{\tau}_\text{nv} &= \overline{Y}_{1,\text{nv}} - \overline{Y}_{0,\text{nv}} = \frac{1}{N_{1,\text{nv}}} \sum_{i:V_i=0} T_i Y_i - \frac{1}{N_{0,\text{nv}}} \sum_{i:V_i=0} (1 - T_i) Y_i
 \end{align*}
 $$
 
@@ -1861,8 +1663,8 @@ $$
 \widehat{\tau}_{BR} = \left(\frac{N_\text{v}}{N}\right) \widehat{\tau}_\text{v} + \left(\frac{N_\text{nv}}{N}\right) \widehat{\tau}_\text{nv}
 $$
 
-  - **Property**: Equivalent to the regular _DiM_ if $p_\text{v} = p_\text{nv} = \frac{1}{2}$.
-  - Otherwise, standard $\widehat{\tau}_{DiM}$ under block design will be **biased**.
+  - **Property**: Equivalent to the regular _DiM_ if $p_\text{v} = p_\text{nv}$ (equal treatment probabilities across blocks).
+  - [Note:]{.note} With unequal probabilites of assignment across block standard $\widehat{\tau}_{DiM}$ under block design will be **biased**.
 
 ## Sampling Variance of Blocking Estimator
 
@@ -2063,9 +1865,207 @@ $$
 \end{cases}
 $$
 
+# Unequal Probabilities of Assignment
+
+## Unequal Probabilities of Assignment
+
+<br><br>
+
+- We mentioned that block randomization with $p_j$ varying across blocks makes the naive _DiM_ **biased**, requiring either a weighted block estimator or WLS.
+
+- This is an instance of a **general problem**: whenever units have [unequal treatment probabilities]{.highlight}, the standard _DiM_ is biased.
+
+. . .
+
+- Unequal probabilities can arise from:
+
+  - Block (stratified) randomization with different $p_j$ across strata (as we just saw).
+
+  - Cluster randomization with unequal cluster sizes.
+
+  - Practical constraints, ethical considerations, or adaptive designs [@offer2021adaptive].
+
+. . .
+
+- **General solution**: Use [Inverse Probability Weighting (IPW)]{.highlight} estimator.
+
+## Bias in Difference-in-Means
+
+- Recall the _DiM_ estimator: $\widehat{\tau}_{DiM} = \frac{1}{N_1} \sum_{i=1}^N T_i Y_i - \frac{1}{N_0} \sum_{i=1}^N (1 - T_i) Y_i$
+
+- Suppose $p_i = \Pr(T_i = 1)$ varies across units (e.g., block randomization with varying treatment probabilities across blocks), but $N_1$ and $N_0$ are fixed.
+
+. . .
+
+- The expected value of the _DiM_ estimator is:
+
+$$
+\begin{align*}
+\E[\widehat{\tau}] &= \E \left[ \frac{1}{N_1}\sum_{i=1}^N T_i Y_i(1) \right] - \E \left[ \frac{1}{N_0}\sum_{i=1}^N (1 - T_i) Y_i(0) \right] \\
+&= \sum_{i=1}^N \E \left[\frac{T_i}{N_1}\right] Y_i(1) - \sum_{i=1}^N \E \left[\frac{(1 - T_i)}{N_0}\right] Y_i(0) \\
+&= \frac{\sum_{i=1}^N p_i\,Y_i(1)}{\sum_{j=1}^N p_j} - \frac{\sum_{i=1}^N (1-p_i)\,Y_i(0)}{\sum_{j=1}^N (1-p_j)} \\
+&\neq \tau_{ATE}.
+\end{align*}
+$$
+
+- [Intuition]{.note}: The _DiM_ over-weights observations with higher assignment probabilities and is generally not equal to the true _ATE_ (unless $p_i$ is constant for all units or $\tau_i$ is constant).
+
+## Inverse Probability Weighting (IPW)
+
+<br>
+
+- The [IPW estimator]{.highlight} corrects for unequal probabilities:
+
+$$
+\widehat{\tau}_{IPW} = \frac{1}{N} \sum_{i=1}^N \left( \frac{T_i Y_i}{p_i} - \frac{(1 - T_i) Y_i}{1 - p_i} \right)
+$$
+
+. . .
+
+- **Properties**: 
+  - The IPW estimator is unbiased for the _ATE_: $\E [\widehat{\tau}_{IPW}] = \tau_{ATE}$
+  - Can be used for estimation of _SATE_ or _PATE_.
+  - Can be obtained using regression with inverse probability weights (e.g. `estimatr::lm_robust()` with `weights` argument).
+
+- [Intuition]{.note}: Weight each unit by the inverse of its probability of receiving the observed treatment to compensate for over-weighting.
+
+- [Note]{.note}: The IPW estimator is unbiased and consistent if the treatment assignment mechanism is known and correctly specified.
+
+## Example: Bias of DiM vs IPW Estimator
+
+![](../_images/ipw_dim_bias.gif){fig-align="center" width="90%"}
+
+# Cluster Randomized Experiments
+
+## Cluster Randomization
+
+- So far, we have assumed treatments are assigned at the individual level.
+
+- Sometimes random assignment occurs at the [cluster level]{.highlight} for various reasons:
+  
+  - Treatment only makes sense at the group level, but outcome is measured for individuals (e.g., classroom curriculum).
+
+  - Treatment too costly to implement individually (e.g., village-level program).
+
+  - SUTVA only plausible if treatment is defined at the group level (e.g., information campaigns).
+
+. . .
+
+- Cluster randomization is a natural setting where [unequal treatment probabilities]{.highlight} arise -- can use IPW estimator.
+
+- It creates **two distinct challenges**:
+
+  1. [Estimation]{.highlight}: When clusters have unequal sizes, DiM can be **biased** for $\tau_{ATE}$.
+  2. [Inference]{.highlight}: Standard errors ignoring clustering are usually **too small**, even when DiM is unbiased.
+
+
+## Randomization at the Group Level
+
+![](../_images/potential_outcomes_cluster.png){fig-align="center" width="90%"}
+
+## Bias of DiM in Cluster-Randomized Experiments
+
+<br>
+
+- When clusters have **unequal sizes**, the _DiM_ estimator can be biased for $\tau_{ATE}$.
+
+- [Why?]{.highlight} Even though $G_1$ (number of treated clusters) is fixed by design, $N_1 = \sum_{j: T_j=1} N_j$ (number of treated individuals) is **random** — it depends on _which_ clusters are selected.
+
+  - _DiM_ becomes a ratio with a random denominator: $\E\!\left[\frac{\sum T_i Y_i}{N_1}\right] \neq \frac{\E[\sum T_i Y_i]}{\E[N_1]}$.
+
+- [Intuition]{.note}: Individuals in larger clusters are _over-represented_ whenever their cluster is treated, so DiM implicitly gives more weight to larger clusters. If cluster size correlates with potential outcomes, this produces bias.
+
+. . .
+
+- To address the issue, as before, we can:
+
+  - Use weighted estimators, such as the [IPW estimator]{.highlight}, or 
+  - Regression weighted by inverse of probabilities of assignment to account for unequal cluster sizes.
+
+## Variance of DiM in Cluster-Randomized Experiments
+
+- Even with **equal** cluster sizes (no bias), clustering _can_ inflate standard errors.
+
+- [Intuition:]{.note} Units within the same cluster tend to be similar, so each additional unit within a cluster provides _less new information_ than an independent draw.
+
+. . .
+
+- To formalize this, recall the [Law of Total Variance]{.highlight}: $\var(Y) = \E[\var(Y\mid X)] + \var(\E[Y\mid X])$
+
+- This implies the decomposition of heterogeneity in outcomes:
+
+$$
+\underbrace{\frac{1}{N}\sum_{j=1}^G \sum_{i=1}^{N_j} (Y_{ij} - \overline{Y})^2}_{\text{total variance, } \sigma^2} = \underbrace{\frac{1}{N}\sum_{j=1}^G \sum_{i=1}^{N_j} (Y_{ij} - \overline{Y}_{j})^2}_{\text{within-cluster variance, } \sigma^2_W} + \underbrace{\frac{1}{N}\sum_{j=1}^G N_{j}(\overline{Y}_{j} - \overline{Y})^2}_{\text{between-cluster variance, } \sigma^2_B}
+$$
+
+where $\overline{Y_{j}}$ is mean of $Y_{ij}$ in cluster $j$, $\overline{Y}$ is overall mean, and $N = \sum_{j=1}^G N_j$.
+
+. . .
+
+- Then we can define the [intracluster correlation (ICC)]{.highlight}: $\rho = \frac{\sigma^2_B}{\sigma^2} = 1 - \frac{\sigma^2_W}{\sigma^2}$
+
+- [Intuition]{.note}: When $\rho = 1$, all variation is between clusters (units within a cluster are identical). When $\rho = 0$, cluster membership is uninformative.
+
+## Inference in Cluster-Randomized Experiments
+
+- We can show cluster randomization **inflates** the sampling variance (compared to complete randomization) approximately by [Moulton factor]{.highlight} (design effect):
+
+$$
+\frac{\var(\hat\tau_{CL})}{\var(\hat\tau_{R})} = 1 + (\overline{N} - 1)\rho, \quad \text{where} \quad \bar{N} = \frac{1}{G} \sum_{j=1}^G N_j
+$$
+
+- [Intuition]{.note}: When $\rho = 1$, outcomes do not vary within clusters ($\sigma^2_{W} = 0$), each cluster is essentially one observation. As a result, the _effective sample_ size is number of clusters, not number of units, and variance is inflated. When $\rho = 0$ all clusters are _similar_ to the whole sample.
+
+. . .
+
+- **Valid inference** requires [cluster-robust standard errors]{.highlight} (_CR2_) or randomization inference to account for the inflated variance.
+
+- [Note]{.note}: When $G$ is small, $\rho$ will be poorly estimated and cluster SEs will be unreliable $\rightsquigarrow$ prefer increasing $G$ over sample size per cluster ($N_j$).
+
+## Simulation: Ignoring Clustering in SE Estimates
+
+
+
+:::{.columns}
+
+:::{.column width="50%"}
+- Ignoring clustering in standard error estimates can result in overly _"optimistic"_ confidence intervals and increased [Type I error]{.highlight} (_false-positives_) rates.
+
+- The simulation shows how [coverage]{.highlight}--probability of 95% CIs including the true _ATE_ across replications of the experiment--is affected by ratio of between- to within-cluster variance:
+
+  - We would expect the these CIs will include true _ATE_ in 95% of the cases.
+  - _HC2_ are CIs based on heteroskedastisity robust standard errors.
+  - _CR2_ are CIs based on cluster robust standard errors.
+
+:::
+
+::: {.column width="50%"}
+<br>
+
+![](../_images/cr2_coverage.gif){fig-align="center" width="90%"}
+:::
+
+:::
+
+## Example: Field Experiment in Benin
+
+<br><br><br><br>
+
+![@wantchekon2003clientelism](../_images/wantchekon_experiment_citations.png){fig-align="center" width="80%"}
+
+## Example: Field Experiment in Benin
+
+![](../_images/wantchekon_experiment_table.png){fig-align="center" width="90%"}
+
+## Example: Field Experiment in Benin
+
+![](../_images/wantchekon_experiment_table2.png){fig-align="center" width="90%"}
+
 # Statistical Power
 
 ## What is _Power_?
+
+<br><br>
 
 - Recall that for a statistical test:
 
@@ -2080,85 +2080,42 @@ $$
 
 . . .
 
-- What does power depend on?
+- Power depends on the **design** (sample size, treatment allocation, randomization scheme) and the **test** (test statistic, significance level) -- we now examine the key choices.
 
-  :::small-font
-  - True size of the effect ($\tau$),
-  - Sample size and proportion of the treated ($N$ and $p$),
-  - Variability of potential outcomes ($\sigma$),
-  - Test statistic,
-  - Number of treatments,
-  - Randomization scheme (simple, complete, clustered, blocked, etc.)
-  :::
+## Choice of Relative Treatment Group Size ($p$) {#optimal-p}
 
-## Choice of Relative Treatment Group Size ($p$)
+- **Problem**: For a given $N$, choose $p = N_1/N$ to minimize $\var(\hat\tau) = \frac{\sigma^2_1}{p N}+\frac{\sigma^2_0}{(1-p) N}$.
 
-<br>
-
-- Consider a randomized experiment with complete randomization.
-
-- **Problem**: For a given total sample size $N$, choose the optimal treatment allocation $p = N_1/N$ to minimize the variance of the estimator of the average treatment effect.
-
-. . .
-
-- Recall that our asymptotically valid variance expression is:
+- Minimizing over $p$ gives [[(derivation)](#proof-optimal-p)]{.note .small-font}:
 
 $$
-\var(\hat\tau) = \frac{\sigma^2_1}{p N}+\frac{\sigma^2_0}{(1-p) N}
+p^* = \frac{\sigma_1}{\sigma_1+\sigma_0}=\frac{1}{1+\sigma_0/\sigma_1}
 $$
 
-. . .
-
-- How should we proceed? [**Solve a minimization problem!**]{.fragment}
-
-
-## Choice of Relative Treatment Group Size ($p$)
-
-<br>
-
-- Find the value $p^*$ that makes the derivative with respect to $p$ equal to zero:
-
-$$
--\frac{\sigma^2_1}{p^{*2} N}+\frac{\sigma^2_0}{(1-p^*)^2 N}=0
-$$
-
-Therefore:
-
-$$
-\frac{1-p^*}{p^*} = \frac{\sigma_0}{\sigma_1} \implies p^* = \frac{\sigma_1}{\sigma_1+\sigma_0}=\frac{1}{1+\sigma_0/\sigma_1}
-$$
-
-- [Intuition]{.note}: A "rule of thumb" if you can assume $\sigma_1\approx \sigma_0$ is to have $p^{*}=0.5$
-
-- For _practical_ reasons it is sometimes better to choose unequal sample sizes (even if $\sigma_1\approx \sigma_0$).
-
-## Sampling Variance as Function of $p$
-
-- **Suppose**: $\sigma^2_1=\sigma^2_0=1$, $N=100$
+- [Intuition]{.note}: If $\sigma_1\approx \sigma_0$, then $p^{*}=0.5$. For _practical_ reasons it is sometimes better to choose unequal sample sizes (even if $\sigma_1\approx \sigma_0$).
 
 ```{r}
 #| label: dim_variance_plot
-#| echo: true
-#| output-location: column-fragment
+#| echo: false
 #| fig-align: center
-#| fig-width: 6
-#| fig-height: 6
+#| fig-width: 7
+#| fig-height: 4
 
 # function to calculate variance of DiM
-variance_dim <- 
+variance_dim <-
   function(p, N, sigma1 = 1, sigma0 = 1) {
     (sigma1^2 / (p * N)) + (sigma0^2 / ((1 - p) * N))
   }
 
 # create a sequence of assignment p's
 # calculate variance for each p
-variance_data <- 
+variance_data <-
   tibble(
     N = 100,
-    p = seq(0.01, 0.99, by = 0.01), 
-    variance = 
+    p = seq(0.01, 0.99, by = 0.01),
+    variance =
       map2_dbl(
-        N, p, 
+        N, p,
         \(x, y) variance_dim(p = y, N = x)))
 
 # plot using ggplot2
@@ -2167,54 +2124,14 @@ ggplot(variance_data, aes(x = p, y = variance)) +
   labs(
     x = bquote("Proportion of Treatment Group, " ~ N[1]/N),
     y = bquote("Variance of DiM, " ~ V(bar(Y)(1) - bar(Y)(0)))
-  ) + 
+  ) +
     theme(text = element_text(size = 16))
 
 ```
 
-## Choice of Overall Sample Size ($N$)
+## Choice of Overall Sample Size ($N$) {#power-formula}
 
-<br>
-
-- Suppose that $\sigma^2_0=\sigma^2_1$ and $Y_i (0) \sim (\mu_0, \sigma^2)$ and $Y_i (1) \sim (\mu_1, \sigma^2)$
-
-- Assume also that $p=0.5$, so $N_0=N_1=N/2$, and $\tau=\mu_1-\mu_0$.
-
-. . .
-
-- Then, for the $t$-statistic of equality of means, we have:
-
-$$
-\frac{\widehat{\tau}_{DiM}-\tau}{\sqrt{\frac{\sigma^2_1}{N_1}+\frac{\sigma^2_0}{N_0}}} = \frac{\widehat{\tau}_{DiM}-\tau}{\sqrt{\frac{2\sigma^2}{N}+\frac{2\sigma^2}{N}}} = \frac{\widehat{\tau}_{DiM}-\tau}{2\sigma/\sqrt{N}} \sim \mathcal{N} (0,1).
-$$
-
-. . .
-
-- Therefore:
-
-$$
-t = \frac{\widehat{\tau}_{DiM}}{\sqrt{\frac{\sigma^2_1}{N_1}+\frac{\sigma^2_0}{N_0}}} \sim \mathcal{N}\left(\frac{\tau\sqrt{N}}{2\sigma},1\right)
-$$
-
-## Choice of Overall Sample Size ($N$)
-
-<br><br>
-
-- The power, i.e. $\Pr\left(\text{Reject } \mu_1 - \mu_0 = 0 \given \mu_1 - \mu_0 = \tau \right)$ is then given by:
-
-$$
-\begin{align*}
-\Pr\left(|t| > 1.96\right) &= \Pr\left(t < -1.96\right) + \Pr\left(t > 1.96\right) \\
-&= \Pr\left(t-\frac{\tau \sqrt N}{2\sigma} < -1.96 - \frac{\tau \sqrt N}{2\sigma}\right) \\
-&\qquad + \Pr\left(t-\frac{\tau \sqrt N}{2\sigma}>1.96-\frac{\tau \sqrt N}{2\sigma}\right) \\
-&= \Phi\left(-1.96-\frac{\tau \sqrt N}{2\sigma}\right) + \left(1-\Phi\left(1.96-\frac{\tau \sqrt N}{2\sigma}\right)\right)
-\end{align*}
-$$
-
-
-## General Formula for the Power Function
-
-<br>
+- Under a two-sided test at level $\alpha = 0.05$, the power function is [[(derivation)](#proof-power-formula)]{.note .small-font}:
 
 $$
 \begin{align*}
@@ -2305,9 +2222,7 @@ where,
 
 ## Minimum Detectable Effect
 
-- Let $\sigma_{\hat{\beta}} = \max\bigl(\sigma_{\hat{\beta}}^{(0)}, \sigma_{\hat{\beta}}^{(a)}\bigr)$.
-
-- Then define a conservative _MDE_ as
+- Let $\sigma_{\hat{\beta}} = \max\bigl(\sigma_{\hat{\beta}}^{(0)}, \sigma_{\hat{\beta}}^{(a)}\bigr)$, then define a conservative _MDE_ as
 
 :::{.callout-important icon="false" title="RESULT: Minimum Detectable Effect"}
 $$
@@ -2321,45 +2236,36 @@ $$
 
 - Therefore, the _MDE_ is **2.8 times the conservative standard error of the effect estimator** for *any* study for which we use
   
-  1. a two-sided test,  
-  2. a standard normal distribution as our reference distribution,  
+  1. a two-sided test,
+  2. a standard normal distribution as our reference distribution,
   3. $\alpha = .05$ and $\kappa = .80$
 
-- In all applications we have studied, the normal or $t$ distribution is a good approximation so long as the sample size is not too small.
+## MDE and Sample Size Determination
 
-## Minimum Detectable Effect
+- **Practical question**: Given a target MDE, how large must $N$ be?
 
-- Under complete random assignment we have,
-
-$$
-\var [\hat{\beta}] = \frac{1}{N} \left( \frac{\sigma^2_{1}}{p} + \frac{\sigma^2_{0}}{1 - p} \right)
-$$
+- Under CRA, $\;\var[\hat\beta] = \frac{1}{N}\!\left(\frac{\sigma_1^2}{p} + \frac{\sigma_0^2}{1-p}\right)$, so $MDE = 2.8 \times \underbrace{\sqrt{\frac{1}{N}\!\left(\frac{\sigma_1^2}{p} + \frac{\sigma_0^2}{1-p}\right)}}_{SE(\hat\beta)}$.
 
 . . .
 
-- Plug into the expression for _MDE_ to get [sample size determination formula]{.highlight}.
+- Solving for $N$:
 
 $$
-\begin{align*}
-MDE &= \bigl(t_{\alpha/2} + t_{1-\kappa} \bigr) \sqrt{\frac{1}{N} \left( \frac{\sigma^2_{1}}{p} + \frac{\sigma^2_{0}}{1 - p} \right)} \\
-\implies N &= \frac{\bigl(t_{\alpha/2} + t_{1-\kappa} \bigr)^2 \left( \frac{\sigma^2_{1}}{p} + \frac{\sigma^2_{0}}{1 - p} \right)}{MDE^2}.
-\end{align*}  
+N = \frac{2.8^2 \left( \frac{\sigma^2_{1}}{p} + \frac{\sigma^2_{0}}{1 - p} \right)}{MDE^2}
 $$
+
+- [Key insight]{.note}: $N$ scales as $1/MDE^2$ -- halving the detectable effect requires **4 times** the sample size.
 
 . . .
 
-- [Note]{.note} Use standardized effect sizes to avoid ["power fallacy"]{.highlight}! 
-
-  - E.g., Effect size relative to the control group standard deviation, [*Glass's* $\Delta$]{.highlight}, $\Delta = MDE / \sigma_{0}$ (_normalize standard deviations too!_)
+- [Be vary of "power fallacy"]{.alert}: Raw MDE depends on $\sigma$ -- a noisy outcome variable makes MDE look large even with a large $N$. Always report standardized effect sizes, e.g. [*Glass's* $\Delta$]{.highlight} $= MDE / \sigma_0$.
 
 ## Conclusion on Power
 
-<br>
-
 - [Statistical power]{.highlight}  is the probability of rejecting the null hypothesis when it is indeed false.
-  
-  - It depends on _design_ and _test_!
-  
+
+- **Power depends on:** effect size ($\tau$), sample size ($N$), probability of treatment ($p$), variance of potential outcomes ($\sigma$), test statistic, randomization scheme (simple, complete, clustered, blocked, etc.)
+
 . . .
 
 - **Optimal design considerations**:
@@ -2377,6 +2283,51 @@ $$
 
 
 # Appendix {visibility="uncounted"}
+
+
+## [[🔙](#optimal-p)]{.small-font} Derivation of Optimal $p^*$ {#proof-optimal-p visibility="uncounted"}
+
+<br>
+
+- **Problem**: Minimize $\var(\hat\tau) = \frac{\sigma^2_1}{p N}+\frac{\sigma^2_0}{(1-p) N}$ over $p$.
+
+- Find $p^*$ that makes the derivative with respect to $p$ equal to zero:
+
+$$
+-\frac{\sigma^2_1}{p^{*2} N}+\frac{\sigma^2_0}{(1-p^*)^2 N}=0
+$$
+
+Therefore:
+
+$$
+\frac{1-p^*}{p^*} = \frac{\sigma_0}{\sigma_1} \implies p^* = \frac{\sigma_1}{\sigma_1+\sigma_0}=\frac{1}{1+\sigma_0/\sigma_1}
+$$
+
+
+## [[🔙](#power-formula)]{.small-font} Derivation of the Power Function {#proof-power-formula visibility="uncounted"}
+
+:::{.small-font}
+
+- Suppose $\sigma^2_0=\sigma^2_1 = \sigma^2$, $p=0.5$ (so $N_0=N_1=N/2$), and $\tau=\mu_1-\mu_0$.
+
+- The $t$-statistic under $H_a$:
+
+$$
+t = \frac{\widehat{\tau}_{DiM}}{\sqrt{\frac{\sigma^2_1}{N_1}+\frac{\sigma^2_0}{N_0}}} \sim \mathcal{N}\left(\frac{\tau\sqrt{N}}{2\sigma},\;1\right)
+$$
+
+- Power at $\alpha = 0.05$:
+
+$$
+\begin{align*}
+\Pr\left(|t| > 1.96\right) &= \Pr\left(t < -1.96\right) + \Pr\left(t > 1.96\right) \\
+&= \Phi\left(-1.96-\frac{\tau \sqrt N}{2\sigma}\right) + \left(1-\Phi\left(1.96-\frac{\tau \sqrt N}{2\sigma}\right)\right)
+\end{align*}
+$$
+
+- Generalizing to arbitrary $p$, $\sigma_1^2 \neq \sigma_0^2$: replace $2\sigma/\sqrt{N}$ with $\sqrt{\sigma_1^2/(pN) + \sigma_0^2/((1-p)N)}$.
+
+:::
 
 
 ## [[🔙](#lin-solution)]{.small-font} Why Demean? Orthogonality {#proof-why-demean visibility="uncounted"}
