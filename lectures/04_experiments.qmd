@@ -1841,7 +1841,7 @@ out[[1]]; out[[2]]; out[[3]]
 
 ## Regression for Block Randomized Experiments
 
-- Like in the classical experiment, one can use **linear regression** to obtain unbiased estimates in block-randomized experiments.
+- One can use **linear regression** to obtain unbiased estimates in block-randomized experiments.
 
 . . .
 
@@ -1851,7 +1851,7 @@ $$
 Y_i = \alpha + \tau T_i + \sum_{j=2}^{M} \beta_j B_{ij} + \epsilon_i, \quad \text{where} \quad \E[\widehat{\tau}_{OLS}] = \tau
 $$
 
-- Valid uncertainty estimates can then be obtained via [HC2 standard errors]{.highlight} (or **clustered SE** if randomization was clustered within blocks).
+- Uncertainty estimates can be obtained via [HC2 standard errors]{.highlight} or randomization inference (replicating assignment mechanism).
 
 . . .
 
@@ -1937,6 +1937,10 @@ $$
 
 # Cluster Randomized Experiments
 
+## CR = Randomization at the Group Level
+
+![](../_images/potential_outcomes_cluster.png){fig-align="center" width="90%"}
+
 ## Cluster Randomization
 
 - So far, we have assumed treatments are assigned at the individual level.
@@ -1959,9 +1963,6 @@ $$
   2. [Inference]{.highlight}: Standard errors ignoring clustering are usually **too small**, even when DiM is unbiased.
 
 
-## Randomization at the Group Level
-
-![](../_images/potential_outcomes_cluster.png){fig-align="center" width="90%"}
 
 ## Bias of DiM in Cluster-Randomized Experiments
 
