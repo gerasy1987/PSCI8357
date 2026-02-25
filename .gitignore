@@ -20,6 +20,7 @@ _data/Titiunik*
 _data/Clingingsmith*
 _data/Arceneaux*
 _data/interaction*
+_shiny/*
 !_data/.gitkeep
 quality_reports/*
 _archive/*

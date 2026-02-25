@@ -2042,7 +2042,7 @@ $$
 ::: {.column width="50%"}
 <br>
 
-![](../_images/cr2_coverage.gif){fig-align="center" width="90%"}
+![<https://gsyunyaev-psci8357-cr-inference.share.connect.posit.cloud/>](../_images/cr2_coverage.gif){fig-align="center" width="90%"}
 :::
 
 :::
