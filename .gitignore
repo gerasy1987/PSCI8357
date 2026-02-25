@@ -16,7 +16,10 @@ recitation_material/*
 !recitation_material/.gitkeep
 problem_sets/*
 !problem_sets/ps_template*
-_data/gerber*
+_data/Titiunik*
+_data/Clingingsmith*
+_data/Arceneaux*
+_data/interaction*
 !_data/.gitkeep
 quality_reports/*
 _archive/*
