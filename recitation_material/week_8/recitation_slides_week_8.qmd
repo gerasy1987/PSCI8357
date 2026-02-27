@@ -1,0 +1,167 @@
+---
+title: "The Case of the Missing Data"
+author: "Alexander Dean"
+subtitle: "Recitation Period 5"
+institute: "Vanderbilt University"
+email: "alexander.r.dean@vanderbilt.edu"
+date: today
+format: 
+  revealjs:
+    theme: dark
+    footer: "Alexander Dean (Vanderbilt University)"
+    slide-number: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    self-contained-math: true
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+fontsize: 32px
+editor: source
+---
+
+# Introductory Spiel
+
+## What We Will Cover Today
+
+1. Types of missing data
+2. Methods for handling missing data
+3. Demonstration in R
+
+# Missing Data: Concepts and Types
+
+## What is missing data?
+
+. . . 
+
+- Definition: When no data is stored for a variable for a unit of observation
+
+. . . 
+
+- How would you (personally) handle an NA observation in R?
+
+## Why care about missing data?
+
+- Consider the following: 
+  - I want to design a survey that estimates the association between wealth and voting behavior. 
+  - I ask respondents to give their income within a bracketed range
+  - Poor respondents are less likely to respond to the question
+  - Could my estimates be biased?
+
+. . . 
+
+1. Yes (unfortunately)
+2. The social sciences are increasingly paying attention to missing data and how to best respond to it (for analysis).
+
+## Primary Types of Missing Data
+
+1. Missing Completely at Random (MCAR): no relationship between missingness and observed and unobserved covariates (and confounders)
+2. Missing at Random (MAR): missingness depends only on observed variables, not on missing values themselves
+    - People with lower income avoid reporting (but we have SES data)
+3. Missing not at Random (MNAR): Missingness depends on the unobserved values
+    - Smokers are less likely to report smoking status
+    - Think of signaling with unverifiable info and a semi-pooling equilibrium
+
+# Dealing with Missing Data
+
+## Handle it ex ante
+
+- Consider the following: 
+    - I want to design a survey that estimates the association between wealth and voting behavior. 
+    - How should I measure wealth?
+
+. . . 
+
+1. Sometimes we can anticipate missing data issues
+2. In such cases, we want to reduce having to deal with it ex-post, if possible
+3. Instead, we can create a wealth index (AmericasBarometer) that reduces concerns of data missingness
+
+## Listwise Deletion
+
+1. Dropping any rows with missing observations with analysis (na.omit = T)
+2. The most common approach
+
+. . . 
+
+3. Pros and cons:
+    - With MCAR, produces unbiased estimates
+    - With MAR and MNAR, this biases estimates
+    - You may be discarding A LOT of your data, over $50\%$ (e.g., income with AmericasBarometer)
+    - Decreases your power (via lowered $n$)
+
+## Pairwise Deletion
+
+1. Idea is to use all of the data possible, with calculation of statistic using all observations that have non-NA values for the variable(s)
+2. Often used to calculate specific moments (e.g., mean, variance, skewness) or correlation matrices
+
+. . . 
+
+3. Pros and cons:
+    - With MCAR, it produces unbiased estimates
+    - With MAR and MNAR, it biases estimates
+    - Can produce wonky estimates (cov. matrix may not be positive definite; too small std. errors; etc.)
+    - Problems arise more often with highly correlated variables
+
+## Single Imputation Methods (pt. 1)
+
+1. Mean substitution:
+    - Imputes mean of sample for missing data
+    - Pros: quick fix, unbiased for MCAR
+    - Cons: Understimation of variance, biased estimates for other missing data types
+
+## Single Imputation Methods (pt. 2)
+
+1. Regression imputation:
+    - Builds a model from observed data and missing data values are imputed using regression estimates ($\hat{y}_{i} - y^{impute}_{i} = 0$)
+    - Pros: Unbiased for MCAR and MAR (if vars that influence missingness are included)
+    - Cons: Unlikely fitted estimates represent true distribution, biased estimates for MNAR, variance is underestimated, inflated correlation estimates, increased type I error
+
+## Multiple Imputation (pt. 1)
+
+1. Intuition:
+    - Replace each missing value with multiple plausible values drawn from a predictive distribution
+    - Create $m$ completed datasets compared to one
+2. Procedure:
+    - Impute missing values $m$ times ($m \geq 5$) with a statistical model
+    - Estimate model separately on each $\text{dataset}_m$
+    - Combine estimates using Rubin's Rules
+
+## Multiple Imputation (pt. 2)
+
+![Multiple Imputation Steps Visualization](imputation.png)
+
+## Multiple Imputation (pt. 3)
+
+1. Pros:
+    - Unbiased estimates for MCAR and MAR
+    - Preserves variance and relationships between variables
+    - Std. errors are not too conservative
+2. Cons:
+    - Must make modeling assumptions (that could be wrong)
+    - Sensitive to misspecified imputation model
+    - More computationally taxing (less of an issue now)
+
+## Rubin's Rules
+
+Named for *that* Rubin, who came up with the method in the 1970s:
+
+1. Average the estimates:
+    - $\bar{\theta} = \frac{1}{m}\sum_{j=1}^{m}\hat{\theta}_j$
+2. Combine uncertainty:
+    - Within-imputation variance (average sampling uncertainty)
+    - Between-imputation variance (difference across imputations)
+    - $T = \underbrace{\bar{U}}_{\text{within}} + \left(1+\frac{1}{m}\right)\underbrace{B}_{\text{between}}$
+3. Under high between-imputation uncertainty, larger variance and std. errors
+
+# Resources and Demonstration with mice
+
+## Resources
+
+1. [Book on Data Imputation](https://stefvanbuuren.name/fimd/)
+2. [King et al. 2001](https://gking.harvard.edu/sites/g/files/omnuum7116/files/gking/files/evil.pdf)
+3. [Naijia Liu missing data slides](https://naijialiu.github.io/Gov_51/Slides/Lec14_missing.pdf)

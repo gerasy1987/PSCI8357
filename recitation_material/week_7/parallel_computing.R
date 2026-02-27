@@ -12,11 +12,12 @@ if (!require(parallel)) install.packages("parallel")
 # Checking number of cores available. You always want to keep at least one core
 # free for other processes on your computer to use. Using all cores can also 
 # increase likelihood of crashing your computer
-cores <- detectCores() - 1
+cores <- parallel::detectCores() - 1
 
 # Seed
 seed_set <- set.seed(02192026)
 set.seed(02192026)
+
 ##### Serial ###################################################################
 ### Existing power simulation
 # Recall the simulation we performed last week in order to estimate power for 
@@ -132,7 +133,7 @@ plot_vary(vary_beta,  "Effect size (beta)")
 
 ##### Forking #################################################################
 ### Let's run the function with parallel computing now
-# Recall that child workers inherit settings from parent environemnt!
+# Recall that child workers inherit settings from parent environment!
 vary_params_fork <- function(
     param, values, base, cores = cores, seed = seed) {
   
@@ -145,6 +146,7 @@ vary_params_fork <- function(
   })
 
   set.seed(seed)
+  
   # The actual process of running in parallel
   sims <- parallel::mclapply(
     X = tasks,
