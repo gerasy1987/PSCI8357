@@ -250,9 +250,51 @@ $$
 
 . . .
 
-![](../_images/curse_dimensionality.png){width=60% fig-align="center"}
+- We have $d$ uniformly distributed covariates and $500$ observations. Let's do a number of simulations increasing $d$.
 
-- [Intuition]{.note}: As number of dimensions ($d$) in the covariate space increases, data sparsity exponentially increases for a given sample size.
+:::fragment
+:::{.columns}
+::: {.column width="55%"}
+
+```{r}
+#| label: curse_dimensionality
+#| fig-align: center
+#| fig-width: 7
+#| fig-height: 5
+
+set.seed(20250301)
+n <- 500
+dims <- c(1, 2, 3, 5, 10, 20, 50)
+
+nn_dists <- lapply(dims, function(d) {
+  X <- matrix(runif(n * d), nrow = n)
+  dists <- as.matrix(dist(X))
+  diag(dists) <- Inf
+  tibble(d = d, nn_dist = apply(dists, 1, min))
+}) |> bind_rows() |> mutate(d = factor(d))
+
+ggplot(nn_dists, aes(x = d, y = nn_dist)) +
+  geom_boxplot(fill = "#cc241d", alpha = 0.3, color = "#cc241d",
+               outlier.size = 0.5, outlier.alpha = 0.3) +
+  stat_summary(fun = mean, geom = "point", color = "#cc241d", size = 2.5) +
+  labs(
+    x = "Number of Covariates (d)",
+    y = "Nearest-Neighbor Distance"
+  )
+```
+
+:::
+::: {.column width="45%"}
+
+<br>
+
+- [Intuition]{.note}: As $d$ grows, data becomes sparse -- even the ["closest"]{.highlight} match is far away, and the spread of distances increases.
+
+- Exact matching becomes impossible.
+
+:::
+:::
+:::
 
 ## Distance Metrics for Matching
 
@@ -569,7 +611,7 @@ p1 +
 
 <br><br>
 
-- Mahalanobis and other distance metrics measure [geometric similarity]{.highlight} in $\mathbf{X}$-space -- but they break down in high dimensions (curse of dimensionality)
+- Mahalanobis and other distance metrics measure [geometric similarity]{.highlight} between pairs of units -- but they break down in high dimensions (curse of dimensionality)
 
 - A fundamentally different approach: instead of asking "how close are units in $\mathbf{X}$?", ask "how similar is their [probability of being treated]{.highlight}?"
 
