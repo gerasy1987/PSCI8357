@@ -2083,7 +2083,17 @@ $$
 
 - Power depends on the **design** (sample size, treatment allocation, randomization scheme) and the **test** (test statistic, significance level) -- we now examine the key choices.
 
-## Choice of Relative Treatment Group Size ($p$) {#optimal-p}
+## Statistical Power and Variance {#optimal-p}
+
+<br>
+
+- Statistical power is directly linked to the variance of the estimator: **smaller variance $\Rightarrow$ higher power to reject the null.**
+
+. . .
+
+:::{.columns}
+
+::: {.column width="50%"}
 
 - **Problem**: For a given $N$, choose $p = N_1/N$ to minimize $\var(\hat\tau) = \frac{\sigma^2_1}{p N}+\frac{\sigma^2_0}{(1-p) N}$.
 
@@ -2095,11 +2105,15 @@ $$
 
 - [Intuition]{.note}: If $\sigma_1\approx \sigma_0$, then $p^{*}=0.5$. For _practical_ reasons it is sometimes better to choose unequal sample sizes (even if $\sigma_1\approx \sigma_0$).
 
+:::
+
+::: {.column width="50%"}
+
 ```{r}
 #| label: dim_variance_plot
 #| echo: false
 #| fig-align: center
-#| fig-width: 7
+#| fig-width: 5
 #| fig-height: 4
 
 # function to calculate variance of DiM
@@ -2130,6 +2144,10 @@ ggplot(variance_data, aes(x = p, y = variance)) +
 
 ```
 
+:::
+
+:::
+
 ## Choice of Overall Sample Size ($N$) {#power-formula}
 
 - Under a two-sided test at level $\alpha = 0.05$, the power function is [[(derivation)](#proof-power-formula)]{.note .small-font}:
@@ -2159,8 +2177,6 @@ $$
 
 ::: {.column width="50%"}
 
-<br>
-
 - Power calculations for sample size assuming
 
   - $\sigma^2 = \sigma_1^2 = \sigma_0^2 = 1$,
@@ -2168,6 +2184,10 @@ $$
 
 :::fragment
 - [Intuition]{.note}: Larger sample size allows to detect smaller effect sizes. Increasing sample size has a diminishing return for precision.
+:::
+
+:::fragment
+- [Flipside]{.highlight}: Given a fixed design (including $N$, $p$, $\sigma^2$), what is the smallest effect size we can reliably detect?
 :::
 :::
 
