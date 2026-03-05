@@ -1,0 +1,55 @@
+---
+title: "Matching in R Practicum"
+author: "Alexander Dean"
+subtitle: "Recitation Period 6"
+institute: "Vanderbilt University"
+email: "alexander.r.dean@vanderbilt.edu"
+date: today
+format: 
+  revealjs:
+    theme: dark
+    footer: "Alexander Dean (Vanderbilt University)"
+    slide-number: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    self-contained-math: true
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+fontsize: 32px
+editor: source
+---
+
+## What We Will Cover Today
+
+1. Implementing matching methods in $\texttt{R}$
+
+## A Research Question:
+
+RQ: How does being asked to pay a bribe to a government employee affect your trust of the state?
+
+. . . 
+
+Hypotheses:
+    - $H_0$: Being asked to pay a bribe to a government employee does not affect your trust in the state
+    - $H_1$: Being asked to pay a bribe to a government employee does affect your trust in the state
+
+## The Data:
+
+1. Americas Barometer 2023 survey wave from CGD
+2. IV: Self-report question on being asked to pay a bribe
+3. DV: Composite trust index with various state agencies
+4. Covariates: age, gender, education, income, follows the news frequency, news from social media frequency, and importance of religion
+
+## Additional Resources
+
+1. [Regularly updated list](https://christinecai.github.io/PublicGoods/applied_micro_methods.pdf) of new methodological advancements in applied statistics. Very helpful when starting a paper with an unfamiliar method
+2. [cobalt reference manual](https://cran.r-project.org/web/packages/cobalt/cobalt.pdf)
+3. [Matching reference manual](https://cran.r-project.org/web/packages/Matching/Matching.pdf)
+4. [MatchIt reference manual](https://cran.r-project.org/web/packages/MatchIt/MatchIt.pdf)
+5. [Getting started with MatchIt](https://cran.r-project.org/web/packages/MatchIt/vignettes/MatchIt.html#matching)
