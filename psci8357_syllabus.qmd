@@ -90,7 +90,7 @@ You will receive homework about every two weeks via Brightspace (not GitHub). Yo
 
 Homework will be graded for points as indicated on each assignment and count toward 35% of your grade.
 
-### Replications (2 $\times$ 20 %)
+### Replications (20 % + 25 %)
 
 The primary objective of this course is to provide both a theoretical understanding and hands-on experience implementing the methods we cover. To that end, you must complete **two individual replications** of published studies: one based on an experimental and one based on an observational study. This is an **individual assignment**: you may discuss ideas with classmates, but all code and writing must be your own. **No two students may replicate the same paper.**
 
@@ -253,7 +253,7 @@ If you have questions or concerns about what is allowed, or how to document AI u
     - target quantities (SATE, PATE), inference for the SATE and PATE in an idealized experiment, randomization inference, imbalance, **problem set 2 is posted on 2/11**
     -   - @gerber2012field [Ch. 3]
 
-*   - **2/18 2/23**
+*   - **2/18 2/23 2/25**
     - Complex Experimental Designs and Power Analysis
     - cluster and block randomization, factorial designs, MDE and power analysis
     -   - @gerber2012field [Ch. 4]
@@ -261,40 +261,38 @@ If you have questions or concerns about what is allowed, or how to document AI u
 *   -
     - []{colspan=3} **OBSERVATIONAL DESIGNS FOR CAUSAL INFERENCE**
 
-*   - **2/25 3/2 3/4**
+*   - **3/2 3/4**
     - Matching
     - distance metrics, exact matching, nearest neighbor matching, propensity score matching, balancing property, sensitivity analysis, weighting, doubly robust estimators, **problem set 3 is posted on 2/25**
     -   - @angrist2009mostly [Ch. 3]
         - @morgan2015counterfactuals [Ch. 5]
-        - @sekhon2009opiates
-        - @caliendo2008some
 
 *   - **3/9 3/11**
     - No Class
     - Spring Break
     -
 
-*   - **3/16 3/18**
+*   - **3/16**
+    - Matching (cont.)
+    - Weighting, doubly robust estimators, sensitivity analysis
+    -   - @sekhon2009opiates
+        - @caliendo2008some
+    
+*   - **3/18 3/23**
     - Instrumental Variables
     - Local Average Treatment Effects, IV estimator, one-/two-sided non-compliance, 2SLS estimator and its bias, **experimental replication is due on 3/16**, **problem set 4 is posted on 3/18**
     -   - @angrist2009mostly [Ch. 4]
         - @morgan2015counterfactuals [Ch. 9.1-9.3]
         - @angrist1996identification
         - @sovey2011instrumental
-
-*   - **3/18**
+    
+*   - **3/25 3/30**
     - Difference-in-Differences
-    - two-period DID, pre-trends, event study
+    - two-period DID, pre-trends, event study, conditional DID, continuous treatment DID, event-by-event estimation, **problem set 5 is posted on 3/30**
     -   - @angrist2009mostly [Ch. 5.2]
         - @bertrand2004much
 
-*   - **3/23 3/25**
-    - Difference-in-Differences (cont.)
-    - conditional DID, continuous treatment DID, event-by-event estimation, **problem set 5 is posted on 3/23**
-    -   - @angrist2009mostly [Ch. 5.2]
-        - @bertrand2004much
-
-*   - **3/30 4/1**
+*   - **4/1**
     - Panel Data
     - staggered adoption design, fixed effects, TWFE estimator and its bias
     -   - @angrist2009mostly [Ch. 5.1, 5.4]
@@ -302,12 +300,12 @@ If you have questions or concerns about what is allowed, or how to document AI u
 
 *   - **4/6**
     - Synthetic Control
-    - identification, estimation and statistical inference, interactive FEs, **problem set 6 is posted on 4/6**
+    - identification, estimation and statistical inference, interactive FEs
     -   - @abadie2010synthetic
 
 *   - **4/8 4/13**
     - Regression Discontinuity Designs
-    - parametric, non-parametric local regression, optimized RD and honest inference, threats, fuzzy RDD
+    - parametric, non-parametric local regression, optimized RD and honest inference, threats, fuzzy RDD, **problem set 6 is posted on 4/13**
     -   - @angrist2009mostly [Ch. 6]
         - @morgan2015counterfactuals [Ch. 11.2]
         - @imbens2008regression
@@ -315,7 +313,7 @@ If you have questions or concerns about what is allowed, or how to document AI u
 
 *   - **4/15 4/20**
     - Mediation Effects
-    - natural direct and indirect effects, controlled direct and indirect effects, **problem set 7 is posted on 4/15**, **observational replication is due on 4/15**
+    - natural direct and indirect effects, controlled direct and indirect effects, **observational replication is due on 4/20**
     -   - @gerber2012field [Ch. 9-10]
 
 *   - **4/22**
