@@ -112,7 +112,7 @@ following guidelines:
 Homework will be graded for points as indicated on each assignment and
 count toward 35% of your grade.
 
-### Replications (2 × 20 %)
+### Replications (20 % + 25 %)
 
 The primary objective of this course is to provide both a theoretical
 understanding and hands-on experience implementing the methods we cover.
@@ -475,7 +475,7 @@ inference, imbalance, <strong>problem set 2 is posted on
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>2/18 2/23</strong></th>
+<th style="text-align: center;"><strong>2/18 2/23 2/25</strong></th>
 <td style="text-align: left;">Complex Experimental Designs and Power
 Analysis</td>
 <td style="text-align: left;">cluster and block randomization, factorial
@@ -492,7 +492,7 @@ designs, MDE and power analysis</td>
 FOR CAUSAL INFERENCE</strong></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>2/25 3/2 3/4</strong></th>
+<th style="text-align: center;"><strong>3/2 3/4</strong></th>
 <td style="text-align: left;">Matching</td>
 <td style="text-align: left;">distance metrics, exact matching, nearest
 neighbor matching, propensity score matching, balancing property,
@@ -505,11 +505,6 @@ Ch. 3)</span></li>
 <li><span class="citation" data-cites="morgan2015counterfactuals">Morgan
 and Winship (<a href="#ref-morgan2015counterfactuals"
 role="doc-biblioref">2015</a>, Ch. 5)</span></li>
-<li><span class="citation" data-cites="sekhon2009opiates">Sekhon (<a
-href="#ref-sekhon2009opiates" role="doc-biblioref">2009</a>)</span></li>
-<li><span class="citation" data-cites="caliendo2008some">Caliendo and
-Kopeinig (<a href="#ref-caliendo2008some"
-role="doc-biblioref">2008</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
@@ -519,7 +514,20 @@ role="doc-biblioref">2008</a>)</span></li>
 <td style="text-align: left;"></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>3/16 3/18</strong></th>
+<th style="text-align: center;"><strong>3/16</strong></th>
+<td style="text-align: left;">Matching (cont.)</td>
+<td style="text-align: left;">Weighting, doubly robust estimators,
+sensitivity analysis</td>
+<td style="text-align: left;"><ul>
+<li><span class="citation" data-cites="sekhon2009opiates">Sekhon (<a
+href="#ref-sekhon2009opiates" role="doc-biblioref">2009</a>)</span></li>
+<li><span class="citation" data-cites="caliendo2008some">Caliendo and
+Kopeinig (<a href="#ref-caliendo2008some"
+role="doc-biblioref">2008</a>)</span></li>
+</ul></td>
+</tr>
+<tr>
+<th style="text-align: center;"><strong>3/18 3/23</strong></th>
 <td style="text-align: left;">Instrumental Variables</td>
 <td style="text-align: left;">Local Average Treatment Effects, IV
 estimator, one-/two-sided non-compliance, 2SLS estimator and its bias,
@@ -542,10 +550,11 @@ role="doc-biblioref">2011</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>3/18</strong></th>
+<th style="text-align: center;"><strong>3/25 3/30</strong></th>
 <td style="text-align: left;">Difference-in-Differences</td>
-<td style="text-align: left;">two-period DID, pre-trends, event
-study</td>
+<td style="text-align: left;">two-period DID, pre-trends, event study,
+conditional DID, continuous treatment DID, event-by-event estimation,
+<strong>problem set 5 is posted on 3/30</strong></td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="angrist2009mostly">Angrist and
 Pischke (<a href="#ref-angrist2009mostly" role="doc-biblioref">2009</a>,
@@ -556,22 +565,7 @@ role="doc-biblioref">2004</a>)</span></li>
 </ul></td>
 </tr>
 <tr>
-<th style="text-align: center;"><strong>3/23 3/25</strong></th>
-<td style="text-align: left;">Difference-in-Differences (cont.)</td>
-<td style="text-align: left;">conditional DID, continuous treatment DID,
-event-by-event estimation, <strong>problem set 5 is posted on
-3/23</strong></td>
-<td style="text-align: left;"><ul>
-<li><span class="citation" data-cites="angrist2009mostly">Angrist and
-Pischke (<a href="#ref-angrist2009mostly" role="doc-biblioref">2009</a>,
-Ch. 5.2)</span></li>
-<li><span class="citation" data-cites="bertrand2004much">Bertrand,
-Duflo, and Mullainathan (<a href="#ref-bertrand2004much"
-role="doc-biblioref">2004</a>)</span></li>
-</ul></td>
-</tr>
-<tr>
-<th style="text-align: center;"><strong>3/30 4/1</strong></th>
+<th style="text-align: center;"><strong>4/1</strong></th>
 <td style="text-align: left;">Panel Data</td>
 <td style="text-align: left;">staggered adoption design, fixed effects,
 TWFE estimator and its bias</td>
@@ -588,8 +582,7 @@ role="doc-biblioref">2015</a>, Ch. 11.3)</span></li>
 <th style="text-align: center;"><strong>4/6</strong></th>
 <td style="text-align: left;">Synthetic Control</td>
 <td style="text-align: left;">identification, estimation and statistical
-inference, interactive FEs, <strong>problem set 6 is posted on
-4/6</strong></td>
+inference, interactive FEs</td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="abadie2010synthetic">Abadie,
 Diamond, and Hainmueller (<a href="#ref-abadie2010synthetic"
@@ -600,7 +593,8 @@ role="doc-biblioref">2010</a>)</span></li>
 <th style="text-align: center;"><strong>4/8 4/13</strong></th>
 <td style="text-align: left;">Regression Discontinuity Designs</td>
 <td style="text-align: left;">parametric, non-parametric local
-regression, optimized RD and honest inference, threats, fuzzy RDD</td>
+regression, optimized RD and honest inference, threats, fuzzy RDD,
+<strong>problem set 6 is posted on 4/13</strong></td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="angrist2009mostly">Angrist and
 Pischke (<a href="#ref-angrist2009mostly" role="doc-biblioref">2009</a>,
@@ -620,9 +614,8 @@ role="doc-biblioref">2016</a>)</span></li>
 <th style="text-align: center;"><strong>4/15 4/20</strong></th>
 <td style="text-align: left;">Mediation Effects</td>
 <td style="text-align: left;">natural direct and indirect effects,
-controlled direct and indirect effects, <strong>problem set 7 is posted
-on 4/15</strong>, <strong>observational replication is due on
-4/15</strong></td>
+controlled direct and indirect effects, <strong>observational
+replication is due on 4/20</strong></td>
 <td style="text-align: left;"><ul>
 <li><span class="citation" data-cites="gerber2012field">Gerber and Green
 (<a href="#ref-gerber2012field" role="doc-biblioref">2012</a>, Ch.
