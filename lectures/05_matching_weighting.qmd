@@ -67,7 +67,8 @@ pacman::p_load(
   MASS,
   estimatr,
   rsample,
-  MatchIt
+  MatchIt,
+  ggridges
 )
 
 options(width = 120)
@@ -683,7 +684,7 @@ $$
 - [Two-step procedure to estimate causal effects]{.highlight}:
 
   1. Estimate $\pi(\mathbf{X}_i)$ with a model for a binary response (e.g. logit, probit).
-  2. Do matching (or weighting --- later in this lecture) on $\hat{\pi}(\mathbf{X}_i)$.
+  2. Do matching (or weighting --- later in this lecture) on $\widehat{\pi}(\mathbf{X}_i)$.
 
   - [Note]{.note}: You only need to model $\Pr(T=1 \given \mathbf{X})$ (binary classification), not $\E[Y \given T, \mathbf{X}]$ (outcome model).
 
@@ -714,7 +715,7 @@ $$
 
 ## Example: Matching with Propensity Score
 
-- Matching on manually estimated $\hat{\pi}(\mathbf{X}_i)$ as a single covariate is equivalent to letting `MatchIt` estimate the PS internally
+- Matching on manually estimated $\widehat{\pi}(\mathbf{X}_i)$ as a single covariate is equivalent to letting `MatchIt` estimate the PS internally
 
 ```{r}
 #| label: matching_atc_ps
@@ -977,8 +978,6 @@ cobalt::love.plot(
     :::
 
 
-# Estimation and Inference of Causal Effects After Matching
-
 ## Post-Matching Estimation
 
 <br>
@@ -1019,8 +1018,8 @@ cobalt::love.plot(
 
 - **Approach 2**: [Robust Post-Matching Inference]{.highlight} [@abadie2022robust]
   
-  - Cluster standard errors at the level of matches (or block bootstrap).
-  - Valid for matching without replacement + directly on covariates.
+  - Cluster standard errors at the level of matches (or block bootstrap) to account for error interdependence (due to $\mathbf{X}$).
+  - Valid for matching without replacement and also directly on covariates.
   - Still many theoretical details are unknown.
 
 ## Example: Estimation and Inference After Matching
@@ -1095,6 +1094,559 @@ knitr::kable(
   caption = "ATC Estimates of Effect of Abduction"
 ) |>
   kableExtra::kable_minimal(font_size = 20)
+```
+
+# Weighting
+
+## Motivation for Weighting Estimator
+
+- We now consider an alternative to matching that addresses some of its practical limitations.
+
+- Potential limitations of matching methods:
+  
+  1. **inefficient** $\rightsquigarrow$ it may throw away data.
+  2. **ineffective** $\rightsquigarrow$ it may not be able to balance covariates.
+
+- [Idea]{.note}: weight each observation in the untreated group such that it looks like the treated group (i.e., good covariate balance)
+
+. . .
+
+- Weighting is actually a general (continuous) version of matching: 
+  $$
+  \begin{align*}
+  \widehat{\tau}_{\rm match} &= \frac{1}{N_1} \sum_{i=1}^N T_i\left(Y_i - \frac{1}{ |\mathcal{M}_i| }\sum_{j \in \mathcal{M}_i}Y_{j}\right) \\
+  &= \frac{1}{N_1} \sum_{i: T_i = 1}  Y_i - \frac{1}{N_0} \sum_{i: T_i=0} \underbrace{\left(\frac{N_0}{N_1}\sum_{j: T_j = 1}\frac{\mathbb{1}\{i \in \mathcal{M}_{j} \}}{|\mathcal{M}_{j}|} \right)}_{W_i} Y_i
+  \end{align*}
+  $$
+
+
+## From Experiments to Observational Studies
+
+- Recall from [experiments]{.highlight}: the IPW estimator generalizes difference-in-means to unequal treatment probabilities:
+
+$$
+\widehat{\tau}_{IPW} = \frac{1}{N} \sum_{i=1}^N \left( \frac{T_i Y_i}{\pi_i} - \frac{(1-T_i) Y_i}{1-\pi_i} \right)
+$$
+
+. . .
+
+- In experiments, $\pi_i = \Pr(T_i = 1 \given \mathcal{O}_N)$ is [known from the design]{.highlight}.
+
+- In observational studies, $\pi(\mathbf{X}_i) = \Pr(T_i = 1 \given \mathbf{X}_i)$ must be [estimated]{.alert}.
+
+$$
+\widehat{\tau}_{IPW} = \frac{1}{N} \sum_{i=1}^N \left( \frac{T_i Y_i}{\widehat{\pi}(\mathbf{X}_i)} - \frac{(1-T_i) Y_i}{1-\widehat{\pi}(\mathbf{X}_i)} \right)
+$$
+
+. . .
+
+- **Result**: Under CIA, $\widehat{\tau}_{IPW} \xrightarrow{p} \tau_{ATE}$ (consistent).
+
+- Similar expression for _ATT_: $\ \widehat{\tau}_{IPW,T} = \frac{1}{N_1} \sum_{i=1}^N \left( T_i Y_i - \frac{\widehat{\pi}(\mathbf{X}_i)(1-T_i)Y_i}{1-\widehat{\pi}(\mathbf{X}_i)} \right)$
+
+## Efficiency of Weighting Estimators
+
+<br>
+
+- [Two sources of inefficiency]{.highlight} in the IPW estimator:
+
+. . .
+
+  1. **Extreme weights**: When $\widehat{\pi}(\mathbf{X}_i) \approx 0$ or $\approx 1$, some units get weights $\gg 1$ and a single observation can dominate the estimate $\rightsquigarrow$ Normalize the weights using [Hájek estimator]{.highlight}.
+
+. . .
+
+  2. **True vs estimated PS**: Surprisingly, using $\widehat{\pi}(\mathbf{X}_i)$ is [more efficient]{.highlight} than using the true $\pi(\mathbf{X}_i)$.
+
+     - [Intuition]{.note}: Estimated PS absorbs finite-sample imbalances that the true PS cannot correct for.
+     - True PS only adjusts for _expected_ differences between groups.
+     - [Important]{.alert}: Only true if the propensity score model is correctly specified!
+
+## Hájek (Stabilized) Estimator
+
+<br><br>
+
+- [Hájek estimator]{.highlight} normalizes the denominator so the weights sum to $1$:
+
+$$
+\widehat{\tau}_{HA} = \frac{\sum_{i=1}^N \frac{T_i Y_i}{\widehat{\pi}(\mathbf{X}_i)}}{\sum_{i=1}^N \frac{T_i}{\widehat{\pi}(\mathbf{X}_i)}} - \frac{\sum_{i=1}^N \frac{(1-T_i) Y_i}{1-\widehat{\pi}(\mathbf{X}_i)}}{\sum_{i=1}^N \frac{(1-T_i)}{1-\widehat{\pi}(\mathbf{X}_i)}}
+$$
+
+. . .
+
+- [Intuition]{.note}: Prevents any single observation from dominating. Reduces variance, especially when PS values are extreme.
+
+- [Note]{.note}: Hájek can still be slightly biased (ratio estimator), but the bias vanishes as $N \to \infty$.
+
+## Weighted Least Squares
+
+<br><br>
+
+- Practically, [weighted least squares]{.highlight} gives automatic normalization:
+
+$$
+(\widehat{\alpha}_{WLS}, \widehat{\tau}_{WLS}) = \argmin_{\alpha, \tau} \sum_{i=1}^N \left( \frac{T_i}{\widehat{\pi}(\mathbf{X}_i)} + \frac{1-T_i}{1-\widehat{\pi}(\mathbf{X}_i)} \right) (Y_i - \alpha - \tau T_i)^2
+$$
+
+. . .
+
+- This is equivalent to the Hájek estimator -- WLS with IPW weights automatically normalizes.
+
+- [Note]{.note}: Can also be used for _ATT_ and _ATC_ estimation with weight of $1$ given to units in treated or untreated group respectively.
+
+## Simulation: HT vs Hájek, True vs Estimated PS
+
+<br>
+
+```{r}
+#| label: hajek_simulation
+#| echo: true
+#| eval: true
+#| fig-align: center
+#| fig-width: 10
+#| fig-height: 6
+#| output-location: slide
+#| code-line-numbers: "1-4|10-17|19-29|31-35"
+
+set.seed(20251024)
+
+N <- 150
+true_tau <- 2
+
+sims <-
+  pbapply::pbreplicate(
+    2000,
+    {
+      X <- rnorm(N)
+      probs <- plogis(2 * X)
+      D <- rbinom(N, 1, probs)
+      Y <- true_tau * D - 2 * X + rnorm(N, sd = 1.5)
+      ps <- predict(
+        glm(D ~ X, family = binomial),
+        type = "response"
+      )
+
+      ht_ate_true <-
+        estimatr::horvitz_thompson(
+          Y ~ D,
+          condition_prs = probs
+        )$coefficients[["D"]]
+
+      ht_ate <-
+        estimatr::horvitz_thompson(
+          Y ~ D,
+          condition_prs = ps
+        )$coefficients[["D"]]
+
+      hajek_ate <-
+        estimatr::lm_robust(
+          Y ~ D,
+          weights = (D / ps) + ((1 - D) / (1 - ps))
+        )$coefficients[["D"]]
+
+      tibble(
+        Estimator = c(
+          "HT (true PS)", "HT (estimated PS)",
+          "Hájek"
+        ),
+        Estimate = c(ht_ate_true, ht_ate, hajek_ate)
+      )
+    },
+    simplify = FALSE
+  ) |>
+  bind_rows()
+
+sims$Estimator <- factor(
+  sims$Estimator,
+  levels = c("HT (true PS)", "HT (estimated PS)", "Hájek")
+)
+
+rmse_labels <- sims |>
+  group_by(Estimator) |>
+  summarise(
+    RMSE = sqrt(mean((Estimate - true_tau)^2, na.rm = TRUE)),
+    .groups = "drop"
+  )
+
+ggplot(sims, aes(x = Estimate, y = Estimator, fill = Estimator)) +
+  ggridges::geom_density_ridges(
+    alpha = 0.7,
+    scale = 1.3,
+    rel_min_height = 0.005,
+    quantile_lines = TRUE,
+    quantiles = 2
+  ) +
+  geom_vline(
+    xintercept = true_tau,
+    linetype = "dashed",
+    linewidth = 0.8,
+    colour = "#d79921"
+  ) +
+  annotate(
+    "text",
+    x = true_tau, y = Inf,
+    label = paste0("True ATE = ", true_tau),
+    hjust = -0.1, vjust = 1.5,
+    size = 3.5, colour = "#d79921", fontface = "bold"
+  ) +
+  geom_text(
+    data = rmse_labels,
+    aes(
+      x = Inf, y = Estimator,
+      label = paste0("RMSE = ", round(RMSE, 2))
+    ),
+    inherit.aes = FALSE,
+    hjust = 1.1, vjust = -0.5, size = 4, fontface = "italic"
+  ) +
+  scale_fill_manual(
+    values = c(
+      "HT (true PS)" = "#928374",
+      "HT (estimated PS)" = "#cc241d",
+      "Hájek" = "#689d6a"
+    )
+  ) +
+  coord_cartesian(xlim = c(-8, 15)) +
+  labs(
+    x = "Estimate",
+    y = NULL
+  ) +
+  theme(legend.position = "none")
+
+```
+
+## Weighting in Practice: Estimation
+
+<br>
+
+- After Weighting, how do we estimate the causal effect?
+
+. . .
+
+- **Approach 1**: [Weighting Estimator]{.highlight}
+
+  - IPW estimator.
+  - Hájek Estimator.
+  - Adaptive normalization [@khan2023adaptive].
+
+- **Approach 2**: [Weighted Linear Regression]{.highlight}
+
+  - Running a regression of $Y_i$ on $T_i$ and $\mathbf{X}_i$, with weights $w_i$.
+  - Equivalent to running regression of $Y_i\sqrt{w_i}$ on $T_i\sqrt{w_i}$ and $\mathbf{X}_i \sqrt{w_i}$ (do not forget about intercept!).
+  - Generalization of Hájek Estimator.
+
+# Weighting in Practice
+
+## Weighting in Practice: Inference
+
+
+<br>
+
+- If $\widehat{\pi}(\mathbf{X}_i)$ is estimated, how to estimate $\var(\widehat{\tau}_{IPW})$ or $\var(\widehat{\tau}_{HA})$?
+
+. . .
+
+- **Approach 1**: [Weighting as Pre-Processing]{.highlight}
+
+  - Inference will condition on weighting.
+  - This is standard, but it ignores the uncertainty from weighting.
+
+. . .
+
+- **Approach 2:** [Bootstrap]{.highlight}
+
+  - Clustering and weighting where needed!
+
+. . .
+
+- **Approach 3:** [Method of Moments]{.highlight} [@newey1994large]
+
+  - View PS estimation and IPW estimation as one joint system of estimating equations (stacked moment conditions).
+
+  - Standard sandwich/GMM variance formula for the joint system automatically propagates PS estimation uncertainty into $\widehat{\tau}$ SEs.
+
+## Example: Estimation After Weighting
+
+<br>
+
+```{r}
+#| label: weighting_estimation
+#| echo: true
+#| eval: true
+#| output-location: "column"
+#| code-line-numbers: "1-9|11-32"
+
+pacman::p_load(WeightIt)
+
+ps <-
+  WeightIt::weightit(
+    formula = for_match,
+    data = data_small,
+    estimand = "ATE",
+    method = "glm"
+  )
+
+weight_naive <-
+  WeightIt::lm_weightit(
+    main_for,
+    data = data_small,
+    weightit = ps,
+    vcov = "const"
+  )
+
+weight_boot <-
+  WeightIt::lm_weightit(
+    main_for,
+    data = data_small,
+    weightit = ps,
+    vcov = "BS"
+  )
+
+weight_mest <-
+  WeightIt::lm_weightit(
+    main_for,
+    data = data_small,
+    weightit = ps,
+    vcov = "asympt"
+  )
+
+results <- tibble(
+  Model = c(
+    "Pre-Processing",
+    "Bootstrap",
+    "GMM"
+  ),
+  Coefficient = c(
+    tidy(weight_naive)$estimate[2],
+    tidy(weight_boot)$estimate[2],
+    tidy(weight_mest)$estimate[2]
+  ),
+  `Standard Error` = c(
+    tidy(weight_naive)$std.error[2],
+    tidy(weight_boot)$std.error[2],
+    tidy(weight_mest)$std.error[2]
+  )
+)
+
+# Print the table using knitr
+knitr::kable(
+  results,
+  digits = 3,
+  align = "lcc",
+  caption = "ATE Estimates of Effect of Abduction"
+) |>
+  kableExtra::kable_minimal(font_size = 20)
+
+```
+
+## Problems with Weighting: Covariate Balancing
+
+<br>
+
+- **Problem 1**: Modeling propensity score for covariate balance is difficult.
+
+- **Problem 2**: Highly variable/unstable weights $\rightsquigarrow$ High variance estimators.
+
+  - When there is a lack of overlap so $\pi(\mathbf{X}_i)$ is close to $0$ or $1$.
+
+. . .
+
+- **Approach 1**: [Entropy balancing]{.highlight} [@hainmueller2012entropy]
+
+  - Solve convex quadratic programming problem with loss function to find optimal weights.
+
+- **Approach 2**: [Covariate balancing propensity scores (CBPS)]{.highlight} [@imai2014covariate]
+
+  - Use GMM with balancing condition using some _moment_ of covariates.
+
+- **Many other approaches...**
+
+- [Note]{.note}: Attractive when few covariates and covariate distributions are convex and unimodal over their support, in which case balancing on a few moments should work.
+
+# Combining Weighting and Regression
+
+## Doubly Robust Estimator
+
+<br>
+
+![](../_images/doubly_robust.png){height=90% fig-align="center"}
+
+## Doubly Robust Estimator: AIPW
+
+<br>
+
+- [Augmented IPW (AIPW) estimator]{.highlight}:
+
+$$
+\widehat{\tau}_{AIPW} = \frac{1}{N} \sum_{i=1}^N \left( \underbrace{\widehat{\mu}_1(\mathbf{X}_i) - \widehat{\mu}_0(\mathbf{X}_i)}_{\text{regression imputation}} + \underbrace{\frac{T_i (Y_i - \widehat{\mu}_1(\mathbf{X}_i))}{\widehat{\pi}(\mathbf{X}_i)} - \frac{(1-T_i)(Y_i - \widehat{\mu}_0(\mathbf{X}_i))}{1-\widehat{\pi}(\mathbf{X}_i)}}_{\text{bias correction via IPW}} \right)
+$$
+
+- $\widehat{\mu}_t(\mathbf{X}_i)$: predicted potential outcomes from outcome model.
+
+- $\widehat{\pi}(\mathbf{X}_i)$: estimated propensity score.
+
+- The IPW term corrects for bias in $\widehat{\mu}_t$ when the outcome model is misspecified.
+
+## Doubly Robust Estimator: Properties
+
+<br>
+
+- $\widehat{\tau}_{AIPW}$ is [doubly robust]{.highlight}:
+
+  - Consistent if _either_ the **propensity score** ($\widehat{\pi}(\mathbf{X}_i)$) or the **outcome** ($\widehat{\mu}_t(\mathbf{X}_i)$) model is correct. We get two chances to be correct!
+
+. . .
+
+- **Intuition**: If the outcome model is correct, the residuals $Y_i - \widehat{\mu}_t(\mathbf{X}_i) \approx 0$, so the IPW term vanishes and we get the regression estimate. If the PS model is correct, the IPW reweighting corrects for any bias in $\widehat{\mu}_t$.
+
+. . .
+
+- This is also the estimator we need to use when we want to incorporate machine learning methods for $\widehat{\mu}_t(\mathbf{X}_i)$ and $\widehat{\pi}(\mathbf{X}_i)$.
+
+- **Further Reading:** @chernozhukov2018double, @mercatanti2014debit
+
+## Example: Benefits of Doubly Robust Estimation
+
+<br>
+
+```{r}
+#| label: doubly_robust_simulation
+#| echo: true
+#| eval: true
+#| fig-align: center
+#| fig-width: 10
+#| fig-height: 6.5
+#| output-location: slide
+#| code-line-numbers: "1|7-8,14-16|18-24|26-37|39-54|56-64"
+
+pacman::p_load(AIPW, SuperLearner)
+
+set.seed(20260315)
+
+get_estimates <-
+  function(
+    tau = 0.8,
+    n = 1000,
+    wrong_model = c("regression", "weighting")
+  ) {
+    require(AIPW); require(SuperLearner)
+    wrong_model <- match.arg(wrong_model)
+
+    X <- rnorm(n) # confounder
+    D <- rbinom(n, 1, plogis(0.5 * X)) # treatment assignment with propensity depending on X
+    Y <- tau * D + X + rnorm(n) # outcome depends on treatment and confounder
+
+    if (wrong_model == "regression") {
+      outcome_model <- Y ~ D # incorrect
+      treatment_model <- D ~ X # correct
+    } else if (wrong_model == "weighting") {
+      outcome_model <- Y ~ D + X # correct
+      treatment_model <- D ~ 1 # incorrect
+    }
+
+    # naive regression
+    reg_ate <- estimatr::lm_robust(outcome_model)$coefficients[["D"]]
+
+    # ipw estimator
+    prop_scores <- predict(
+      glm(treatment_model, family = binomial),
+      type = "response"
+    )
+    ipw_ate <- estimatr::lm_robust(
+      Y ~ D,
+      weights = (D / prop_scores) + ((1 - D) / (1 - prop_scores))
+    )$coefficients[["D"]]
+
+    # aipw (doubly robust) estimator by hand
+    outcome_predict <-
+      estimatr::lm_robust(outcome_model) |>
+      (\(.)
+        cbind(
+          # predict Y(1) and Y(0) for each observation based
+          # on the outcome model
+          mu1 = predict(., newdata = data.frame(D = 1, X = X)),
+          mu0 = predict(., newdata = data.frame(D = 0, X = X))
+        ))()
+
+    aipw_ate <- mean(
+      (D * (Y - outcome_predict[, "mu1"]) / prop_scores) -
+        ((1 - D) * (Y - outcome_predict[, "mu0"]) / (1 - prop_scores)) +
+        (outcome_predict[, "mu1"] - outcome_predict[, "mu0"])
+    )
+
+    # aipw in practice using machine learning!
+    aipw_ate_ml <-
+      AIPW$new(
+        Y = Y, A = D,
+        W = data.frame(X = X),
+        Q.SL.library = "SL.lm", # outcome model
+        g.SL.library = "SL.glm", # treatment model
+        verbose = FALSE
+      )$stratified_fit()$summary()$estimates$RD["Estimate"]
+
+    # Results comparison
+    return(
+      tibble(
+        Estimator = c(
+          "Naive Regression",
+          "IPW",
+          "AIPW by hand",
+          "AIPW (SL)"
+        ),
+        Estimate = c(reg_ate, ipw_ate, aipw_ate, aipw_ate_ml)
+      )
+    )
+  }
+
+sims_regression_wrong <-
+  future.apply::future_replicate(
+    500,
+    get_estimates(wrong_model = "regression"),
+    simplify = FALSE
+  ) |>
+  bind_rows()
+
+sims_weighting_wrong <-
+  future.apply::future_replicate(
+    500,
+    get_estimates(wrong_model = "weighting"),
+    simplify = FALSE
+  ) |>
+  bind_rows()
+
+est_levels <- c("Naive Regression", "IPW", "AIPW by hand", "AIPW (SL)")
+est_colors <- c(
+  "Naive Regression" = "#928374", "IPW" = "#cc241d",
+  "AIPW by hand" = "#689d6a", "AIPW (SL)" = "#458588"
+)
+sims_regression_wrong$Estimator <- factor(sims_regression_wrong$Estimator, levels = est_levels)
+sims_weighting_wrong$Estimator <- factor(sims_weighting_wrong$Estimator, levels = est_levels)
+
+p1 <-
+  ggplot(sims_regression_wrong, aes(x = Estimate, y = Estimator, fill = Estimator)) +
+  ggridges::geom_density_ridges(
+    alpha = 0.7, scale = 1.3,
+    rel_min_height = 0.005,
+    quantile_lines = TRUE, quantiles = 2
+  ) +
+  geom_vline(xintercept = 0.8, linetype = "dashed", linewidth = 0.8, colour = "#d79921") +
+  scale_fill_manual(values = est_colors) +
+  coord_cartesian(xlim = c(0.5, 1.6)) +
+  labs(title = "Regression is wrong", x = "Estimate", y = NULL, fill = "Estimator")
+
+p2 <-
+  ggplot(sims_weighting_wrong, aes(x = Estimate, y = Estimator, fill = Estimator)) +
+  ggridges::geom_density_ridges(
+    alpha = 0.7, scale = 1.3,
+    rel_min_height = 0.005,
+    quantile_lines = TRUE, quantiles = 2
+  ) +
+  geom_vline(xintercept = 0.8, linetype = "dashed", linewidth = 0.8, colour = "#d79921") +
+  scale_fill_manual(values = est_colors) +
+  coord_cartesian(xlim = c(0.5, 1.6)) +
+  labs(title = "Weighting is wrong", x = "Estimate", y = NULL, fill = "Estimator")
+
+p1 + p2 + plot_layout(ncol = 2, guides = "collect", axes = "collect_y") & theme(legend.position = "right")
+
 ```
 
 # Sensitivity Analysis
@@ -1387,564 +1939,6 @@ x$bounds |>
 
 ```
 
-# Weighting
-
-## Motivation for Weighting Estimator
-
-- Potential limitations of matching methods:
-  
-  1. **inefficient** $\rightsquigarrow$ it may throw away data.
-  2. **ineffective** $\rightsquigarrow$ it may not be able to balance covariates.
-
-. . .
-
-- Weighting is actually a general (continuous) version of matching: 
-  $$
-  \begin{align*}
-  \widehat\tau_{\rm match} &= \frac{1}{N_1} \sum_{i=1}^n T_i\left(Y_i - \frac{1}{ |\mathcal{M}_i| }\sum_{j \in \mathcal{M}_i}Y_{j}\right) \\
-  &= \frac{1}{N_1} \sum_{i: T_i = 1}  Y_i - \frac{1}{N_0} \sum_{i: T_i=0} \underbrace{\left(\frac{N_0}{N_1}\sum_{j: T_j = 1}\frac{\mathbb{1}\{i \in \mathcal{M}_{j} \}}{|\mathcal{M}_{j}|} \right)}_{W_i} Y_i
-  \end{align*}
-  $$
-
-. . .
-
-- [Idea]{.note}: weight each observation in the untreated group such that it looks like the treated group (i.e., good covariate balance)
-
-# Two Weighting Estimators
-
-## Survey Sampling Origin
-
-- We will re-introduce the weighted estimator we talked about briefly before.
-
-. . .
-
-- Intuition for weighting comes from sampling literature.
-
-- Imagine we want to estimate the population mean $\overline{Y} = \frac{1}{N} \sum_{i=1}^N Y_i$
-
-  - $R_i = 1$ if sampled, $R_i = 0$ if not.
-  - We only observe $Y_i$ for those with $R_i = 1$.
-  - Inclusion probability varies by person: $\Pr(R_i = 1) = \pi_i$
-
-. . .
-
-- [Horvitz-Thompson estimator]{.highlight} is given by (treating $Y_i$ as fixed):
-
-$$
-\widehat{\mu}_{HT} = \frac{1}{N} \sum_{i=1}^N \frac{R_i Y_i}{\pi_i}
-$$
-
-- [Intuition]{.note}: Reweight sample to be representative of the population.
-
-## Identification of $\E [Y_i(1) ]$
-
-- We can use this estimator to estimate potential outcomes!
-
-. . .
-
-- Begin with the estimator conditional on a specific covariate value $\mathbf{x}$:
-
-$$
-\begin{align*}
-  \E(\widehat{Y}_i (1) \given \mathbf{X}_i = \mathbf{x}) &= \E\left( Y_i\frac{T_i}{\pi(\mathbf{X}_i)}  \given \mathbf{X}_i = \mathbf{x}\right) \\
-  &= \E\left(Y_i \frac{1}{\pi(\mathbf{X}_i)} \given \mathbf{X}_i=\mathbf{x}, T_i=1\right)\Pr(T_i=1 \given \mathbf{X}_i=\mathbf{x})  \qquad (\because \text{ total expectation}) \\ 
-                      &= \E\left(\frac{Y_i}{\pi(\mathbf{X}_i)} \given\mathbf{X}_i=\mathbf{x}, T_i=1 \right) \pi(\mathbf{x}) \\
-                      &= \E(Y_i \given\mathbf{X}_i=\mathbf{x}, T_i=1) \\ 
-                      &= \E\{Y_i(1) \given \mathbf{X}_i=\mathbf{x}\} \quad (\because \text{ CIA})
-\end{align*}
-$$
-
-- Averaging $\E(\widehat{Y}_i (1) \given \mathbf{X}_i = \mathbf{x})$ over the distribution of $\mathbf{x}$, $f(\mathbf{x})$, yields $\E\{Y_i(1)\}$. $\qquad \qedknitr$
-
-- [Note]{.note}: We can do the same for $\E(\widehat{Y}_i (0))$ and hence $\E\{Y_i(1) - Y_i(0)\}$.
-
-
-## Horvitz-Thompson for Treatment Effects
-
-- Applying _HT_ estimator idea to potential outcomes framework and propensity scores:
-
-$$
-\widehat{\tau}_{IPW} = \frac{1}{N} \sum_{i=1}^N \left( \frac{T_i Y_i}{\widehat{\pi}(\mathbf{X}_i)} - \frac{(1-T_i) Y_i}{1-\widehat{\pi}(\mathbf{X}_i)} \right)
-$$
-
-. . .
-
-- **Result**: Under no unmeasured confounders (**CIA**), $\widehat{\tau}_{IPW} \xrightarrow{p} \tau_{ATE}$ (consistent).
-
-  - [Important]{.alert}: Would be unbiased if we knew the true propensity scores, $\pi(\mathbf{X}_i)$.
-
-. . .
-
-- Similar expression for estimator of _ATT_:
-
-$$
-\widehat{\tau}_{IPW,T} = \frac{1}{N_1} \sum_{i=1}^N \left( T_i Y_i - \frac{\widehat{\pi}(\mathbf{X}_i)(1-T_i)Y_i}{1-\widehat{\pi}(\mathbf{X}_i)} \right)
-$$
-
-- [Intuition]{.note}: Upweight units with _rare_ treatment values for their values of $\mathbf{X}_i$. A kind of "continuous" version of matching _w/ replacement_.
-
-
-## Stabilized Weights
-
-- _HT_ estimators with known weights are unbiased but can be **inefficient**.
-
-  - Large weights can lead to highly variable estimates when (not) included.
-
-. . .
-
-- [Hájek estimator]{.highlight} normalizes the denominator so the weights sum up to $1$:
-
-$$
-\widehat{\tau}_{HA} = \frac{\sum_{i=1}^n \frac{T_i Y_i}{\widehat{\pi}(\mathbf{X}_i)}}{\sum_{i=1}^n \frac{T_i}{\widehat{\pi}(\mathbf{X}_i)}} - \frac{\sum_{i=1}^n \frac{(1-T_i) Y_i}{1-\widehat{\pi}(\mathbf{X}_i)}}{\sum_{i=1}^n \frac{(1-T_i)}{1-\widehat{\pi}(\mathbf{X}_i)}}
-$$
-
-. . .
-
-- Practically, **weighted least squares gives automatic normalization**:
-
-$$
-(\widehat{\alpha}_{WLS}, \widehat{\tau}_{WLS}) = \argmin_{\alpha, \tau} \sum_{i=1}^n \left( \frac{T_i}{\widehat{\pi}(\mathbf{X}_i)} + \frac{1-T_i}{1-\widehat{\pi}(\mathbf{X}_i)} \right) (Y_i - \alpha - \tau T_i)^2
-$$
-
-- [Note]{.note}: This procedure can also be used for _ATT_ and _ATC_ estimation with weight of $1$ given to units in treated or untreated group respectively.
-
-## True vs Estimated PS; HT vs Hájek Estimator
-
-<br>
-
-```{r}
-#| label: hajek_simulation
-#| echo: true
-#| eval: true
-#| fig-align: center
-#| fig-width: 8
-#| fig-height: 6
-#| output-location: slide
-#| code-line-numbers: "3-4,10-15|17-33"
-
-set.seed(20251024)
-
-N <- 1000
-true_tau <- 2
-
-sims <-
-  pbapply::pbreplicate(
-    1000,
-    {
-      X <- sample(0:3, prob = c(.5, .4, 0, .1), N, replace = TRUE)
-      probs <- 0.5 + 0.1 * X
-      D <- randomizr::simple_ra(N, prob_unit = probs)
-      Y <- true_tau * D - 10 * X + rnorm(N, sd = 5)
-      # ps <- WeightIt::weightit(D ~ X, estimand = "ATE", method = "glm")$weights
-      ps <- predict(glm(D ~ X, family = binomial), type = "response")
-
-      ht_ate_true <-
-        estimatr::horvitz_thompson(
-          Y ~ D,
-          condition_prs = probs
-        )$coefficients[["D"]]
-
-      ht_ate <-
-        estimatr::horvitz_thompson(
-          Y ~ D,
-          condition_prs = ps
-        )$coefficients[["D"]]
-
-      hajek_ate <-
-        estimatr::lm_robust(
-          Y ~ D + X,
-          weights = (D / ps) + ((1 - D) / (1 - ps))
-        )$coefficients[["D"]]
-
-      tibble(
-        Estimator = c("HT True", "HT", "Hajek"),
-        Estimate = c(ht_ate_true, ht_ate, hajek_ate)
-      )
-    },
-    simplify = FALSE
-  ) |>
-  bind_rows()
-
-
-# create density plots for HT and Hajek estimates
-sims$Estimator <- factor(sims$Estimator, levels = c("HT True", "HT", "Hajek"))
-
-ggplot(sims, aes(x = Estimate, y = Estimator, fill = Estimator)) +
-  geom_violin(scale = "width", alpha = 0.6, colour = NA) +
-  geom_boxplot(width = 0.15, outlier.shape = NA, alpha = 0.8) +
-  geom_vline(xintercept = 2, linetype = "dashed", linewidth = 1) +
-  scale_fill_manual(
-    values = c("HT True" = "#928374", "HT" = "#cc241d", "Hajek" = "#689d6a")
-  ) +
-  scale_x_continuous(
-    breaks = seq(-2, 6, by = 2),
-    limits = c(-2, 6)
-  ) +
-  labs(
-    x = "Estimates",
-    y = NULL,
-    fill = "Estimator"
-  ) +
-  theme(legend.position = "bottom")
-
-```
-
-## Why Use Estimated Propensity Scores?
-
-<br><br>
-
-- **Question**: Why is the estimated propensity score more efficient than the _true_ propensity scores?
-
-. . .
-
-  - [Intuition]{.note}: Removing chance variations using $\widehat{\pi} (\mathbf{X}_i)$ adjusts for any small imbalances that arise because of a finite sample.
-
-  - True PS only adjusts for the _expected_ differences between samples.
-
-  - [Note]{.note}: Only true if propensity score model is correctly specified!!
-
-. . .
-
-- **Question**: Why could the Hájek estimator be more efficient than the Horvitz-Thompson estimator?
-
-  - **Intuition**: The Hájek estimator normalizes the weights so that they sum to one, which reduces the variance of the weights $\rightsquigarrow$ lower variance of the estimator. This is not generally true though.
-
-# Weighting in Practice
-
-## Post-Weighting Estimation
-
-<br>
-
-- After Weighting, how do we estimate the causal effect?
-
-. . .
-
-- **Approach 1**: [Weighting Estimator]{.highlight}
-
-  - IPW estimator.
-  - Hájek Estimator.
-  - Adaptive normalization [@khan2023adaptive].
-
-- **Approach 2**: [Weighted Linear Regression]{.highlight}
-
-  - Running a regression of $Y_i$ on $T_i$ and $\mathbf{X}_i$, with weights $w_i$.
-  - Equivalent to running regression of $Y_i\sqrt{w_i}$ on $T_i\sqrt{w_i}$ and $\mathbf{X}_i \sqrt{w_i}$ (do not forget about intercept!).
-  - Generalization of Hájek Estimator.
-
-
-## Post-Weighting Inference
-
-
-- If $\widehat{\pi}(\mathbf{X}_i)$ is estimated, how to estimate $\var(\widehat{\tau}_{IPW})$ or $\var(\widehat{\tau}_{HA})$?
-
-. . .
-
-- **Approach 1**: [Weighting as Pre-Processing]{.highlight}
-
-  - Inference will condition on weighting.
-  - The standard, but this ignores uncertainties of weighting.
-
-. . .
-
-- **Approach 2:** [Bootstrap]{.highlight}
-
-  - Clustering and weighting where needed!
-
-. . .
-
-- **Approach 3:** [Method of Moments]{.highlight} [@newey1994large]
-
-  - Treat as a joint estimation problem and use the delta method.
-    
-    - [Intuition]{.note}: How small changes in the propensity score estimates affect the overall variance.
-  
-  - Write $\widehat{\tau}_{IPW}$ as a function of $\widehat{\theta}$ (the PS parameters) and $(\widehat{\mu}_1, \widehat{\mu}_0)$. Because $\widehat{\theta}$ is itself estimated, $\var(\widehat{\tau}_{IPW})$ depends on $\var(\widehat{\theta})$ via the chain rule. The **delta method** (or sandwich estimator) propagates this first-stage uncertainty into the final variance, giving SEs that account for PS estimation.
-
-## Example: Estimation After Weighting
-
-<br>
-
-```{r}
-#| label: weighting_estimation
-#| echo: true
-#| eval: true
-#| output-location: "column"
-#| code-line-numbers: "1-9|11-32"
-
-pacman::p_load(WeightIt)
-
-ps <-
-  WeightIt::weightit(
-    formula = for_match,
-    data = data_small,
-    estimand = "ATE",
-    method = "glm"
-  )
-
-weight_asympt <-
-  WeightIt::lm_weightit(
-    main_for,
-    data = data_small,
-    weightit = ps,
-    vcov = "asympt"
-  )
-
-weight_boot <-
-  WeightIt::lm_weightit(
-    main_for,
-    data = data_small,
-    weightit = ps,
-    vcov = "BS"
-  )
-
-weight_gmm <-
-  WeightIt::lm_weightit(
-    main_for,
-    data = data_small,
-    weightit = ps,
-    vcov = "const"
-  )
-
-results <- tibble(
-  Model = c(
-    "Pre-Processing",
-    "Bootstrap",
-    "GMM"
-  ),
-  Coefficient = c(
-    tidy(weight_asympt)$estimate[2],
-    tidy(weight_boot)$estimate[2],
-    tidy(weight_gmm)$estimate[2]
-  ),
-  `Standard Error` = c(
-    tidy(weight_asympt)$std.error[2],
-    tidy(weight_boot)$std.error[2],
-    tidy(weight_gmm)$std.error[2]
-  )
-)
-
-# Print the table using knitr
-knitr::kable(
-  results,
-  digits = 3,
-  align = "lcc",
-  caption = "ATE Estimates of Effect of Abduction"
-) |>
-  kableExtra::kable_minimal(font_size = 20)
-
-```
-
-# Problems with Weighting
-
-## Covariate Balancing
-
-<br>
-
-- **Problem 1**: Modeling propensity score for covariate balance is difficult.
-
-- **Problem 2**: Highly variable/unstable weights $\rightsquigarrow$ High variance estimators.
-
-  - When there is a lack of overlap so $\pi(\mathbf{X}_i)$ is close to $0$ or $1$.
-
-. . .
-
-- **Approach 1**: [Entropy balancing]{.highlight} [@hainmueller2012entropy]
-
-  - Solve convex quadratic programming problem with loss function to find optimal weights.
-
-- **Approach 2**: [Covariate balancing propensity scores (CBPS)]{.highlight} [@imai2014covariate]
-
-  - Use GMM with balancing condition using some _moment_ of covariates.
-
-- **Many other approaches...**
-
-- [Note]{.note}: Attractive when few covariates and covariate distributions are convex and unimodal over their support, in which case balancing on a few moments should work.
-
-# Combining Weighting and Regression
-
-## Doubly Robust Estimator
-
-<br>
-
-![](../_images/doubly_robust.png){height=90% fig-align="center"}
-
-## Doubly Robust Estimator: AIPW
-
-<br>
-
-- [Augmented IPW (AIPW) estimator]{.highlight}:
-
-$$
-\widehat{\tau}_{AIPW} = \frac{1}{N} \sum_{i=1}^N \left( \underbrace{\widehat{\mu}_1(\mathbf{X}_i) - \widehat{\mu}_0(\mathbf{X}_i)}_{\text{regression imputation}} + \underbrace{\frac{T_i (Y_i - \widehat{\mu}_1(\mathbf{X}_i))}{\widehat{\pi}(\mathbf{X}_i)} - \frac{(1-T_i)(Y_i - \widehat{\mu}_0(\mathbf{X}_i))}{1-\widehat{\pi}(\mathbf{X}_i)}}_{\text{bias correction via IPW}} \right)
-$$
-
-- $\widehat{\mu}_t(\mathbf{X}_i)$: predicted potential outcomes from outcome model
-
-- $\widehat{\pi}(\mathbf{X}_i)$: estimated propensity score
-
-- The IPW term corrects for bias in $\widehat{\mu}_t$ when the outcome model is misspecified
-
-## Doubly Robust Estimator: Properties
-
-<br>
-
-- $\widehat{\tau}_{AIPW}$ is [doubly robust]{.highlight}:
-
-  - Consistent if _either_ the **propensity score** ($\widehat{\pi}(\mathbf{X}_i)$) or the **outcome** ($\widehat{\mu}_t(\mathbf{X}_i)$) model is correct. We get two chances to be correct!
-
-. . .
-
-- **Intuition**: If the outcome model is correct, the residuals $Y_i - \widehat{\mu}_t(\mathbf{X}_i) \approx 0$, so the IPW term vanishes and we get the regression estimate. If the PS model is correct, the IPW reweighting corrects for any bias in $\widehat{\mu}_t$.
-
-. . .
-
-- This is also the estimator we need to use when we want to incorporate machine learning methods for $\widehat{\mu}_t(\mathbf{X}_i)$ and $\widehat{\pi}(\mathbf{X}_i)$.
-
-- **Further Reading:** @chernozhukov2018double, @mercatanti2014debit
-
-## Example: Benefits of Doubly Robust Estimation
-
-<br>
-
-```{r}
-#| label: doubly_robust_simulation
-#| echo: true
-#| eval: true
-#| fig-align: center
-#| fig-width: 10
-#| fig-height: 6.5
-#| output-location: slide
-#| code-line-numbers: "1|7-8,13-15|17-23|25-36|38-53|55-65"
-
-pacman::p_load(drtmle, SuperLearner)
-
-set.seed(20250226)
-
-get_estimates <-
-  function(
-    tau = 0.8,
-    n = 1000,
-    wrong_model = c("regression", "weighting")
-  ) {
-    wrong_model <- match.arg(wrong_model)
-
-    X <- rnorm(n) # confounder
-    D <- rbinom(n, 1, plogis(0.5 * X)) # treatment assignment with propensity depending on X
-    Y <- tau * D + X + rnorm(n) # outcome depends on treatment and confounder
-
-    if (wrong_model == "regression") {
-      outcome_model <- Y ~ D # incorrect
-      treatment_model <- D ~ X # correct
-    } else if (wrong_model == "weighting") {
-      outcome_model <- Y ~ D + X # correct
-      treatment_model <- D ~ 1 # incorrect
-    }
-
-    # naive regression
-    reg_ate <- estimatr::lm_robust(outcome_model)$coefficients[["D"]]
-
-    # ipw estimator
-    prop_scores <- predict(
-      glm(treatment_model, family = binomial),
-      type = "response"
-    )
-    ipw_ate <- estimatr::lm_robust(
-      Y ~ D,
-      weights = (D / prop_scores) + ((1 - D) / (1 - prop_scores))
-    )$coefficients[["D"]]
-
-    # aipw (doubly robust) estimator by hand
-    outcome_predict <-
-      estimatr::lm_robust(outcome_model) |>
-      (\(.)
-        cbind(
-          # predict Y(1) and Y(0) for each observation based
-          # on the outcome model
-          mu1 = predict(., newdata = data.frame(D = 1, X = X)),
-          mu0 = predict(., newdata = data.frame(D = 0, X = X))
-        ))()
-
-    aipw_ate <- mean(
-      (D * (Y - outcome_predict[, "mu1"]) / prop_scores) -
-        ((1 - D) * (Y - outcome_predict[, "mu0"]) / (1 - prop_scores)) +
-        (outcome_predict[, "mu1"] - outcome_predict[, "mu0"])
-    )
-
-    # aipw in practice using machine learning!
-    aipw_ate_ml <-
-      drtmle(
-        W = data.frame(X = X), # covariates
-        A = D, # treatment (exposure)
-        Y = Y, # outcome
-        SL_g = "SL.glm", SL_gr = "SL.glm", # model for treatment
-        SL_Q = "SL.lm", SL_Qr = "SL.lm" # model for outcome
-      )$drtmle$est |>
-      diff() |>
-      abs()
-
-    # Results comparison
-    return(
-      tibble(
-        Estimator = c(
-          "Naive Regression",
-          "IPW",
-          "AIPW by hand",
-          "AIPW (drtmle)"
-        ),
-        Estimate = c(reg_ate, ipw_ate, aipw_ate, aipw_ate_ml)
-      )
-    )
-  }
-
-sims_regression_wrong <-
-  pbapply::pbreplicate(
-    500,
-    get_estimates(wrong_model = "regression"),
-    simplify = FALSE,
-    cl = 6
-  ) |>
-  bind_rows()
-
-sims_weighting_wrong <-
-  pbapply::pbreplicate(
-    500,
-    get_estimates(wrong_model = "weighting"),
-    simplify = FALSE,
-    cl = 6
-  ) |>
-  bind_rows()
-
-est_levels <- c("Naive Regression", "IPW", "AIPW by hand", "AIPW (drtmle)")
-est_colors <- c(
-  "Naive Regression" = "#689d6a", "IPW" = "#cc241d",
-  "AIPW by hand" = "#928374", "AIPW (drtmle)" = "#458588"
-)
-sims_regression_wrong$Estimator <- factor(sims_regression_wrong$Estimator, levels = est_levels)
-sims_weighting_wrong$Estimator <- factor(sims_weighting_wrong$Estimator, levels = est_levels)
-
-p1 <-
-  ggplot(sims_regression_wrong, aes(x = Estimate, y = Estimator, fill = Estimator)) +
-  geom_violin(scale = "width", alpha = 0.6, colour = NA) +
-  geom_boxplot(width = 0.15, outlier.shape = NA, alpha = 0.8) +
-  geom_vline(xintercept = 0.8, linetype = "dashed", linewidth = 1) +
-  scale_fill_manual(values = est_colors) +
-  scale_x_continuous(limits = c(0.5, 1.6)) +
-  labs(title = "Regression is wrong", x = "Estimates", y = NULL, fill = "Estimator") +
-  theme_minimal(base_size = 14)
-
-p2 <-
-  ggplot(sims_weighting_wrong, aes(x = Estimate, y = Estimator, fill = Estimator)) +
-  geom_violin(scale = "width", alpha = 0.6, colour = NA) +
-  geom_boxplot(width = 0.15, outlier.shape = NA, alpha = 0.8) +
-  geom_vline(xintercept = 0.8, linetype = "dashed", linewidth = 1) +
-  scale_fill_manual(values = est_colors) +
-  scale_x_continuous(limits = c(0.5, 1.6)) +
-  labs(title = "Weighting is wrong", x = "Estimates", y = NULL, fill = "Estimator") +
-  theme_minimal(base_size = 14)
-
-p1 + p2 + plot_layout(ncol = 2, guides = "collect") & theme(legend.position = "right")
-
-```
 
 # Summary
 
@@ -1957,9 +1951,10 @@ p1 + p2 + plot_layout(ncol = 2, guides = "collect") & theme(legend.position = "r
 - [Matching]{.highlight}
   
   - **Pros**: Transparent, Intuitive.
-  - **Cons**: Might be inefficient because dropping observations.
+  - **Cons**: Might be inefficient because of dropping observations.
 
 - [Weighting]{.highlight}
+
   - **Pros**: More efficient and more effective.
   - **Cons**: Sensitive to extreme weights.
 
@@ -1969,8 +1964,24 @@ p1 + p2 + plot_layout(ncol = 2, guides = "collect") & theme(legend.position = "r
 
 - Regression, Matching, and Weighting are complementary estimation methods $\rightsquigarrow$ If results are different, we should figure out why!
 
-- In practice, we should try to be robust to the choice of estimation methods
+- In practice, we should try to be robust to the choice of estimation methods and conduct sensitivity analyses to assess issues with CIA.
 
-<!-- # Appendix {visibility="uncounted"} -->
+# Appendix {visibility="uncounted"}
+<!-- 
+## [[🔙](#from-experiments-to-observational-studies)]{.small-font} Identification of $\E[Y_i(1)]$ via IPW {#proof-ipw-identification visibility="uncounted"}
+
+:::{.small-font}
+$$
+\begin{align*}
+  \E\!\left(\frac{T_i Y_i}{\pi(\mathbf{X}_i)} \given \mathbf{X}_i = \mathbf{x}\right)
+  &= \E\!\left(\frac{Y_i}{\pi(\mathbf{X}_i)} \given \mathbf{X}_i=\mathbf{x},\, T_i=1\right)\Pr(T_i=1 \given \mathbf{X}_i=\mathbf{x}) & (\text{iterated expectations}) \\
+  &= \E\!\left(\frac{Y_i}{\pi(\mathbf{X}_i)} \given \mathbf{X}_i=\mathbf{x},\, T_i=1\right) \pi(\mathbf{x}) \\
+  &= \E(Y_i \given \mathbf{X}_i=\mathbf{x},\, T_i=1) \\
+  &= \E\{Y_i(1) \given \mathbf{X}_i=\mathbf{x}\} & (\text{CIA})
+\end{align*}
+$$
+:::
+
+Averaging over $f(\mathbf{x})$ yields $\E\{Y_i(1)\}$. Analogous for $\E\{Y_i(0)\}$. $\qedknitr$ -->
 
 ## References {visibility="uncounted"}
