@@ -107,61 +107,56 @@ thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 
 ### DAG for Instrumental Variables
 
-:::{.columns}
-::: {.column width="60%"}
 
-```{dot}
-//| fig-width: 5
-//| fig-height: 7
+```{tikz}
+%| fig-width: 7
+%| fig-height: 5
+%| fig-align: center
 
-digraph causal_diagram {
-    rankdir=LR;
-    bgcolor="transparent";
-    edge [
-		  arrowsize=0.5,
-		  // fontname="Helvetica,Arial,sans-serif"
-		  labeldistance=5,
-		  // labelfontcolor="#00000080"
-		  penwidth=2
-		  // style=dotted // dotted style symbolizes data transfer
-	  ]
-    node [
-      fontsize=24,
-      penwidth=2
-    ]
-    
-    // Define nodes
-    U [label="U", shape=circle, style=dashed];
-    Z [label="Z", shape=circle, style=bold];
-    T [label="T", shape=circle, style=bold];
-    Y [label="Y", shape=circle, style=bold];
-    
-    // Define edges
-    U -> T;
-    U -> Y;
-    Z -> T;
-    T -> Y;
-    Z -> Y [dir=forward,style=dotted, color=red, label="×", fontcolor=red, fontsize=32]; // Dotted red arrow (spurious correlation)
+\usetikzlibrary{arrows.meta, positioning, calc}
+\definecolor{plotbg}{HTML}{f0f1eb}
+\definecolor{plotfg}{HTML}{111111}
+\definecolor{gruvred}{HTML}{cc241d}
+\definecolor{gruvgray}{HTML}{928374}
 
-    // Blocked path marker
-    // { rank=min; Z}
-    { rank=same; Z;T;Y}
-    { rank=max; U}
-}
+\begin{tikzpicture}[
+    node distance=2.5cm,
+    dag node/.style={circle, draw=plotfg, thick, minimum size=1.1cm,
+                     font=\Large, text=plotfg},
+    label node/.style={draw=none, font=\normalsize, text=plotfg,
+                       minimum size=0pt, inner sep=1pt},
+    every edge/.style={-{Stealth[length=3mm]}, thick, color=plotfg},
+  ]
 
+  % Background
+  \fill[plotbg] (-1.8,-2.2) rectangle (8.5,3.5);
+
+  % Nodes
+  \node[dag node] (Z) {$Z$};
+  \node[dag node] (T) [right=of Z] {$T$};
+  \node[dag node] (Y) [right=of T] {$Y$};
+  \node[dag node, dashed, draw=gruvgray, text=gruvgray] (U)
+    [above right=1.5cm and 1.25cm of T] {$U$};
+
+  % Edges
+  \draw[->, color=plotfg] (Z) -- (T);
+  \draw[->, color=plotfg] (T) -- (Y);
+  \draw[->, color=gruvgray] (U) -- (T);
+  \draw[->, color=gruvgray] (U) -- (Y);
+
+  % Exclusion restriction: dotted red path with × crossing it
+  \draw[->, densely dotted, color=gruvred, thick] (Z) to[bend right=30] (Y);
+  \node[draw=none, minimum size=0pt, font=\bfseries\Large, text=gruvred
+        ] at ($(Z)!0.5!(Y) + (0,-1.2)$) {$\times$};
+
+  % Labels below nodes
+  \node[label node, below=4pt of Z] {\textit{Instrument}};
+  \node[label node, below=4pt of T] {\textit{Treatment}};
+  \node[label node, below=4pt of Y] {\textit{Outcome}};
+  \node[label node, right=4pt of U, text=gruvgray] {\textit{Unobserved}};
+
+\end{tikzpicture}
 ```
-
-:::
-::: {.column width="40%"}
-
-<br><br><br><br>
-
-- **Y**: Outcome
-- **T**: Treatment 
-- **Z**: Instrument 
-
-:::
-:::
 
 # Motivating Examples
 
@@ -322,7 +317,7 @@ digraph causal_diagram {
 - Four **principal strata** (or **compliance types**):
 
   - [(c)ompliers]{.highlight}: $T_i(1) = 1$ and $T_i(0)= 0$
-  - [(n)on(c)ompliers]{.highlight}:
+  - [(n)on-(c)ompliers]{.highlight}:
     - [(a)lways-takers]{.highlight}: $T_i(1) = T_i(0) = 1$
     - [(n)ever-takers]{.highlight}: $T_i(1) = T_i(0) = 0$
     - [(d)efiers]{.highlight}: $T_i(1) = 0$ and $T_i(0)=1$
@@ -336,23 +331,22 @@ digraph causal_diagram {
 
 . . .
 
-- [Issue]{.note}: Without further assumptions, compliance types are not identified from observed strata
+- [Problem]{.alert}: Without further assumptions, compliance types are not identified from observed strata
 
-. . .
+- [Even bigger problem]{.alert}: The _ITT_ weights the effects of treatment assignment across all these strata, but some of those are **not** due to receiving treatment!
 
-- [Bigger issue]{.note}: Suppose average treatment effects within strata are $\tau_{\text{c}}$, $\tau_{\text{a}}$, $\tau_{\text{n}}$ and $\tau_{\text{d}}$ -- there are good reasons to believe those are different!
+  - **Which strata should we focus on?**
 
 
 ### Identification of LATE (CACE)
 
-- If we had to choose one of the four strata to focus on, which one would we choose?
-
-. . .
-
 - **Causal estimand 2**: [Local ATE (Complier Average Treatment Effect)]{.highlight}
 
   $$
-  \tau_{LATE} \equiv \E[Y_i(t=1) - Y_i(t=0) \given T_i(1)=1, T_i(0)=0] = \E[Y_i(t=1) - Y_i(t=0) \given T_i(1) \gt T_i(0) ]
+  \begin{align*}
+  \tau_{LATE} &\equiv \E[Y_i(t=1) - Y_i(t=0) \given T_i(1)=1, T_i(0)=0] \\
+  &= \E[Y_i(t=1) - Y_i(t=0) \given T_i(1) \gt T_i(0) ]
+  \end{align*}
   $$
 
 . . .
@@ -360,8 +354,8 @@ digraph causal_diagram {
 - The _ITT_ effect can be decomposed into a combination of subgroup _ITTs_:
   $$
   \begin{align*}
-  \tau_{ITT} &= \tau_{\text{c}} \times \Pr(\text{compliers}) + \tau_{\text{a}} \times \Pr(\text{always-takers}) \\
-  &+ \tau_{\text{n}} \times \Pr(\text{never-takers}) + \tau_{\text{d}} \times \Pr(\text{defiers})
+  \tau_{ITT} &= \tau_{\text{c}} \times \Pr(\text{complier}) + \tau_{\text{a}} \times \Pr(\text{always-taker}) \\
+  &+ \tau_{\text{n}} \times \Pr(\text{never-taker}) + \tau_{\text{d}} \times \Pr(\text{defier})
   \end{align*}
   $$
 
@@ -412,15 +406,15 @@ digraph causal_diagram {
 - Under [monotonicity]{.highlight} and [exclusion restriction]{.highlight}, the decomposition simplifies to
   $$
   \begin{align*}
-  \tau_{ITT} &= \tau_{\text{c}} \times \Pr(\text{compliers}) + \tau_{\text{a}} \times \Pr(\text{always-takers}) \\
-  &\qquad \qquad  + \tau_{\text{n}} \times \Pr(\text{never-takers}) + \tau_{\text{d}} \times 0 \qquad \text{($\because$ monotonicity)} \\
-  &= \tau_{\text{c}} \times \Pr(\text{compliers}) + 0 \times \Pr(\text{always-takers}) \\
-  &\qquad \qquad + 0 \times \Pr(\text{never-takers}) \qquad \text{($\because$ exclusion restriction)} \\
-  &= \tau_{\text{c}} \times \Pr(\text{compliers})
+  \tau_{ITT} &= \tau_{\text{c}} \times \Pr(\text{complier}) + \tau_{\text{a}} \times \Pr(\text{always-taker}) \\
+  &\qquad \qquad  + \tau_{\text{n}} \times \Pr(\text{never-taker}) + \tau_{\text{d}} \times 0 \qquad \text{($\because$ monotonicity)} \\
+  &= \tau_{\text{c}} \times \Pr(\text{complier}) + 0 \times \Pr(\text{always-taker}) \\
+  &\qquad \qquad + 0 \times \Pr(\text{never-taker}) \qquad \text{($\because$ exclusion restriction)} \\
+  &= \tau_{\text{c}} \times \Pr(\text{complier})
   \end{align*}
   $$
 
-- Under [relevance]{.highlight}: $\Pr(\text{compliers}) > 0$ and the effect among compliers is given by $$\tau_{\text{c}} = \frac{\tau_{ITT}}{\Pr(\text{compliers})}$$
+- Under [relevance]{.highlight}: $\Pr(\text{complier}) > 0$ and the effect among compliers is given by $$\tau_{\text{c}} = \frac{\tau_{ITT}}{\Pr(\text{complier})}$$
 
 ### IV Estimand and Interpretation {#iv-estimand}
 
@@ -429,7 +423,7 @@ digraph causal_diagram {
 - $\tau_{\text{c}}$ can be nonparametrically identified (_LATE_ equation):
 
   $$
-  \tau_{\text{c}} = \frac{\tau_{ITT}}{\Pr(\text{compliers})} = \frac{\E(Y_i \given Z_i = 1) - \E(Y_i \given Z_i = 0)}{\E(T_i \given Z_i = 1) - \E(T_i \given Z_i = 0)} \\
+  \tau_{\text{c}} = \frac{\tau_{ITT}}{\Pr(\text{complier})} = \frac{\E(Y_i \given Z_i = 1) - \E(Y_i \given Z_i = 0)}{\E(T_i \given Z_i = 1) - \E(T_i \given Z_i = 0)} \\
   = \frac{\cov(Y_i, Z_i)}{\cov(T_i, Z_i)}
   $$
 
@@ -439,67 +433,73 @@ digraph causal_diagram {
 
 - _LATE_ has a clear causal meaning, **but** interpretation is often tricky:
 
+  - For compliers there is no difference between treatment assignment ($Z_i$) and treatment ($T_i$) $\rightsquigarrow$ _LATE_ can be interpreted as treatment effect.
   - Compliers are defined in terms of principal strata, but what makes subjects compliers?
   - [Note]{.note}: Different instrument (encouragement) yields different compliers.
 
 ### DAG for Instrumental Variables
 
-:::{.columns}
-::: {.column width="60%"}
+```{tikz}
+%| fig-width: 7
+%| fig-height: 5
+%| fig-align: center
 
-```{dot}
-//| fig-width: 5
-//| fig-height: 7
+\usetikzlibrary{arrows.meta, positioning, calc, fit, backgrounds}
+\definecolor{plotbg}{HTML}{f0f1eb}
+\definecolor{plotfg}{HTML}{111111}
+\definecolor{gruvred}{HTML}{cc241d}
+\definecolor{gruvgray}{HTML}{928374}
+\definecolor{gruvblue}{HTML}{458588}
+\definecolor{gruvgreen}{HTML}{98971a}
+\definecolor{gruvorange}{HTML}{d65d0e}
+\definecolor{gruvpurple}{HTML}{b16286}
 
-digraph causal_diagram {
-    rankdir=LR;
-    bgcolor="transparent";
-    edge [
-		  arrowsize=0.5,
-		  // fontname="Helvetica,Arial,sans-serif"
-		  labeldistance=5,
-		  // labelfontcolor="#00000080"
-		  penwidth=2
-		  // style=dotted // dotted style symbolizes data transfer
-	  ]
-    node [
-      fontsize=24,
-      penwidth=2
-    ]
+\begin{tikzpicture}[
+    node distance=2.5cm,
+    dag node/.style={circle, draw=plotfg, thick, minimum size=1.1cm,
+                     font=\Large, text=plotfg},
+    annot/.style={draw=none, font=\small, minimum size=0pt, inner sep=2pt,
+                  align=center},
+    every edge/.style={-{Stealth[length=3mm]}, thick, color=plotfg},
+  ]
 
-    // Define nodes
-    U [label="U", shape=circle, style=dashed];
-    Z [label="Z", shape=circle, style=bold];
-    T [label="T", shape=circle, style=bold];
-    Y [label="Y", shape=circle, style=bold];
+  % Background
+  \fill[plotbg] (-1.8,-2.2) rectangle (8.5,3.5);
 
-    // Define edges
-    U -> T;
-    U -> Y;
-    Z -> T;
-    T -> Y;
-    Z -> Y [dir=forward,style=dotted, color=red, label="×", fontcolor=red, fontsize=32]; // Dotted red arrow (spurious correlation)
+  % Nodes
+  \node[dag node, color=gruvblue] (Z) {$Z$};
+  \node[dag node, color=gruvpurple] (T) [right=of Z] {$T$};
+  \node[dag node] (Y) [right=of T] {$Y$};
+  \node[dag node, dashed, draw=gruvgray, text=gruvgray] (U)
+    [above right=1.5cm and 1.25cm of T] {$U$};
 
-    // Blocked path marker
-    // { rank=min; Z}
-    { rank=same; Z;T;Y}
-    { rank=max; U}
-}
+  % Edges
+  \draw[->, color=gruvpurple, thick] (Z) -- (T);
+  \draw[->, color=plotfg] (T) -- (Y);
+  \draw[->, color=gruvgray] (U) -- (T);
+  \draw[->, color=gruvgray] (U) -- (Y);
 
+  % Exclusion restriction: dotted red path with × crossing it
+  \draw[->, densely dotted, color=gruvred, thick] (Z) to[bend right=30] (Y);
+  \node[draw=none, minimum size=0pt, font=\bfseries\Large, text=gruvred
+        ] at ($(Z)!0.5!(Y) + (0,-1.2)$) {$\times$};
+
+  % --- Assumption annotations ---
+
+  % 1. Random assignment: highlight Z node
+  \node[annot, text=gruvblue, anchor=south]
+    at ($(Z) + (-0.25,0.65)$) {Random\\assignment};
+
+  % 2. Exclusion restriction: label the crossed-out path
+  \node[annot, text=gruvred, anchor=north]
+    at ($(Z)!0.5!(Y) + (0,-1.3)$) {Exclusion restriction};
+
+  % 3. Monotonicity: label above Z→T edge
+  \node[annot, text=gruvpurple, anchor=south]
+    at ($(Z)!0.5!(T) + (0,0.25)$) {Monotonicity\\and relevance};
+
+\end{tikzpicture}
 ```
-
-:::
-::: {.column width="40%"}
-
-<br><br><br><br>
-
-1. Random assignment of $Z$.
-2. Exclusion restriction.
-3. Monotonicity.
-4. Relevance.
-
-:::
-:::
 
 ## Assessing Identification Assumptions {visibility="uncounted"}
 
@@ -952,9 +952,9 @@ $$
   $$
   \begin{align*}
   \text{bias} &= \frac{\E(Y_i \given Z_i = 1) - \E(Y_i \given Z_i = 0)}{\E(T_i \given Z_i = 1) - \E(T_i \given Z_i = 0)} - \tau_{LATE} = \\
-  &= \Big( \tau_{\text{c}} \times \Pr(\text{compliers}) + \tau_{\text{a}} \times \Pr(\text{always-takers}) \\
-  &\qquad + \tau_{\text{n}} \times \Pr(\text{never-takers}) + \tau_{\text{d}} \times \Pr(\text{defiers})\Big) \\
-  &\quad \Big/ \ \Big( \Pr(\text{compliers}) - \Pr(\text{defiers}) \Big) \\
+  &= \Big( \tau_{\text{c}} \times \Pr(\text{complier}) + \tau_{\text{a}} \times \Pr(\text{always-taker}) \\
+  &\qquad + \tau_{\text{n}} \times \Pr(\text{never-taker}) + \tau_{\text{d}} \times \Pr(\text{defier})\Big) \\
+  &\quad \Big/ \ \Big( \Pr(\text{complier}) - \Pr(\text{defier}) \Big) \\
   &\quad - \tau_{\text{c}}
   \end{align*}
   $$
@@ -1318,9 +1318,9 @@ sensemakr::sensemakr(
 
   $$
   \begin{align*}
-  \pi_{\text{a}} &= \Pr(\text{always-takers}) = \Pr(T_i = 1 \given Z_i = 0) \\
-  \pi_{\text{n}} &= \Pr(\text{never-takers}) = \Pr(T_i = 0 \given Z_i = 1) \\
-  \pi_{\text{c}} &= \Pr(\text{compliers}) \\
+  \pi_{\text{a}} &= \Pr(\text{always-taker}) = \Pr(T_i = 1 \given Z_i = 0) \\
+  \pi_{\text{n}} &= \Pr(\text{never-taker}) = \Pr(T_i = 0 \given Z_i = 1) \\
+  \pi_{\text{c}} &= \Pr(\text{complier}) \\
                  &= \Pr(T_i = 1 \given Z_i = 1) - \pi_{\text{a}} = \Pr(T_i = 0 \given Z_i = 0) - \pi_{\text{n}}
   \end{align*}
   $$
