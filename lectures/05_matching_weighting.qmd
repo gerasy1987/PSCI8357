@@ -996,7 +996,7 @@ cobalt::love.plot(
 
 - **Approach 2**: [Regression after Matching]{.highlight} [@abadie2022robust]
   
-  - Running a regression of $Y_i$ on $T_i$ and $\mathbf{X}_i$ only using the matched samples. 
+  - Running a regression of $Y_i$ on $T_i$ only using the matched samples. 
   - Matching as a pre-processing step (reduce model dependence).
   - We can use the regression-based estimator to compute the _ATT_.
 
@@ -1018,7 +1018,7 @@ cobalt::love.plot(
 
 - **Approach 2**: [Robust Post-Matching Inference]{.highlight} [@abadie2022robust]
   
-  - Cluster standard errors at the level of matches (or block bootstrap) to account for error interdependence (due to $\mathbf{X}$).
+  - Cluster standard errors at the level of matches (or block bootstrap) to account for error interdependence (e.g. due to $\mathbf{X}_i$).
   - Valid for matching without replacement and also directly on covariates.
   - Still many theoretical details are unknown.
 
