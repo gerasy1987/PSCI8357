@@ -28,6 +28,7 @@ format:
     scrollable: false
     transition: fade
     reference-location: document
+    slide-level: 3
     fig-cap-location: top
     include-before: [ '<script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {enableAssistiveMml: false}});</script>']
 fontsize: 26px
@@ -37,7 +38,7 @@ bibliography: ../_supp/psci8357.bib
 ---
 
 
-## {data-visibility="hidden"}
+### {data-visibility="hidden"}
 
 \(
   \def\E{{\mathbb{E}}}
@@ -81,7 +82,7 @@ ggplot2::theme_set(ggplot2::theme_minimal())
 thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 ```
 
-## Overview
+### Overview
 
 - In observational studies we can use regression based estimator under **CIA**.
 
@@ -107,7 +108,7 @@ thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 
 # Motivating Example
 
-## Motivating Example: Causal Effects of Abduction
+### Motivating Example: Causal Effects of Abduction
 
 <br>
 
@@ -117,7 +118,7 @@ thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 
 ![@blattman2010consequences](../_images/blattman_annan_2010.png){width=80%}
 
-## Motivating Example: Causal Effects of Abduction
+### Motivating Example: Causal Effects of Abduction
 
 <br>
 
@@ -136,9 +137,11 @@ thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
   - The impacts of military service on human capital and labor market outcomes.
   - **Results**: Schooling falls by nearly a year, skilled employment halves, and earnings drop by a third. Military service seems to be a poor substitute for schooling. Psychological distress is evident among those exposed to severe war violence and is not limited to ex-combatants.
 
-# What is Matching?
-  
-## Introduction to Matching Estimator
+# Matching
+
+## What is Matching? {visibility="uncounted"}
+
+### Introduction to Matching Estimator
 
 <br><br>
 
@@ -155,7 +158,7 @@ thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 - No parametric assumptions on how $Y$ depends on $\mathbf{X}$ $\implies$ arbitrary treatment effect heterogeneity
 
 
-## Setup and Matching Estimator
+### Setup and Matching Estimator
 
 - **Setting**: Observe $\{Y_i, T_i, \mathbf{X}_i\}_{i=1}^N$ where treatment is **not** randomly assigned
 
@@ -186,7 +189,7 @@ $$
 
 - [Why ATT?]{.note} Weaker requirements — only need $Y_i(0) \indep T_i \given \mathbf{X}_i$ and overlap where treated units exist, not across the full covariate support.
 
-## Why Does Matching Work?
+### Why Does Matching Work?
 
 <br>
 
@@ -219,7 +222,7 @@ $$
 
 - [Important]{.note}: Matching does **not** justify CIA, i.e. balance on observed $\mathbf{X}$ does not imply balance on unobservables. [We must still assume CIA to achieve causal identification.]{.highlight}
 
-## Example: Matching with One Covariate
+### Example: Matching with One Covariate
 
 - Obeserve outcome $Y$ for $7$ units, single covariate $X_i$, 3 treated (triangles) and 4 untreated (circles)
 
@@ -227,9 +230,151 @@ $$
 
 :::{.r-stack}
 
-![](../_images/matching_numberline_before.png){.fragment .fade-out data-fragment-index="1" fig-align="center" width=75%}
+::: {.fragment .fade-out data-fragment-index="1"}
+```{tikz}
+%| fig-width: 7
+%| fig-align: center
 
-![](../_images/matching_numberline.png){.fragment .fade-in data-fragment-index="1" fig-align="center" width=75%}
+\usetikzlibrary{arrows.meta, shapes.geometric, positioning, backgrounds}
+
+\definecolor{plotbg}{HTML}{f0f1eb}
+\definecolor{gruvblue}{HTML}{458588}
+\definecolor{gruvpurple}{HTML}{b16286}
+\definecolor{gruvgray}{HTML}{928374}
+\definecolor{gruvlight}{HTML}{d5c4a1}
+
+\begin{tikzpicture}[
+  >=Stealth,
+  tnode/.style={regular polygon, regular polygon sides=3,
+    minimum size=10mm, draw=black, line width=0.8pt, inner sep=0pt,
+    font=\footnotesize\bfseries},
+  cnode/.style={circle, minimum size=10mm, draw=black, line width=0.8pt,
+    inner sep=0pt, font=\footnotesize\bfseries},
+  yval/.style={font=\footnotesize},
+  arr/.style={->, dashed, line width=1pt}
+]
+
+% ---- Number line ----
+\draw[->, black, line width=0.8pt] (-5.5,0) -- (5.5,0) node[right, font=\normalsize\itshape] {$X_i$};
+\foreach \x in {-4,-3,...,4} {
+  \draw[black] (\x,0.12) -- (\x,-0.12);
+  \node[below, font=\small, black] at (\x,-0.2) {\x};
+}
+
+% ---- Group labels ----
+\node[font=\normalsize\bfseries, anchor=east] at (-5.8,1.6) {Treated};
+\node[font=\small, anchor=east] at (-5.8,1.05) {$Y_i = Y_i(1)$};
+\node[font=\normalsize\bfseries, anchor=east] at (-5.8,-1.6) {Untreated};
+\node[font=\small, anchor=east] at (-5.8,-1.05) {$Y_i = Y_i(0)$};
+
+% ---- Treated units (all neutral color) ----
+\node[tnode, fill=gruvlight!50] (t2) at (1,1.6) {1};
+\node[yval, above=1mm of t2] {$i{=}2$};
+
+\node[tnode, fill=gruvlight!50] (t1) at (3,1.6) {6};
+\node[yval, above=1mm of t1] {$i{=}1$};
+
+\node[tnode, fill=gruvlight!50] (t3) at (4,1.6) {0};
+\node[yval, above=1mm of t3] {$i{=}3$};
+
+% ---- Control units (all neutral color) ----
+\node[cnode, fill=gruvlight!50] (c4) at (2,-1.6) {0};
+\node[yval, below=1mm of c4] {$i{=}4$};
+
+\node[cnode, fill=gruvlight!50] (c5) at (3,-1.6) {9};
+\node[yval, below=1mm of c5] {$i{=}5$};
+
+\node[cnode, fill=gruvlight!50] (c6) at (-2,-1.6) {1};
+\node[yval, below=1mm of c6] {$i{=}6$};
+
+\node[cnode, fill=gruvlight!50] (c7) at (-4,-1.6) {1};
+\node[yval, below=1mm of c7] {$i{=}7$};
+
+% Background fill covering entire bounding box
+\begin{pgfonlayer}{background}
+  \fill[plotbg] (current bounding box.south west) rectangle (current bounding box.north east);
+\end{pgfonlayer}
+
+\end{tikzpicture}
+```
+:::
+
+::: {.fragment .fade-in data-fragment-index="1"}
+```{tikz}
+%| fig-width: 7
+%| fig-align: center
+
+\usetikzlibrary{arrows.meta, shapes.geometric, positioning, backgrounds}
+
+\definecolor{plotbg}{HTML}{f0f1eb}
+\definecolor{gruvblue}{HTML}{458588}
+\definecolor{gruvpurple}{HTML}{b16286}
+\definecolor{gruvgray}{HTML}{928374}
+
+\begin{tikzpicture}[
+  >=Stealth,
+  tnode/.style={regular polygon, regular polygon sides=3,
+    minimum size=10mm, draw=black, line width=0.8pt, inner sep=0pt,
+    font=\footnotesize\bfseries},
+  cnode/.style={circle, minimum size=10mm, draw=black, line width=0.8pt,
+    inner sep=0pt, font=\footnotesize\bfseries},
+  yval/.style={font=\footnotesize},
+  arr/.style={->, dashed, line width=1pt}
+]
+
+% ---- Number line ----
+\draw[->, black, line width=0.8pt] (-5.5,0) -- (5.5,0) node[right, font=\normalsize\itshape] {$X_i$};
+\foreach \x in {-4,-3,...,4} {
+  \draw[black] (\x,0.12) -- (\x,-0.12);
+  \node[below, font=\small, black] at (\x,-0.2) {\x};
+}
+
+% ---- Group labels ----
+\node[font=\normalsize\bfseries, anchor=east] at (-5.8,1.6) {Treated};
+\node[font=\small, anchor=east] at (-5.8,1.05) {$Y_i = Y_i(1)$};
+\node[font=\normalsize\bfseries, anchor=east] at (-5.8,-1.6) {Untreated};
+\node[font=\small, anchor=east] at (-5.8,-1.05) {$Y_i = Y_i(0)$};
+
+% ---- Treated units (Y inside shape, i as label) ----
+\node[tnode, fill=gruvpurple!30] (t2) at (1,1.6) {1};
+\node[yval, above=1mm of t2] {$i{=}2$};
+
+\node[tnode, fill=gruvblue!30] (t1) at (3,1.6) {6};
+\node[yval, above=1mm of t1] {$i{=}1$};
+
+\node[tnode, fill=gruvblue!30] (t3) at (4,1.6) {0};
+\node[yval, above=1mm of t3] {$i{=}3$};
+
+% ---- Matched controls ----
+\node[cnode, fill=gruvpurple!30] (c4) at (2,-1.6) {0};
+\node[yval, below=1mm of c4] {$i{=}4$};
+
+\node[cnode, fill=gruvblue!30] (c5) at (3,-1.6) {9};
+\node[yval, below=1mm of c5] {$i{=}5$};
+
+% ---- Unmatched controls ----
+\node[cnode, fill=gruvgray!15, draw=gruvgray, text=gruvgray] (c6) at (-2,-1.6) {1};
+\node[yval, below=1mm of c6, text=gruvgray] {$i{=}6$};
+
+\node[cnode, fill=gruvgray!15, draw=gruvgray, text=gruvgray] (c7) at (-4,-1.6) {1};
+\node[yval, below=1mm of c7, text=gruvgray] {$i{=}7$};
+
+% ---- Match arrows ----
+% i=1 (X=3) → i=5 (X=3)
+\draw[arr, gruvblue] (t1.south) to[bend right=12] (c5.north);
+% i=2 (X=1) → i=4 (X=2)
+\draw[arr, gruvpurple] (t2.south) to[bend right=20] (c4.north);
+% i=3 (X=4) → i=5 (X=3)
+\draw[arr, gruvblue] (t3.south) to[bend left=25] (c5.north east);
+
+% Background fill covering entire bounding box
+\begin{pgfonlayer}{background}
+  \fill[plotbg] (current bounding box.south west) rectangle (current bounding box.north east);
+\end{pgfonlayer}
+
+\end{tikzpicture}
+```
+:::
 
 :::
 
@@ -241,9 +386,9 @@ $$
 $$
 :::
 
-# Distance Metrics (Multiple Covariates)
+## Distance Metrics {visibility="uncounted"}
 
-## The Curse of Dimensionality
+### The Curse of Dimensionality
 
 - How do we define the "closest" when $\mathbf{X}_i$ contains $>1$ variable?
 
@@ -297,7 +442,7 @@ ggplot(nn_dists, aes(x = d, y = nn_dist)) +
 :::
 :::
 
-## Distance Metrics for Matching
+### Distance Metrics for Matching
 
 - [Idea]{.note}: With many covariates, we can use some [distance metric]{.highlight}... [but which one?]{.fragment}
 
@@ -326,7 +471,7 @@ ggplot(nn_dists, aes(x = d, y = nn_dist)) +
   4. Many others...
   :::
 
-## Choosing a Distance Metric
+### Choosing a Distance Metric
 
 - [Euclidean]{.highlight}: Simple, but treats all covariates equally
   - Sensitive to **scale**: a covariate in thousands dominates one in decimals
@@ -348,7 +493,7 @@ ggplot(nn_dists, aes(x = d, y = nn_dist)) +
 
 - [Practical guidance]{.note}: Start with Mahalanobis; if balance is poor, try genetic matching. With high-dimensional $\mathbf{X}$, consider **propensity score** matching instead (next section).
 
-## Mahalanobis Distance: Numeric Example
+### Mahalanobis Distance: Numeric Example
 
 :::{.columns .small-font}
 ::: {.column width="60%"}
@@ -385,7 +530,7 @@ $$
 
 - Will the ordering of distances be the same if $\Sigma_{\mathbf{X}} = \begin{pmatrix} 1 & 0.9 \\ 0.9 & 1 \end{pmatrix}$?
 
-## Mahalanobis Distance: Graphical Illustration
+### Mahalanobis Distance: Graphical Illustration
 
 <br>
 
@@ -456,7 +601,7 @@ mahal_plot(data2, data_exp2)
 
 ```
 
-## Example: Matching with Mahalanobis Distance
+### Example: Matching with Mahalanobis Distance
 
 <br>
 
@@ -529,7 +674,7 @@ match_out2 <-
 matched_df2 <- match.data(match_out2)
 ```
 
-## Example: Matching with Mahalanobis Distance
+### Example: Matching with Mahalanobis Distance
 
 <br>
 
@@ -603,9 +748,9 @@ p1 +
   theme(legend.position = "bottom")
 ```
 
-# Propensity Score Matching
+## Propensity Score Matching {visibility="uncounted"}
 
-## Propensity Score and Balancing Property
+### Propensity Score and Balancing Property
 
 <br><br>
 
@@ -626,7 +771,7 @@ p1 +
 
   - [Note]{.note}: This holds by the definition of the propensity score alone (no CIA needed!).
 
-## Proof: Balancing Property
+### Proof: Balancing Property
 
 - **Trick**: To prove conditional independence between two random variables $A$ and $B$ given $C$, all you need is to show that $\Pr(A \given B, C) = \Pr(A \given C)$. 
 
@@ -658,7 +803,7 @@ $$
 
 - Therefore, $\Pr(T_i=1|\pi(\mathbf{X}_i), \mathbf{X}_i) = \Pr(T_i=1|\pi(\mathbf{X}_i)) \implies T_i \ \indep \ \mathbf{X}_i \given \pi(\mathbf{X}_i)$. $\qedknitr$ 
 
-## Identification with the Propensity Score
+### Identification with the Propensity Score
 
 - Suppose the following assumptions hold:
   
@@ -688,7 +833,7 @@ $$
 
   - [Note]{.note}: You only need to model $\Pr(T=1 \given \mathbf{X})$ (binary classification), not $\E[Y \given T, \mathbf{X}]$ (outcome model).
 
-## Proof of the Identification Result
+### Proof of the Identification Result
 
 - Again: To prove conditional independence between two random variables $A$ and $B$ given $C$, all you need is to show that $\Pr(A \given B, C) = \Pr(A \given C)$.
 
@@ -713,7 +858,7 @@ $$
 
 - Therefore, $\Pr(T_i=1\given Y_i(1),Y_i(0),\pi(\mathbf{X}_i)) = \Pr(T_i=1\given \pi(\mathbf{X}_i))$, which implies $\{Y_i(1), Y_i(0)\} \ \indep \ T_i \given \pi(\mathbf{X}_i)$ -- **CIA** just given $\pi(\mathbf{X}_i)$. $\qedknitr$
 
-## Example: Matching with Propensity Score
+### Example: Matching with Propensity Score
 
 - Matching on manually estimated $\widehat{\pi}(\mathbf{X}_i)$ as a single covariate is equivalent to letting `MatchIt` estimate the PS internally
 
@@ -760,7 +905,7 @@ summary(matched_df_ps2)
 (matched_df_ps1$subclass == matched_df_ps2$subclass) |> table()
 ```
 
-## Example: Matching with Propensity Score
+### Example: Matching with Propensity Score
 
 <br>
 
@@ -841,9 +986,9 @@ p_before +
 
 ```
 
-# Covariate Balance
+## Covariate Balance {visibility="uncounted"}
 
-## Checking Covariate Balance
+### Checking Covariate Balance
 
 <br>
 
@@ -869,7 +1014,7 @@ p_before +
 
 Hansen (2004), *Journal of the American Statistical Association*. -->
 
-## Kolmogorov-Smirnov (KS) Test
+### Kolmogorov-Smirnov (KS) Test
 
 - The [KS test]{.highlight} is used to test whether two random variables are sampled from the same distribution.
 
@@ -898,7 +1043,7 @@ Hansen (2004), *Journal of the American Statistical Association*. -->
 
 - [Intuition]{.note}: $D$ measures the **maximum vertical gap** between the CDFs of treated and untreated groups. A large $D$ means the covariate distributions differ substantially $\implies$ poor balance.
 
-## Example: Checking Covariate Balance
+### Example: Checking Covariate Balance
 
 <br>
 
@@ -917,7 +1062,7 @@ summary(match_out_ps)
 
 ```
 
-## Example: Checking Covariate Balance
+### Example: Checking Covariate Balance
 
 ```{r}
 #| label: matching_balance_plot
@@ -940,9 +1085,9 @@ cobalt::love.plot(
 
 ```
 
-# Matching in Practice
+## Matching in Practice {visibility="uncounted"}
 
-## Matching in Practice
+### Matching in Practice
 
 1. Choose pre-treatment covariates $\mathbf{X}_i$ to satisfy the identification assumptions (CIA and Positivity).
 
@@ -978,7 +1123,7 @@ cobalt::love.plot(
     :::
 
 
-## Post-Matching Estimation
+### Post-Matching Estimation
 
 <br>
 
@@ -1000,7 +1145,7 @@ cobalt::love.plot(
   - Matching as a pre-processing step (reduce model dependence).
   - We can use the regression-based estimator to compute the _ATT_.
 
-## Post-Matching Inference
+### Post-Matching Inference
 
 <br>
 
@@ -1022,7 +1167,7 @@ cobalt::love.plot(
   - Valid for matching without replacement and also directly on covariates.
   - Still many theoretical details are unknown.
 
-## Example: Estimation and Inference After Matching
+### Example: Estimation and Inference After Matching
 
 <br>
 
@@ -1098,7 +1243,9 @@ knitr::kable(
 
 # Weighting
 
-## Motivation for Weighting Estimator
+## Inverse Probability Weighting {visibility="uncounted"}
+
+### Motivation for Weighting Estimator
 
 - We now consider an alternative to matching that addresses some of its practical limitations.
 
@@ -1120,7 +1267,7 @@ knitr::kable(
   $$
 
 
-## From Experiments to Observational Studies
+### From Experiments to Observational Studies
 
 - Recall from [experiments]{.highlight}: the IPW estimator generalizes difference-in-means to unequal treatment probabilities:
 
@@ -1144,7 +1291,7 @@ $$
 
 - Similar expression for _ATT_: $\ \widehat{\tau}_{IPW,T} = \frac{1}{N_1} \sum_{i=1}^N \left( T_i Y_i - \frac{\widehat{\pi}(\mathbf{X}_i)(1-T_i)Y_i}{1-\widehat{\pi}(\mathbf{X}_i)} \right)$
 
-## Efficiency of Weighting Estimators
+### Efficiency of Weighting Estimators
 
 <br>
 
@@ -1162,7 +1309,7 @@ $$
      - True PS only adjusts for _expected_ differences between groups.
      - [Important]{.alert}: Only true if the propensity score model is correctly specified!
 
-## Hájek (Stabilized) Estimator
+### Hájek (Stabilized) Estimator
 
 <br><br>
 
@@ -1178,7 +1325,7 @@ $$
 
 - [Note]{.note}: Hájek can still be slightly biased (ratio estimator), but the bias vanishes as $N \to \infty$.
 
-## Weighted Least Squares
+### Weighted Least Squares
 
 <br><br>
 
@@ -1194,7 +1341,7 @@ $$
 
 - [Note]{.note}: Can also be used for _ATT_ and _ATC_ estimation with weight of $1$ given to units in treated or untreated group respectively.
 
-## Simulation: HT vs Hájek, True vs Estimated PS
+### Simulation: HT vs Hájek, True vs Estimated PS
 
 <br>
 
@@ -1314,7 +1461,7 @@ ggplot(sims, aes(x = Estimate, y = Estimator, fill = Estimator)) +
 
 ```
 
-## Weighting in Practice: Estimation
+### Weighting in Practice: Estimation
 
 <br>
 
@@ -1334,9 +1481,9 @@ ggplot(sims, aes(x = Estimate, y = Estimator, fill = Estimator)) +
   - Equivalent to running regression of $Y_i\sqrt{w_i}$ on $T_i\sqrt{w_i}$ and $\mathbf{X}_i \sqrt{w_i}$ (do not forget about intercept!).
   - Generalization of Hájek Estimator.
 
-# Weighting in Practice
+## Weighting in Practice {visibility="uncounted"}
 
-## Weighting in Practice: Inference
+### Weighting in Practice: Inference
 
 
 <br>
@@ -1364,7 +1511,7 @@ ggplot(sims, aes(x = Estimate, y = Estimator, fill = Estimator)) +
 
   - Standard sandwich/GMM variance formula for the joint system automatically propagates PS estimation uncertainty into $\widehat{\tau}$ SEs.
 
-## Example: Estimation After Weighting
+### Example: Estimation After Weighting
 
 <br>
 
@@ -1438,7 +1585,7 @@ knitr::kable(
 
 ```
 
-## Problems with Weighting: Covariate Balancing
+### Problems with Weighting: Covariate Balancing
 
 <br>
 
@@ -1462,15 +1609,15 @@ knitr::kable(
 
 - [Note]{.note}: Attractive when few covariates and covariate distributions are convex and unimodal over their support, in which case balancing on a few moments should work.
 
-# Combining Weighting and Regression
+## Doubly Robust Estimation {visibility="uncounted"}
 
-## Doubly Robust Estimator
+### Doubly Robust Estimator
 
 <br>
 
 ![](../_images/doubly_robust.png){height=90% fig-align="center"}
 
-## Doubly Robust Estimator: AIPW
+### Doubly Robust Estimator: AIPW
 
 <br>
 
@@ -1486,7 +1633,7 @@ $$
 
 - The IPW term corrects for bias in $\widehat{\mu}_t$ when the outcome model is misspecified.
 
-## Doubly Robust Estimator: Properties
+### Doubly Robust Estimator: Properties
 
 <br>
 
@@ -1504,7 +1651,7 @@ $$
 
 - **Further Reading:** @chernozhukov2018double, @mercatanti2014debit
 
-## Example: Benefits of Doubly Robust Estimation
+### Example: Benefits of Doubly Robust Estimation
 
 <br>
 
@@ -1649,9 +1796,9 @@ p1 + p2 + plot_layout(ncol = 2, guides = "collect", axes = "collect_y") & theme(
 
 ```
 
-# Sensitivity Analysis
+# Sensitivity Analyses
 
-## Sensitivity Analysis
+### Sensitivity Analysis
 
 - **Question**: How robust are our results to violations of CIA?
 
@@ -1671,7 +1818,7 @@ p1 + p2 + plot_layout(ncol = 2, guides = "collect", axes = "collect_y") & theme(
   
 - **Approach 2**: Non-parametric, based on the differences in probability of treatment assignment [@rosenbaum2002sensitivity].
 
-## OVB Sensitivity Analysis
+### OVB Sensitivity Analysis
 
 - Recall: the short regression of $Y_i$ on $T_i$ (omitting confounders) recovers
   $$
@@ -1693,7 +1840,7 @@ p1 + p2 + plot_layout(ncol = 2, guides = "collect", axes = "collect_y") & theme(
   - We need additional parametric assumptions to accommodate $X$, non-binary $U$ or $D$, etc.
   - Extended to partial $R^2$ by @cinelli2020making.
 
-## Example: Effects of Child Soldiering in Uganda
+### Example: Effects of Child Soldiering in Uganda
 
 :::{.columns}
 ::: {.column style="margin-top: 3em; width:40%;"}
@@ -1743,7 +1890,7 @@ plot(sens, lim = 0.1, nlevels = 3)
 :::
 :::
 
-## Non-Parametric Sensitivity Analysis
+### Non-Parametric Sensitivity Analysis
 
 <br>
 
@@ -1762,7 +1909,7 @@ plot(sens, lim = 0.1, nlevels = 3)
 
   - **Without CIA**: $\pi_i(X_i) \gtrless \pi_j(X_j)$ even if $X_i = X_j$, due to unobserved confounders.
 
-## Rosenbaum's $\Gamma$
+### Rosenbaum's $\Gamma$
 
 - Quantify the degree of confounding by bounding the **odds ratio** by $\Gamma$:
   $$
@@ -1785,13 +1932,13 @@ plot(sens, lim = 0.1, nlevels = 3)
   
   4.  Iterate through 1-3 with different $\Gamma$ values.
 
-## Wilcoxon's Signed Rank Test
+### Wilcoxon's Signed Rank Test
 
 <br>
 
 - Step 3 of the procedure requires a test statistic for matched pairs.
 
-- Standard choice: the [Wilcoxon signed rank test]{.highlight} (nonparametric).
+- Standard choice: the [Wilcoxon signed rank test]{.highlight}.
 
 - Under the sharp null ($H_0\colon Y_i(1) = Y_i(0)\ \forall\, i$), $W$ is uniformly distributed.
 
@@ -1807,7 +1954,7 @@ plot(sens, lim = 0.1, nlevels = 3)
   4.  $W = \sum_{i:\, \textrm{sgn}(\Delta_i) > 0} R_i$ (sum of positive signed ranks).
   5.  Compare $W$ to a critical value.
 
-## Example: Exact Pair Matching w/o Replacement
+### Example: Exact Pair Matching w/o Replacement
 
 Under **CIA**: $\Gamma = 1$, $\max\pi(X_i) = \min\pi(X_i) = 0.5$
 
@@ -1828,7 +1975,7 @@ Under **CIA**: $\Gamma = 1$, $\max\pi(X_i) = \min\pi(X_i) = 0.5$
 
 - $p$-value for the sharp null is: $p = \Pr(W \geq 9 \mid H_0) = 0.125$
 
-## Constructing Worst and Best Case Bounds
+### Constructing Worst and Best Case Bounds
 
 - With $\Gamma > 1$, each pair $i$ has $\pi_i \in [1/(1+\Gamma),\, \Gamma/(1+\Gamma)]$. We choose $\pi_i$ **pair by pair** to get the most/least favorable $p$-value.
 
@@ -1850,7 +1997,7 @@ Under **CIA**: $\Gamma = 1$, $\max\pi(X_i) = \min\pi(X_i) = 0.5$
 
 - [General principle]{.highlight}: The bounds bracket the true $p$-value. If even the worst case is significant, the finding is robust to confounding at level $\Gamma$.
 
-## Example: Worst Case, $\Gamma = 2$
+### Example: Worst Case, $\Gamma = 2$
 
 With unobserved confounding: $\Gamma = 2$, $\max\pi(X_i) = 2/3$,  $\min\pi(X_i) = 1/3$
 
@@ -1879,7 +2026,7 @@ With unobserved confounding: $\Gamma = 2$, $\max\pi(X_i) = 2/3$,  $\min\pi(X_i) 
 
 - Maximum $p$-value: $p = \Pr(W \geq 9 \mid H_0) = 0.296$ (large $W$ values now more probable under $H_0$).
 
-## Example: Best Case, $\Gamma = 2$
+### Example: Best Case, $\Gamma = 2$
 
 With unobserved confounding: $\Gamma = 2$, $\max\pi(X_i) = 2/3$,  $\min\pi(X_i) = 1/3$
 
@@ -1908,7 +2055,7 @@ With unobserved confounding: $\Gamma = 2$, $\max\pi(X_i) = 2/3$,  $\min\pi(X_i) 
 
 - min $p$-value for the sharp null is: $p = \Pr(W \geq 9 \mid H_0) = 0.037$
 
-## Example: Blattman and Annan on Child Soldiers in Uganda
+### Example: Blattman and Annan on Child Soldiers in Uganda
 
 ```{r}
 #| label: matching_sensitivity
@@ -1942,7 +2089,7 @@ x$bounds |>
 
 # Summary
 
-## Summary
+### Summary
 
 <br>
 
@@ -1984,4 +2131,4 @@ $$
 
 Averaging over $f(\mathbf{x})$ yields $\E\{Y_i(1)\}$. Analogous for $\E\{Y_i(0)\}$. $\qedknitr$ -->
 
-## References {visibility="uncounted"}
+### References {visibility="uncounted"}
