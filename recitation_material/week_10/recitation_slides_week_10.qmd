@@ -1,0 +1,57 @@
+---
+title: "Instrumental Variables in R Practicum"
+author: "Alexander Dean"
+subtitle: "Recitation Period 7"
+institute: "Vanderbilt University"
+email: "alexander.r.dean@vanderbilt.edu"
+date: today
+format: 
+  revealjs:
+    theme: dark
+    footer: "Alexander Dean (Vanderbilt University)"
+    slide-number: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    self-contained-math: true
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+fontsize: 32px
+editor: source
+---
+
+## What We Will Cover Today
+
+1. Implementing instrumental variables in $\texttt{R}$
+
+## A Research Question:
+
+RQ(s): What is the return to an additional year of schooling on hourly wages, and how do our conclusions change once we instrument for schooling with proximity to college?
+
+. . . 
+
+Hypotheses:
+    - $H_0$: An additional year of schooling has no return on hourly wages
+    - $H_1$: An additional year of schooling has a (positive) return on hourly wages
+
+## The Data:
+
+1. Data Source: Americas Barometer 2023 survey wave from CGD
+2. Independent Variable: Years of schooling
+3. Instrument: Whether respondent grew up near a college
+4. Dependent Variable: Hourly wages in 1976, measured in cents
+5. Covariates: labor market experience, ethnicity, living in a metropolitan area, living in the south, and your father's education
+
+# But Wait...
+
+## What are Instrumental Variables?
+
+. . . 
+
+1. Alternative identification strategy that doesn't rely on CIA to interpret regression causally
+2. Instead, we have a new identification framework (and new assumptions)— let's see!
