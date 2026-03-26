@@ -74,6 +74,8 @@ pacman::p_load(
 future::plan(multisession, workers = parallel::detectCores() - 2)
 
 # set theme for plots
+ggplot2::theme_set(ggplot2::theme_minimal())
+
 thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 ```
 
@@ -174,17 +176,16 @@ thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 
 . . .
 
-- **Political information bias**: effects of campaign on voting behavior
-- **Ability bias**: effects of education on wages
-- **Healthy-user bias**: effects of exercises on blood pressure
+- Common in [encouragement designs]{.highlight}, where we randomize the encouragement to receive the treatment rather than the receipt of the treatment itself.
 
 . . .
 
 - Settings: 
 
-  - [Encouragement design]{.highlight}: randomize the encouragement to receive the treatment rather than the receipt of the treatment itself.
+  - **Political information bias**: effects of campaign on voting behavior
+  - **Ability bias**: effects of education on wages
+  - **Healthy-user bias**: effects of exercises on blood pressure
 
-  - [Instrumental variables]{.highlight}: Observational analogue (sort of) of randomized encouragements.
 
 ### Example: Perspective-Taking Experiment
 
@@ -340,7 +341,7 @@ thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 
 ### Identification of LATE (CACE)
 
-- **Causal estimand 2**: [Local ATE (Complier Average Treatment Effect)]{.highlight}
+- **Causal estimand 2**: [Local ATE (Complier Average Causal Effect)]{.highlight}
 
   $$
   \begin{align*}
@@ -578,27 +579,6 @@ thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
     - Regression of treatment on instrument: Estimate is $0.745$ ($p$-value $= 0.00$).
     - $F$-statistic $= 579$, which is (_much_) larger than $10$ [@stock2005asymptotic].
 
-### Example: Relevance
-
-<br>
-
-```{r}
-#| label: relevance_transphobia
-#| echo: true
-#| eval: true
-#| output-location: fragment
-
-bk_data <-
-  readr::read_rds("../_data/broockman_kalla_subset.rds") |>
-  as_tibble() |>
-  dplyr::filter(!is.na(trans.tolerance.dv.t1))
-
-first_stage <- lm(treatment.delivered ~ treat_ind, data = bk_data)
-
-summary(first_stage)
-
-```
-
 ### Example: Vietnam Draft Lottery
 
 <br>
@@ -623,45 +603,14 @@ summary(first_stage)
 
 4.  [Relevance]{.highlight}:
 
-    - Regression of treatment on instrument: Estimate is $0.167$ ($p$-value $= 0.00$).
+    - Regression of treatment on instrument: Estimate is $0.159$ ($p$-value $= 0.00$).
     - $F$-statistic $= 13.52$, which is larger than $10$ [@stock2005asymptotic].
 
-## Special Case: One-Sided Noncompliance {visibility="uncounted"}
-
-### One-Sided Noncompliance
-
-<br>
-
-- Sometimes, control units have no access to the treatment.
-
-- If so, we have [one-sided noncompliance]{.highlight} where $T_i(0) = 0$ for all $i$.
-
-. . .
-
-- One-sided noncompliance makes things easier:
-  
-  - Rules out **always-takers** and **defiers** $\Longrightarrow$ Monotonicity is **guaranteed** to hold!
-
-  - Some individuals can be identified to be compliers or never-takers $\Longrightarrow$ easier to estimate proportion of compliers!
-
-|                  | $Z_i = 1$               | $Z_i = 0$               |
-|------------------|:-----------------------:|:---------------------:|
-| $T_i = 1$        | Complier/~~Always-taker~~   | ~~Defier~~/~~Always-taker~~   |
-| $T_i = 0$          | ~~Defier~~/Never-taker      | Complier/Never-taker  |
-
-. . .
-
--  The _LATE_ is then equal to the _ATT_, which might be easier to interpret:
-  
-   $$
-   \tau_{LATE} = \E[Y_i(t=1) - Y_i(t=0) \given T_i(1)=1] = \tau_{ATT}
-   $$
+# Estimation and Inference for IV
 
 ## Estimating the Size of the Complier Group {visibility="uncounted"}
 
 ### Estimating the Size of the Complier Group
-
-<br><br>
 
 - Since we never observe both $T_i(0)$ and $T_i(1)$ for the same $i$, we cannot identify individual units as compliers.
 
@@ -674,8 +623,41 @@ summary(first_stage)
 
 . . .
 
-- Perspective-Taking Experiment: $0.75$
-- Vietnam Draft Lottery: $0.16$
+- Under [monotonicity]{.highlight} (no defiers), the principal strata simplify:
+
+|                  | $Z_i = 1$               | $Z_i = 0$               |
+|------------------|:-----------------------:|:------------------------:|
+| $T_i = 1$        | Complier/Always-taker   | ~~Defier~~/Always-taker  |
+| $T_i = 0$        | ~~Defier~~/Never-taker  | Complier/Never-taker     |
+
+. . .
+
+- [Random assignment]{.highlight} of $Z$ $\implies$ expected proportions of always-takers, never-takers, and compliers are the same within $Z$ subgroups $\implies$ can estimate $\pi_a$, $\pi_n$, and $\pi_c$ from observed data.
+
+- Perspective-Taking Experiment: $\hat{\pi}_c = 0.75$
+- Vietnam Draft Lottery: $\hat{\pi}_c = 0.16$
+
+### Example: Relevance
+
+<br>
+
+```{r}
+#| label: relevance_transphobia
+#| echo: true
+#| eval: true
+#| output-location: fragment
+
+bk_data <-
+  readr::read_rds("../_data/broockman_kalla_subset.rds") |>
+  as_tibble() |>
+  dplyr::filter(!is.na(trans.tolerance.dv.t1))
+
+first_stage <- lm(treatment.delivered ~ treat_ind, data = bk_data)
+
+summary(first_stage)
+
+```
+
 
 ### Example: Size of the Complier Group
 
@@ -683,8 +665,34 @@ summary(first_stage)
 
 ![](../_images/angrist_compliance.png){width=90% fig-align=center}
 
+### One-Sided Noncompliance
 
-# Estimation and Inference for IV
+<br>
+
+- Sometimes, control units have no access to the treatment.
+
+- If so, we have [one-sided noncompliance]{.highlight} where $T_i(0) = 0$ for all $i$.
+
+. . .
+
+- One-sided noncompliance makes things easier:
+
+  - Rules out **always-takers** (or **never-takers**) and **defiers** $\Longrightarrow$ Monotonicity is **guaranteed** to hold!
+
+  - Some individuals can be identified to be compliers or never-takers $\Longrightarrow$ easier to estimate proportion of compliers!
+
+|                  | $Z_i = 1$               | $Z_i = 0$               |
+|------------------|:-----------------------:|:---------------------:|
+| $T_i = 1$        | Complier/~~Always-taker~~   | ~~Defier~~/~~Always-taker~~   |
+| $T_i = 0$          | ~~Defier~~/Never-taker      | Complier/Never-taker  |
+
+. . .
+
+-  The _LATE_ is then equal to the _ATT_, which might be easier to interpret:
+
+   $$
+   \tau_{LATE} = \E[Y_i(t=1) - Y_i(t=0) \given T_i(1)=1] = \tau_{ATT}
+   $$
 
 ### Wald Estimator
 
@@ -712,7 +720,7 @@ $$
 
 ### TSLS: Binary Treatment and Instrument
 
-<br><br>
+<br>
 
 - Consider two equations:
   
@@ -734,7 +742,7 @@ $$
   \E(\varepsilon_i \given Z_i) = \E(\varepsilon_i), \quad \text{and} \quad \E(\eta_i \given Z_i) = \E(\eta_i)
   $$
 
-  - **(A2, exclusion restriction)**: $Z_i$ not in the $Y_i$ model
+  - **(A2, exclusion restriction)**: $Z_i$ not in the $Y_i$ model -- i.e. $Z_i$ affects $Y_i$ [only through]{.highlight} $T_i$, so there is no direct $Z_i \to Y_i$ path. This is what allows us to write $Y_i = \alpha + \tau T_i + \varepsilon_i$ without a $Z_i$ term, and together with A1 ensures $\cov(Z_i, \varepsilon_i) = 0$
 
   - **(A3, relevance)**: $\gamma \neq 0$
 
@@ -848,25 +856,52 @@ knitr::kable(
   
   :::fragment
   - _Negatively affected_ ruled out by monotonicity; Effects among _unaffected_ ruled out by exclusion restriction.
-  - Still three unknown proportions $\rightsquigarrow$ [cannot identify all causal types...]{.fragment}
   :::
 
 ### TSLS: Multi-Valued Treatments
 
-- Let $C_i = jk$ be an indicator for compliance type $T_i(1) = j$ and $T_i(0) = k$.
+- [Principal strata]{.highlight} for $K = 3$, binary $Z_i$ (denote strata by $(T_i(0), T_i(1))$):
 
-  - People that are moved from $k$ to $j$ by the instrument.
-  - Let $\pi_{jk} = \Pr(T_i(1) = j, T_i(0) = k)$ be the strata size.
+|                  | $Z_i = 1$                              | $Z_i = 0$                              |
+|------------------|:---------------------------------------:|:---------------------------------------:|
+| $T_i = 0$        | (0,0) / ~~(1,0)~~ / ~~(2,0)~~          | (0,0) / (0,1) / (0,2)                  |
+| $T_i = 1$        | (0,1) / (1,1) / ~~(2,1)~~              | ~~(1,0)~~ / (1,1) / (1,2)              |
+| $T_i = 2$        | (0,2) / (1,2) / (2,2)                  | ~~(2,0)~~ / ~~(2,1)~~ / (2,2)          |
+
+. . .
+
+- Monotonicity ($T_i(1) \geq T_i(0)$) $\implies$ $\pi_{10} = \pi_{20} = \pi_{21} = 0$.
+
+- From observed $\Pr(T_i = t \given Z_i = z)$ we can directly identify:
+  $$
+  \pi_{00} = \Pr(T_i = 0 \given Z_i = 1), \qquad \pi_{22} = \Pr(T_i = 2 \given Z_i = 0)
+  $$
+
+. . .
+
+- Remaining **four** unknowns ($\pi_{11}, \pi_{01}, \pi_{02}, \pi_{12}$) satisfy only **two** independent equations:
+  $$
+  \pi_{11} + \pi_{12} = \Pr(T_i = 1 \given Z_i = 0), \qquad \pi_{11} + \pi_{01} = \Pr(T_i = 1 \given Z_i = 1)
+  $$
+
+  $\rightsquigarrow$ [Cannot separately identify strata proportions]{.alert} (2 degrees of freedom)
+
+### TSLS: Multi-Valued Treatments
+
+- Let $C_i = jk$ be an indicator for compliance type $T_i(0) = j$ and $T_i(1) = k$.
+
+  - People that are moved from $j$ to $k$ by the instrument.
+  - Let $\pi_{jk} = \Pr(T_i(0) = j, T_i(1) = k)$ be the strata size.
 
 . . .
 
 -  We can show that the _TSLS_ estimator converges to:
 
    $$
-   \widehat{\tau}_{2SLS} \xrightarrow{p} \sum_{k=0}^{K-1} \sum_{j=k+1}^{K-1} \omega_{jk} \E \left( \frac{Y_i(1) - Y_i(0)}{j - k} \given C_i = jk \right)
+   \widehat{\tau}_{2SLS} \xrightarrow{p} \sum_{j=0}^{K-1} \sum_{k=j+1}^{K-1} \omega_{jk} \E \left( \frac{Y_i(1) - Y_i(0)}{k - j} \given C_i = jk \right)
    $$
 
-   where $\omega_{jk} = \frac{(j - k) \pi_{jk}}{\sum_{s=0}^{K-1} \sum_{t=s+1}^{K-1} (t - s) \pi_{st}}$
+   where $\omega_{jk} = \frac{(k - j) \pi_{jk}}{\sum_{s=0}^{K-1} \sum_{t=s+1}^{K-1} (t - s) \pi_{st}}$
 
 -  [Intuition]{.note}: a weighted average of effects per [dose]{.highlight} for each affected type.
 
@@ -899,6 +934,151 @@ $$
 
   -  We need [constant effects]{.highlight}, or $\tau$ becomes an _odd_ weighted function of causal effects and $\tau \neq \tau_{LATE}$ (recall last regression slides).
 
+### Two Types of Controls in IV
+
+<br><br>
+
+- [Pre-instrument covariates $\mathbf{X}_i$]{.highlight}: variables determined **before** the instrument operates.
+
+  - Make $Z_i$ conditionally as-if-random: $Z_i \indep \{Y_i(z,t), T_i(z)\} \given \mathbf{X}_i$
+  - Standard and unproblematic — improve efficiency, reduce bias.
+
+. . .
+
+- [Post-instrument covariates $M_i$]{.alert}: variables determined **after** the instrument operates (affected by $Z_i$ or $T_i$).
+
+  - Researchers sometimes include $M_i$ to "control away" exclusion restriction violations.
+  - This can introduce [post-instrument bias]{.alert} via collider paths [@schuessler2025post].
+
+. . .
+
+- [Key question]{.note}: Is this covariate determined before or after the instrument operates?
+
+### Post-Instrument Bias [@schuessler2025post]
+
+:::{.columns}
+
+::: {.column width="55%"}
+
+<br><br>
+
+:::fragment
+**(a)** $M_i$ caused only by $Z_i$: conditioning on $M_i$ is [required]{.highlight} and identifies a local effect of $T_i$ on $Y_i$.
+:::
+
+:::fragment
+**(b)** $M_i$ is a [collider]{.alert} ($Z_i \to M_i \leftarrow U_i$): conditioning opens spurious $Z_i$--$U_i$ path $\rightsquigarrow$ IV [fails]{.alert}.
+:::
+
+:::fragment
+**(c)** $M_i$ is a [mediator]{.alert} on $T_i \to Y_i$: descendant of collider $T_i$. Conditioning creates spurious dependence between $Z_i$ and $U_i$ $\rightsquigarrow$ IV works only [without]{.alert} conditioning on $M_i$.
+:::
+
+:::
+
+::: {.column width="45%"}
+
+```{tikz}
+
+\usetikzlibrary{arrows.meta, positioning, calc, fit, backgrounds}
+\definecolor{plotbg}{HTML}{f0f1eb}
+\definecolor{plotfg}{HTML}{111111}
+\definecolor{gruvred}{HTML}{cc241d}
+\definecolor{gruvgray}{HTML}{928374}
+\definecolor{gruvgreen}{HTML}{98971a}
+\definecolor{gruvorange}{HTML}{d65d0e}
+
+\begin{tikzpicture}[
+    node distance=1.6cm,
+    dag node/.style={circle, draw=plotfg, thick, minimum size=0.8cm,
+                     font=\small, text=plotfg},
+    dag box/.style={rectangle, draw=gruvorange, thick, minimum size=0.8cm,
+                    font=\small, text=plotfg},
+    annot/.style={draw=none, font=\footnotesize, minimum size=0pt, inner sep=1pt,
+                  align=center},
+    every edge/.style={-{Stealth[length=2mm]}, thick, color=plotfg},
+  ]
+
+  % Background
+  \fill[plotbg] (-1.3,-2) rectangle (10.5,13.5);
+
+  % === Panel (a): M caused only by Z ===
+  \begin{scope}[yshift=9cm]
+    \node[annot, text=plotfg, font=\bfseries\small] at (-0.8,1.7) {(a)};
+    \node[annot, text=gruvgreen, font=\bfseries] at (4.8,1.7) {OK};
+
+    \node[dag node] (Za) at (0,0) {$Z$};
+    \node[dag node] (Ta) at (2,0) {$T$};
+    \node[dag node] (Ya) at (4,0) {$Y$};
+    \node[dag node, dashed, draw=gruvgray, text=gruvgray] (Ua) at (3,1.3) {$U$};
+    \node[dag box] (Ma) at (2,-1.2) {$M$};
+
+    \draw[->] (Za) -- (Ta);
+    \draw[->] (Ta) -- (Ya);
+    \draw[->, color=gruvgray] (Ua) -- (Ta);
+    \draw[->, color=gruvgray] (Ua) -- (Ya);
+    \draw[->] (Za) -- (Ma);
+    \draw[->] (Ma) -- (Ya);
+  \end{scope}
+
+  % === Panel (b): M is a collider ===
+  \begin{scope}[yshift=4.5cm]
+    \node[annot, text=plotfg, font=\bfseries\small] at (-0.8,1.7) {(b)};
+    \node[annot, text=gruvred, font=\bfseries\large] at (4.8,1.7) {$\times$};
+
+    \node[dag node] (Zb) at (0,0) {$Z$};
+    \node[dag node] (Tb) at (2,0) {$T$};
+    \node[dag node] (Yb) at (4,0) {$Y$};
+    \node[dag node, dashed, draw=gruvgray, text=gruvgray] (Ub) at (3,1.3) {$U$};
+    \node[dag box] (Mb) at (2,-1.2) {$M$};
+
+    \draw[->] (Zb) -- (Tb);
+    \draw[->] (Tb) -- (Yb);
+    \draw[->, color=gruvgray] (Ub) -- (Tb);
+    \draw[->, color=gruvgray] (Ub) -- (Yb);
+    \draw[->] (Zb) -- (Mb);
+    \draw[->, color=gruvgray] (Ub) -- (Mb);
+    \draw[->] (Mb) -- (Yb);
+  \end{scope}
+
+  % === Panel (c): M is a mediator ===
+  \begin{scope}[yshift=0cm]
+    \node[annot, text=plotfg, font=\bfseries\small] at (-0.8,1.7) {(c)};
+    \node[annot, text=gruvred, font=\bfseries\large] at (4.8,1.7) {$\times$};
+
+    \node[dag node] (Zc) at (0,0) {$Z$};
+    \node[dag node] (Tc) at (2,0) {$T$};
+    \node[dag node] (Yc) at (4,0) {$Y$};
+    \node[dag node, dashed, draw=gruvgray, text=gruvgray] (Uc) at (3,1.3) {$U$};
+    \node[dag box] (Mc) at (2,-1.2) {$M$};
+
+    \draw[->] (Zc) -- (Tc);
+    \draw[->] (Tc) -- (Yc);
+    \draw[->, color=gruvgray] (Uc) -- (Tc);
+    \draw[->, color=gruvgray] (Uc) -- (Yc);
+    \draw[->] (Tc) -- (Mc);
+    \draw[->] (Mc) -- (Yc);
+  \end{scope}
+
+\end{tikzpicture}
+```
+
+:::
+
+:::
+
+### Practical Guidance on Post-Instrument Controls
+
+<br><br><br>
+
+1. [Classify]{.highlight} each covariate as pre-instrument ($\mathbf{X}_i$) or post-instrument ($M_i$).
+
+2. If $M_i$ is a post-instrument mediator not directly caused by $Z_i$ $\rightsquigarrow$ do [not]{.alert} condition on it; use standard 2SLS with $\mathbf{X}_i$ only.
+
+3. If $M_i$ is directly caused by $Z_i$ (graph a) $\rightsquigarrow$ provide a [diagnostic test]{.highlight}: evidence that $T_i \indep M_i \given Z_i$.
+
+4. If $U_i$ also affects $M_i$ (graph b) $\rightsquigarrow$ identification fails. Condition only on $\mathbf{X}_i$ and use [sensitivity analysis]{.note} to assess consequences.
+
 ### General TSLS {#general-tsls}
 
 - The same two-stage logic extends to multiple endogenous regressors and instruments [[(matrix algebra)](#tsls-matrix-algebra)]{.note .small-font}:
@@ -921,7 +1101,11 @@ $$
 
 ### Inference for TSLS
 
-- [Asymptotic variance]{.highlight} has the familiar sandwich form:
+- [Asymptotic expansion]{.highlight} of 2SLS: $\sqrt{n}(\widehat{\beta} - \beta) = \left( \frac{\widehat{\mathbf{T}}' \widehat{\mathbf{T}}}{n} \right)^{-1} \frac{\widehat{\mathbf{T}}' \varepsilon}{\sqrt{n}}$
+
+  where $\widehat{\mathbf{T}}_i = \mathbf{P}_Z \mathbf{T}_i$ (first-stage fitted values), $\varepsilon_i = Y_i - \mathbf{T}_i' \beta$ (structural errors, as defined earlier)
+
+- Taking the variance gives the [sandwich form]{.note}:
 
   $$
   \var(\widehat{\beta}_{2SLS}) = \frac{1}{n} \underbrace{(\E [\widehat{\mathbf{T}}_i \widehat{\mathbf{T}}_i'])^{-1}}_{\text{bread}}
@@ -929,16 +1113,28 @@ $$
   \underbrace{(\E [\widehat{\mathbf{T}}_i \widehat{\mathbf{T}}_i'])^{-1}}_{\text{bread}}
   $$
 
-  - [Important]{.alert}: Use residuals $\widehat{u}_i = Y_i - \mathbf{T}_i' \widehat{\beta}$ (from the _original_ $\mathbf{T}_i$, not the fitted $\widehat{\mathbf{T}}_i$!).
-  - Heteroskedasticity-robust (HC2), clustered, and HAC versions all apply as in OLS.
+  - [Bread]{.highlight} $(\E [\widehat{\mathbf{T}}_i \widehat{\mathbf{T}}_i'])^{-1}$: sensitivity of $\widehat{\beta}$ to perturbations (how much instrument variation "moves" treatment)
+  - [Meat]{.highlight} $\E [\widehat{\mathbf{T}}_i \varepsilon_i^2 \widehat{\mathbf{T}}_i']$: variability of the moment conditions $\widehat{\mathbf{T}}_i \varepsilon_i$, allowing for heteroskedasticity
+  - [Important]{.alert}: estimate $\varepsilon_i$ with $\widehat{\varepsilon}_i = Y_i - \mathbf{T}_i' \widehat{\beta}$ using the _original_ $\mathbf{T}_i$, not $\widehat{\mathbf{T}}_i$
+  - HC2, clustered, and HAC versions apply as in OLS
+
+### Alternative Inference for TSLS
+
+<br><br>
+
+- **Bootstrap**: resample $(Y_i, T_i, Z_i, \mathbf{X}_i)$ tuples, re-estimate both stages each time — works well when asymptotic SEs are unreliable (weak instruments)
+- **Anderson-Rubin (AR) test**: directly tests $H_0: \tau = \tau_0$ using the reduced form — robust to weak instruments (more on this later)
+- **Randomization inference**: if $Z_i$ is randomly assigned, permute $Z_i$ and re-compute the Wald/2SLS statistic — exact finite-sample inference, no asymptotic approximation
 
 . . .
 
-- [Alternative inference approaches]{.highlight}:
+- [Important]{.alert}: In the just-identified case, $t_{LATE} = t_{ITT}$ since both estimate and SE scale by $1/\widehat{\gamma}$:
 
-  - **Bootstrap**: Resample $(Y_i, T_i, Z_i, \mathbf{X}_i)$ tuples, re-estimate both stages each time. Works well with weak instruments where asymptotic SEs can be unreliable.
-  - **Anderson-Rubin (AR) test**: Directly tests $H_0: \tau = \tau_0$ using the reduced form — robust to weak instruments (more on this later).
-  - **Randomization inference**: If $Z_i$ is randomly assigned, permute $Z_i$ and re-compute the Wald/2SLS statistic. Exact finite-sample inference, no asymptotic approximation needed.
+  $$
+  t_{LATE} = \frac{\widehat{\tau}_{ITT}/\widehat{\gamma}}{\widehat{SE}(\widehat{\tau}_{ITT})/\widehat{\gamma}} = t_{ITT}
+  $$
+
+  - 2SLS will [not]{.alert} rescue an insignificant reduced form (ITT)!
 
 
 # Issues with IV Validity
@@ -996,76 +1192,26 @@ $$
 
 ## Weak Instruments
 
-### $RSS$, $ESS$, and $R^2$
-
-- [Residual Sum of Squares (RSS)]{.highlight} measures **unexplained** variation in a regression of $Y$ on $X$: 
-
-  $$
-  RSS = \sum_N (Y_i - \widehat{Y}_i)^2
-  $$
-
-  where $\widehat{Y}_i$ is the predicted value from the regression model.
-
-. . .
-
-- [Explained Sum of Squares (ESS)]{.highlight} measures variation **explained** by the regression model:
-
-  $$
-  ESS = \sum_N (\widehat{Y}_i - \bar{Y})^2
-  $$
-
-. . .
-
-- [Coefficient of Determination ($R^2$)]{.highlight} measures the proportion of variation in the dependent variable explained by the model:
-
-  $$
-  R^2_{Y \sim X} = \frac{ESS}{TSS} = 1 - \frac{RSS}{TSS}, \quad \text{where} \quad TSS = ESS + RSS = \sum_N (Y_i - \bar{Y})^2
-  $$
-
-
-### Weak Instruments: $F$ Test
-
-- The [$F$ test]{.highlight} for model $Y_i = \alpha + \beta_1 X_{1i} + \dots + \beta_k X_{ki} + \varepsilon_i$ tests the null hypothesis:
-
-$$
-H_0: \beta_1 = \beta_2 = \dots = \beta_k = 0
-$$
-
-. . .
-
-- Uses $F$-statistic calculated as:
-
-  $$
-  F = \frac{(RSS_{\text{restricted}} - RSS_{\text{full}})/(dof_{\text{restricted}} - dof_{\text{full}})}{RSS_{\text{full}}/(dof_{\text{full}})} = \frac{ESS}{RSS} \times \frac{N - k - 1}{k}
-  $$
-
-  - Full model includes more regressors than restricted $\implies RSS_{restricted} \geq RSS_{full}$
-  - $k$ number of _additional_ regressors in full vs restricted model; $n$: Sample size.
-  - In regression summary restricted model includes intercept only.
-
-- [Intuition]{.note}: A large first stage $F$-statistic indicates strong evidence against $H_0$ $\rightsquigarrow$ regressors have explanatory power.
-
-<!-- - Using definition of $R^2$ and $F$-statistic we can express $R^2$ in terms of $F$ as $R^2 = \frac{F}{F + (n - k - 1)}$. -->
-
-
-### Weak Instruments: $F$-statistic
+### Weak Instruments: First-Stage $F$-statistic {#weak-f-stat}
 
 <br>
 
-- The standard first-stage [$F$-statistic]{.highlight} from a regression of the endogenous regressors on instruments and exogenous controls is:
+- The $F$-statistic [[(recall $RSS$, $ESS$, $R^2$)](#rss-ess-r2)]{.note .small-font} tests joint significance of instruments in the first stage:
 
   $$
-  F = \frac{R^2_{T \sim Z}}{(1 - R^2_{T \sim Z})} \times \frac{N - k - 1}{k} 
+  F = \frac{R^2_{T \sim Z}}{(1 - R^2_{T \sim Z})} \times \frac{N - k - 1}{k}
   $$
 
-  where $R^2_{T \sim Z}$ is $R^2$ from first-stage regression of $T$ on $Z$ and $k$ is the number of instruments.
+  where $R^2_{T \sim Z}$ is the $R^2$ from first-stage regression of $T$ on $Z$ and $k$ is the number of instruments.
 
-- [Note]{.note}: $F$-statistic in case of a single instrument is equal to square of first-stage $t$-statistic.
+- [Note]{.note}: With a single instrument, $F = t^2$ (square of the first-stage $t$-statistic).
 
 . . .
 
-- @stock2005asymptotic suggests that $F > 10$ is a good rule of thumb for instrument strength based on simulations.
-  - Critical value based on bias of TSLS being 10% of OLS bias.
+- @stock2005asymptotic: $F > 10$ is a good rule of thumb for instrument strength.
+  - Where does $10$ come from? It is the critical value at which the bias of $\widehat{\tau}_{2SLS}$ is no more than $10$% of the OLS bias. In other words, if $F > 10$, the IV "cure" does not reintroduce more than a tenth of the endogeneity problem it was meant to fix.
+
+- [Intuition]{.note}: A large $F$ indicates instruments have explanatory power for the endogenous regressor.
 
 ### Weak Instruments: Effective $F$-statistic
 
@@ -1088,49 +1234,21 @@ $$
   - Instruments are numerous (over-identified scenarios).
   - Error structures are complex (heteroskedasticity or clustering).
 
-### Weak Instruments: Bootstrap
+### Weak Instruments: Bootstrap and $tF$
 
-<br>
+<br><br>
 
-- @young2022consistency recommends two bootstrap methods to compute confidence intervals (CIs) for $\widehat{\tau}_{2SLS}$ in case of weak instruments.
+- [Bootstrap]{.highlight} [@young2022consistency]: two methods for CIs robust to weak instruments:
 
-. . .
-
-- [Bootstrap-$c$]{.highlight}:
-  1. Resample data with replacement to create $B$ bootstrap samples.
-  2. Estimate $\widehat{\tau}_{2SLS}$ in each bootstrap sample.
-  3. Compute percentiles directly from the bootstrap distribution of $\widehat{\tau}_{2SLS}$.
+  - [Bootstrap-$c$]{.highlight}: resample, re-estimate $\widehat{\tau}_{2SLS}$, take percentile CI.
+  - [Bootstrap-$t$]{.highlight}: compute bootstrap $t$-statistics, form CIs via percentile-$t$ adjustments.
 
 . . .
 
-- [Bootstrap-$t$]{.highlight}:
-  
-  1. Calculate bootstrap t-statistics: $t = \frac{\widehat{\tau}_{2SLS}}{\widehat{\text{SE}}(\widehat{\tau}_{2SLS})}$.
-  2. Form CIs using percentile-t adjustments:
-  
-  $$
-  \widehat{\tau}_{2SLS} \pm t^*_{\alpha/2|1-\alpha} \widehat{\text{SE}}(\widehat{\tau}_{2SLS})
-  $$
+- [$tF$ procedure]{.highlight} [@lee2022valid]: adjusts TSLS SEs based on the first-stage $F$-statistic for just-identified IV.
 
-### Weak Instruments: $tF$ procedure
-
-<br>
-
-- @lee2022valid propose the [$tF$ procedure]{.highlight} for inference in just-identified IV settings instead of _ad-hoc_ $F$-statistic cutoffs.
-
-- Confidence intervals do not properly reflect the true variability and potential bias in the estimates, especially in the presence of weak instruments.
-
-  - [Idea]{.note}: Adjust TSLS inference **based** on the first-stage $F$-statistic.
-
-. . .
-
-- Applies a smooth adjustment factor to TSLS SEs derived from the first-stage $t$-ratio: 
-
-  $$
-  \widehat{f} = \frac{\widehat{\gamma}}{\sqrt{\widehat{V}(\widehat{\gamma})}} \quad \text{where} \quad \widehat{f}^2 = \widehat{F}.
-  $$
-
-- [Note]{.note}: Without adjustment, to maintain a correct $5$% size (two-sided $t$-test), a very large first-stage $F \approx 104.7$ may be needed!
+  - [Idea]{.note}: standard TSLS CIs are too narrow when instruments are weak because they ignore first-stage estimation uncertainty. The $tF$ procedure widens CIs by a factor that depends on $F$.
+  - [Note]{.note}: Without this adjustment, the standard $F > 10$ rule is insufficient -- maintaining a correct $5$% rejection rate would actually require $F \approx 104.7$!
 
 ### Weak Instruments: $AR$ test
 
@@ -1196,6 +1314,8 @@ plot_coef(bk_ivdiag)
 
 ### "Testing" Exclusion: Placebo-Test and Sensitivity
 
+<br><br>
+
 - [Placebo tests]{.highlight}:
 
   1. Find setting in which first stage should not operate.
@@ -1206,17 +1326,9 @@ plot_coef(bk_ivdiag)
 
 - [Sensitivity analysis]{.highlight} [@cinelli2025omitted]:
 
-  - See how much violation of (1) randomization of instrument and (2) exclusion restriction would be needed to change the results.
-  
-  - Use an approach similar to @cinelli2020making varying partial $R^2$ between instrument/outcome and unobserved confounder/mediator.
+  - How much violation of (1) randomization and (2) exclusion restriction would be needed to change results?
 
-  - [Partial $R^2$]{.highlight} is additional $R^2$ achieved from adding $q$ predictors $Z$ in the model that already has $k$ of $X$ predictors and can be directly computed from the $F$-statistic:
-
-    $$
-    R^2_{Y \sim Z \given X} = \frac{q \ F_{Y,Z \given X} }{(n - k - q) + q \ F_{Y,Z \given X}}
-    $$
-
-    where $F_{Y,Z \given X}$: $F$-statistic for testing the joint significance of all $Z$'s in the linear model with $Z$'s and $X$'s.
+  - Use partial $R^2$ sensitivity framework [@cinelli2020making] varying instrument--outcome and confounder--mediator associations (recall [matching/weighting lecture]{.note}).
 
 
 ### Sensitivity Analysis in Practice
@@ -1364,13 +1476,102 @@ $$
   \end{align*}
   $$
 
-- [Intuition]{.note}: To test LATE assumptions check whether $\E (Y_i (1) \given \text{always-taker})$ lies within bounds derived from truncated distributions. Do the same for never-takers!
+- [Intuition]{.note}: To test _LATE_ assumptions check whether $\E (Y_i (1) \given \text{always-taker})$ lies within bounds derived from truncated distributions. Do the same for never-takers!
 
 - @huber2015testing show bootstrap procedure for testing the inequalities.
 
 . . .
 
 - [Note]{.note}: This approach is similar to trimming bounds used in cases of attrition [Ch. 7, @gerber2012field].
+
+### Testing _LATE_ Assumptions in Practice
+
+```{r}
+#| label: late_testing
+#| echo: true
+#| eval: true
+#| output-location: column-fragment
+
+# --- Principal strata proportions ---
+pi_a <- mean(bk_data$treatment.delivered[bk_data$treat_ind == 0])
+pi_n <- mean(1 - bk_data$treatment.delivered[bk_data$treat_ind == 1])
+pi_c <- 1 - pi_a - pi_n
+
+tibble(
+  Stratum = c("Always-taker", "Never-taker", "Complier"),
+  Proportion = round(c(pi_a, pi_n, pi_c), 3)
+) |> knitr::kable(align = "lc") |>
+  kableExtra::kable_minimal(font_size = 20)
+```
+
+### Testing _LATE_: Kitagawa Nesting Check
+
+```{r}
+#| label: kitagawa_test
+#| echo: true
+#| eval: true
+#| fig-align: center
+#| fig-width: 4
+#| fig-height: 6
+#| output-location: column-fragment
+
+y <- bk_data$trans.tolerance.dv.t1
+t_var <- bk_data$treatment.delivered
+z <- bk_data$treat_ind
+y_grid <- sort(unique(y))
+
+# Treated (T=1): Pr(Y<=y, T=1|Z) should nest — Z=1 >= Z=0
+cdf_t1_z1 <- sapply(y_grid, \(v) mean(y <= v & t_var == 1 & z == 1) / mean(z == 1))
+cdf_t1_z0 <- sapply(y_grid, \(v) mean(y <= v & t_var == 1 & z == 0) / mean(z == 0))
+
+# Untreated (T=0): Pr(Y<=y, T=0|Z) should nest — Z=0 >= Z=1
+cdf_t0_z0 <- sapply(y_grid, \(v) mean(y <= v & t_var == 0 & z == 0) / mean(z == 0))
+cdf_t0_z1 <- sapply(y_grid, \(v) mean(y <= v & t_var == 0 & z == 1) / mean(z == 1))
+
+bind_rows(
+  tibble(y = y_grid, cdf = cdf_t1_z1, Z = "Z = 1", Panel = "T = 1 (should nest: Z=1 above Z=0)"),
+  tibble(y = y_grid, cdf = cdf_t1_z0, Z = "Z = 0", Panel = "T = 1 (should nest: Z=1 above Z=0)"),
+  tibble(y = y_grid, cdf = cdf_t0_z0, Z = "Z = 0", Panel = "T = 0 (should nest: Z=0 above Z=1)"),
+  tibble(y = y_grid, cdf = cdf_t0_z1, Z = "Z = 1", Panel = "T = 0 (should nest: Z=0 above Z=1)")
+) |>
+  ggplot(aes(x = y, y = cdf, color = Z)) +
+  geom_step(linewidth = 0.8) +
+  facet_wrap(~Panel, nrow = 2) +
+  scale_color_manual(values = c("Z = 1" = "#458588", "Z = 0" = "#d65d0e")) +
+  labs(x = "y", y = "Joint CDF: Pr(Y \u2264 y, T = t | Z)")
+```
+
+### Testing _LATE_: Huber Bounds Check
+
+```{r}
+#| label: huber_test
+#| echo: true
+#| eval: true
+#| output-location: column-fragment
+
+# Trimming quantile
+q_trim <- pi_a / (pi_a + pi_c)
+
+# Mean for always-takers: E(Y | T=1, Z=0)
+mean_at <- mean(y[t_var == 1 & z == 0])
+
+# Trimmed means from E(Y | T=1, Z=1)
+y_t1z1 <- y[t_var == 1 & z == 1]
+q_lo <- quantile(y_t1z1, q_trim)
+q_hi <- quantile(y_t1z1, 1 - q_trim)
+worst_case <- mean(y_t1z1[y_t1z1 <= q_lo])
+best_case  <- mean(y_t1z1[y_t1z1 >= q_hi])
+
+tibble(
+    Quantity = c(
+      "E(Y\u2223T=1, Z=0) [always-taker mean]",
+      "Worst-case trimmed mean",
+      "Best-case trimmed mean"
+    ),
+    Value = round(c(mean_at, worst_case, best_case), 3)
+  ) |> knitr::kable(align = "lc") |>
+    kableExtra::kable_minimal(font_size = 20)
+```
 
 # Summary
 
@@ -1399,6 +1600,18 @@ $$
   - Exclusion restriction needs to be re-evaluated carefully.
 
 # Appendix {visibility="uncounted"}
+
+### [[🔙](#weak-f-stat)]{.small-font} $RSS$, $ESS$, and $R^2$ {#rss-ess-r2 visibility="uncounted"}
+
+- [Residual Sum of Squares (RSS)]{.highlight} measures **unexplained** variation: $RSS = \sum_N (Y_i - \widehat{Y}_i)^2$
+
+- [Explained Sum of Squares (ESS)]{.highlight} measures variation **explained** by the model: $ESS = \sum_N (\widehat{Y}_i - \bar{Y})^2$
+
+- [Coefficient of Determination ($R^2$)]{.highlight}: $R^2_{Y \sim X} = \frac{ESS}{TSS} = 1 - \frac{RSS}{TSS}$, where $TSS = ESS + RSS$
+
+- The $F$-statistic: $F = \frac{ESS}{RSS} \times \frac{N - k - 1}{k}$, where $k$ is the number of regressors tested.
+
+---
 
 ### [[🔙](#general-tsls)]{.small-font} General TSLS: Matrix Algebra {#tsls-matrix-algebra visibility="uncounted"}
 
