@@ -68,7 +68,9 @@ pacman::p_load(
   patchwork,
   MASS,
   estimatr,
-  rsample
+  rsample,
+  pdftools,
+  ivDiag
 )
 
 future::plan(multisession, workers = parallel::detectCores() - 2)
@@ -1134,7 +1136,7 @@ $$
   t_{LATE} = \frac{\widehat{\tau}_{ITT}/\widehat{\gamma}}{\widehat{SE}(\widehat{\tau}_{ITT})/\widehat{\gamma}} = t_{ITT}
   $$
 
-  - 2SLS will [not]{.alert} rescue an insignificant reduced form (ITT)!
+  - _2SLS_ will [not]{.alert} rescue an insignificant reduced form (_ITT_)!
 
 
 # Issues with IV Validity
@@ -1157,38 +1159,28 @@ $$
 
 ### Non-Valid IVs
 
-<br><br>
+<br>
 
-1.  If **exclusion restriction** is violated:
-    
-  $$
-  \text{bias} =  \; \frac{\tau_{\text{a}} \Pr(\text{always-taker}) + \tau_{\text{n}} \Pr(\text{never-taker})}{\Pr(\text{complier})}
-  $$
+1.  If **exclusion restriction** is violated:$\text{bias} =  \; \frac{\tau_{\text{a}} \Pr(\text{always-taker}) + \tau_{\text{n}} \Pr(\text{never-taker})}{\Pr(\text{complier})}$
 
 . . .
 
-2.  If **monotonicity** is violated when defiers exist
+2.  If **monotonicity** is violated when defiers exist: $\text{bias} = \frac{[\tau_{\text{c}} - \tau_{\text{d}} ] \Pr(\text{defier})}{\Pr(\text{complier}) - \Pr(\text{defier})}$
   
-  $$
-  \text{bias} = \frac{[\tau_{\text{c}} - \tau_{\text{d}} ] \Pr(\text{defier})}{\Pr(\text{complier}) - \Pr(\text{defier})}
-  $$
-  
-  - **Bias becomes large when**: (1) the proportion of defiers is large or (2) causal effects are heterogeneous between compliers and defiers
+    - [**Bias becomes large when**]{.alert}: (1) the proportion of defiers is large or (2) causal effects are heterogeneous between compliers and defiers
 
-### Non-Valid IVs
-
-<br><br>
+. . .
 
 3. If **relevance** is violated ([weak instruments]{.highlight}):
 
-    - Biases due to exclusion restriction and monotonicity violations blow up!
+    - $\Pr(\text{complier})$ is low, and biases due to exclusion restriction and monotonicity violations blow up!
     - Uncertainty is amplified and has to be accounted for!
 
 . . .
 
 4. If **randomization** is violated:
 
-    - Standard selection issues arise, and we need to account for confounders or conduct sensitivity analyses, similar to standard **selection on observables** [@cinelli2025omitted].
+    - Standard selection issues arise, and we need to account for confounders or conduct sensitivity analyses, similar to **OVB bias sensitivity** [@cinelli2025omitted].
 
 ## Weak Instruments
 
@@ -1209,7 +1201,7 @@ $$
 . . .
 
 - @stock2005asymptotic: $F > 10$ is a good rule of thumb for instrument strength.
-  - Where does $10$ come from? It is the critical value at which the bias of $\widehat{\tau}_{2SLS}$ is no more than $10$% of the OLS bias. In other words, if $F > 10$, the IV "cure" does not reintroduce more than a tenth of the endogeneity problem it was meant to fix.
+  - **Where does $10$ come from?** It is the critical value at which the bias of $\widehat{\tau}_{2SLS}$ is no more than $10$% of the OLS bias. In other words, if $F > 10$, the IV "cure" does not reintroduce more than a tenth of the endogeneity problem it was meant to fix.
 
 - [Intuition]{.note}: A large $F$ indicates instruments have explanatory power for the endogenous regressor.
 
@@ -1240,39 +1232,38 @@ $$
 
 - [Bootstrap]{.highlight} [@young2022consistency]: two methods for CIs robust to weak instruments:
 
-  - [Bootstrap-$c$]{.highlight}: resample, re-estimate $\widehat{\tau}_{2SLS}$, take percentile CI.
-  - [Bootstrap-$t$]{.highlight}: compute bootstrap $t$-statistics, form CIs via percentile-$t$ adjustments.
+  - [Bootstrap-$c$]{.highlight}: resample, compute $\widehat{\tau}_{2SLS}$, take percentile CI.
+  - [Bootstrap-$t$]{.highlight}: resample, compute $t$-statistics, form CIs via percentile-$t$ adjustments.
 
 . . .
 
-- [$tF$ procedure]{.highlight} [@lee2022valid]: adjusts TSLS SEs based on the first-stage $F$-statistic for just-identified IV.
+- [$tF$ procedure]{.highlight} [@lee2022valid]: adjusts the critical value for TSLS inference in just-identified IV.
 
-  - [Idea]{.note}: standard TSLS CIs are too narrow when instruments are weak because they ignore first-stage estimation uncertainty. The $tF$ procedure widens CIs by a factor that depends on $F$.
-  - [Note]{.note}: Without this adjustment, the standard $F > 10$ rule is insufficient -- maintaining a correct $5$% rejection rate would actually require $F \approx 104.7$!
+  - [Idea]{.note}: With weak instruments, $\widehat{\tau}_{2SLS}$ is non-normal $\rightsquigarrow$ standard $\pm 1.96 \times SE$ CIs undercover. Replace $1.96$ with $c(F)$ that shrinks toward $1.96$ as $F \to \infty$ -- reject when $|t| > c(F)$ (hence $tF$).
+  - [CI]{.note}: $\widehat{\tau}_{2SLS} \pm c(F) \times SE$ -- equivalently, multiply $SE$ by adjustment factor $c(F)/1.96$ to get "$tF$ standard error." At $F = 10$, factor $\approx 1.75$.
+  - [Note]{.note}: $c(F) = 1.96$ only when $F \geq 104.7$ -- below that, standard CIs undercover!
 
 ### Weak Instruments: $AR$ test
 
 - @anderson1949estimation and later @chernozhukov2008reduced propose [$AR$ test]{.highlight} for direct inference in **over-identified** and **just-identified** cases.
 
-- [Intuition]{.note}: Testing $H_0: \tau = 0 \implies H_0: \tau \gamma = \tau_{ITT} = 0$ $\rightsquigarrow$ **use $F$-test applied directly to the reduced-form equation!**
+- [Why weak-instrument robust?]{.note} Recall: standard Wald inference divides by $\widehat{\gamma}$ $\rightsquigarrow$ blows up when $\gamma \approx 0$. AR **sidesteps this division entirely**.
 
 . . .
 
-- Procedure: For each candidate value $\tilde{\tau}$:
-  
-  1. Compute adjusted outcome: $Y_i - \tilde{\tau} T_i$
-  2. Regress adjusted outcome on instruments $Z_i$ to estimate $\tilde{\gamma}$ and covariance $\tilde{V}(\tilde{\gamma})$.
-  3. Construct Wald statistic:
-     $$
-     \tilde{W}_s(\tilde{\gamma}) = \tilde{\gamma}'\tilde{V}(\tilde{\gamma})^{-1}\tilde{\gamma}
-     $$
+- [Key insight]{.note}: If $\tau_0$ is the true effect, $Z_i$ should have no predictive power for $Y_i - \tau_0 T_i$ $\rightsquigarrow$ test via reduced-form $F$-test, no ratio needed.
 
-  4. AR CI set is the set of $\tilde{\tau}$ satisfying:
-     $$
-     \tilde{W}_s(\tilde{\gamma}) \leq c(1 - p)
-     $$
+. . .
 
-     where $c(1 - p)$ is the $(1 - p)$-th percentile of the $\chi^2$ distribution.
+- **Procedure**: For each candidate value $\tilde{\tau}$
+
+  1. Adjusted outcome: $\tilde{Y}_i = Y_i - \tilde{\tau} T_i$
+
+  2. Regress $\tilde{Y}_i$ on $Z_i$ $\rightsquigarrow$ coefficients $\tilde{\gamma}$, variance $\tilde{V}(\tilde{\gamma})$
+
+  3. Calculate **Wald statistic**: $\tilde{W}_s = \tilde{\gamma}'\tilde{V}(\tilde{\gamma})^{-1}\tilde{\gamma}$ -- just the $F$-statistic from `lm(Y_tilde ~ Z)` testing joint significance of $Z_i$
+
+  4. [AR confidence set]{.highlight}: all $\tilde{\tau}$ where $\tilde{W}_s \leq \chi^2_{k, 1 - \alpha}$ ($k$ = number of instruments, $\alpha$ = significance level)
 
 ### Weak Instruments Tests in Practice
 
@@ -1314,8 +1305,6 @@ plot_coef(bk_ivdiag)
 
 ### "Testing" Exclusion: Placebo-Test and Sensitivity
 
-<br><br>
-
 - [Placebo tests]{.highlight}:
 
   1. Find setting in which first stage should not operate.
@@ -1326,10 +1315,13 @@ plot_coef(bk_ivdiag)
 
 - [Sensitivity analysis]{.highlight} [@cinelli2025omitted]:
 
-  - How much violation of (1) randomization and (2) exclusion restriction would be needed to change results?
+  - How strong would an omitted variable $W$ need to be to invalidate the IV estimate?
 
-  - Use partial $R^2$ sensitivity framework [@cinelli2020making] varying instrument--outcome and confounder--mediator associations (recall [matching/weighting lecture]{.note}).
+  - The `iv.sensemakr` framework [@cinelli2025omitted] measures this via partial $R^2$: how much would $W$ need to explain of the instrument ($R^2_{Z \sim W \given X}$) and of the potential outcome ($R^2_{Y(0) \sim W \given Z, X}$) to reduce the estimate to zero?
 
+  - This directly models violations of both [instrument exogeneity]{.note} (confounders of $Z$) and the [exclusion restriction]{.note} (side-effects of $Z$ on $Y$ not through $T$).
+
+  - [Key difference from OLS sensitivity]{.note}: The IV sensitivity plot shows how the **Anderson-Rubin confidence interval bounds** (lower and upper) shift as omitted variable strength increases.
 
 ### Sensitivity Analysis in Practice
 
@@ -1338,34 +1330,27 @@ plot_coef(bk_ivdiag)
 #| echo: true
 #| eval: true
 #| fig-align: center
-#| fig-width: 8
+#| fig-width: 10
 #| fig-height: 6
 #| code-fold: true
 
-pacman::p_load(sensemakr)
+pacman::p_load(iv.sensemakr)
 
-bk_ivest <-
-  estimatr::iv_robust(
-    trans.tolerance.dv.t1 ~ treatment.delivered | treat_ind,
-    data = bk_data
-  )
+bk_iv_fit <- iv.sensemakr::iv_fit(
+  y = bk_data$trans.tolerance.dv.t1,
+  d = bk_data$treatment.delivered,
+  z = bk_data$treat_ind,
+  x = cbind(female = bk_data$vf_female, democrat = as.numeric(bk_data$vf_party == "D"))
+)
 
-sensemakr::sensemakr(
-  estimate = bk_ivest$coefficients[["treatment.delivered"]],
-  se = bk_ivest$std.error[["treatment.delivered"]],
-  dof = bk_ivest$df[["treatment.delivered"]],
-  r2dz.x = .1,
-  r2yz.dx = .1
-) |>
-  plot()
+bk_iv_sens <- iv.sensemakr::sensemakr(bk_iv_fit, benchmark_covariates = c("female", "democrat"))
+plot(bk_iv_sens)
 
 ```
 
-### "Testing" Exclusion: Restrictions Approach [@pearl1995causal]
+### "Testing" Exclusion: Restrictions Approach [@pearl1995causal] {#exclusion-restrictions}
 
-<br>
-
-- For binary instrument ($Z$), treatment ($T$), and outcome ($Y$), the following must hold if $Z$ satisfies exclusion:
+- For binary instrument ($Z$), treatment ($T$), and outcome ($Y$), the following must hold (_necessary condition_) if $Z$ satisfies exclusion:
 
   $$
   \begin{align*}
@@ -1382,9 +1367,51 @@ sensemakr::sensemakr(
 
 . . .
 
-- @pearl1995causal extends to the more general case when $T$ and $Z$ are still discrete, but $Y$ is either discrete or continuous.
+- @kedagni2020generalized generalize Pearl's inequalities to continuous $Y$ (binary $Z$, $T$):
 
-- @kedagni2020generalized extend to a binary outcome and treatment, but an unrestricted instrument.
+  $$
+  \max_{d \in \{0,1\}} \int \max_z \; f_{Y,T}(y, d \given z) \, dy \leq 1
+  $$
+
+  where $f_{Y,T}(y, d \given z) = f(y \given T = d, Z = z) \cdot \Pr(T = d \given Z = z)$.
+
+### "Testing" Exclusion: Restrictions in Practice
+
+```{r}
+#| label: pearl_restrictions
+#| echo: true
+#| eval: true
+#| output-location: column-fragment
+
+# Common grid for density evaluation
+y_grid <- seq(
+  min(bk_data$trans.tolerance.dv.t1) - 1,
+  max(bk_data$trans.tolerance.dv.t1) + 1,
+  length.out = 512
+)
+
+# Estimate f(y, T=d | Z=z) = f(y | T=d, Z=z) * Pr(T=d | Z=z) for each (d, z)
+f_joint <- \(d, z) {
+  sub <- bk_data |> filter(treatment.delivered == d, treat_ind == z)
+  pr_td_z <- mean(bk_data$treatment.delivered[bk_data$treat_ind == z] == d)
+  if (nrow(sub) < 5) return(rep(0, length(y_grid)))
+  approx(density(sub$trans.tolerance.dv.t1, n = 512, from = min(y_grid), to = max(y_grid)),
+         xout = y_grid)$y * pr_td_z
+}
+
+# For each d: integrate max_z f(y, T=d | Z=z) dy
+test_stat <- sapply(0:1, \(d) {
+  fz0 <- f_joint(d, 0)
+  fz1 <- f_joint(d, 1)
+  pracma::trapz(y_grid, pmax(fz0, fz1))
+})
+
+tibble::tibble(
+  `Treatment (d)` = c(0, 1),
+  `∫ max_z f(y,d|z) dy` = round(test_stat, 3),
+  `≤ 1?` = ifelse(test_stat <= 1, "Pass", "FAIL")
+) |> knitr::kable()
+```
 
 ## Testing Multiple _LATE_ Assumptions
 
@@ -1484,26 +1511,6 @@ $$
 
 - [Note]{.note}: This approach is similar to trimming bounds used in cases of attrition [Ch. 7, @gerber2012field].
 
-### Testing _LATE_ Assumptions in Practice
-
-```{r}
-#| label: late_testing
-#| echo: true
-#| eval: true
-#| output-location: column-fragment
-
-# --- Principal strata proportions ---
-pi_a <- mean(bk_data$treatment.delivered[bk_data$treat_ind == 0])
-pi_n <- mean(1 - bk_data$treatment.delivered[bk_data$treat_ind == 1])
-pi_c <- 1 - pi_a - pi_n
-
-tibble(
-  Stratum = c("Always-taker", "Never-taker", "Complier"),
-  Proportion = round(c(pi_a, pi_n, pi_c), 3)
-) |> knitr::kable(align = "lc") |>
-  kableExtra::kable_minimal(font_size = 20)
-```
-
 ### Testing _LATE_: Kitagawa Nesting Check
 
 ```{r}
@@ -1541,13 +1548,18 @@ bind_rows(
   labs(x = "y", y = "Joint CDF: Pr(Y \u2264 y, T = t | Z)")
 ```
 
-### Testing _LATE_: Huber Bounds Check
+### Testing _LATE_: Huber and Mellace Bounds Check
 
 ```{r}
 #| label: huber_test
 #| echo: true
 #| eval: true
 #| output-location: column-fragment
+
+# --- Principal strata proportions ---
+pi_a <- mean(bk_data$treatment.delivered[bk_data$treat_ind == 0])
+pi_n <- mean(1 - bk_data$treatment.delivered[bk_data$treat_ind == 1])
+pi_c <- 1 - pi_a - pi_n
 
 # Trimming quantile
 q_trim <- pi_a / (pi_a + pi_c)
@@ -1583,9 +1595,9 @@ tibble(
 
 <br><br>
 
-- IV approach is one of the most popular and powerful identification strategies.
+- IV approach is one of the most popular identification strategies.
 
-- Important to be mindful and transparent about identification assumptions.
+- Important to be mindful and transparent about identification assumptions and the "local" estimand.
 
 - **Exclusion restriction** and **randomization of instrument** are crucial!
 
@@ -1602,6 +1614,8 @@ tibble(
 # Appendix {visibility="uncounted"}
 
 ### [[🔙](#weak-f-stat)]{.small-font} $RSS$, $ESS$, and $R^2$ {#rss-ess-r2 visibility="uncounted"}
+
+<br><br>
 
 - [Residual Sum of Squares (RSS)]{.highlight} measures **unexplained** variation: $RSS = \sum_N (Y_i - \widehat{Y}_i)^2$
 
@@ -1670,6 +1684,37 @@ $$
 $$
 
 You can then devide both sides by $\var (Z_i)$ to get expression for ITT. To express proportion of compliers follow the same procedure but for $\cov (T_i, Z_i)$.
+
+---
+
+### [[🔙](#exclusion-restrictions)]{.small-font} Proof: First Exclusion Restriction Inequality {#exclusion-proof visibility="uncounted"}
+
+Show: $\Pr(Y_i = 0, T_i = 0 \given Z_i = 0) + \Pr(Y_i = 1, T_i = 0 \given Z_i = 1) \leq 1$
+
+. . .
+
+- Under exclusion, $Y_i(t, z) = Y_i(t)$, so $T_i = 0 \implies Y_i = Y_i(0)$ regardless of $Z_i$. Express each term by compliance type:
+
+$$
+\begin{align*}
+\Pr(Y_i = 0, T_i = 0 \given Z_i = 0)
+&= \underbrace{\Pr(Y_i(0) = 0, \text{complier})}_{\leq \pi_c}
+  + \Pr(Y_i(0) = 0, \text{never-taker}) \\
+\Pr(Y_i = 1, T_i = 0 \given Z_i = 1)
+&= \Pr(Y_i(0) = 1, \text{never-taker})
+  + \underbrace{\Pr(Y_i(0) = 1, \text{defier})}_{\leq \pi_d}
+\end{align*}
+$$
+
+. . .
+
+- [Note]{.note}: that the two never-taker terms cover complementary values of $Y_i(0)$ and they sum up to $\pi_n$, so the following holds for the sum of LHS expressions:
+
+$$
+\Pr(Y_i = 0, T_i = 0 \given Z_i = 0) + \Pr(Y_i = 1, T_i = 0 \given Z_i = 1) \leq \pi_c + \pi_n + \pi_d = 1 - \pi_a \leq 1
+$$
+
+- The same logic applies to remaining three inequalities -- always two types overlap with complementary potential outcomes.
 
 ---
 
