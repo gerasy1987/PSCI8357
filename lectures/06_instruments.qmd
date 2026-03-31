@@ -1103,9 +1103,7 @@ $$
 
 ### Inference for TSLS
 
-- [Asymptotic expansion]{.highlight} of 2SLS: $\sqrt{n}(\widehat{\beta} - \beta) = \left( \frac{\widehat{\mathbf{T}}' \widehat{\mathbf{T}}}{n} \right)^{-1} \frac{\widehat{\mathbf{T}}' \varepsilon}{\sqrt{n}}$
-
-  where $\widehat{\mathbf{T}}_i = \mathbf{P}_Z \mathbf{T}_i$ (first-stage fitted values), $\varepsilon_i = Y_i - \mathbf{T}_i' \beta$ (structural errors, as defined earlier)
+- Representation of 2SLS (similar to OLS): $\sqrt{n}(\widehat{\beta} - \beta) = \left( \frac{\widehat{\mathbf{T}}' \widehat{\mathbf{T}}}{n} \right)^{-1} \frac{\widehat{\mathbf{T}}' \varepsilon}{\sqrt{n}}$, where $\widehat{\mathbf{T}}_i = \mathbf{P}_Z \mathbf{T}_i$ (first-stage fitted values), $\varepsilon_i = Y_i - \mathbf{T}_i' \beta$ (structural errors, as defined earlier)
 
 - Taking the variance gives the [sandwich form]{.note}:
 
@@ -1117,8 +1115,10 @@ $$
 
   - [Bread]{.highlight} $(\E [\widehat{\mathbf{T}}_i \widehat{\mathbf{T}}_i'])^{-1}$: sensitivity of $\widehat{\beta}$ to perturbations (how much instrument variation "moves" treatment)
   - [Meat]{.highlight} $\E [\widehat{\mathbf{T}}_i \varepsilon_i^2 \widehat{\mathbf{T}}_i']$: variability of the moment conditions $\widehat{\mathbf{T}}_i \varepsilon_i$, allowing for heteroskedasticity
-  - [Important]{.alert}: estimate $\varepsilon_i$ with $\widehat{\varepsilon}_i = Y_i - \mathbf{T}_i' \widehat{\beta}$ using the _original_ $\mathbf{T}_i$, not $\widehat{\mathbf{T}}_i$
   - HC2, clustered, and HAC versions apply as in OLS
+
+  - [Note]{.note}: In the just-identified case, $t_{LATE} = t_{ITT}$ since both estimate and SE scale by $1/\widehat{\gamma}$: $t_{LATE} = \frac{\widehat{\tau}_{ITT}/\widehat{\gamma}}{\widehat{SE}(\widehat{\tau}_{ITT})/\widehat{\gamma}} = t_{ITT}$
+    - _2SLS_ will [not]{.alert} rescue an insignificant reduced form (_ITT_)!
 
 ### Alternative Inference for TSLS
 
@@ -1128,61 +1128,118 @@ $$
 - **Anderson-Rubin (AR) test**: directly tests $H_0: \tau = \tau_0$ using the reduced form — robust to weak instruments (more on this later)
 - **Randomization inference**: if $Z_i$ is randomly assigned, permute $Z_i$ and re-compute the Wald/2SLS statistic — exact finite-sample inference, no asymptotic approximation
 
-. . .
-
-- [Important]{.alert}: In the just-identified case, $t_{LATE} = t_{ITT}$ since both estimate and SE scale by $1/\widehat{\gamma}$:
-
-  $$
-  t_{LATE} = \frac{\widehat{\tau}_{ITT}/\widehat{\gamma}}{\widehat{SE}(\widehat{\tau}_{ITT})/\widehat{\gamma}} = t_{ITT}
-  $$
-
-  - _2SLS_ will [not]{.alert} rescue an insignificant reduced form (_ITT_)!
-
 
 # Issues with IV Validity
 
 ### Bias of IV Estimators
 
-<br><br>
+<br>
 
 - We can reason about the potential direction and size of the bias using the following expression (in binary case)
   
   $$
   \begin{align*}
-  \text{bias} &= \frac{\E(Y_i \given Z_i = 1) - \E(Y_i \given Z_i = 0)}{\E(T_i \given Z_i = 1) - \E(T_i \given Z_i = 0)} - \tau_{LATE} = \\
-  &= \Big( \tau_{\text{c}} \times \Pr(\text{complier}) + \tau_{\text{a}} \times \Pr(\text{always-taker}) \\
-  &\qquad + \tau_{\text{n}} \times \Pr(\text{never-taker}) + \tau_{\text{d}} \times \Pr(\text{defier})\Big) \\
-  &\quad \Big/ \ \Big( \Pr(\text{complier}) - \Pr(\text{defier}) \Big) \\
+  \text{bias} &= \widehat{\tau}_{LATE} - \tau_{LATE}\\ 
+  &= \frac{\E(Y_i \given Z_i = 1) - \E(Y_i \given Z_i = 0)}{\E(T_i \given Z_i = 1) - \E(T_i \given Z_i = 0)} - \tau_{LATE} = \\
+  &= \left[
+  \begin{aligned}
+  \tau_{\text{c}} \times \Pr(\text{complier}) + \tau_{\text{a}} \times \Pr(\text{always-taker}) \\
+  + \tau_{\text{n}} \times \Pr(\text{never-taker}) + \tau_{\text{d}} \times \Pr(\text{defier})
+  \end{aligned}
+  \right] \Big/ \left( \Pr(\text{complier}) - \Pr(\text{defier}) \right) \\
   &\quad - \tau_{\text{c}}
   \end{align*}
   $$
+
+. . .
+
+- Under 4 core IV assumptions we can cancel out all parts related to defiers, always-takers and never-takers to get: $$\text{bias} = \frac{\tau_{\text{c}} \times \Pr(\text{complier})}{\Pr(\text{complier})} - \tau_{\text{c}} = 0$$
 
 ### Non-Valid IVs
 
 <br>
 
-1.  If **exclusion restriction** is violated:$\text{bias} =  \; \frac{\tau_{\text{a}} \Pr(\text{always-taker}) + \tau_{\text{n}} \Pr(\text{never-taker})}{\Pr(\text{complier})}$
+1. If **randomization** is violated:
+
+    - Standard selection issues arise, and we need to account for confounders or conduct sensitivity analyses, similar to **OVB bias sensitivity** [@cinelli2025omitted].
 
 . . .
 
-2.  If **monotonicity** is violated when defiers exist: $\text{bias} = \frac{[\tau_{\text{c}} - \tau_{\text{d}} ] \Pr(\text{defier})}{\Pr(\text{complier}) - \Pr(\text{defier})}$
+2.  If **exclusion restriction** is violated: $\text{bias} =  \; \frac{\tau_{\text{a}} \Pr(\text{always-taker}) + \tau_{\text{n}} \Pr(\text{never-taker})}{\Pr(\text{complier})}$
+
+. . .
+
+3.  If **monotonicity** is violated when defiers exist: $\text{bias} = \frac{[\tau_{\text{c}} - \tau_{\text{d}} ] \Pr(\text{defier})}{\Pr(\text{complier}) - \Pr(\text{defier})}$
   
     - [**Bias becomes large when**]{.alert}: (1) the proportion of defiers is large or (2) causal effects are heterogeneous between compliers and defiers
 
 . . .
 
-3. If **relevance** is violated ([weak instruments]{.highlight}):
+4. If **relevance** is violated ([weak instruments]{.highlight}):
 
     - $\Pr(\text{complier})$ is low, and biases due to exclusion restriction and monotonicity violations blow up!
-    - Uncertainty is amplified and has to be accounted for!
-
-. . .
-
-4. If **randomization** is violated:
-
-    - Standard selection issues arise, and we need to account for confounders or conduct sensitivity analyses, similar to **OVB bias sensitivity** [@cinelli2025omitted].
+    - The denominator of Wald estimator is close to zero and the normal approximation breaks!
 
 ## Weak Instruments
+
+### Why Weak Instruments Break Normal Inference
+
+- $\widehat{\tau}_{2SLS} = \widehat{\pi}_{RF}/\widehat{\gamma}_{FS}$ is a [ratio]{.highlight} $\rightsquigarrow$ when $\widehat{\gamma}_{FS} \approx 0$, the distribution becomes **heavy-tailed and non-normal**
+
+```{r}
+#| label: weak_iv_normal_approx
+#| echo: true
+#| eval: true
+#| fig-align: center
+#| fig-width: 10
+#| fig-height: 5
+#| code-fold: true
+
+set.seed(8357)
+n <- 200; n_sims <- 5000; tau <- 1
+
+simulate_2sls <- function(gamma) {
+  U <- rnorm(n); Z <- rnorm(n)
+  T_i <- gamma * Z + 0.5 * U + rnorm(n)
+  Y <- tau * T_i + 0.5 * U + rnorm(n)
+  fs <- lm(T_i ~ Z)
+  F_stat <- summary(fs)$fstatistic[1]
+  c(coef(lm(Y ~ fitted(fs)))[2], F_stat)
+}
+
+run_scenario <- function(gamma) {
+  raw <- future_replicate(n_sims, simulate_2sls(gamma), future.seed = TRUE)
+  tibble(estimate = raw[1, ], F_stat = raw[2, ], gamma = gamma)
+}
+
+results <- bind_rows(run_scenario(0.8), run_scenario(0.05)) |>
+  mutate(scenario = paste0(
+    ifelse(gamma == 0.8, "Strong", "Weak"),
+    " (γ = ", gamma, ", median F = ",
+    round(median(F_stat), 1), ")"),
+    .by = gamma) |>
+  filter(estimate > -15 & estimate < 17)
+
+normal_overlay <- results |>
+  summarise(m = median(estimate), s = sd(estimate),
+            lo = min(estimate), hi = max(estimate),
+            scenario = first(scenario), .by = gamma) |>
+  reframe(scenario = scenario,
+          x = seq(lo, hi, length.out = 500),
+          density = dnorm(x, m, s), .by = gamma)
+
+ggplot(results, aes(x = estimate)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 100,
+                 fill = "#458588", alpha = 0.6, color = NA) +
+  geom_line(data = normal_overlay, aes(x = x, y = density),
+            color = "#cc241d", linewidth = 1, linetype = "dashed") +
+  geom_vline(xintercept = tau, color = "#d65d0e",
+             linewidth = 0.8, linetype = "dotted") +
+  facet_wrap(~ scenario, scales = "free") +
+  labs(x = expression(hat(tau)["2SLS"]), y = "Density")
+```
+
+- [Note]{.note}: Weak-IV distribution is [leptokurtic]{.highlight} — sharper peak AND heavier tails than normal. No single normal matches both $\rightsquigarrow$ normal-based CIs get the **shape** wrong, not just the scale.
 
 ### Weak Instruments: First-Stage $F$-statistic {#weak-f-stat}
 
@@ -1207,7 +1264,7 @@ $$
 
 ### Weak Instruments: Effective $F$-statistic
 
-- **Regular $F$-statistic** assumes homoskedasticity and independence, leading to potential overstatement of instrument strength in complex settings.
+- **Regular $F$-statistic** assumes homoskedasticity and independence, leading to potential overstatement of instrument strength in settings with multiple instruments.
 
 . . .
 
@@ -1228,12 +1285,12 @@ $$
 
 ### Weak Instruments: Bootstrap and $tF$
 
-<br><br>
+<br>
 
 - [Bootstrap]{.highlight} [@young2022consistency]: two methods for CIs robust to weak instruments:
 
-  - [Bootstrap-$c$]{.highlight}: resample, compute $\widehat{\tau}_{2SLS}$, take percentile CI.
-  - [Bootstrap-$t$]{.highlight}: resample, compute $t$-statistics, form CIs via percentile-$t$ adjustments.
+  - [Bootstrap-$c$]{.highlight}: resample, compute $\widehat{\tau}^{\star}_{2SLS}$, take percentile CI from bootstrapped coefficients.
+  - [Bootstrap-$t$]{.highlight}: resample, compute $t^\star = (\widehat{\tau}^{\star}_{2SLS} - \widehat{\tau}_{2SLS})/\widehat{SE}^\star$, use quantiles of $t^\star$ as critical values for CI (instead of $\pm 1.96$).
 
 . . .
 
@@ -1377,6 +1434,8 @@ plot(bk_iv_sens)
 
 ### "Testing" Exclusion: Restrictions in Practice
 
+<br>
+
 ```{r}
 #| label: pearl_restrictions
 #| echo: true
@@ -1513,6 +1572,8 @@ $$
 
 ### Testing _LATE_: Kitagawa Nesting Check
 
+<br>
+
 ```{r}
 #| label: kitagawa_test
 #| echo: true
@@ -1549,6 +1610,8 @@ bind_rows(
 ```
 
 ### Testing _LATE_: Huber and Mellace Bounds Check
+
+<br>
 
 ```{r}
 #| label: huber_test
