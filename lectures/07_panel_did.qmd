@@ -1,6 +1,6 @@
 ---
 title: "Observational Studies:<br>DiD/Panel/Synth"
-subtitle: "PSCI 8357 - Stats II"
+subtitle: "PSCI 8357 - STAT II"
 author: Georgiy Syunyaev
 institute: "Department of Political Science, Vanderbilt University"
 date: today
@@ -67,6 +67,7 @@ pacman::p_load(
   future.apply,
   pbapply,
   patchwork,
+  plotly,
   MASS,
   ggpubr,
   thematic
@@ -78,20 +79,9 @@ pacman::p_load_gh("naoki-egami/DIDdesign")
 future::plan(multisession, workers = parallel::detectCores() - 2)
 
 # set theme for plots
-custom_theme <- theme(
-  panel.background = element_rect(fill = "#f0f1eb", color = NA),
-  plot.background = element_rect(fill = "#f0f1eb", color = NA),
-  text = element_text(color = "#111111"),
-  axis.text = element_text(color = "#111111"),
-  axis.title = element_text(color = "#111111"),
-  plot.title = element_text(color = "#111111", face = "bold"),
-  plot.subtitle = element_text(color = "#111111"),
-  legend.text = element_text(color = "#111111"),
-  legend.title = element_text(color = "#111111"),
-  legend.background = element_rect(fill = "#f0f1eb", color = NA)
-)
+ggplot2::theme_set(ggplot2::theme_bw(base_size = 20))
 
-thematic::thematic_on(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
+thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 ```
 
 # Difference-in-Differences (DiD)
@@ -179,12 +169,10 @@ ggplot(df, aes(x = time, y = outcome, color = group, linetype = group)) +
            label = "DiD estimate", 
            hjust = 0.0, vjust = 0.5) +
   labs(x = NULL, y = "Outcome") +
-  theme_bw(base_size = 20) +
   theme(legend.position = "bottom",
         axis.text.y = element_blank(),
         axis.text.x = element_text(size = 18),
-        panel.grid.minor = element_blank()) +
-  custom_theme
+        panel.grid.minor = element_blank())
 
 ```
 
@@ -196,15 +184,9 @@ ggplot(df, aes(x = time, y = outcome, color = group, linetype = group)) +
 
 - **Question**: Do higher minimum wages decrease employment?
 
-. . .
-
 - @card1994minimum consider impact of New Jersey's 1992 minimum wage increase from \$4.25 to \$5.05 per hour
 
-. . .
-
 - Compare employment in 410 fast-food restaurants in New Jersey and eastern Pennsylvania before and after the rise
-
-. . .
 
 - Data: Two waves of survey on wages and employment
   
@@ -250,9 +232,7 @@ hist_before <-
   scale_x_continuous(limits = c(4, 6.5)) +
   scale_fill_manual(
     values = c("Pennsylvania" = "#689d6a", "New Jersey" = "#cc241d")
-  ) +
-  theme_bw(base_size = 20) +
-  custom_theme
+  )
 
 hist_after <-
   card_krueger_1994_mod |>
@@ -279,9 +259,7 @@ hist_after <-
   scale_x_continuous(limits = c(4, 6.5)) +
   scale_fill_manual(
     values = c("Pennsylvania" = "#689d6a", "New Jersey" = "#cc241d")
-  ) +
-  theme_bw(base_size = 20) +
-  custom_theme
+  )
 
 hist_before +
   hist_after +
@@ -313,8 +291,6 @@ hist_before +
   $$
 
 - **Treatment indicator:** $T_{it} \in \{0,1\}$
-
-. . .
 
 - **Units in the treatment group receive treatment in $t=1$:**
 
@@ -349,13 +325,7 @@ hist_before +
     Y_{i1} = Y_{i1}(0) (1 - G_i) + Y_{i1}(1) G_i
     $$
 
-- **Estimand:** [_ATT_ in the post-treatment period]{.highlight}
-  
-$$
-\tau_{ATT} = \E[Y_{i1}(1)-Y_{i1}(0) \given G_i = 1] = \E[Y_{i1}(1) \given G_i=1] - \textcolor{#cc241d}{\E[Y_{i1}(0) \given G_i=1]}
-$$
-
-### Identification Strategies
+### Estimand: _ATT_
 
 <br>
 
@@ -379,335 +349,203 @@ $$
 
     - What is the average post-period outcome for the treated group in the absence of the treatment?
 
-### Strategy 1: Before vs. After
+### Three Identification Strategies
 
-<br>
+::: {.panel-tabset}
 
-|                                | **Pre-Period ($t=0$)**               | **Post-Period ($t=1$)**               |
+#### [Before vs. After]{.highlight}
+
+|                                | **Pre ($t=0$)**               | **Post ($t=1$)**               |
 |--------------------------------|:---------------------------:|:--------------------------:|
-| **$G_i = 1$ (treatment group)**  | $\textcolor{#458588}{\E[Y_{i0}(0) \given G_i=1]}$             | $\textcolor{#458588}{\E[Y_{i1}(1) \given G_i=1]}$              |
-| **$G_i = 0$ (control group)**    | $\E[Y_{i0}(0) \given G_i=0]$             | $\E[Y_{i1}(0) \given G_i=0]$              |
+| **$G_i = 1$ (treatment)**  | $\textcolor{#458588}{\E[Y_{i0}(0) \given G_i=1]}$             | $\textcolor{#458588}{\E[Y_{i1}(1) \given G_i=1]}$              |
+| **$G_i = 0$ (control)**    | $\E[Y_{i0}(0) \given G_i=0]$             | $\E[Y_{i1}(0) \given G_i=0]$              |
+
+:::{.columns}
+:::{.column .small-font width="50%"}
 
 <br>
 
-- **Identification Strategy**: [Before vs. After]{.highlight}
-
-  - Assume [No Time Trend]{.highlight} (No change in average potential outcome over time)
-
+:::{.callout-important icon="false" title="Assumption: No Time Trend"}
 $$
 \textcolor{#cc241d}{\E[Y_{i1}(0) \given G_i=1]} = \textcolor{#458588}{\E[Y_{i0}(0)|G_i=1]}
 $$
+:::
 
-. . .
+Estimator for _ATT_: $$\widehat{\tau}_{ATT} = \textcolor{#458588}{\E[Y_{i1}|G_i=1] - \E[Y_{i0}|G_i=1]}$$
 
-- **Estimator**:
-
-$$
-\widehat{\tau}_{ATT} = \textcolor{#458588}{\E[Y_{i1}|G_i=1] - \E[Y_{i0}|G_i=1]}
-$$
-
-### Strategy 1: Before vs. After
+:::
+:::{.column width="50%"}
 
 ```{r}
-#| label: before_after_estimator
+#| label: before_after_tab
 #| fig-align: center
-#| fig-width: 9
+#| fig-width: 8
 #| fig-height: 7
+#| echo: false
 
 df <- data.frame(
   group = rep(c("Treatment", "Counterfactual"), each = 2),
   time = rep(c(0, 1), 2),
-  outcome = c(
-    2,   3,    # Treatment group (before -> after)
-    2,   2    # Counterfactual (parallel shift of Control)
-  )
+  outcome = c(2, 3, 2, 2)
 )
 
 ggplot(df, aes(x = time, y = outcome, color = group, linetype = group, shape = group)) +
-  # Draw lines and points
   geom_line(size = 1) +
   geom_point(size = 3) +
-  
-  scale_color_manual(
-    name = "Trends",
-    values = c("Counterfactual" = "#cc241d",
-               "Treatment" = "#cc241d"),
-    labels = c("Counterfactual for Treatment Group",
-               "Treatment Group")
-  ) +
-  scale_linetype_manual(
-    name = "Trends",
-    values = c("Counterfactual" = "dotted",
-               "Treatment" = "solid"),
-    labels = c("Counterfactual for Treatment Group",
-               "Treatment Group")
-  ) +
-  scale_shape_manual(
-    name = "Trends",
-    values = c("Counterfactual" = 1,
-               "Treatment" = 16),
-    labels = c("Counterfactual for Treatment Group",
-               "Treatment Group")
-  ) +
-  scale_x_continuous(
-    breaks = c(0, 1),
-    labels = c("t = 0\n(before)", "t = 1\n(after)"),
-    limits = c(-0.5,1.5)
-  ) +
-  scale_y_continuous(
-    limits = c(0.8,3.2)
-  ) +
-  annotate("segment", 
-           x = 1.05, xend = 1.05, 
-           y = 2,  yend = 3,
-           arrow = arrow(angle = 90, ends = "both", length = unit(0.15, "cm")), 
-           color = "black") +
-  annotate("text", size = 5,
-           x = 1.07, y = (2 + 3)/2, 
-           label = "Before-After estimate", 
-           hjust = 0.0, vjust = 0.5) +
-  annotate("text", x = 1, y = 1.9,
-           label = expression(E (Y[i1](0) ~ "|" ~ G[i]==1)),
-           parse = TRUE, size = 5, hjust = 0.5) +
-  annotate("text", x = 0, y = 1.9,
-           label = expression(E (Y[i0] ~ "|" ~ G[i]==1)),
-           parse = TRUE, size = 5, hjust = 0.5) +
-  annotate("text", x = 1, y = 3.1,
-           label = expression(E (Y[i1] ~ "|" ~ G[i]==1)),
-           parse = TRUE, size = 5, hjust = 0.5) +
+  scale_color_manual(name = "Trends",
+    values = c("Counterfactual" = "#cc241d", "Treatment" = "#cc241d"),
+    labels = c("Counterfactual", "Treatment")) +
+  scale_linetype_manual(name = "Trends",
+    values = c("Counterfactual" = "dotted", "Treatment" = "solid"),
+    labels = c("Counterfactual", "Treatment")) +
+  scale_shape_manual(name = "Trends",
+    values = c("Counterfactual" = 1, "Treatment" = 16),
+    labels = c("Counterfactual", "Treatment")) +
+  scale_x_continuous(breaks = c(0, 1), labels = c("t = 0", "t = 1"), limits = c(-0.3, 1.3)) +
+  scale_y_continuous(limits = c(0.8, 3.2)) +
+  annotate("segment", x = 1.05, xend = 1.05, y = 2, yend = 3,
+    arrow = arrow(angle = 90, ends = "both", length = unit(0.15, "cm")), color = "black") +
+  annotate("text", size = 3.5, x = 1.08, y = 2.5, label = "B-A estimate", hjust = 0) +
   labs(x = NULL, y = "Outcome") +
-  theme_bw(base_size = 20) +
-  theme(legend.position = "bottom",
-        axis.text.y = element_blank(),
-        axis.text.x = element_text(size = 18),
-        panel.grid.minor = element_blank()) +
-  custom_theme
-
+  theme(legend.position = "bottom", axis.text.y = element_blank(),
+        panel.grid.minor = element_blank())
 ```
 
-### Strategy 2: Treated vs. Control in Post-Period
+:::
+:::
 
-<br>
+#### [Difference-in-Means (DiM)]{.highlight}
 
-|                                | **Pre-Period ($t=0$)**               | **Post-Period ($t=1$)**               |
+|                                | **Pre ($t=0$)**               | **Post ($t=1$)**               |
 |--------------------------------|:---------------------------:|:--------------------------:|
-| **$G_i = 1$ (treatment group)**  | $\E[Y_{i0}(0) \given G_i=1]$             | $\textcolor{#458588}{\E[Y_{i1}(1) \given G_i=1]}$              |
-| **$G_i = 0$ (control group)**    | $\E[Y_{i0}(0) \given G_i=0]$             | $\textcolor{#458588}{\E[Y_{i1}(0) \given G_i=0]}$              |
+| **$G_i = 1$ (treatment)**  | $\E[Y_{i0}(0) \given G_i=1]$             | $\textcolor{#458588}{\E[Y_{i1}(1) \given G_i=1]}$              |
+| **$G_i = 0$ (control)**    | $\E[Y_{i0}(0) \given G_i=0]$             | $\textcolor{#458588}{\E[Y_{i1}(0) \given G_i=0]}$              |
+
+:::{.columns}
+:::{.column .small-font width="50%"}
 
 <br>
 
-- **Identification Strategy**: [Treated vs. Control in Post-Period]{.highlight}
-
-  - Assume [Strict (Conditional)  Ignorability]{.highlight}
-
+:::{.callout-important icon="false" title="Assumption: Strict/Conditional Ignorability"}
 $$
 \textcolor{#cc241d}{\E[Y_{i1}(0)|G_i=1]} = \textcolor{#458588}{\E[Y_{i1}(0)|G_i=0]}
 $$
+:::
 
-. . .
+Estimator for _ATT_: $$\widehat{\tau}_{ATT} = \textcolor{#458588}{\E[Y_{i1}|G_i=1] - \E[Y_{i1}|G_i=0]}$$
 
-- **Estimator**:
-
-$$
-\widehat{\tau}_{ATT} = \textcolor{#458588}{\E[Y_{i1}|G_i=1] - \E[Y_{i1}|G_i=0]}
-$$
-
-### Strategy 2: Treated vs. Control in Post-Period
+:::
+:::{.column width="50%"}
 
 ```{r}
-#| label: dim_estimator
+#| label: dim_tab
 #| fig-align: center
-#| fig-width: 9
+#| fig-width: 8
 #| fig-height: 7
+#| echo: false
 
 df <- data.frame(
   group = rep(c("Treatment", "Counterfactual"), each = 2),
   time = rep(c(0, 1), 2),
-  outcome = c(
-    2,   3,    # Treatment group (before -> after)
-    2,   1.2   # Counterfactual (parallel shift of Control)
-  )
+  outcome = c(2, 3, 2, 1.2)
 )
 
 ggplot(df, aes(x = time, y = outcome, color = group, linetype = group, shape = group)) +
-  # Draw lines and points
   geom_line(size = 1) +
   geom_point(size = 3, fill = "white") +
-  
-  scale_color_manual(
-    name = "Trends",
-    values = c("Counterfactual" = "#cc241d",
-               "Treatment" = "#cc241d"),
-    labels = c("Counterfactual for Treatment Group",
-               "Treatment Group")
-  ) +
-  scale_linetype_manual(
-    name = "Trends",
-    values = c("Counterfactual" = "blank",
-               "Treatment" = "solid"),
-    labels = c("Counterfactual for Treatment Group",
-               "Treatment Group")
-  ) +
-  scale_shape_manual(
-    name = "Trends",
-    values = c("Counterfactual" = 1,
-               "Treatment" = 16),
-    labels = c("Counterfactual for Treatment Group",
-               "Treatment Group")
-  ) +
-  scale_x_continuous(
-    breaks = c(0, 1),
-    labels = c("t = 0\n(before)", "t = 1\n(after)"),
-    limits = c(-0.5,1.5)
-  ) +
-  scale_y_continuous(
-    limits = c(0.8,3.2)
-  ) +
-  annotate("segment", 
-           x = 1.05, xend = 1.05, 
-           y = 1.2,  yend = 3,
-           arrow = ggplot2::arrow(angle = 90, ends = "both", length = unit(0.15, "cm")), 
-           color = "black") +
-  annotate("text", size = 5,
-           x = 1.07, y = (1.2 + 3)/2, 
-           label = "DiM estimate", 
-           hjust = 0.0, vjust = 0.5) +
-  annotate("text", x = 1, y = 1.1,
-           label = expression(E (Y[i1] ~ "|" ~ G[i]==0) ~ "=" ~ E (Y[i1](0) ~ "|" ~ G[i]==1)),
-           parse = TRUE, size = 5, hjust = 0.5) +
-  annotate("text", x = 0, y = 1.9,
-           label = expression(E (Y[i0] ~ "|" ~ G[i]==1)),
-           parse = TRUE, size = 5, hjust = 0.5) +
-  annotate("text", x = 1, y = 3.1,
-           label = expression(E (Y[i1] ~ "|" ~ G[i]==1)),
-           parse = TRUE, size = 5, hjust = 0.5) +
+  scale_color_manual(name = "Trends",
+    values = c("Counterfactual" = "#cc241d", "Treatment" = "#cc241d"),
+    labels = c("Counterfactual", "Treatment")) +
+  scale_linetype_manual(name = "Trends",
+    values = c("Counterfactual" = "blank", "Treatment" = "solid"),
+    labels = c("Counterfactual", "Treatment")) +
+  scale_shape_manual(name = "Trends",
+    values = c("Counterfactual" = 1, "Treatment" = 16),
+    labels = c("Counterfactual", "Treatment")) +
+  scale_x_continuous(breaks = c(0, 1), labels = c("t = 0", "t = 1"), limits = c(-0.3, 1.3)) +
+  scale_y_continuous(limits = c(0.8, 3.2)) +
+  annotate("segment", x = 1.05, xend = 1.05, y = 1.2, yend = 3,
+    arrow = arrow(angle = 90, ends = "both", length = unit(0.15, "cm")), color = "black") +
+  annotate("text", size = 3.5, x = 1.08, y = 2.1, label = "DiM estimate", hjust = 0) +
   labs(x = NULL, y = "Outcome") +
-  theme_bw(base_size = 20) +
-  theme(legend.position = "bottom",
-        axis.text.y = element_blank(),
-        axis.text.x = element_text(size = 18),
-        panel.grid.minor = element_blank()) +
-  custom_theme
-
+  theme(legend.position = "bottom", axis.text.y = element_blank(),
+        panel.grid.minor = element_blank())
 ```
 
-### Identification Strategy: DiD
+:::
+:::
 
-<br>
+#### [Difference-in-Differences]{.highlight}
 
-|                                | **Pre-Period ($t=0$)**               | **Post-Period ($t=1$)**               |
+|                                | **Pre ($t=0$)**               | **Post ($t=1$)**               |
 |--------------------------------|:---------------------------:|:--------------------------:|
-| **$G_i = 1$ (treatment group)**  | $\textcolor{#458588}{\E[Y_{i0}(0) \given G_i=1]}$             | $\textcolor{#458588}{\E[Y_{i1}(1) \given G_i=1]}$              |
-| **$G_i = 0$ (control group)**    | $\textcolor{#458588}{\E[Y_{i0}(0) \given G_i=0]}$             | $\textcolor{#458588}{\E[Y_{i1}(0) \given G_i=0]}$              |
+| **$G_i = 1$ (treatment)**  | $\textcolor{#458588}{\E[Y_{i0}(0) \given G_i=1]}$             | $\textcolor{#458588}{\E[Y_{i1}(1) \given G_i=1]}$              |
+| **$G_i = 0$ (control)**    | $\textcolor{#458588}{\E[Y_{i0}(0) \given G_i=0]}$             | $\textcolor{#458588}{\E[Y_{i1}(0) \given G_i=0]}$              |
 
-. . .
+:::{.columns}
+:::{.column .small-font width="50%"}
 
 <br>
 
-- **Identification Strategy**: [Difference-in-Differences (DiD)]{.highlight}
-
-  - Assume [Parallel Trends]{.highlight}:  
-
+:::{.callout-important icon="false" title="Assumption: Parallel Trends"}
 $$
-\E\Bigl[ \textcolor{#cc241d}{Y_{i1}(0)} - \textcolor{#458588}{Y_{i0}(0)} \given G_i=1 \Bigr] = \E\Bigl[ \textcolor{#458588}{Y_{i1}(0) - Y_{i0}(0)} \given G_i=0 \Bigr]
+\begin{aligned}
+&\E\Bigl[ \textcolor{#cc241d}{Y_{i1}(0)} - \textcolor{#458588}{Y_{i0}(0)} \given G_i=1 \Bigr] \\
+&\quad = \E\Bigl[ \textcolor{#458588}{Y_{i1}(0) - Y_{i0}(0)} \given G_i=0 \Bigr]
+\end{aligned}
+$$
+:::
+
+Estimator for _ATT_: 
+$$
+\begin{aligned}
+\widehat{\tau}_{ATT}
+&= \textcolor{#458588}{\bigl\{ \E[Y_{i1}\given G_i\!=\!1] - \E[Y_{i1}\given G_i\!=\!0] \bigr\}} \\
+&\qquad \textcolor{#458588}{- \bigl\{ \E[Y_{i0}\given G_i\!=\!1] - \E[Y_{i0}\given G_i\!=\!0] \bigr\}}
+\end{aligned}
 $$
 
-. . .
-
-- [DiD Estimator]{.highlight}:
-
-$$
-\widehat{\tau}_{ATT} = \textcolor{#458588}{\Bigl\{ \E[Y_{i1}|G_i=1] - \E[Y_{i1}|G_i=0] \Bigr\} - \Bigl\{ \E[Y_{i0}|G_i=1] - \E[Y_{i0}|G_i=0] \Bigr\}}
-$$
-
-### DiD Estimator
+:::
+:::{.column width="50%"}
 
 ```{r}
-#| label: did_estimator_full
+#| label: did_tab
 #| fig-align: center
-#| fig-width: 10
+#| fig-width: 8
 #| fig-height: 7
+#| echo: false
 
 df <- data.frame(
   group = rep(c("Control", "Treatment", "Counterfactual"), each = 2),
   time = rep(c(0, 1), 3),
-  outcome = c(
-    1,   1.2,  # Control group (before -> after)
-    2,   3,    # Treatment group (before -> after)
-    2,   2.2   # Counterfactual (parallel shift of Control)
-  )
+  outcome = c(1, 1.2, 2, 3, 2, 2.2)
 )
 
 ggplot(df, aes(x = time, y = outcome, color = group, linetype = group, shape = group)) +
-  # Draw lines and points
   geom_line(size = 1) +
   geom_point(size = 3, fill = "white") +
-  
-  scale_color_manual(
-    name = "Trends",
-    values = c("Control" = "#689d6a",
-               "Counterfactual" = "#cc241d",
-               "Treatment" = "#cc241d"),
-    labels = c("Control Group",
-               "Counterfactual for Treatment Group",
-               "Treatment Group")
-  ) +
-  scale_linetype_manual(
-    name = "Trends",
-    values = c("Control" = "solid",
-               "Counterfactual" = "dotted",
-               "Treatment" = "solid"),
-    labels = c("Control Group",
-               "Counterfactual for Treatment Group",
-               "Treatment Group")
-  ) +
-  scale_shape_manual(
-    name = "Trends",
-    values = c("Control" = 16,
-               "Counterfactual" = 1,
-               "Treatment" = 16),
-    labels = c("Control Group",
-               "Counterfactual for Treatment Group",
-               "Treatment Group")
-  ) +
-  scale_x_continuous(
-    breaks = c(0, 1),
-    labels = c("t = 0\n(before)", "t = 1\n(after)"),
-    limits = c(-0.5,1.5)
-  ) +
-  annotate("segment", 
-           x = 1.05, xend = 1.05, 
-           y = 2.2,  yend = 3,
-           arrow = arrow(angle = 90, ends = "both", length = unit(0.15, "cm")), 
-           color = "black") +
-  annotate("text", size = 5,
-           x = 1.07, y = (2.2 + 3)/2, 
-           label = "DiD estimate", 
-           hjust = 0.0, vjust = 0.5) +
-  annotate("text", x = 1, y = 2.1,
-           label = expression(E (Y[i1](0) ~ "|" ~ G[i]==1)),
-           parse = TRUE, size = 5, hjust = 0.5) +
-  annotate("text", x = 0, y = 1.9,
-           label = expression(E (Y[i0] ~ "|" ~ G[i]==1)),
-           parse = TRUE, size = 5, hjust = 0.5) +
-  annotate("text", x = 0, y = 1.1,
-           label = expression(E (Y[i0] ~ "|" ~ G[i]==0)),
-           parse = TRUE, size = 5, hjust = 0.5) +
-  annotate("text", x = 1, y = 1.3,
-           label = expression(E (Y[i1] ~ "|" ~ G[i]==0)),
-           parse = TRUE, size = 5, hjust = 0.5) +
-  annotate("text", x = 1, y = 3.1,
-           label = expression(E (Y[i1] ~ "|" ~ G[i]==1)),
-           parse = TRUE, size = 5, hjust = 0.5) +
+  scale_color_manual(name = "Trends",
+    values = c("Control" = "#689d6a", "Counterfactual" = "#cc241d", "Treatment" = "#cc241d"),
+    labels = c("Control", "Counterfactual", "Treatment")) +
+  scale_linetype_manual(name = "Trends",
+    values = c("Control" = "solid", "Counterfactual" = "dotted", "Treatment" = "solid"),
+    labels = c("Control", "Counterfactual", "Treatment")) +
+  scale_shape_manual(name = "Trends",
+    values = c("Control" = 16, "Counterfactual" = 1, "Treatment" = 16),
+    labels = c("Control", "Counterfactual", "Treatment")) +
+  scale_x_continuous(breaks = c(0, 1), labels = c("t = 0", "t = 1"), limits = c(-0.3, 1.3)) +
+  annotate("segment", x = 1.05, xend = 1.05, y = 2.2, yend = 3,
+    arrow = arrow(angle = 90, ends = "both", length = unit(0.15, "cm")), color = "black") +
+  annotate("text", size = 3.5, x = 1.08, y = 2.6, label = "DiD estimate", hjust = 0) +
   labs(x = NULL, y = "Outcome") +
-  theme_bw(base_size = 20) +
-  theme(legend.position = "bottom",
-        axis.text.y = element_blank(),
-        axis.text.x = element_text(size = 18),
-        panel.grid.minor = element_blank()) +
-  custom_theme
-
+  theme(legend.position = "bottom", axis.text.y = element_blank(),
+        panel.grid.minor = element_blank())
 ```
+
+:::
+:::
+
+:::
 
 ### Identification with DiD
 
@@ -723,9 +561,11 @@ $$
 
 - Then the _ATT_ can be nonparametrically identified as:
 
+:::{.callout-important icon="false" title="DiD Identification"}
 $$
 \tau_{ATT} = \Bigl\{ \E[Y_{i1} \given G_i=1]- \E[Y_{i1} \given G_i=0] \Bigr\} - \Bigl\{ \E[Y_{i0} \given G_i=1]- \E[Y_{i0} \given G_i=0] \Bigr\}
 $$
+:::
 
 ### Identification with DiD: Proof
 
@@ -745,22 +585,23 @@ $$
 
 ### Conditional DiD
 
-- **Question**: What type of confounding does DiD make us robust to?
-  
+- **Question**: What type of issues does DiD make us robust to?
+
   :::fragment
-  - Parallel trends hold if [unobserved confounding is time-invariant]{.highlight}.
-  - Parallel trends are violated if there is [unobserved time-varying confounding]{.highlight}.
+  - [Common time shocks]{.highlight} (e.g., macro shocks): absorbed by the control group trends
+  - [Time-invariant, unit-varying confounding]{.highlight} (e.g., geography, institutional quality): differenced out
+  - But **not** to [unit-varying, time-varying confounding]{.alert} (e.g., differential regional trends)
   :::
 
 . . .
 
-- [Idea]{.note}: Parallel trends may be more plausible with pre-treatment covariates:
+- [Idea]{.note}: Parallel trends may be more plausible conditional on covariates $X_i$:
 
-$$
-\E[Y_{i1}(0) - Y_{i0}(0) \given G_i=1, X_i=x] = \E[Y_{i1}(0)-Y_{i0}(0) \given G_i=0, X_i=x]
-$$
+  $$
+  \E[Y_{i1}(0) - Y_{i0}(0) \given G_i=1, X_i=x] = \E[Y_{i1}(0)-Y_{i0}(0) \given G_i=0, X_i=x]
+  $$
 
-  - [Intuition]{.note}: This assumes parallel trends within strata.
+  [Intuition]{.note}: Parallel trends need to hold within strata defined by $X_i$!
 
 . . .
 
@@ -775,15 +616,16 @@ $$
 
 ### (Conditional) DiD in Different Confounding Scenarios
 
+<br>
+
 ```{r}
 #| label: biases_did
 #| fig-align: center
 #| fig-width: 12
-#| fig-height: 7
+#| fig-height: 9
 #| echo: true
-#| code-fold: true
-#| output-location: fragment
-#| code-line-numbers: "3-8|14,18-26|29-45"
+#| output: false
+#| code-line-numbers: "3-9|12-24|29-47"
 
 set.seed(20250327)  # for reproducibility
 
@@ -791,78 +633,82 @@ set.seed(20250327)  # for reproducibility
 n <- 200            # total individuals (n/2 in treatment, n/2 in control)
 tau <- 2            # true ATT (treatment effect in post period)
 lambda <- 1         # common time effect
-beta <- 2           # effect of confounder U on the outcome
+beta <- 2           # effect of X on outcome level
+gamma <- 2          # effect of X on outcome trend (differential trends)
 error_sd <- 1       # standard deviation of error term
 
+# Four estimators from group means + OLS for conditional DiD
+did_estimators <- function(Y, treat, time, X) {
+  m11 <- mean(Y[treat == 1 & time == 1])
+  m10 <- mean(Y[treat == 1 & time == 0])
+  m01 <- mean(Y[treat == 0 & time == 1])
+  m00 <- mean(Y[treat == 0 & time == 0])
+
+  c(
+    did  = (m11 - m10) - (m01 - m00),
+    cdid = .lm.fit(cbind(1, treat, time, treat * time, X, X * time), Y)$coefficients[4],
+    ba   = m11 - m10,
+    dim  = m11 - m01
+  )
+}
+
 sims <-
-  pbapply::pbreplicate(1000,
+  future.apply::future_replicate(1000,
     {
-      
-      unit_U <- runif(n, 0, 0.5)
+      X_i <- runif(n, 0, 0.5)
+      V   <- runif(1, 0, 2)
 
-      sim_df <- 
-        tibble(
-          id = rep(1:n, each = 2),
-          time = rep(c(0, 1), times = n),
-          treat = as.numeric(id %in% sample(1:n, size = n/2, prob = 1 / 4 + unit_U)),
-          ## time-invariant confounding
-          U_ti = rep(unit_U, each = 2),
-          ## time-varying confounding
-          U_tv = if_else(treat == 1 & time == 1, U_ti + runif(1, 0, 0.25), U_ti),
-          Y_ti = lambda * time + tau * (treat * time) + beta * U_ti + rnorm(n * 2, 0, error_sd),
-          Y_tv = lambda * time + tau * (treat * time) + beta * U_tv + rnorm(n * 2, 0, error_sd)
-        )
-      
-      # estimates for time-invariant case
-      ti <-
-        c(
-          estimatr::lm_robust(Y_ti ~ treat * time, data = sim_df)$coefficients[["treat:time"]],
-          estimatr::lm_robust(Y_ti ~ treat * time + U_ti, data = sim_df)$coefficients[["treat:time"]],
-          estimatr::lm_robust(Y_ti ~ time, data = sim_df, subset = treat == 1)$coefficients[["time"]],
-          estimatr::lm_robust(Y_ti ~ treat, data = sim_df, subset = time == 1)$coefficients[["treat"]]
-        )
-      
-      # estimates for time-varying case
-      tv <-
-        c(
-          estimatr::lm_robust(Y_tv ~ treat * time, data = sim_df)$coefficients[["treat:time"]],
-          estimatr::lm_robust(Y_tv ~ treat * time + U_tv, data = sim_df)$coefficients[["treat:time"]],
-          estimatr::lm_robust(Y_tv ~ time, data = sim_df, subset = treat == 1)$coefficients[["time"]],
-          estimatr::lm_robust(Y_tv ~ treat, data = sim_df, subset = time == 1)$coefficients[["treat"]]
-        )
+      time  <- rep(c(0, 1), times = n)
+      treat <- rep(as.numeric(1:n %in% sample(1:n, n / 2, prob = 1 / 4 + X_i)), each = 2)
+      X     <- rep(X_i, each = 2)
+      eps   <- rnorm(n * 2, 0, error_sd)
 
-      # Return a tibble with one row per scenario for this iteration
-      expand_grid(
-        scenario = c("Time-Invariant Confounding", "Time-Varying Confounding"),
-        estimator = c("DiD", "Conditional DiD", "Before-After", "DiM")
-      ) |>
-        dplyr::mutate(
-          est = c(ti, tv)
+      tibble(
+        scenario = rep(c("Unit-Varying\nConfounding", "Common\nTime Shock",
+                         "Differential\nTrends"), each = 4),
+        estimator = rep(c("DiD", "Conditional DiD", "Before-After", "DiM"), 3),
+        est = c(
+          did_estimators(lambda * time + tau * (treat * time) + beta * X + eps, treat, time, X),
+          did_estimators(lambda * time + tau * (treat * time) + V * time + eps, treat, time, X),
+          did_estimators(lambda * time + tau * (treat * time) + beta * X + gamma * X * time + eps, treat, time, X)
         )
+      )
     },
     simplify = FALSE,
-    cl = 6
+    future.seed = 20250327
   ) |>
-  bind_rows() |> 
+  bind_rows() |>
   dplyr::mutate(
-    correct = if_else((scenario == "Time-Invariant Confounding" & estimator == "DiD") | estimator == "Conditional DiD", 1, 0),
+    correct = case_when(
+      scenario == "Unit-Varying\nConfounding" & estimator %in% c("DiD", "Conditional DiD") ~ 1,
+      scenario == "Common\nTime Shock" & estimator != "Before-After" ~ 1,
+      scenario == "Differential\nTrends" & estimator == "Conditional DiD" ~ 1,
+      TRUE ~ 0
+    ),
+    scenario = factor(scenario, levels = c("Unit-Varying\nConfounding", "Common\nTime Shock", "Differential\nTrends")),
     estimator = factor(estimator, levels = c("Before-After", "DiM", "DiD", "Conditional DiD"))
   )
 
 
-# Plot the Monte Carlo density estimates with ggplot2
+```
+
+### (Conditional) DiD in Different Confounding Scenarios
+
+```{r}
+#| label: biases_did_plot
+#| fig-align: center
+#| fig-width: 12
+#| fig-height: 9
+#| echo: false
+
 ggplot(sims, aes(x = est, fill = factor(correct), color = factor(correct))) +
   ggdist::geom_dots() +
-  # geom_density(alpha = 0.5) +
   geom_vline(xintercept = tau, linetype = "dashed", color = "black") +
   scale_color_manual(values = c("1" = "#689d6a", "0" = "#cc241d"), guide = "none") +
   scale_fill_manual(values = c("1" = "#689d6a", "0" = "#cc241d"), guide = "none") +
   facet_grid(scenario ~ estimator) +
   labs(x = "Estimate",
-       y = "Density") +
-  theme_bw(base_size = 20) +
-  custom_theme
-
+       y = "Density")
 ```
 
 ## Estimation and Inference
@@ -871,8 +717,6 @@ ggplot(sims, aes(x = est, fill = factor(correct), color = factor(correct))) +
 
 - [Panel data]{.highlight}: The same units are sampled at two time points.
 - [Repeated cross-sectional data (RCS)]{.highlight}: Different units are sampled at different time points.
-
-. . .
 
 - [Examples]{.note}:
 
@@ -888,48 +732,29 @@ ggplot(sims, aes(x = est, fill = factor(correct), color = factor(correct))) +
     - **Outcome**: Quality of local public services provision.
     - **Results**: Decentralization significantly improved public service delivery in policy areas important to central policy-makers.
 
-### Plug-in Estimation for Panel Data
+### Plug-in Estimation
+
+::: {.panel-tabset}
+
+#### [Panel Data]{.highlight}
 
 <br>
 
-- **Panel data**: The same units are sampled at two time points.
+**Panel data**: The same units are sampled at two time points. Example: @anzia2012election.
 
-- [Causal Estimand]{.highlight}:
+[Plug-in estimator]{.highlight} (difference in difference-in-means):
 
-  $$
-  \tau_{ATT} = \left\{ \E [Y_{i1}|G_i=1]- \E [Y_{i1}|G_i=0]\right\} - \left\{ \E [Y_{i0}|G_i=1]- \E [Y_{i0}|G_i=0] \right\}
-  $$
+$$
+\widehat{\tau}^{P}_{ATT} = \left\{\frac{1}{N_1}\sum_{i=1}^N G_i\{Y_{i1} - Y_{i0} \}\right\} - \left\{\frac{1}{N_0}\sum_{i=1}^N (1-G_i)\{Y_{i1}-Y_{i0}\}\right\}
+$$
 
-- [Plug-in estimator]{.highlight} (difference in difference-in-means):
-
-  $$
-  \begin{align*}
-  \widehat{\tau}^{P}_{ATT} &\equiv \left\{\frac{1}{N_1}\sum_{i=1}^N G_iY_{i1} -
-                \frac{1}{N_0}\sum_{i=1}^N (1-G_i)Y_{i1}\right\} -
-                \left\{\frac{1}{N_1}\sum_{i=1}^N G_iY_{i0} -
-                \frac{1}{N_0}\sum_{i=1}^N (1-G_i)Y_{i0} \right\}\\
-      & =\left\{\frac{1}{N_1}\sum_{i=1}^N G_i\{Y_{i1} - Y_{i0} \} -
-            \frac{1}{N_0}\sum_{i=1}^N (1-G_i)\{Y_{i1}-Y_{i0}\}\right\},
-    \end{align*}
-  $$
-
-  where $N_1$ and $N_0$ are treated and control unit counts.
-
-. . .
-
-- **Inference**: Standard errors from standard difference in means.
-
-### Example: Impact of Election Timing
-
-<br>
+where $N_1$ and $N_0$ are treated and control unit counts. **Inference**: SE from standard difference in means.
 
 ```{r}
 #| label: did_basic_panel
 #| echo: true
 #| eval: true
-#| output-location: fragment
-#| output: asis
-
+#| code-fold: true
 
 anzia2012 <-
   readr::read_csv("../_data/anzia2012.csv") |>
@@ -960,60 +785,37 @@ group_mn <-
       var_Y_00 = var(.$lnavgsalary_cpi[.$group == 0 & .$year == 2006])
     ))()
 
-# did panel
 panel_estimate <- (group_mn$Y_11 - group_mn$Y_10) - (group_mn$Y_01 - group_mn$Y_00)
-
-# calculate standard errors
 panel_se <- sqrt(
-  group_mn$var_Y_11 / group_mn$n_Y_11 + 
-  group_mn$var_Y_10 / group_mn$n_Y_10 + 
-  group_mn$var_Y_01 / group_mn$n_Y_01 + 
+  group_mn$var_Y_11 / group_mn$n_Y_11 +
+  group_mn$var_Y_10 / group_mn$n_Y_10 +
+  group_mn$var_Y_01 / group_mn$n_Y_01 +
   group_mn$var_Y_00 / group_mn$n_Y_00
 )
 
-panel_estimate
+cat(
+  "Effect of switching to on-cycle elections on log avg. teacher salary (Anzia 2012):", round(panel_estimate, 4))
 ```
 
-### Plug-in Estimation for Repeated Cross Sections
+#### [Repeated Cross-Sections]{.highlight}
 
 <br>
 
-- **Repeated cross-sectional data (RCS)**: Different units are sampled at different time points
+**RCS data**: Different units are sampled at different time points. Example: @malesky2014impact.
 
-. . .
+[Plug-in estimator]{.highlight} using group-time averages $\overline{Y}_{gt} = \frac{1}{N_{gt}} \sum_{i=1}^{N_{gt}} Y_{it}$:
 
-- Need to define group-time averages:
+$$
+\widehat{\tau}^{RC}_{ATT} = (\overline{Y}_{11} - \overline{Y}_{10}) - (\overline{Y}_{01} - \overline{Y}_{00})
+$$
 
-  $$
-  \overline{Y}_{gt} = \frac{1}{N_{gt}} \sum_{i=1}^{N_{gt}} Y_{it}
-  $$
-
-  where $N_{gt}$ is the number of units in Group $G_i = g$ at time $t$.
-
-- The plug-in estimator is then:
-
-  $$
-  \widehat{\tau}^{RC}_{ATT} = (\overline{Y}_{11} - \overline{Y}_{10}) - (\overline{Y}_{01} - \overline{Y}_{00})
-  $$
-
-. . .
-
-- **Inference**: Standard errors from standard difference in means.
-
-### Example: Minimum Wage Effect
-
-![](../_images/card_krueger_1994_2.png){height="75%" fig-align="center"}
-
-### Example: Impact of Recentralization
-
-<br>
+where $N_{gt}$ is the number of units in Group $g$ at time $t$. **Inference**: SE from standard difference in means.
 
 ```{r}
 #| label: did_basic_rcs
 #| echo: true
 #| eval: true
-#| output-location: fragment
-#| output: asis
+#| code-fold: true
 
 malesky2014 <-
   readr::read_csv("../_data/malesky2014.csv") |>
@@ -1039,24 +841,21 @@ group_mn <-
       var_Y_00 = var(.$vpost[.$treatment == 0 & .$year == 2008])
     ))()
 
-# did repeated cross-section
 rcs_estimate <- (group_mn$Y_11 - group_mn$Y_10) - (group_mn$Y_01 - group_mn$Y_00)
-
-# calculate standard errors
 rcs_se <- sqrt(
-  group_mn$var_Y_11 / group_mn$n_Y_11 + 
-  group_mn$var_Y_10 / group_mn$n_Y_10 + 
-  group_mn$var_Y_01 / group_mn$n_Y_01 + 
+  group_mn$var_Y_11 / group_mn$n_Y_11 +
+  group_mn$var_Y_10 / group_mn$n_Y_10 +
+  group_mn$var_Y_01 / group_mn$n_Y_01 +
   group_mn$var_Y_00 / group_mn$n_Y_00
 )
 
-
-rcs_estimate
+cat(
+  "Effect of switching to on-cycle elections on log avg. teacher salary (Anzia 2012):", round(rcs_estimate, 4))
 ```
 
-### Regression Estimator for RCS and Panel
+:::
 
-<br>
+### Regression Estimator for RCS and Panel
 
 - We can fit the following [interactive linear regression]{.highlight} in both RCS and Panel case: 
   $$
@@ -1257,19 +1056,30 @@ tibble(
   Y_{i1}(0) \indep G_i \given Y_{i0}
   $$
 
-  - Does **not** imply and is **not** implied by [parallel trends].
-  - Benefit over parallel trends: It is scale-free. i.e. it does not depend on absolute levels.
-  - Equivalent to parallel trends if 
-    $$
-    \E [Y_{i0} \given G_i = 1] = \E [Y_{i0} \given G_i = 0]
-    $$
+  - Does **not** imply and is **not** implied by parallel trends.
+  - Benefit over parallel trends: It is scale-free, i.e. it does not depend on absolute levels.
+  - Equivalent to parallel trends if $\E [Y_{i0} \given G_i = 1] = \E [Y_{i0} \given G_i = 0]$
 
 . . .
 
 - **Different ideas about why there is selection**:
-  
-  - [DiD]{.highlight}: time-constant unmeasured confounder creates imbalance.
-  - [LDV]{.highlight}: previous outcome directly affects treatment assignment.
+
+:::columns
+::: {.column width="48%"}
+[DiD]{.highlight}
+
+- Concern: Time-invariant unmeasured confounder creates imbalance in treatment assignment
+
+- Assumption: [Parallel Trends]{.note}.
+:::
+::: {.column width="48%"}
+[LDV]{.highlight}
+
+- Concern: Previous outcome directly affects treatment assignment
+
+- Assumption: [Conditional Ignorability]{.note}.
+:::
+:::
 
 ### DiD/LDV bracketing
 
@@ -1378,16 +1188,7 @@ $$
 
 - [Note]{.note}: **this is only diagnostics**, not a direct test of the assumption!
   
-  - E.g. in $t = -1$ we test
-    
-    $$
-    \begin{align*}
-      &\E[Y_{i,0}(0) - Y_{i, -1}(0) \given G_i=1] = \E[Y_{i, 0}(0)-Y_{i, -1}(0) \given G_i=0] \\
-      &\Longleftrightarrow \E[Y_{i,0} - Y_{i, -1} \given G_i=1] = \E[Y_{i, 0} -Y_{i, -1} \given G_i=0]
-    \end{align*}
-    $$
-  
-  which is different from $\E[Y_{i,1}(0) - Y_{i, 0}(0) \given G_i=1] = \E[Y_{i, 1}(0)-Y_{i, 0}(0) \given G_i=0]$
+  - E.g. in $t = -1$ we test $\E[Y_{i,\textcolor{#cc241d}{0}} - Y_{i, \textcolor{#cc241d}{-1}} \given G_i=1] = \E[Y_{i, \textcolor{#cc241d}{0}} -Y_{i, \textcolor{#cc241d}{-1}} \given G_i=0]$ $\neq$ parallel trends between periods $0$ and $1$!
 
 - Do not forget about [pre-trend testing fallacy]{.highlight}: failure to reject the conventional null to test for parallel trends is problematic.
 
@@ -1425,9 +1226,7 @@ anzia2012 |>
   annotate("text", x = 2006.5, y = 10.7, label = "E[Y | G=0]", color = "#689d6a", size = 6) +
   annotate("text", x = 2006.5, y = 10.63, label = "E[Y | G=1]", color = "#cc241d", size = 6) +
   labs(x = "Year", y = "Y", color = NULL) +
-  theme_bw(base_size = 20) +
-  theme(panel.grid.minor = element_blank()) +
-  custom_theme
+  theme(panel.grid.minor = element_blank())
 
 ```
 
@@ -1455,9 +1254,7 @@ anzia2012 |>
   annotate("text", x = 2006.5, y = 10.7, label = "E[Y | G=0]", color = "#689d6a", size = 6) +
   annotate("text", x = 2006.5, y = 10.63, label = "E[Y | G=1]", color = "#cc241d", size = 6) +
   labs(x = "Year", y = "Y", color = NULL) +
-  theme_bw(base_size = 20) +
-  theme(panel.grid.minor = element_blank()) +
-  custom_theme
+  theme(panel.grid.minor = element_blank())
 
 ```
 
@@ -1523,7 +1320,7 @@ out.fect.p <-
 
 plot(out.fect.p, 
       cex.text = 0.8, stats = c("placebo.p","equiv.p"), 
-      main = "") + theme_bw(base_size = 20) + custom_theme
+      main = "")
 
 ```
 
@@ -1559,9 +1356,7 @@ anzia2012 |>
       x = "Estimate (Year x Group Interaction)",
       y = "Pre-Treatment Time Period (Year)"
     ) +
-    theme_bw(base_size = 20) +
-    coord_flip() +
-    custom_theme
+    coord_flip()
 
 ```
 
@@ -1697,7 +1492,7 @@ HonestDiDFEct::createSensitivityResults_relativeMagnitudes(
 
 ::: {.column style="margin-top: 2em; width:40%;"}
 
-{{< video https://youtu.be/6nG63ISt_Ek?si=YhfNN90Sjki1cezn&t=26 width="450" height="250" >}}
+<iframe width="450" height="250" src="https://www.youtube.com/embed/6nG63ISt_Ek?start=26" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen data-external="1"></iframe>
 
 :::
 
@@ -1824,6 +1619,19 @@ $$
 
 ## Staggered Adoption Design (DiD Fail?)
 
+### From 2x2 to Staggered Adoption
+
+<br><br>
+
+- In basic DiD we had **2 groups** and **2 periods** $\rightsquigarrow$ one clean treatment-vs-control comparison.
+
+. . .
+
+- **What breaks when units adopt at different times?**
+
+  - With $G$ adoption cohorts and $T$ periods, TWFE pools many 2x2 comparisons with **different** weights.
+  - Some comparisons use [already-treated]{.alert} units as controls $\rightsquigarrow$ bias when treatment effects evolve over time.
+
 ### Example: Bargaining Rights and Size of the Government
 
 <br><br><br>
@@ -1869,8 +1677,7 @@ p <-
     gridOff = TRUE,
     by.timing = TRUE,
     axis.lab.angle = 90
-  ) +
-  custom_theme
+  )
 
 ```
 
@@ -1889,7 +1696,7 @@ panelView::panelview(
   xlab = "Year", ylab = "Log(Salary)", type = "outcome", theme.bw = FALSE,
   display.all = T, gridOff = TRUE, by.timing = TRUE, color = c("lightblue", "blue", "#99999950"), 
   axis.lab.angle = 90
-  ) + custom_theme
+  )
 
 
 ```
@@ -1908,10 +1715,11 @@ panelView::panelview(
   
   - $\forall t > t^\prime$: If $T_{it^\prime} = 1$ then $T_{it} = 1$ 
 
-- We can summarize the information about the treatment assignment by the timing of the treatment: $G_i = \min \{t: T_{it} = 1\}.$  
-  
-  - When unit $i$ never receives the treatment, $G_i = \infty.$  
+- We can summarize the information about the treatment assignment by the timing of the treatment: $G_i = \min \{t: T_{it} = 1\}.$
+
+  - When unit $i$ never receives the treatment, $G_i = \infty.$
   - $G_i$ defines a cohort (units with the same treatment history).
+  - [Note]{.note}: $G_i$ is now essentially a **timing variable** (not the binary group indicator from basic DiD).
 
 - **Assumptions in the SA design**:  
   
@@ -2240,7 +2048,7 @@ $$
 ### Unpacking TWFE Estimator
 
 - [Parallel Trends Assumption]{.highlight} holds for *all* groups for all time periods:
-    
+
     $$
     \forall g, g', t: \: \E[Y_{it}(0) - Y_{i,t-1}(0) \given G_i = g] = \E[Y_{it}(0) - Y_{i,t-1}(0) \given G_i = g'].
     $$
@@ -2256,6 +2064,12 @@ $$
   \end{align*}
   $$
 
+- [Note]{.note}: The $\textcolor{#cc241d}{\widehat{\text{DiD}}^{(1, 2)}_{21}}$ comparison uses already-treated Group 1 as "control" for Group 2 $\rightsquigarrow$ its expectation includes *changes* in Group 1's treatment effect, not just a level.
+
+### GB Decomposition: When Does TWFE Fail?
+
+<br>
+
 - The expectation of the two-way fixed effects estimator:
   $$
   \E(\widehat{\tau}_{\text{SA}}) = (\omega_{1\infty}/2 + \omega_{12}) \times \tau(1, 0) + (\omega_{2\infty} + \omega_{12}/2) \times \tau(2, 0) + (\omega_{1\infty}/2 - \omega_{12}/2) \times \tau(1, 1).
@@ -2263,7 +2077,13 @@ $$
 
 . . .
 
+- [Bias]{.alert}: $\E(\widehat{\tau}_{\text{SA}}) \neq \text{ATT}$ whenever $\tau(1,1) \neq \tau(1,0)$. The weight on $\tau(1,1)$ is $(\omega_{1\infty}/2 - \omega_{12}/2)$, which can even be [**negative**]{.alert} when $\omega_{12} > \omega_{1\infty}$ (i.e., more early-vs-late comparisons than early-vs-never).
+
+. . .
+
 - [Intuition]{.note}: No bias when **no dynamic treatment effects** (no HTE over time, i.e., $\tau(1, 1) = \tau(1, 0)$). [**Moreover returns ATT when no HTE at all!**]{.fragment}
+
+- **Question**: When is dynamic treatment effect heterogeneity substantively plausible? (e.g., policy learning, habit formation, anticipation effects)
 
 ### GB Decomposition
 
@@ -2274,8 +2094,8 @@ $$
 #| echo: true
 #| code-fold: true
 #| fig-align: center
-#| fig-width: 10
-#| fig-height: 7
+#| fig-width: 8
+#| fig-height: 5
 
 pacman::p_load(bacondecomp)
 
@@ -2295,7 +2115,7 @@ base_twfe <-
   ) |>
   broom::tidy()
 
-ggplot(
+p_bacon <- ggplot(
   df_bacon,
   aes(x = weight, y = estimate, shape = factor(type), color = factor(type))
 ) +
@@ -2305,9 +2125,9 @@ ggplot(
     linetype = "dashed"
   ) +
   labs(x = "Weight", y = "Estimate", shape = "Type", color = 'Type') +
-  geom_point() +
-  theme_bw(base_size = 20) +
-  custom_theme
+  geom_point()
+
+plotly::ggplotly(p_bacon)
 ```
 
 
@@ -2319,7 +2139,6 @@ ggplot(
 #| label: bacon_decomp_comparisons
 #| echo: true
 #| eval: true
-#| code-fold: true
 #| output-location: fragment
 
 df_bacon |> 
@@ -2492,7 +2311,7 @@ twfe_est_dyn |>
 
 . . .
 
-- **Potential Outcome**: $Y_{it}(t)$ where $t \in \{0,1\}$.
+- **Potential Outcome**: $Y_{it}(d)$ where $d \in \{0,1\}$.
 - **Observed outcome**: $Y_{it} = Y_{it}(T_{it})$.
 
 . . .
@@ -2605,6 +2424,18 @@ twfe_est_dyn |>
 
 # Synthetic Control Method
 
+### From Many Units to One
+
+<br><br>
+
+- So far: DiD and panel methods assume **many treated units** $\rightsquigarrow$ can estimate group means and differences.
+
+. . .
+
+- **What if there is only one treated unit?** (e.g., a single state passes a policy)
+
+  - Cannot estimate $\E[Y_{it}(0) \given G_i = 1]$ from data $\rightsquigarrow$ need to **construct** a counterfactual from donor units.
+
 ### Setup
 
 <br>
@@ -2682,6 +2513,8 @@ twfe_est_dyn |>
 
 ### Identification
 
+<br>
+
 - [Idea]{.note}: Take a weighted sum of $J$ comparison (donor) units.
 
 - Weight vector $w = (w_j)_{j=2}^{J+1}$ where $w_j \geq 0$ and $\sum_{j=2}^{J+1} w_j = 1$.
@@ -2695,17 +2528,11 @@ twfe_est_dyn |>
 
 . . .
 
-- Suppose $w^\ast$ for which:
+:::{.callout-important icon="false" title="SCM Balancing Weights"}
+Let $w^\ast$ be the weights that satisfy $\sum_{j=2}^{J+1} w_j^\ast \pmb{\mu}_j = \pmb{\mu}_1$ and $\sum_{j=2}^{J+1} w_j^\ast \mathbf{X}_j = \mathbf{X}_1$.
+:::
 
-  $$
-  \sum_{j=2}^{J+1} w_j^\ast \pmb{\mu}_j = \pmb{\mu}_1, 
-  \quad \text{and} \quad 
-  \sum_{j=2}^{J+1} w_j^\ast \mathbf{X}_j = \mathbf{X}_1.
-  $$
-
-. . .
-
-- These [balancing weights]{.highlight} cause the $X_j$ term to cancel out when we take $Y_{1t}(0) - \sum_{j=2}^{J+1} w_j^\ast Y_{jt}$ for $t \leq T_{0}$ $\rightsquigarrow$ use them to approximate $Y_{1t}(0)$ for $t > T_{0}$.
+- These are called [balancing weights]{.highlight} cause the $X_j$ term to cancel out when we take $Y_{1t}(0) - \sum_{j=2}^{J+1} w_j^\ast Y_{jt}$ for $t \leq T_{0}$ $\rightsquigarrow$ use them to approximate $Y_{1t}(0)$ for $t > T_{0}$.
 
 ## Estimation and Inference
 
@@ -2872,6 +2699,8 @@ twfe_est_dyn |>
 
 ### Summary and Extensions
 
+<br>
+
 - Synthetic control method is like a _"quantitative case study"_ [@abadie2010synthetic]: **only one or few treated units needed, but long time series**.
 
 - In practice you need to look at the resulting weights: sometimes few controls receive any weight (_"corner solution" problem_).
@@ -2892,15 +2721,94 @@ twfe_est_dyn |>
 
 ## Summary
 
-### What to use?
+### Method Selection Guide
 
-<br><br>
+```{tikz}
+%| label: method-selection-tree
+%| fig-align: center
+%| fig-width: 7
+%| echo: false
+
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, backgrounds}
+
+\definecolor{gruvbg}{HTML}{f0f1eb}
+\definecolor{gruvfg}{HTML}{111111}
+\definecolor{gruvred}{HTML}{cc241d}
+\definecolor{gruvgreen}{HTML}{98971a}
+\definecolor{gruvblue}{HTML}{458588}
+\definecolor{gruvpurple}{HTML}{b16286}
+\definecolor{gruvorange}{HTML}{d65d0e}
+\definecolor{gruvaqua}{HTML}{689d6a}
+
+\begin{tikzpicture}[
+  background rectangle/.style={fill=gruvbg},
+  show background rectangle,
+  >=Stealth,
+  node distance=1.2cm and 2.2cm,
+  question/.style={
+    diamond,
+    draw=gruvfg,
+    fill=gruvbg,
+    text=gruvfg,
+    text width=2.8cm,
+    align=center,
+    inner sep=2pt,
+    font=\small\bfseries
+  },
+  method/.style={
+    rectangle,
+    rounded corners=4pt,
+    draw=#1,
+    fill=#1!15,
+    text=gruvfg,
+    text width=2.8cm,
+    align=center,
+    minimum height=0.8cm,
+    font=\small\bfseries
+  },
+  method/.default=gruvblue,
+  edge label/.style={
+    font=\footnotesize,
+    text=gruvfg,
+    fill=gruvbg,
+    inner sep=1pt
+  },
+  arrow/.style={->, thick, gruvfg}
+]
+
+% Questions
+\node[question] (q1) {How many\\treated units?};
+\node[question, below right=1.5cm and 3cm of q1] (q2) {Treatment\\absorbing?};
+\node[question, below left=1.5cm and 1.5cm of q2] (q3) {Single\\treatment\\time?};
+\node[question, below right=1.5cm and 1.5cm of q3] (q4) {Long\\pre-trend?};
+
+% Methods
+\node[method=gruvaqua, below left=1.5cm and 2cm of q1] (scm) {Classic SCM};
+\node[method=gruvblue, below left=1.2cm and 0.8cm of q3] (did) {Classic\\DiD/TWFE};
+\node[method=gruvpurple, below left=1.2cm and 0.8cm of q4] (sa) {HTE-robust\\SA estimators};
+\node[method=gruvorange, below right=1.2cm and 0.8cm of q4] (ife) {IFE\\Imputation};
+\node[method=gruvred, below right=1.5cm and 1cm of q2] (si) {Sequential\\Ignorability};
+
+% Arrows
+\draw[arrow] (q1) -- node[edge label, above left] {One} (scm);
+\draw[arrow] (q1) -- node[edge label, above right] {Many} (q2);
+\draw[arrow] (q2) -- node[edge label, above left] {Yes} (q3);
+\draw[arrow] (q2) -- node[edge label, above right] {No (on/off)} (si);
+\draw[arrow] (q3) -- node[edge label, left] {Yes} (did);
+\draw[arrow] (q3) -- node[edge label, right] {No (staggered)} (q4);
+\draw[arrow] (q4) -- node[edge label, left] {No} (sa);
+\draw[arrow] (q4) -- node[edge label, right] {Yes} (ife);
+
+\end{tikzpicture}
+```
+
+### What to use?
 
 :::{.columns}
 :::{.column width="50%"}
 
 - [Classic DiD/TWFE]{.highlight}
-  
+
   :::small-font
   - Single treatment cohort.
   - Parallel trends (potentially conditionally).
@@ -2909,7 +2817,7 @@ twfe_est_dyn |>
   :::
 
 - [Classic SCM]{.highlight}
-  
+
   :::small-font
   - Single treatment unit.
   - Unweighted trends not necessarily parallel.
@@ -2917,20 +2825,28 @@ twfe_est_dyn |>
   - Long pretrend data.
   :::
 
+- [Sequential Ignorability]{.highlight}
+
+  :::small-font
+  - General treatment pattern (on/off).
+  - No unmeasured confounding (given history).
+  - Allows outcome-treatment feedback.
+  :::
+
 :::
 ::: {.column width="50%"}
 
-- [HTE-robust methods for General Panel]{.highlight}
-  
+- [HTE-robust SA Estimators]{.highlight}
+
   :::small-font
-  - Multiple cohorts receiving treatment at different times.
+  - Multiple cohorts, staggered adoption (absorbing).
   - Parallel trends (potentially conditionally).
   - Control trends don't overlap treated trend.
   - Short pretrend data.
   :::
 
 - [Interactive FE Imputation Methods]{.highlight}
-  
+
   :::small-font
   - Multiple treated units, possibly at different times.
   - Control trends overlap treated trends.
