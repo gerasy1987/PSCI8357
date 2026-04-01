@@ -1289,8 +1289,8 @@ ggplot(results, aes(x = estimate)) +
 
 - [Bootstrap]{.highlight} [@young2022consistency]: two methods for CIs robust to weak instruments:
 
-  - [Bootstrap-$c$]{.highlight}: resample, compute $\widehat{\tau}^{\star}_{2SLS}$, take percentile CI from bootstrapped coefficients.
-  - [Bootstrap-$t$]{.highlight}: resample, compute $t^\star = (\widehat{\tau}^{\star}_{2SLS} - \widehat{\tau}_{2SLS})/\widehat{SE}^\star$, use quantiles of $t^\star$ as critical values for CI (instead of $\pm 1.96$).
+  - [Bootstrap-$c$]{.highlight}: resample, compute $\widehat{\tau}^{\ast}_{2SLS}$, take percentile CI from bootstrapped coefficients.
+  - [Bootstrap-$t$]{.highlight}: resample, compute $t^\ast = (\widehat{\tau}^{\ast}_{2SLS} - \widehat{\tau}_{2SLS})/\widehat{SE}^\ast$, use quantiles of $t^\ast$ as critical values for CI (instead of $\pm 1.96$).
 
 . . .
 
