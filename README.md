@@ -1,29 +1,29 @@
 #   PSCI 8357 (Spring 2026)  
   Statistics for Political Research (STAT) II
 
--   [Course Overview](#course-overview)
--   [Prerequisites](#prerequisites)
--   [Requirements](#requirements)
--   [Grading and Deadlines](#grading-and-deadlines)
--   [Resources](#resources)
--   [Course Schedule](#course-schedule)
--   [Course Policies](#course-policies)
--   [Acknowledgments](#acknowledgments)
--   [References](#references)
+- [Course Overview](#course-overview)
+- [Prerequisites](#prerequisites)
+- [Requirements](#requirements)
+- [Grading and Deadlines](#grading-and-deadlines)
+- [Resources](#resources)
+- [Course Schedule](#course-schedule)
+- [Course Policies](#course-policies)
+- [Acknowledgments](#acknowledgments)
+- [References](#references)
 
 ------------------------------------------------------------------------
 
 #### **Instructor:** Georgiy (Gosha) Syunyaev (<g.syunyaev@vanderbilt.edu>)
 
--   **Office hours:** Wednesday, 10 AM - 12 PM in Commons 351 (or email
-    me to schedule appointment)
--   **Office hourse sign-up link:**
-    <https://calendar.app.google/iHhWLRvcGoppGW477>
+- **Office hours:** Wednesday, 10 AM - 12 PM in Commons 351 (or email me
+  to schedule appointment)
+- **Office hourse sign-up link:**
+  <https://calendar.app.google/iHhWLRvcGoppGW477>
 
 #### **TA:** Alexander (Alex) Dean
 
--   **Recitations:** Friday, 11 AM - 12 PM in Commons 349
--   **Office hours:** Monday, 1 PM - 3 PM in Commons 312
+- **Recitations:** Friday, 11 AM - 12 PM in Commons 349
+- **Office hours:** Monday, 1 PM - 3 PM in Commons 312
 
 ------------------------------------------------------------------------
 
@@ -45,12 +45,12 @@ firm grasp of probability theory, statistical inference, and linear
 models at the level of STAT I or an equivalent course ( e.g. do you
 remember what the law of iterated expectations is? or what does it mean
 for two random variables to be independent? or the significance of the
-equation *β* = (*X*′*X*)<sup>−1</sup>(*X*′*Y*) ? ). Second, students
-should have some background in writing scripts to implement statistical
-analyses in <span class="proglang">R</span>. The course provides
-foundational methodological training to Political Science PhD students
-in their first or second year as part of their required sequence of
-courses.
+equation *β* = (*X*<sup>′</sup>*X*)<sup>−1</sup>(*X*<sup>′</sup>*Y*) ?
+). Second, students should have some background in writing scripts to
+implement statistical analyses in <span class="proglang">R</span>. The
+course provides foundational methodological training to Political
+Science PhD students in their first or second year as part of their
+required sequence of courses.
 
 ------------------------------------------------------------------------
 
@@ -66,7 +66,7 @@ support your learning—not to add pressure. They are **not graded**, and
 you should think of them as a quick warm-up and a way for us to
 calibrate where we are as a class.
 
-### Problem sets (7 × 5 %)
+### Problem sets (6 × 5 %)
 
 You will receive homework about every two weeks via Brightspace (not
 GitHub). You will have to submit your completed problem set within a
@@ -74,40 +74,39 @@ week; exact deadlines will be made clear on the assignment. You can work
 with others, but to receive credit, your homework must comply with the
 following guidelines:
 
--   You must turn in a PDF copy of your own homework by the stated
-    deadline to both the instructor and TA.
--   The assignment that you turn in must clearly reflect your own
-    thinking. Sets of verbatim copies of homework will have credit
-    reduced by half.
--   Include a short disclaimer at the top of the assignment (e.g., after
-    your name/date) indicating whether you used any AI tool(s) beyond
-    spell-checking/light editing and for what purpose(s). If you did,
-    also attach a printed to PDF log of the AI chat.
--   Estimates obtained in <span class="proglang">R</span> must be
-    formatted properly into tables or graphs resembling journal
-    presentation styles. You should use a table formatting function
-    (e.g., `kableExtra`, `apsrtable` or `stargazer` in
-    <span class="proglang">R</span>). Use a reasonable (2 or at most 3)
-    number of digits after decimal points, report standard errors or
-    confidence intervals along with coefficients, clarify what are the
-    dependent variables in each table or figure, and explain in
-    footnotes to your tables or figures what kinds of estimators or
-    adjustments have been used. Print outs of raw screen output or
-    commented logs will not receive any credit. However, you may include
-    such output as an appendix so that the grader can troubleshoot.
--   Mathematical derivations should include all key steps with
-    explanations for important techniques.
--   Your assignment should be submitted as a PDF file compiled from ,
-    <span class="proglang">R</span> Markdown, or (*ideally*) a Quarto
-    Markdown document.
-    -   If using raw (.tex) for your answers, submit an accompanying
-        <span class="proglang">R</span> file for any computational
-        tasks, with referenced line numbers corresponding to each
-        specific task.
-    -   If using R Markdown (.Rmd) or Quarto Markdown (.qmd), include
-        your code as code chunks in the source file. Additionally,
-        submit the source .Rmd or .qmd file along with the compiled PDF
-        to allow us to run your code easily.
+- You must turn in a PDF copy of your own homework by the stated
+  deadline to both the instructor and TA.
+- The assignment that you turn in must clearly reflect your own
+  thinking. Sets of verbatim copies of homework will have credit reduced
+  by half.
+- Include a short disclaimer at the top of the assignment (e.g., after
+  your name/date) indicating whether you used any AI tool(s) beyond
+  spell-checking/light editing and for what purpose(s). If you did, also
+  attach a printed to PDF log of the AI chat.
+- Estimates obtained in <span class="proglang">R</span> must be
+  formatted properly into tables or graphs resembling journal
+  presentation styles. You should use a table formatting function (e.g.,
+  `kableExtra`, `apsrtable` or `stargazer` in
+  <span class="proglang">R</span>). Use a reasonable (2 or at most 3)
+  number of digits after decimal points, report standard errors or
+  confidence intervals along with coefficients, clarify what are the
+  dependent variables in each table or figure, and explain in footnotes
+  to your tables or figures what kinds of estimators or adjustments have
+  been used. Print outs of raw screen output or commented logs will not
+  receive any credit. However, you may include such output as an
+  appendix so that the grader can troubleshoot.
+- Mathematical derivations should include all key steps with
+  explanations for important techniques.
+- Your assignment should be submitted as a PDF file compiled from ,
+  <span class="proglang">R</span> Markdown, or (*ideally*) a Quarto
+  Markdown document.
+  - If using raw (.tex) for your answers, submit an accompanying
+    <span class="proglang">R</span> file for any computational tasks,
+    with referenced line numbers corresponding to each specific task.
+  - If using R Markdown (.Rmd) or Quarto Markdown (.qmd), include your
+    code as code chunks in the source file. Additionally, submit the
+    source .Rmd or .qmd file along with the compiled PDF to allow us to
+    run your code easily.
 
 Homework will be graded for points as indicated on each assignment and
 count toward 35% of your grade.
@@ -147,14 +146,13 @@ tasks:
     delineated** (labelled as “Extension 1” and “Extension 2”),
     **well-motivated**, and explained as a specific contribution beyond
     the main replication. Extensions may take one of two broad forms:
-    -   **Robustness checks:** e.g., alternative
-        estimators/specifications, alternative measurement choices,
-        additional tests of identifying assumptions.
-    -   **Theory-driven analyses:** e.g., additional tests implied by
-        the theory/hypotheses (such as heterogeneity analyses). You may
-        do two robustness checks, two theory-driven analyses, or one of
-        each, as long as each is distinct, motivated, and clearly
-        separated.
+    - **Robustness checks:** e.g., alternative
+      estimators/specifications, alternative measurement choices,
+      additional tests of identifying assumptions.
+    - **Theory-driven analyses:** e.g., additional tests implied by the
+      theory/hypotheses (such as heterogeneity analyses). You may do two
+      robustness checks, two theory-driven analyses, or one of each, as
+      long as each is distinct, motivated, and clearly separated.
 
 For both replication and extensions, you must post a brief replication
 plan on the Brightspace forum at least **one week** before submitting
@@ -169,16 +167,16 @@ that would allow the instructor and TA to re-run your analyses. The
 compiled PDF write-up should be **10–20 double-spaced pages** and should
 include:
 
--   A brief summary of the paper’s theory and hypotheses.
--   A concise description of the data, model, and main results
-    (screenshots from the paper are allowed for reference).
--   A report on your replication of the main results (including code,
-    output, and discussion of any deviations from the original paper).
--   A report on your two extensions (including code, output, and
-    interpretation).
--   *(Optional)* An appendix with ancillary details, tables, or figures
-    that does not count toward the page limit and may be referenced in
-    the main text.
+- A brief summary of the paper’s theory and hypotheses.
+- A concise description of the data, model, and main results
+  (screenshots from the paper are allowed for reference).
+- A report on your replication of the main results (including code,
+  output, and discussion of any deviations from the original paper).
+- A report on your two extensions (including code, output, and
+  interpretation).
+- *(Optional)* An appendix with ancillary details, tables, or figures
+  that does not count toward the page limit and may be referenced in the
+  main text.
 
 Because part of the goal is to practice professional research
 communication, a small portion of your grade will be based on
@@ -189,21 +187,21 @@ showing raw console output.
 
 ### Final Exam (25%)
 
-A final exam will be scheduled during the final examination week (the
-week of April 20th). The exam aims to assess individual progress, thus
-allowing me to provide personalized recommendations for improving your
-methodological foundations. If you cannot take the exam during the
-scheduled period, you must provide notice at least one week in advance
-so that we can arrange an alternative time. The final will constitute
-20% of your grade.
+A final exam will be scheduled during the final examination week. The
+exam aims to assess individual progress, thus allowing me to provide
+personalized recommendations for improving your methodological
+foundations. If you cannot take the exam during the scheduled period,
+you must provide notice at least one week in advance so that we can
+arrange an alternative time. The final will constitute 20% of your
+grade.
 
 ------------------------------------------------------------------------
 
 ## Grading and Deadlines
 
--   **35% Problem sets** (every two weeks, see schedule below)
--   **40% Replications** (due March 16th and April 15th)
--   **25% Take-home final exam** (Week of April 20th)
+- **30% Problem sets** (every two weeks, see schedule below)
+- **45% Replications** (due March 16th and April 20th)
+- **25% Final exam** (Exam week)
 
 Late work will not be accepted without documented proof of a family or
 medical emergency.
@@ -237,31 +235,31 @@ Vanderbilt here:
 We will draw on textbooks and papers for the course. Here are the
 **required** textbooks:
 
--   Angrist, Joshua D., and Jörn-Steffen Pischke. *Mostly Harmless
-    Econometrics: An Empiricist’s Companion.* Princeton university
-    press, 2009.
--   Gerber, Alan S and Donald P Green. *Field Experiments: Design,
-    analysis, and interpretation.* W.W. Norton, 2012.
--   Morgan, Stephen L., and Christopher Winship. *Counterfactuals and
-    Causal Inference.* 2nd Ed. Cambridge University Press, 2015.
+- Angrist, Joshua D., and Jörn-Steffen Pischke. *Mostly Harmless
+  Econometrics: An Empiricist’s Companion.* Princeton university press,
+  2009.
+- Gerber, Alan S and Donald P Green. *Field Experiments: Design,
+  analysis, and interpretation.* W.W. Norton, 2012.
+- Morgan, Stephen L., and Christopher Winship. *Counterfactuals and
+  Causal Inference.* 2nd Ed. Cambridge University Press, 2015.
 
 And here are the **recommended** ones:
 
--   Cattaneo, Matias D., Nicolás Idrobo, and Rocío Titiunik. *A
-    Practical Introduction to Regression Discontinuity Designs:
-    Foundations.* Cambridge University Press, 2019.
--   de Chaisemartin, Clément, and Xavier D’Haultfoeuille.
-    *Difference-in-Differences for Simple and Complex Natural
-    Experiments.* Forthcoming from Princeton University Press, 2023.
--   Ding, Peng. *A First Course in Causal Inference.* CRC Press, 2024.
--   Huber, Martin. *Causal Analysis.* MIT Press, 2023.
--   Humphreys, Macartan, and Alan M. Jacobs. *Integrated Inferences:
-    Causal Models for Qualitative and Mixed-Method Research.* Cambridge
-    University Press, 2023.
--   Imbens, Guido W., and Donald B. Rubin. *Causal Inference in
-    Statistics, Social, and Biomedical Sciences.* Cambridge University
-    Press, 2015.
--   Lohr, Sharon L. *Sampling: Design and Analysis.* CRC press, 2021.
+- Cattaneo, Matias D., Nicolás Idrobo, and Rocío Titiunik. *A Practical
+  Introduction to Regression Discontinuity Designs: Foundations.*
+  Cambridge University Press, 2019.
+- de Chaisemartin, Clément, and Xavier D’Haultfoeuille.
+  *Difference-in-Differences for Simple and Complex Natural
+  Experiments.* Forthcoming from Princeton University Press, 2023.
+- Ding, Peng. *A First Course in Causal Inference.* CRC Press, 2024.
+- Huber, Martin. *Causal Analysis.* MIT Press, 2023.
+- Humphreys, Macartan, and Alan M. Jacobs. *Integrated Inferences:
+  Causal Models for Qualitative and Mixed-Method Research.* Cambridge
+  University Press, 2023.
+- Imbens, Guido W., and Donald B. Rubin. *Causal Inference in
+  Statistics, Social, and Biomedical Sciences.* Cambridge University
+  Press, 2015.
+- Lohr, Sharon L. *Sampling: Design and Analysis.* CRC press, 2021.
 
 You can obtain these as PDFs on Brightspace or on the authors’ websites
 and online preprint archives (SSRN or arXiv). Papers are listed below
@@ -432,8 +430,8 @@ Ch. 3.1-3.2.2)</span></li>
 <li><span class="citation" data-cites="morgan2015counterfactuals">Morgan
 and Winship (<a href="#ref-morgan2015counterfactuals"
 role="doc-biblioref">2015</a>, Ch. 6.1-6.2)</span></li>
-<li><span class="citation" data-cites="cinelli2024crash">Cinelli,
-Forney, and Pearl (<a href="#ref-cinelli2024crash"
+<li><span class="citation" data-cites="cinelli2024crash">Cinelli et al.
+(<a href="#ref-cinelli2024crash"
 role="doc-biblioref">2024</a>)</span></li>
 </ul></td>
 </tr>
@@ -541,7 +539,7 @@ Ch. 4)</span></li>
 and Winship (<a href="#ref-morgan2015counterfactuals"
 role="doc-biblioref">2015</a>, Ch. 9.1-9.3)</span></li>
 <li><span class="citation"
-data-cites="angrist1996identification">Angrist, Imbens, and Rubin (<a
+data-cites="angrist1996identification">Angrist et al. (<a
 href="#ref-angrist1996identification"
 role="doc-biblioref">1996</a>)</span></li>
 <li><span class="citation" data-cites="sovey2011instrumental">Sovey and
@@ -559,8 +557,8 @@ conditional DID, continuous treatment DID, event-by-event estimation,
 <li><span class="citation" data-cites="angrist2009mostly">Angrist and
 Pischke (<a href="#ref-angrist2009mostly" role="doc-biblioref">2009</a>,
 Ch. 5.2)</span></li>
-<li><span class="citation" data-cites="bertrand2004much">Bertrand,
-Duflo, and Mullainathan (<a href="#ref-bertrand2004much"
+<li><span class="citation" data-cites="bertrand2004much">Bertrand et al.
+(<a href="#ref-bertrand2004much"
 role="doc-biblioref">2004</a>)</span></li>
 </ul></td>
 </tr>
@@ -584,8 +582,8 @@ role="doc-biblioref">2015</a>, Ch. 11.3)</span></li>
 <td style="text-align: left;">identification, estimation and statistical
 inference, interactive FEs</td>
 <td style="text-align: left;"><ul>
-<li><span class="citation" data-cites="abadie2010synthetic">Abadie,
-Diamond, and Hainmueller (<a href="#ref-abadie2010synthetic"
+<li><span class="citation" data-cites="abadie2010synthetic">Abadie et
+al. (<a href="#ref-abadie2010synthetic"
 role="doc-biblioref">2010</a>)</span></li>
 </ul></td>
 </tr>
@@ -685,28 +683,28 @@ with academic success, students should reach out to the instructor to
 explore potential solutions together. Vanderbilt offers the following
 resources:
 
--   University Counseling Center: Provides individual and group therapy,
-    psychiatric services, and assessments. Urgent Care Counseling is
-    available in person from 9 am - 4 pm, Monday through Friday, or by
-    phone 24/7. For more information, call 615-322-2571, visit
-    [vu.edu/scn](http://vu.edu/scn), or connect with Student Care
-    Coordination (SCC) where most referrals to the UCC begin.
+- University Counseling Center: Provides individual and group therapy,
+  psychiatric services, and assessments. Urgent Care Counseling is
+  available in person from 9 am - 4 pm, Monday through Friday, or by
+  phone 24/7. For more information, call 615-322-2571, visit
+  [vu.edu/scn](http://vu.edu/scn), or connect with Student Care
+  Coordination (SCC) where most referrals to the UCC begin.
 
--   Center for Student Wellbeing: Aims to support personal and academic
-    success. Contact by calling 615-322-0480 or emailing
-    <healthydores@vanderbilt.edu>.
+- Center for Student Wellbeing: Aims to support personal and academic
+  success. Contact by calling 615-322-0480 or emailing
+  <healthydores@vanderbilt.edu>.
 
--   Student Care Coordination: Assists students in accessing campus and
-    community resources for academic and personal support. Call
-    615-343-9355 or visit [vu.edu/scn](http://vu.edu/scn).
+- Student Care Coordination: Assists students in accessing campus and
+  community resources for academic and personal support. Call
+  615-343-9355 or visit [vu.edu/scn](http://vu.edu/scn).
 
--   Crisis Text Line: For free 24/7 support, text VANDY to 741741.
+- Crisis Text Line: For free 24/7 support, text VANDY to 741741.
 
--   National Suicide & Crisis Lifeline: Call or text 988 for
-    confidential, round-the-clock support.
+- National Suicide & Crisis Lifeline: Call or text 988 for confidential,
+  round-the-clock support.
 
--   Vanderbilt Psychiatric Hospital: Offers 24/7 crisis assessment and
-    admissions. Immediate help is available by calling 615-327-7000.
+- Vanderbilt Psychiatric Hospital: Offers 24/7 crisis assessment and
+  admissions. Immediate help is available by calling 615-327-7000.
 
 ### Mandatory Reporting
 
@@ -809,7 +807,7 @@ Surveys* 22 (1): 31–72.
 
 Cinelli, Carlos, Andrew Forney, and Judea Pearl. 2024. “A Crash Course
 in Good and Bad Controls.” *Sociological Methods & Research* 53 (3):
-1071–1104.
+1071–104.
 
 Clarke, Kevin A. 2005. “The Phantom Menace: Omitted Variable Bias in
 Econometric Research.” *Conflict Management and Peace Science* 22 (4):

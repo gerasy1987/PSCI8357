@@ -75,7 +75,7 @@ There are two prerequisits for this class. First, students should have a firm gr
 
 Roughly once a week, we'll start class with a short in-class quiz (no more than 5 questions). The goal is simply to check how the main ideas are landing and to help me identify topics that may need more explanation or practice. These quizzes are *low-stakes* and meant to support your learning---not to add pressure. They are **not graded**, and you should think of them as a quick warm-up and a way for us to calibrate where we are as a class.
 
-### Problem sets (7 $\times$ 5 %)
+### Problem sets (6 $\times$ 5 %)
 
 You will receive homework about every two weeks via Brightspace (not GitHub). You will have to submit your completed problem set within a week; exact deadlines will be made clear on the assignment. You can work with others, but to receive credit, your homework must comply with the following guidelines:
 
@@ -117,15 +117,15 @@ Because part of the goal is to practice professional research communication, a s
 
 ### Final Exam (25%)
 
-A final exam will be scheduled during the final examination week (the week of April 20th). The exam aims to assess individual progress, thus allowing me to provide personalized recommendations for improving your methodological foundations. If you cannot take the exam during the scheduled period, you must provide notice at least one week in advance so that we can arrange an alternative time. The final will constitute 20% of your grade.
+A final exam will be scheduled during the final examination week. The exam aims to assess individual progress, thus allowing me to provide personalized recommendations for improving your methodological foundations. If you cannot take the exam during the scheduled period, you must provide notice at least one week in advance so that we can arrange an alternative time. The final will constitute 20% of your grade.
 
 ------------------------------------------------------------------------
 
 ## Grading and Deadlines
 
--   **35% Problem sets** (every two weeks, see schedule below)
--   **40% Replications** (due March 16th and April 15th)
--   **25% Take-home final exam** (Week of April 20th)
+-   **30% Problem sets** (every two weeks, see schedule below)
+-   **45% Replications** (due March 16th and April 20th)
+-   **25% Final exam** (Exam week)
 
 Late work will not be accepted without documented proof of a family or medical emergency.
 
