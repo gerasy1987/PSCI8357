@@ -89,7 +89,7 @@ thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 ### Overview: Difference-in-Differences (DiD)
 
 - Another popular identification strategy to relax [conditional ignorability (CIA)]{.highlight}.
-- Applicable when we observe treatment and control groups before and after the treatment assignment.
+- Applicable when we observe treatment and control groups before and after the treatment occurs.
 
 . . .
 
@@ -300,7 +300,9 @@ hist_before +
 | **$G_i = 0$ (control group)**       | $T_{i0} = 0$ (untreated)      | $T_{i1} = 0$ (untreated)       |
 
 
-### Setup: Potential Outcomes and Estimand
+### Potential Outcomes Setup
+
+<br>
 
 - **Potential outcomes** $Y_{it}(d)$, $d \in \{0, 1\}$:
 
@@ -335,13 +337,16 @@ $$
 \tau_{ATT} = \E[Y_{i1}(1)-Y_{i1}(0) \given G_i = 1] = \E[Y_{i1}(1) \given G_i=1] - \textcolor{#cc241d}{\E[Y_{i1}(0) \given G_i=1]}
 $$
 
-<br>
+. . .
+
+- What POs we observe:
 
 |                                | **Pre-Period ($t=0$)**               | **Post-Period ($t=1$)**               |
 |--------------------------------|:---------------------------:|:--------------------------:|
 | **$G_i = 1$ (treatment group)**  | $\E[Y_{i0}(0) \given G_i=1]$             | $\E[Y_{i1}(1) \given G_i=1]$              |
 | **$G_i = 0$ (control group)**    | $\E[Y_{i0}(0) \given G_i=0]$             | $\E[Y_{i1}(0) \given G_i=0]$              |
 
+. . .
 
 - [Problem]{.note}:
 
@@ -559,11 +564,11 @@ $$
 
 . . .
 
-- Then the _ATT_ can be nonparametrically identified as:
+- Then the _ATT_ can be identified using the DiD estimator:
 
-:::{.callout-important icon="false" title="DiD Identification"}
+:::{.callout-important icon="false" title="DiD estimator"}
 $$
-\tau_{ATT} = \Bigl\{ \E[Y_{i1} \given G_i=1]- \E[Y_{i1} \given G_i=0] \Bigr\} - \Bigl\{ \E[Y_{i0} \given G_i=1]- \E[Y_{i0} \given G_i=0] \Bigr\}
+\widehat{\tau}_{DiD} = \Bigl\{ \E[Y_{i1} \given G_i=1]- \E[Y_{i1} \given G_i=0] \Bigr\} - \Bigl\{ \E[Y_{i0} \given G_i=1]- \E[Y_{i0} \given G_i=0] \Bigr\}
 $$
 :::
 
@@ -576,8 +581,8 @@ $$
 &\Bigl\{ \E[Y_{i1} \given G_i=1]- \E[Y_{i1} \given G_i=0] \Bigr\} - \Bigl\{ \E[Y_{i0} \given G_i=1]- \E[Y_{i0} \given G_i=0] \Bigr\} = \\
 &\class{fragment}{= \Bigl\{ \E[Y_{i1}(1) \given G_i=1]- \E[Y_{i1}(0) \given G_i=0] \Bigr\}}\\ 
 &\class{fragment}{\qquad- \Bigl\{ \E[Y_{i0}(0) \given G_i=1]- \E[Y_{i0}(0) \given G_i=0] \Bigr\} \quad (\because \text{ switching eq.})}  \\
-&\class{fragment}{= \underbrace{\E[Y_{i1}(1) \given G_i=1] - \E[Y_{i1}(0) \given G_i=1]}_{= \ \tau_{ATT}} + \E[Y_{i1}(0) \given G_i=1] \qquad (\because \pm \E[Y_{i0}(0) \given G_i=1]) }\\
-&\class{fragment}{\qquad - \E[Y_{i1}(0) \given G_i=0] - \E[Y_{i0}(0) \given G_i=1] + \E[Y_{i0}(0) \given G_i=0] }\\
+&\class{fragment}{= \underbrace{\E[Y_{i1}(1) \given G_i=1] - \E[Y_{i1}(0) \given G_i=1]}_{= \ \tau_{ATT}} + \E[Y_{i1}(0) \given G_i=1]}\\
+&\class{fragment}{\qquad - \E[Y_{i1}(0) \given G_i=0] - \E[Y_{i0}(0) \given G_i=1] + \E[Y_{i0}(0) \given G_i=0] \qquad (\because \pm \E[Y_{i1}(0) \given G_i=1])}\\
 &\class{fragment}{= \tau_{ATT} + \underbrace{\Bigl\{ \E[Y_{i1}(0)-Y_{i0}(0) \given G_i=1] - \E[Y_{i1}(0)-Y_{i0}(0) \given G_i=0] \Bigr\}}_{= \ 0 \text{ under parallel trends}} }\\
 &\class{fragment}{= \tau_{ATT}  \qquad\qquad \qed}
 \end{aligned}
@@ -605,11 +610,11 @@ $$
 
 . . .
 
-- Under the [conditional parallel trends]{.highlight} assumption, the _ATT_ is identified as:
+- Under the [conditional parallel trends]{.highlight} assumption, the _ATT_ can be identified using the following estimator:
 
 $$
 \begin{align*}
-\tau_{ATT} &= \sum_{x} \Bigl[ \{ \E[Y_{i1} \given G_i=1, X_i=x]- \E[Y_{i1} \given G_i=0, X_i=x] \}\\
+\widehat{\tau}_{DiD} &= \sum_{x} \Bigl[ \{ \E[Y_{i1} \given G_i=1, X_i=x]- \E[Y_{i1} \given G_i=0, X_i=x] \}\\
 &\qquad - \{ \E[Y_{i0} \given G_i=1, X_i=x]- \E[Y_{i0} \given G_i=0, X_i=x] \}\Bigr] \Pr(X_i=x \given G_i=1)
 \end{align*}
 $$
@@ -625,7 +630,7 @@ $$
 #| fig-height: 9
 #| echo: true
 #| output: false
-#| code-line-numbers: "3-9|12-24|29-47"
+#| code-line-numbers: "3-9|12-24|28-47"
 
 set.seed(20250327)  # for reproducibility
 
@@ -730,7 +735,7 @@ ggplot(sims, aes(x = est, fill = factor(correct), color = factor(correct))) +
     
     - **Treatment**: Stratified abolition of elected councils after 2009.
     - **Outcome**: Quality of local public services provision.
-    - **Results**: Decentralization significantly improved public service delivery in policy areas important to central policy-makers.
+    - **Results**: Recentralization significantly improved public service delivery in policy areas important to central policy-makers.
 
 ### Plug-in Estimation
 

@@ -117,7 +117,17 @@ Because part of the goal is to practice professional research communication, a s
 
 ### Final Exam (25%)
 
-A final exam will be scheduled during the final examination week. The exam aims to assess individual progress, thus allowing me to provide personalized recommendations for improving your methodological foundations. If you cannot take the exam during the scheduled period, you must provide notice at least one week in advance so that we can arrange an alternative time. The final will constitute 20% of your grade.
+The final exam will be held **in person** during the final examination week. The exam is 90 minutes long and will be administered as a Quarto Markdown template that you complete on your laptop and submit as a compiled PDF via Brightspace.
+
+The exam is **closed-book**, with one exception: you may bring a **reference sheet** (1-2 standard letter-size page, front and back). The sheet may be handwritten or printed; if printed, the font size must be no smaller than 8pt and the page must have reasonable margins. No other notes or electronic materials are permitted.
+
+The exam covers material from all lectures and consists of three parts:
+
+-   **Conceptual questions** — multiple choice and true/false with brief justifications
+-   **Short answer and derivations** — written responses involving identification arguments, light algebra, and research design reasoning
+-   **Applied scenarios** — interpretation of provided R output (regression tables, diagnostic plots) from realistic research settings. Some questions may ask you to describe an approach for implementing a statistical procedure in [R]{.proglang} or to interpret provided [R]{.proglang} code.
+
+The exam aims to assess individual progress and understanding of identification strategies, assumptions, and applied reasoning, thus allowing me to provide personalized recommendations for improving your methodological foundations. If you cannot take the exam during the scheduled period, you must provide notice at least one week in advance so that we can arrange an alternative time.
 
 ------------------------------------------------------------------------
 
