@@ -1169,9 +1169,9 @@ $$
 
 . . .
 
-3.  If **monotonicity** is violated when defiers exist: $\text{bias} = \frac{[\tau_{\text{c}} - \tau_{\text{d}} ] \Pr(\text{defier})}{\Pr(\text{complier}) - \Pr(\text{defier})}$
+3.  If **monotonicity** is violated when defiers exist: $\text{bias} = \frac{[\tau_{\text{c}} + \tau_{\text{d}} ] \Pr(\text{defier})}{\Pr(\text{complier}) - \Pr(\text{defier})}$
   
-    - [**Bias becomes large when**]{.alert}: (1) the proportion of defiers is large or (2) causal effects are heterogeneous between compliers and defiers
+    - [**Bias becomes large when**]{.alert}: (1) the proportion of defiers is large or (2) the _ITT_ among defiers is not the opposite of _ITT_ among compliers
 
 . . .
 
