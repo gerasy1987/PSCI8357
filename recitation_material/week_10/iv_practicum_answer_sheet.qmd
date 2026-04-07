@@ -1,3 +1,41 @@
+---
+title: "Instruments in R Practicum Answer Sheets"
+author: 
+  - name: "Alexander Dean"
+format:
+  pdf:
+    fig-format: png
+    number-sections: false
+    link-citations: true
+    fontsize: "12"
+    indent: true
+    linestretch: 1
+editor: source
+execute:
+  echo: false
+  warning: false
+  cache: true
+header-includes:
+- \usepackage{float}
+- \usepackage{amssymb}
+- \usepackage{graphicx}
+- \usepackage{amsmath}
+- \usepackage[margin=1in]{geometry}
+- \usepackage{indentfirst}
+- \usepackage{array}
+- \usepackage{titling}
+- \usepackage{tikz}
+- \usepackage{hyperref}
+- \usepackage{enumitem}
+- \usepackage{tabularray}
+- \usetikzlibrary{arrows.meta, positioning}
+---
+
+```{r}
+#| warning: false
+#| execute: false
+#| echo: true
+
 ################################################################################
 ################# This R Script Does the Following: ############################
 ### Provides students in the recitation period with a chance to practice
@@ -9,7 +47,7 @@
 ### Load packages, data, and set working directory
 # Setting the working directory
 # If you do not know the directory you are working out of, use getwd() first
-setwd("")
+setwd("/Users/alexdean/Documents/Vanderbilt/Service/Spring 2026/addl_material/")
 
 # Packages
 if (!require(tidyverse)) install.packages("tidyverse")
@@ -33,7 +71,7 @@ rm(SchoolingReturns)
 # analyses today, run it and ask if there are parts of the code that you don't
 # understand why or how I wrote the specific code chunk
 data <- data |>
-  dplyr::select(
+  select(
     wage, # hourly wage in 1976, measured in cents
     education, # completed years of schooling
     experience, # years of labor market experience
@@ -44,7 +82,7 @@ data <- data |>
     nearcollege2, # whether respondent grew up near a 2-year college
     feducation # father's years of schooling
   ) |>
-  dplyr::mutate(
+  mutate(
     log_wage = log(wage),
     nearcollege4 = if_else(nearcollege4 %in% c("public", "private"), 1, 0),
     nearcollege2 = if_else(nearcollege2 == "yes", 1, 0)
@@ -53,7 +91,7 @@ data <- data |>
 
 ### Task 1:
 # Estimate a naïve OLS model of logged wages on years of schooling and the
-# controls listed below. Output a tidy table with robust (HC2) standard errors,
+# controls listed below. Output a tidy table with robust (HC1) standard errors,
 # the treatment labeled as "Education (Years)", and no control variables listed
 # on the table. Exclude all gof_map outputs except R^2 and No. obs. Interpret
 # the association in a single sentence.
@@ -79,12 +117,12 @@ ols_mod <- lm(ols_form, data = data)
 # The table
 table_1 <- modelsummary(
   ols_mod,
-  title = "Effect of Return of Schooling",
+  title = "OLS Association Between Schooling and Logged Wages",
   coef_map = c(
-    "education" = "Education (years)",
+    "education" = "Education (Years)",
     "(Intercept)" = "Intercept"
   ),
-  coef_omit = "experience|ethnicity|smsa|south|feducatio",
+  coef_omit = "experience|ethnicity|smsa|south|feducation",
   estimate = "{estimate}{stars}",
   statistic = "({std.error})",
   gof_map = c("nobs", "r.squared"),
@@ -93,13 +131,15 @@ table_1 <- modelsummary(
   notes = "Outcome is logged hourly wages (in cents) in 1976."
 )
 
+# Interpreting the estimate: in OLS, an additional year of schooling is
+# associated with roughly a 7.4 percent increase in hourly wages.
+
 ##### Instrument Relevance ####################################################
 ### Task 2:
 # Estimate the first-stage regression where education is the dependent variable
 # and nearcollege4 is the excluded instrument. Print the model summary. Is the
 # sign on nearcollege4 what you would expect if college proximity raises
 # schooling attainment?
-
 first_stage <- lm(
   education ~ nearcollege4 + experience + ethnicity + smsa + south + feducation,
   data = data
@@ -107,10 +147,17 @@ first_stage <- lm(
 
 summary(first_stage)
 
+# The sign is positive, which is what we would expect if growing up near a
+# 4-year college increases schooling attainment.
+
+### Task 3:
+# Extract the first-stage fitted values from the regression above and save them
+# as a new vector called `schooling_hat`.
+schooling_hat <- fitted(first_stage)
+
 ### Task 4:
 # Visualize instrument relevance by plotting average years of schooling by
 # nearcollege4 status.
-
 data |>
   dplyr::group_by(nearcollege4) |>
   dplyr::summarise(mean_education = mean(education), .groups = "drop") |>
@@ -123,39 +170,41 @@ data |>
     x = "Grew Up Near a 4-Year College",
     y = "Average Years of Schooling"
   ) +
-  theme_minimal(base_size = 15)
+  theme_minimal(base_size = 10)
 
 ##### IV Estimation ############################################################
 ### Task 5:
 # Estimate the 2SLS model using ivreg() and the formula object above. After this,
 # print the model summary with diagnostics = TRUE. Which of the three diagnostic 
 # tests reported concern (i) weak instruments and (ii) endogeneity of schooling?
+iv_mod <- ivreg::ivreg(iv_form, data = data)
 
-iv_1 <- ivreg::ivreg(iv_form, data = data)
+summary(iv_mod, diagnostics = TRUE)
 
-summary(iv_1, diagnostics = T)
+# The weak instruments test is the most directly informative about instrument
+# strength, while the Wu-Hausman test is the most directly informative about
+# whether schooling is endogenous.
 
 ### Task 6:
 # Create a tidy table comparing the OLS and IV estimates. Label the schooling 
 # coefficient "Education (Years)", and omit the controls from the table.
-
 models <- list(
   "OLS" = ols_mod,
-  "IV" = iv_1
+  "IV" = iv_mod
 )
 
 table_2 <- modelsummary(
   models,
   title = "Returns to Schooling: OLS and IV Estimates",
   coef_map = c(
-    "education" = "Education (years)",
+    "education" = "Education (Years)",
     "(Intercept)" = "Intercept"
   ),
-  coef_omit = "experience|ethnicity|smsa|south|feducatio",
+  coef_omit = "experience|ethnicity|smsa|south|feducation",
   estimate = "{estimate}{stars}",
   statistic = "({std.error})",
   gof_map = c("nobs", "r.squared"),
-  vcov = "HC2",
+  vcov = "HC1",
   output = "kableExtra",
   notes = "Outcome is logged hourly wages in 1976."
 )
@@ -166,10 +215,13 @@ table_2 <- modelsummary(
 # as excluded instruments. Print the summary with diagnostics = TRUE. Does the
 # overidentification test give you evidence against the joint validity of the
 # instruments?
+iv_mod_overid <- ivreg::ivreg(iv_form_overid, data = data)
 
-iv_over <- ivreg::ivreg(iv_form_overid, data = data)
+summary(iv_mod_overid, diagnostics = TRUE)
 
-summary(iv_over, diagnostics = T)
+# The overidentification test does not reject at conventional levels here, so
+# it does not give strong evidence against the joint validity of the instruments.
+# However, do note that the t-statistic is still relatively large.
 
 ### Task 8:
 # Compare the education coefficient across the OLS model, the single-instrument
@@ -177,12 +229,12 @@ summary(iv_over, diagnostics = T)
 # confidence intervals and robust (HC1) standard errors.
 coef_plot_data <- list(
   "OLS" = ols_mod,
-  "IV: 4-Year College" = iv_1,
-  "IV: 2+4-Year College" = iv_over
+  "IV: 4-Year College" = iv_mod,
+  "IV: 2+4-Year College" = iv_mod_overid
 ) |>
   purrr::imap_dfr(\(model, model_name) {
     robust_vcov <- sandwich::vcovHC(model, type = "HC2")
-    
+
     broom::tidy(model, conf.int = FALSE) |>
       dplyr::filter(term == "education") |>
       dplyr::mutate(
@@ -203,4 +255,21 @@ ggplot(coef_plot_data, aes(x = model, y = estimate)) +
   ) +
   theme_minimal(base_size = 14)
 
+### Task 9:
+# Create a reduced-form regression where log_wage is the dependent variable and
+# nearcollege4 is the key explanatory variable, holding the same controls
+# constant. Output the coefficient on nearcollege4. How would you substantively
+# interpret this coefficient?
+reduced_form <- lm(
+  log_wage ~ nearcollege4 + experience + ethnicity + smsa + south + feducation,
+  data = data
+)
+
+summary(reduced_form)
+lmtest::coeftest(reduced_form, vcov = sandwich::vcovHC(reduced_form, type = "HC2"))
+
+# The reduced-form coefficient is positive, which suggests that growing up near
+# a 4-year college is associated with higher logged wages even before scaling by
+# the first stage to recover the IV estimate.
 ################################################################################
+```

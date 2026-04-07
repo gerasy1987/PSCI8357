@@ -1,0 +1,43 @@
+---
+title: "Difference-in-Differences in R Practicum"
+author: "Alexander Dean"
+subtitle: "Recitation Period 9"
+institute: "Vanderbilt University"
+email: "alexander.r.dean@vanderbilt.edu"
+date: today
+format: 
+  revealjs:
+    theme: dark
+    footer: "Alexander Dean (Vanderbilt University)"
+    slide-number: true
+    embed-resources: true
+    link-external-icon: true
+    link-external-newwindow: true
+    self-contained-math: true
+    incremental: false
+    self-contained: true
+    citations-hover: true
+    fragments: true
+    scrollable: false
+    transition: fade
+    reference-location: document
+fontsize: 32px
+editor: source
+---
+
+## What We Will Cover Today
+
+1. Implementing RDD identification strategy in $\texttt{R}$
+
+## Today's Research Questions:
+
+1. What is the causal effect of incumbency on voteshare?
+
+## The Data:
+
+1. Data from the `rdrobust` package.
+
+## Resources and Package Manuals
+
+1. [Causal Mixtape RDD Chapter](hhttps://mixtape.scunning.com/06-regression_discontinuity)
+2. [rdrobust package manual](https://cran.r-project.org/web/packages/rdrobust/rdrobust.pdf)
