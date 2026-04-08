@@ -753,7 +753,7 @@ $$
 \widehat{\tau}^{P}_{ATT} = \left\{\frac{1}{N_1}\sum_{i=1}^N G_i\{Y_{i1} - Y_{i0} \}\right\} - \left\{\frac{1}{N_0}\sum_{i=1}^N (1-G_i)\{Y_{i1}-Y_{i0}\}\right\}
 $$
 
-where $N_1$ and $N_0$ are treated and control unit counts. **Inference**: SE from standard difference in means.
+where $N_1$ and $N_0$ are treated and control unit counts.
 
 ```{r}
 #| label: did_basic_panel
@@ -814,7 +814,7 @@ $$
 \widehat{\tau}^{RC}_{ATT} = (\overline{Y}_{11} - \overline{Y}_{10}) - (\overline{Y}_{01} - \overline{Y}_{00})
 $$
 
-where $N_{gt}$ is the number of units in Group $g$ at time $t$. **Inference**: SE from standard difference in means.
+where $N_{gt}$ is the number of units in Group $g$ at time $t$.
 
 ```{r}
 #| label: did_basic_rcs
@@ -855,7 +855,7 @@ rcs_se <- sqrt(
 )
 
 cat(
-  "Effect of switching to on-cycle elections on log avg. teacher salary (Anzia 2012):", round(rcs_estimate, 4))
+  "Effect of recentralization on public policy spending (Malesky et al. 2014):", round(rcs_estimate, 4))
 ```
 
 :::
@@ -1086,7 +1086,7 @@ tibble(
 :::
 :::
 
-### DiD/LDV bracketing
+### DiD/LDV Bracketing
 
 - **Estimator**: estimate CEF $\E[Y_{i1} \given Y_{i0}, G_i] = \alpha + \rho Y_{i0} + \tau G_i$
 
@@ -1111,15 +1111,144 @@ $$
   \E[\widehat{\tau}_{LDV}] \ge \tau_{ATT} \ge \E[\hat{\tau}_{DiD}]
   $$
 
+### Bracketing: Why Pre-period Dominance Matters
+
+<br>
+
+```{r}
+#| label: bracketing-dominance
+#| fig-align: center
+#| fig-width: 13
+#| fig-height: 6.5
+#| echo: false
+
+rho <- 0.7; tau <- 1.0
+trend <- 0.5  # common time trend
+panels <- c("G = 1 dominates in pre-period", "G = 0 dominates in pre-period")
+
+# Panel A: treated starts higher (pre = 2.5, control pre = 1.0)
+# Panel B: control starts higher (control pre = 2.5, treated pre = 1.0)
+make_panel <- function(ctrl_pre, trt_pre, panel_label) {
+  ctrl_post <- ctrl_pre + trend
+  trt_post  <- trt_pre + trend + tau
+  pre_gap   <- trt_pre - ctrl_pre
+  did_cf    <- ctrl_post + 1.0 * pre_gap
+  ldv_cf    <- ctrl_post + rho * pre_gap
+  data.frame(
+    group = rep(c("Control (G = 0)", "Treatment (G = 1)",
+                  "DiD counterfactual", "LDV counterfactual"), each = 2),
+    time    = rep(c(0, 1), 4),
+    outcome = c(ctrl_pre, ctrl_post, trt_pre, trt_post,
+                trt_pre, did_cf, trt_pre, ldv_cf),
+    panel   = panel_label
+  )
+}
+
+df <- bind_rows(
+  make_panel(1.0, 2.5, panels[1]),
+  make_panel(2.5, 1.0, panels[2])
+)
+
+df$group <- factor(df$group,
+  levels = c("Control (G = 0)", "Treatment (G = 1)",
+             "DiD counterfactual", "LDV counterfactual"))
+df$panel <- factor(df$panel, levels = panels)
+
+# Arrow annotation data (built directly per panel)
+make_arrows <- function(did_cf, ldv_cf, trt_post, panel_label) {
+  data.frame(
+    panel = panel_label,
+    estimator = c("DiD", "LDV"),
+    x = c(1.07, 1.20),
+    ymin = c(did_cf, ldv_cf),
+    trt_post = trt_post,
+    label_y = c((did_cf + trt_post) / 2, (ldv_cf + trt_post) / 2)
+  )
+}
+
+# Reconstruct counterfactuals for each panel
+cf_vals <- function(ctrl_pre, trt_pre) {
+  ctrl_post <- ctrl_pre + trend
+  trt_post  <- trt_pre + trend + tau
+  pre_gap   <- trt_pre - ctrl_pre
+  list(did = ctrl_post + pre_gap, ldv = ctrl_post + rho * pre_gap, trt = trt_post)
+}
+
+cf_A <- cf_vals(1.0, 2.5)
+cf_B <- cf_vals(2.5, 1.0)
+
+arrow_data <- bind_rows(
+  make_arrows(cf_A$did, cf_A$ldv, cf_A$trt, panels[1]),
+  make_arrows(cf_B$did, cf_B$ldv, cf_B$trt, panels[2])
+)
+arrow_data$panel <- factor(arrow_data$panel, levels = panels)
+
+# Split for styling
+df_obs    <- df |> filter(group %in% c("Control (G = 0)", "Treatment (G = 1)"))
+df_cf     <- df |> filter(group %in% c("DiD counterfactual", "LDV counterfactual"))
+df_cf_pts <- df_cf |> filter(time == 1)
+
+ggplot() +
+  geom_line(data = df_obs, aes(x = time, y = outcome, color = group),
+            linetype = "solid", linewidth = 1) +
+  geom_point(data = df_obs, aes(x = time, y = outcome, color = group),
+             size = 3, shape = 16) +
+  geom_line(data = df_cf, aes(x = time, y = outcome, color = group),
+            linetype = "dotted", linewidth = 1) +
+  geom_point(data = df_cf_pts, aes(x = time, y = outcome, color = group),
+             size = 3, shape = 1, stroke = 1) +
+  scale_color_manual(
+    name = "",
+    values = c(
+      "Control (G = 0)"    = "#689d6a",
+      "Treatment (G = 1)"  = "#cc241d",
+      "DiD counterfactual" = "#458588",
+      "LDV counterfactual" = "#d65d0e"
+    )
+  ) +
+  facet_wrap(~ panel, scales = "free_y") +
+  scale_x_continuous(
+    breaks = c(0, 1), labels = c("t = 0", "t = 1"),
+    limits = c(-0.2, 1.55)
+  ) +
+  geom_segment(
+    data = arrow_data |> filter(estimator == "DiD"),
+    aes(x = x, xend = x, y = ymin, yend = trt_post),
+    arrow = arrow(angle = 90, ends = "both", length = unit(0.1, "cm")),
+    color = "#458588", inherit.aes = FALSE, linewidth = 0.7
+  ) +
+  geom_text(
+    data = arrow_data |> filter(estimator == "DiD"),
+    aes(x = x + 0.03, y = label_y, label = "hat(tau)[DiD]"),
+    parse = TRUE, hjust = 0, color = "#458588", size = 5, inherit.aes = FALSE
+  ) +
+  geom_segment(
+    data = arrow_data |> filter(estimator == "LDV"),
+    aes(x = x, xend = x, y = ymin, yend = trt_post),
+    arrow = arrow(angle = 90, ends = "both", length = unit(0.1, "cm")),
+    color = "#d65d0e", inherit.aes = FALSE, linewidth = 0.7
+  ) +
+  geom_text(
+    data = arrow_data |> filter(estimator == "LDV"),
+    aes(x = x + 0.03, y = label_y, label = "hat(tau)[LDV]"),
+    parse = TRUE, hjust = 0, color = "#d65d0e", size = 5, inherit.aes = FALSE
+  ) +
+  labs(x = NULL, y = "Outcome") +
+  theme(
+    legend.position = "bottom",
+    panel.grid.minor = element_blank(),
+    axis.text.y = element_blank(),
+    strip.text = element_text(size = 16, face = "bold")
+  )
+```
+
 ### Example: Minimum Wage Effect
 
 <br>
 
 ![](../_images/ding_li.png){width="80%" fig-align="center"}
 
-. . .
-
-- Stationarity is satisfied and $F(y_i \given G_i = 0)$ stochastically dominates $F(y_i \given G_i = 1)$ (reversed dominance $\rightsquigarrow$ reversed bracketing).
+- Stationarity is satisfied and $F(y_{i0} \given G_i = 0)$ stochastically dominates $F(y_{i0} \given G_i = 1)$ (reversed dominance $\rightsquigarrow$ reversed bracketing).
 
 - $\widehat\tau_{DiD} = 2.446 > \widehat\tau_{LDV} = 0.302$.
 
@@ -1382,16 +1511,13 @@ anzia2012 |>
 
 . . .
 
-- @rambachan2023more propose to [bound the bias term with pre-trend differences]{.highlight}:
+- @rambachan2023more propose the [relative magnitudes]{.highlight} restriction: bound the post-treatment violation of parallel trends by $\bar{M}$ times the largest pre-treatment violation:
 
   $$
-  \begin{align*}
-  &\E [Y_{i1} (0) - Y_{i0} (0) \given G_i = 1] - \E [Y_{i1} (0) - Y_{i0} (0) \given G_i = 0] \\
-  &\quad = \phi \left( \E [Y_{i0} (0) - Y_{i,-1} (0) \given G_i = 1] - \E [Y_{i0} (0) - Y_{i,-1} (0) \given G_i = 0] \right),
-  \end{align*}
+  \Delta^{RM}(\bar{M}) = \left\{\delta : \forall t \geq 0, \; |\delta_{t+1} - \delta_t| \leq \bar{M} \cdot \max_{s < 0} |\delta_{s+1} - \delta_s| \right\},
   $$
 
-  with $\phi \in [-b, b]$.
+  where $\delta_t = \E[Y_{it}(0) - Y_{i,t-1}(0) \given G_i = 1] - \E[Y_{it}(0) - Y_{i,t-1}(0) \given G_i = 0]$ is the differential trend at $t$; $\bar{M} = 0 \Rightarrow$ exact parallel trends, $\bar{M} = 1 \Rightarrow$ post-treatment bias $\leq$ worst pre-trend violation.
 
 ### Example: Impact of Election Timing
 
@@ -1476,7 +1602,7 @@ HonestDiDFEct::createSensitivityResults_relativeMagnitudes(
 
 ### Example: Cycling to School
 
-<br><br>
+<br><br><br>
 
 - [Triple differences]{.highlight} or "difference in differences in differences":
 
@@ -1484,24 +1610,13 @@ HonestDiDFEct::createSensitivityResults_relativeMagnitudes(
 
 . . .
 
-::: {.columns}
+- @muralidharan2017cycling: Effects of cycling to school on educational outcomes among girls in India ([video](https://www.youtube.com/embed/6nG63ISt_Ek?start=26))
 
-::: {.column style="margin-top: 0em; width:60%;"}
-- @muralidharan2017cycling: Effects of cycling to school on educational outcomes among girls in India
-
-  - Reform: Only in Bihar in 2007, all girls aged 14/15 are given a free bicycle.
+  - Reform happened only in Bihar in 2007: all girls aged 14/15 are given a free bicycle.
 
   - **1st DiD**: $G_i \in \{\text{girl, boy}\}$ and $T_i \in \{\text{2005, 2009}\}$ in Bihar.
+  
   - **2nd DiD (placebo)**: $G_i \in \{\text{girl, boy}\}$ and $T_i \in \{\text{2005, 2009}\}$ in Jharkhand.
-:::
-
-::: {.column style="margin-top: 2em; width:40%;"}
-
-<iframe width="450" height="250" src="https://www.youtube.com/embed/6nG63ISt_Ek?start=26" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen data-external="1"></iframe>
-
-:::
-
-:::
 
 
 ### DDD Estimator
@@ -1543,35 +1658,99 @@ HonestDiDFEct::createSensitivityResults_relativeMagnitudes(
 
 ### Continuous Non-Linear Treatment DiD
 
-- Suppose that treatment is continuous and (possibly) non-linear:
+- Two-period setup: $T_{i1} \in \mathcal{T} = \{0\} \cup \mathcal{T}_+$; $G_i = T_{i1}$
 
-  $$
-  Y_{it} = \alpha_i + \lambda_t + \tau G_i \times \text{Post}_t \times f(T_it)  + \varepsilon_{it},
-  $$
-
-  meaning we have pure control group ($G_i = 0$).
+- Potential outcomes: $Y_{it}(d)$; observed outcomes: $Y_{i0} = Y_{i0}(0)$, $Y_{i1} = Y_{i1}(T_{i1})$, $\Delta Y_i = Y_{i1} - Y_{i0}$
 
 . . .
 
-- **Potential outcomes**: $Y_{it}(d)$ for dose $T_i = d$.
-
-- Revise the usual parallel trend assumption to identify [the "level" _ATT_ effect]{.highlight}:
+- [Parallel Trends (PT)]{.highlight} with dose $0$ benchmark:
 
   $$
-  \E [Y_{i1}(0) - Y_{i0}(0) \given T_i = d] = \E [Y_{i1}(0) - Y_{i0}(0) \given T_i = 0],
+  \E [Y_{i1}(0) - Y_{i0}(0) \given G_i = d] = \E [Y_{i1}(0) - Y_{i0}(0) \given G_i = 0]
   $$
 
-  identifies $ATT(d) \equiv \E [Y_{i1}(d) - Y_{i0}(0) \given T_i = d]$.
+- Identifies [local level effect]{.highlight}:
+
+  $$
+  ATT(d \given d) \equiv \E [Y_{i1}(d) - Y_{i1}(0) \given G_i = d] = \E [\Delta Y_i \given G_i = d] - \E [\Delta Y_i \given G_i = 0]
+  $$
 
 . . .
 
-- **Estimation**: First-difference regression with flexible specification for $T_{i}$:
+- Estimation: flexible first-difference model for $m(d) = \E[\Delta Y_i \given G_i = d]$
 
-$$
-\Delta Y_i = \Delta \lambda + f(T_i) + \Delta \varepsilon_i.
-$$
+  $$
+  \Delta Y_i = \alpha + m(T_{i1}) + \varepsilon_i
+  $$
 
-- @de2024difference use similar identifying assumption and an imputation-based estimator.
+- [PT enough]{.note}: level effects vs. dose $0$
+- [PT not enough]{.alert}: slopes / cross-dose comparisons / TWFE interpretation
+
+### Why Strong Parallel Trends for Continuous DiD?
+
+- [Question]{.note}: what does TWFE compare when treatment intensity varies?
+
+- Common TWFE for dose-response summary:
+
+  $$
+  Y_{it} = \alpha_i + \lambda_t + \tau T_{it} + u_{it}
+  $$
+
+- TWFE slope uses [high-dose vs. low-dose]{.highlight} comparisons
+- PT equalizes [untreated]{.highlight} trends only
+- PT does [not]{.alert} remove selection on treatment-effect functions
+
+. . .
+
+- For $h > \ell > 0$, PT implies:
+
+  $$
+  \E [\Delta Y_i \given T_{i1} = h] - \E [\Delta Y_i \given T_{i1} = \ell]
+  =
+  \underbrace{\E [Y_{i1}(h) - Y_{i1}(\ell) \given T_{i1} = h]}_{\text{causal dose contrast}}
+  +
+  \underbrace{\bigl\{ATT(\ell \given h) - ATT(\ell \given \ell)\bigr\}}_{\text{selection bias}}
+  $$
+
+- [Intuition]{.note}:
+
+  - high-dose group tells us effect of $h$ vs. $\ell$ for high-dose units
+  - low-dose group does not recover counterfactual $Y_{i1}(\ell)$ for high-dose units
+  - difference in dose-group-specific effects at dose $\ell$ = selection bias
+
+
+### Strong Parallel Trends and Practical Options
+
+- If dose $0$ unavailable, compare to least treated $d_L$:
+
+  $$
+  \E [\Delta Y_i \given G_i = d] - \E [\Delta Y_i \given G_i = d_L]
+  $$
+
+  - under PT: causal contrast + selection bias
+  - under [Strong Parallel Trends (SPT)]{.highlight}: clean effect comparison across doses
+
+- [Strong Parallel Trends (SPT)]{.highlight} assumption:
+
+  $$
+  \forall d \in \mathcal{T}:\: \E [Y_{i1}(d) - Y_{i0}(0) \given G_i > 0] = \E [Y_{i1}(d) - Y_{i0}(0) \given G_i = d]
+  $$
+
+  - dose-$d$ group stands in for treated units under dose $d$
+
+. . .
+
+- [Option: binarize treatment]{.highlight}
+
+  $$
+  \Delta Y_i = \alpha + \tau_{bin} G_i + \varepsilon_i
+  $$
+
+  - target estimand: $\tau_{glob} = \E [ \E [ Y_{i1} (d) − Y_{i1}(0) \given G_i > 0 ] \given T_{it} > 0 ]$
+
+- [Bottom line]{.note}: Dose comparisons / TWFE slopes need stronger assumptions. See @callaway2026continuous and @de2024difference for further discussion.
+
 
 
 ## Summary
@@ -1626,7 +1805,7 @@ $$
 
 ### From 2x2 to Staggered Adoption
 
-<br><br>
+<br>
 
 - In basic DiD we had **2 groups** and **2 periods** $\rightsquigarrow$ one clean treatment-vs-control comparison.
 
@@ -1637,11 +1816,9 @@ $$
   - With $G$ adoption cohorts and $T$ periods, TWFE pools many 2x2 comparisons with **different** weights.
   - Some comparisons use [already-treated]{.alert} units as controls $\rightsquigarrow$ bias when treatment effects evolve over time.
 
-### Example: Bargaining Rights and Size of the Government
+. . .
 
-<br><br><br>
-
-- @paglayan2019public: Study relationship between public sector unions and the size of government
+- Example: @paglayan2019public study relationship between public sector unions and the size of government
 
   - **Treatment**: Introduction of collective bargaining rights for teachers across US.
   - **Outcome**: Public educational expenditures. 
