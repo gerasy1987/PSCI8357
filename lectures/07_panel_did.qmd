@@ -1273,7 +1273,7 @@ ggplot() +
 2. [Compositional differences across time]{.highlight}
    
    - In repeated cross-sections, the composition of the sample may change between periods (e.g., due to migration).
-   - This may confound any DID estimate since the "effect" may be attributable to a change in population.
+   - This may confound any DiD estimate since the "effect" may be attributable to a change in population.
 
 ### Parallel Trends Violations
 
@@ -1498,8 +1498,6 @@ anzia2012 |>
 
 ### Sensitivity Analyses for Parallel Trends
 
-<br>
-
 - Recall that the DiD estimator can be expressed as:
 
   $$
@@ -1514,7 +1512,7 @@ anzia2012 |>
 - @rambachan2023more propose the [relative magnitudes]{.highlight} restriction: bound the post-treatment violation of parallel trends by $\bar{M}$ times the largest pre-treatment violation:
 
   $$
-  \Delta^{RM}(\bar{M}) = \left\{\delta : \forall t \geq 0, \; |\delta_{t+1} - \delta_t| \leq \bar{M} \cdot \max_{s < 0} |\delta_{s+1} - \delta_s| \right\},
+  \Delta^{RM}(\bar{M}) = \left\{\delta : \forall t \geq 0, \; |\delta_{t} - \delta_{t - 1}| \leq \bar{M} \cdot \max_{s < 0} |\delta_{s} - \delta_{s - 1}| \right\},
   $$
 
   where $\delta_t = \E[Y_{it}(0) - Y_{i,t-1}(0) \given G_i = 1] - \E[Y_{it}(0) - Y_{i,t-1}(0) \given G_i = 0]$ is the differential trend at $t$; $\bar{M} = 0 \Rightarrow$ exact parallel trends, $\bar{M} = 1 \Rightarrow$ post-treatment bias $\leq$ worst pre-trend violation.
@@ -1681,7 +1679,7 @@ HonestDiDFEct::createSensitivityResults_relativeMagnitudes(
 - Estimation: flexible first-difference model for $m(d) = \E[\Delta Y_i \given G_i = d]$
 
   $$
-  \Delta Y_i = \alpha + m(T_{i1}) + \varepsilon_i
+  \Delta Y_i = \alpha + m(G_i) + \varepsilon_i
   $$
 
 - [PT enough]{.note}: level effects vs. dose $0$
@@ -1694,7 +1692,7 @@ HonestDiDFEct::createSensitivityResults_relativeMagnitudes(
 - Common TWFE for dose-response summary:
 
   $$
-  Y_{it} = \alpha_i + \lambda_t + \tau T_{it} + u_{it}
+  Y_{it} = \alpha_i + \lambda_t + \tau T_{it} + \varepsilon_{it}
   $$
 
 - TWFE slope uses [high-dose vs. low-dose]{.highlight} comparisons
@@ -1744,7 +1742,7 @@ HonestDiDFEct::createSensitivityResults_relativeMagnitudes(
 - [Option: binarize treatment]{.highlight}
 
   $$
-  \Delta Y_i = \alpha + \tau_{bin} G_i + \varepsilon_i
+  \Delta Y_i = \alpha + \tau_{bin} \mathbb{1} [G_i > 0] + \varepsilon_i
   $$
 
   - target estimand: $\tau_{glob} = \E [ \E [ Y_{i1} (d) − Y_{i1}(0) \given G_i > 0 ] \given T_{it} > 0 ]$
@@ -1769,7 +1767,7 @@ HonestDiDFEct::createSensitivityResults_relativeMagnitudes(
 
 . . .
 
-- We have focused on the basic DID design (the treatment is one-shot).
+- We have focused on the basic DiD design (the treatment is one-shot).
 
 - Next we will generalize this to Staggered Adoption Design:
   
@@ -2092,7 +2090,9 @@ summary(fit_sa_dyn, estimator = "SA-DID") |> as_tibble() |>
 
 ## Two-Way Fixed Effects Under SA Design
 
-### Two-way Fixed Effects Estimator
+### Two-Way Fixed Effects Estimator
+
+<br>
 
 - Nonparametric DiD estimators are transparent and easy to compute. [**However, they could be less efficient.**]{.fragment}
 
@@ -2100,12 +2100,12 @@ summary(fit_sa_dyn, estimator = "SA-DID") |> as_tibble() |>
 
 - The most popular approach is the [Two-Way Fixed Effects Estimator (TWFE)]{.highlight}:
   $$
-  Y_{it} = \alpha_i + \gamma_t + \tau T_{it} + (\mathbf{X}_{it}^\prime \beta)  + \varepsilon_{it}
+  Y_{it} = \alpha_i + \gamma_t + \tau T_{it} + \varepsilon_{it}
   $$
 
 - The OLS coefficient can be estimated as (implemented by `fixest`, `plm`, `estimatr`...):
   $$
-  (\hat{\tau}_{\text{SA}}, \widehat{\pmb{\alpha}}, \widehat{\pmb{\gamma}}, \widehat{\pmb{\beta}}) = \argmin_{\tau, \pmb{\alpha}, \pmb{\gamma}, \pmb{\beta}} \frac{1}{T \ N} \sum_{t=1}^T \sum_{i=1}^N (Y_{it} - \alpha_i - \gamma_t - \tau T_{it} - \mathbf{X}_{it}^\prime \beta)^2
+  (\hat{\tau}_{\text{SA}}, \widehat{\pmb{\alpha}}, \widehat{\pmb{\gamma}}) = \argmin_{\tau, \pmb{\alpha}, \pmb{\gamma}} \frac{1}{T \ N} \sum_{t=1}^T \sum_{i=1}^N (Y_{it} - \alpha_i - \gamma_t - \tau T_{it})^2
   $$
 
 . . .
@@ -2229,6 +2229,8 @@ $$
 
 ### Unpacking TWFE Estimator
 
+<br>
+
 - [Parallel Trends Assumption]{.highlight} holds for *all* groups for all time periods:
 
     $$
@@ -2254,16 +2256,19 @@ $$
 
 - The expectation of the two-way fixed effects estimator:
   $$
-  \E(\widehat{\tau}_{\text{SA}}) = (\omega_{1\infty}/2 + \omega_{12}) \times \tau(1, 0) + (\omega_{2\infty} + \omega_{12}/2) \times \tau(2, 0) + (\omega_{1\infty}/2 - \omega_{12}/2) \times \tau(1, 1).
+  \begin{aligned}
+  \E(\widehat{\tau}_{\text{SA}}) &= (\omega_{1\infty}/2 + \omega_{12}) \times \tau(1, 0) + (\omega_{2\infty} + \omega_{12}/2) \times \tau(2, 0) \\
+  &\quad + (\omega_{1\infty}/2 - \omega_{12}/2) \times \tau(1, 1).
+  \end{aligned}
   $$
 
 . . .
 
-- [Bias]{.alert}: $\E(\widehat{\tau}_{\text{SA}}) \neq \text{ATT}$ whenever $\tau(1,1) \neq \tau(1,0)$. The weight on $\tau(1,1)$ is $(\omega_{1\infty}/2 - \omega_{12}/2)$, which can even be [**negative**]{.alert} when $\omega_{12} > \omega_{1\infty}$ (i.e., more early-vs-late comparisons than early-vs-never).
+- [Bias]{.alert}: $\E(\widehat{\tau}_{\text{SA}}) \neq \tau_{ATT}$ whenever $\tau(1,1) \neq \tau(1,0)$. The weight on $\tau(1,1)$ is $(\omega_{1\infty}/2 - \omega_{12}/2)$, which can even be [**negative**]{.alert} when $\omega_{12} > \omega_{1\infty}$ (i.e., more early-vs-late comparisons than early-vs-never).
 
 . . .
 
-- [Intuition]{.note}: No bias when **no dynamic treatment effects** (no HTE over time, i.e., $\tau(1, 1) = \tau(1, 0)$). [**Moreover returns ATT when no HTE at all!**]{.fragment}
+- [Intuition]{.note}: No bias when **no dynamic treatment effects** (no HTE over time, i.e., $\tau(1, 1) = \tau(1, 0)$). **Moreover returns ATT when no HTE at all!**
 
 - **Question**: When is dynamic treatment effect heterogeneity substantively plausible? (e.g., policy learning, habit formation, anticipation effects)
 
