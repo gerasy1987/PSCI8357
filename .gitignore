@@ -21,6 +21,8 @@ _data/Clingingsmith*
 _data/Arceneaux*
 _data/interaction*
 _data/spenkuch_tillmann*
+_data/1994*
+_data/1998*
 _shiny/*
 !_data/.gitkeep
 quality_reports/*

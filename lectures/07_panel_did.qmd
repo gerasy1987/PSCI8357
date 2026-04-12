@@ -1567,11 +1567,11 @@ HonestDiDFEct::createSensitivityResults_relativeMagnitudes(
 
 ```
 
-## Event Study (Post-Trends)
+## Extensions of Classic DiD
 
-### Event Study (Post-Trends)
+### Event Study Analysis
 
-- The classic $2 \times 2$ DiD can be extended with pre- and post-trends to study effects of event.
+- The classic $2 \times 2$ DiD can be extended to include pre- and post-trends to study effects of an event.
 
 . . .
 
@@ -1595,8 +1595,6 @@ HonestDiDFEct::createSensitivityResults_relativeMagnitudes(
 
 - [Note]{.note}: Using _only unit_ fixed effects is algebraically equivalent!
 
-
-## Triple (...) Differences 😵‍💫
 
 ### Example: Cycling to School
 
