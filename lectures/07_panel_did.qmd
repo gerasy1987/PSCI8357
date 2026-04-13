@@ -2211,7 +2211,8 @@ $$
 
 $$
 \begin{align*}
-\widehat{\tau}_{\text{SA}} = \frac{1}{2} \Bigl\{ \omega_{1\infty} (\widehat{\text{DiD}}^{(1, \infty)}_{20} + \widehat{\text{DiD}}^{(1, \infty)}_{10}) + \omega_{2\infty} (\widehat{\text{DiD}}^{(2, \infty)}_{21} + \widehat{\text{DiD}}^{(2, \infty)}_{20}) + \omega_{12} (\widehat{\text{DiD}}^{(1, 2)}_{10} \textcolor{#cc241d}{ - \widehat{\text{DiD}}^{(1, 2)}_{21}}) \Bigr\}
+\widehat{\tau}_{\text{SA}} = \frac{1}{2} \Bigl\{ \omega_{1\infty} (\widehat{\text{DiD}}^{(1, \infty)}_{20} + \widehat{\text{DiD}}^{(1, \infty)}_{10}) &+ \omega_{2\infty} (\widehat{\text{DiD}}^{(2, \infty)}_{21} + \widehat{\text{DiD}}^{(2, \infty)}_{20}) \\
+& \quad + \omega_{12} (\widehat{\text{DiD}}^{(1, 2)}_{10} \textcolor{#cc241d}{ - \widehat{\text{DiD}}^{(1, 2)}_{21}}) \Bigr\}
 \end{align*}
 $$
 
@@ -2250,8 +2251,6 @@ $$
 
 ### GB Decomposition: When Does TWFE Fail?
 
-<br>
-
 - The expectation of the two-way fixed effects estimator:
   $$
   \begin{aligned}
@@ -2262,11 +2261,18 @@ $$
 
 . . .
 
-- [Bias]{.alert}: $\E(\widehat{\tau}_{\text{SA}}) \neq \tau_{ATT}$ whenever $\tau(1,1) \neq \tau(1,0)$. The weight on $\tau(1,1)$ is $(\omega_{1\infty}/2 - \omega_{12}/2)$, which can even be [**negative**]{.alert} when $\omega_{12} > \omega_{1\infty}$ (i.e., more early-vs-late comparisons than early-vs-never).
+- The [target estimand]{.highlight} is $\overline{\tau}^{\text{SA}}$, the treated-observation-weighted average of contemporaneous ATTs:
+  $$
+  \overline{\tau}_{} = \sum_{t=1}^T \tau(t, 0) \ \frac{\sum_{i=1}^n \mathbb{1}\{G_i = t\}}{\sum_{i=1}^n \mathbb{1}\{G_i \leq T\}}.
+  $$
 
 . . .
 
-- [Intuition]{.note}: No bias when **no dynamic treatment effects** (no HTE over time, i.e., $\tau(1, 1) = \tau(1, 0)$). **Moreover returns ATT when no HTE at all!**
+- [Bias]{.alert}: $\E(\widehat{\tau}_{\text{SA}}) \neq \overline{\tau}^{\text{SA}}$ whenever $\tau(1,1) \neq \tau(1,0)$. The weight on $\tau(1,1)$ is $(\omega_{1\infty}/2 - \omega_{12}/2)$, which can even be [**negative**]{.alert} when $\omega_{12} > \omega_{1\infty}$ (i.e., more early-vs-late comparisons than early-vs-never).
+
+. . .
+
+- [Intuition]{.note}: No bias when **no dynamic treatment effects** (no HTE over time, i.e., $\tau(1, 1) = \tau(1, 0)$). **Moreover returns $\overline{\tau}^{\text{SA}}$ when no HTE at all!**
 
 - **Question**: When is dynamic treatment effect heterogeneity substantively plausible? (e.g., policy learning, habit formation, anticipation effects)
 
@@ -2383,7 +2389,7 @@ df_bacon |>
 
   - $(\tau_0, \ldots, \tau_S, \widetilde{\tau}_S)$ same as before; 
   
-  - $(\delta_1, \ldots, \delta_Q)$ should be $0$ if the parallel trends assumption holds true.
+  - $(\delta_1, \ldots, \delta_Q)$ should be $0$ if the parallel trends assumption holds.
 
   - $\mathbf{X}_{it}^\prime \beta$ adjusts for observed time-varying covariates.   (Do not include covariates affected by the treatment.)
 
@@ -2561,8 +2567,6 @@ twfe_est_dyn |>
 
 ### Identification and Estimation under SI
 
-<br>
-
 - **Identification**: Under the assumptions on the last slide
   $$
   \begin{align*}
@@ -2573,17 +2577,22 @@ twfe_est_dyn |>
 
   where $\mu_t(\mathbf{x}) = \E (Y_{it} \given T_{it} = t, \mathbf{X}_{it} = \mathbf{x})$ for $t=0,1$.
 
+. . .
 
-- **Estimation**:
-  - Essentially the same as "Regression in Observational Studies."
-  - Choose a model for $\E (Y_{it} \given T_{it} = t, \mathbf{X}_{it} = \mathbf{x})$.
+- **Estimation**: Linear model with OLS, explicitly conditioning on history and covariates:
+  $$
+  Y_{it} = \alpha + \tau T_{it} + \mathbf{X}_{it}^\prime \beta + \sum_{\ell=1}^{L} \rho_\ell Y_{i,t-\ell} + \sum_{\ell=1}^{L} \delta_\ell T_{i,t-\ell} + \gamma_t + \varepsilon_{it}
+  $$
 
-- [Example]{.highlight}: Linear Model with OLS
-  $$
-  \E (Y_{it} \given T_{it} = t, \mathbf{X}_{it} = \mathbf{x}) = \alpha + \tau T_{it} + \mathbf{X}_i^\prime \gamma
-  $$
+  - $\mathbf{X}_{it}$: observed (time-varying) covariates.
 
   - Cluster standard errors at the unit level.
+
+. . .
+
+- [Why this solves the feedback problem]{.note}: TWFE uses unit FE $\alpha_i$ to absorb all time-invariant confounding, but [cannot condition on past outcomes]{.highlight} (they are post-treatment for earlier periods). SI [explicitly conditions on the treatment-outcome history]{.highlight} $\rightsquigarrow$ blocks feedback paths $(Y_{i,t-1} \to T_{it} \to Y_{it})$ by including lagged $Y$ and $T$ as covariates.
+
+- [Trade-off]{.alert}: No unit FE $\rightsquigarrow$ any time-invariant unobserved confounder is a threat.
 
 ### Practical Consideration + Extensions
 
@@ -2611,7 +2620,7 @@ twfe_est_dyn |>
 
 ### From Many Units to One
 
-<br><br>
+<br><br><br>
 
 - So far: DiD and panel methods assume **many treated units** $\rightsquigarrow$ can estimate group means and differences.
 
@@ -2666,9 +2675,7 @@ twfe_est_dyn |>
 
 ## Identification
 
-### DiD vs Synthetic Control
-
-<br>
+## DiD vs Synthetic Control
 
 - [DiD]{.highlight}: Focus on _ATT_ and assume parallel trends.
 
@@ -2676,7 +2683,7 @@ twfe_est_dyn |>
   Y_{it} = \alpha_i + \gamma_t + \tau T_{it} + \mathbf{X}_{it}^\prime \beta + \varepsilon_{it}, \quad \text{with } \E [\varepsilon_{it} \given T_{it}, \mathbf{X}_{it}] = 0.
   $$
 
-- This implies untreated trend is a [TWFE process]{.highlight} $Y_{jt}(0) = \alpha_i + \gamma_t + \varepsilon_{it}.$
+- This implies untreated trend is a [TWFE process]{.highlight} $Y_{it}(0) = \alpha_i + \gamma_t + \mathbf{X}_{it}^\prime \beta + \varepsilon_{it}.$
 
 . . .
 
@@ -2694,7 +2701,7 @@ twfe_est_dyn |>
 
 . . .
 
-- [Note]{.note}: If $\lambda_t = \lambda$, then this is TWFE.
+- [Note]{.note}: If $\lambda_t = \lambda$ (constant over time), then $\lambda^\prime \pmb{\mu}_i$ is time-invariant $\rightsquigarrow$ absorbed into a unit FE $\alpha_i \equiv \lambda^\prime \pmb{\mu}_i$, and the model collapses to TWFE. **SCM generalizes DiD by allowing [time-varying factor loadings]{.highlight}.**
 
 ### Identification
 
@@ -2753,23 +2760,23 @@ Let $w^\ast$ be the weights that satisfy $\sum_{j=2}^{J+1} w_j^\ast \pmb{\mu}_j 
 
 <br>
 
-- Let $\mathbf{V}_1 = (X_{11}, ..., X_{1R}, Y_{11}, ..., Y_{1T_0})^\prime$ be a $p$-dimensional vector of pre-intervention characteristics where $p = R + T_0$.
-
-- $\mathbf{V}_0$ is a $(p \times J)$ matrix of the same variables for the control units.
+- [Analogy with matching/weighting]{.note}: SCM is essentially a [covariate balancing]{.highlight} problem -- find weights on donor units to match the treated unit.
 
 . . .
 
-- $\mathbf{W}$ is chosen to minimize $\|\mathbf{V}_1 - \mathbf{V}_0 \mathbf{W}\|$, subject to constraints:
-  - $w_i \geq 0$ for $i \in \{2,...,J+1\}$ and $\sum_{i=2}^{J+1} w_i = 1$.
-
-- Use $\|\mathbf{V}_1 - \mathbf{V}_0 \mathbf{W}\| = \sqrt{(\mathbf{V}_1 - \mathbf{V}_0 \mathbf{W})^\prime \Sigma (\mathbf{V}_1 - \mathbf{V}_0 \mathbf{W})}$, where $\Sigma$ is some $(p \times p)$ symmetric and positive semidefinite matrix.
+- $\mathbf{W}$ is chosen to minimize the distance between treated unit's and weighted donors' pre-treatment profiles, subject to $w_j \geq 0$ and $\sum_{j} w_j = 1$ (convex combination).
 
 . . .
 
-- @abadie2010synthetic choose $\Sigma$ to minimize the MSPE for the pre-treatment outcomes for the treated unit:
+- [Key difference from matching]{.highlight}: the non-negative convex weight constraint $\rightsquigarrow$ synthetic control is an [interpolation]{.highlight}, also making quality of donor units transparent.
+
+. . .
+
+- @abadie2010synthetic choose $\Sigma$ (importance weights across predictors) to minimize the Mean Squared Prediction Error (MSPE) for pre-treatment outcomes:
   $$
-  MSPE \ = \ \frac{1}{T_0}\sum_{t=1}^{T_0}\left(Y_{1t} - \sum_{j=2}^{J+1}w_j^\ast Y_{jt}\right)^2.
+  \text{MSPE} \ = \ \frac{1}{T_0}\sum_{t=1}^{T_0}\left(Y_{1t} - \sum_{j=2}^{J+1}w_j^\ast Y_{jt}\right)^2.
   $$
+
 
 ### DiD vs Synthetic Control
 

@@ -78,20 +78,9 @@ pacman::p_load(
 future::plan(multisession, workers = parallel::detectCores() - 2)
 
 # set theme for plots
-custom_theme <- theme(
-  panel.background = element_rect(fill = "#f0f1eb", color = NA),
-  plot.background = element_rect(fill = "#f0f1eb", color = NA),
-  text = element_text(color = "#111111"),
-  axis.text = element_text(color = "#111111"),
-  axis.title = element_text(color = "#111111"),
-  plot.title = element_text(color = "#111111", face = "bold"),
-  plot.subtitle = element_text(color = "#111111"),
-  legend.text = element_text(color = "#111111"),
-  legend.title = element_text(color = "#111111"),
-  legend.background = element_rect(fill = "#f0f1eb", color = NA)
-)
+ggplot2::theme_set(theme_bw(base_size = 20))
 
-thematic::thematic_on(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
+thematic::thematic_rmd(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 ```
 
 
@@ -184,29 +173,6 @@ thematic::thematic_on(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 ![](../_images/rdd1.png){width="75%" fig-align="center"}
 
 
-### Identification of Causal Effect at the Threshold
-
-- **Identification Assumption**: [Continuity of average potential outcomes]{.highlight}
-  
-  - $\E [Y_i(t) \given X_i = x]$ is continuous in $x$ around $X_i = c \text{ for } t \in \{0,1\}$ (i.e. smooth or is $p$-times differentiable at $c$).
-
-- **Causal estimand**: [Local ATE _at the threshold_]{.highlight}
-  $$
-  \tau_{SRD} \equiv \E [Y_i(1) - Y_i(0) \given X_i = c]
-  $$
-
-- **Identification Result**: If the continuity assumption holds, $\tau_{SRD}$ is nonparametrically identified as
-  $$
-  \tau_{SRD} = \lim_{x \downarrow c} \E [Y_i \given X_i = x] - \lim_{x \uparrow c} \E [Y_i \given X_i = x]
-  $$
-
-. . .
-
-- **Proof**:
-  1. Under the **continuity**, $\E [Y_i(1) \given X_i = c] = \lim_{x \downarrow c} \E [Y_i(1) \given X_i = x]$.
-  2. Due to the **consistency** of POs, $\lim_{x \downarrow c} \E [Y_i(1) \given X_i = x] = \lim_{x \downarrow c} \E [Y_i \given X_i = x]$.
-  3. The same proof works for $\E [Y_i(0) \given X_i = c]$.
-
 ### Graphical Illustration
 
 <br>
@@ -243,16 +209,41 @@ thematic::thematic_on(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
 
 ![](../_images/rdd3_bad.png){width="75%" fig-align="center"}
 
-### Example: Party Incumbency Advantage 
+### Identification of Causal Effect at the Threshold
 
-- @lee2008randomized studies the effect of incumbency status on vote shares in U.S. House elections?
+- **Identification Assumption**: [Continuity of average potential outcomes]{.highlight}
+
+  - $\E [Y_i(t) \given X_i = x]$ is continuous in $x$ around $X_i = c \text{ for } t \in \{0,1\}$ (i.e. smooth or is $p$-times differentiable at $c$).
+
+- **Causal estimand**: [Local ATE _at the threshold_]{.highlight}
+  $$
+  \tau_{SRD} \equiv \E [Y_i(1) - Y_i(0) \given X_i = c]
+  $$
+
+- **Identification Result**: If the continuity assumption holds, $\tau_{SRD}$ is nonparametrically identified as
+  $$
+  \tau_{SRD} = \lim_{x \downarrow c} \E [Y_i \given X_i = x] - \lim_{x \uparrow c} \E [Y_i \given X_i = x]
+  $$
+
+. . .
+
+- **Proof**:
+  1. Under the **continuity**, $\E [Y_i(1) \given X_i = c] = \lim_{x \downarrow c} \E [Y_i(1) \given X_i = x]$.
+  2. Due to the **consistency** of POs, $\lim_{x \downarrow c} \E [Y_i(1) \given X_i = x] = \lim_{x \downarrow c} \E [Y_i \given X_i = x]$.
+  3. The same proof works for $\E [Y_i(0) \given X_i = c]$.
+
+### Example: Party Incumbency Advantage
+
+<br>
+
+- @lee2008randomized studies the effect of incumbency status on vote shares in U.S. House elections.
 
 . . .
 
 - **Treatment** is incumbency status of party $j$ in district $i$ at election $t$, $T_{ijt}$.
 - Potential vote share as incumbent ($t=1$) or challenger ($t=0$), $V_{ijt}(t)$.
 
-- **Observed vote share** is $V_{itj} = V_{ijt}(T_{ijt})$.
+- **Observed vote share** is $V_{ijt} = V_{ijt}(T_{ijt})$.
 
 - Party incumbency effect for party $j$ in election $t$: $V_{ijt}(1) - V_{ijt}(0)$.
 
@@ -264,8 +255,8 @@ thematic::thematic_on(bg = "#f0f1eb", fg = "#111111", accent = "#111111")
   $$
   T_{ij(t+1)} = 
   \begin{cases} 
-    1 & \text{if } Z_{itj} > 0 \\
-    0 & \text{if } Z_{itj} < 0
+    1 & \text{if } Z_{ijt} > 0 \\
+    0 & \text{if } Z_{ijt} < 0
   \end{cases}
   $$
 
@@ -464,9 +455,7 @@ df_lee |>
   labs(
     x = "Margin (t-1)",
     y = "Vote Share (t)"
-  ) +
-  theme_bw(base_size = 20) +
-  custom_theme 
+  )
 
 ```
 
@@ -538,7 +527,7 @@ est_diff_slope |>
   knitr::kable(
     digits = 4,
     align = "lccc",
-    caption = "Estimates with Common Slope Assumption"
+    caption = "Estimates with Different Slopes"
   ) |>
   kableExtra::kable_minimal(font_size = 20)
 ```
@@ -582,9 +571,7 @@ df_lee |>
   labs(
     x = "Margin (t-1)",
     y = "Vote Share (t)"
-  ) +
-  theme_bw(base_size = 20) +
-  custom_theme 
+  )
 
 ```
 
@@ -609,7 +596,7 @@ df_lee |>
 
     $\rightsquigarrow \widehat{\alpha}_1 - \widehat{\alpha}_0$ is an estimator for $\tau_{SRD}$.
 
-- **Equivalent approach**: Eegression weighted by $K(\cdot)$.
+- **Equivalent approach**: Regression weighted by $K(\cdot)$.
 
 . . .
 
@@ -715,11 +702,7 @@ df_lee |>
   labs(
     x = "Margin (t-1)",
     y = "Vote Share (t)"
-  ) +
-  theme_bw(base_size = 20) +
-  custom_theme 
-
-
+  )
 
 ```
 
@@ -732,34 +715,26 @@ df_lee |>
 ![](../_images/rdd_bw.png){width="75%" fig-align="center"}
 
 
-### Optimal Bandwidth + Statistical Inference
+### Optimal Bandwidth
 
 <br>
 
 - **Question**: How should we choose the bandwidth $h$?
 
-  - When $h$ is larger, bias is larger and variance is smaller.
-  - When $h$ is smaller, bias is smaller and variance is larger.
+  - Larger $h$: more data $\rightsquigarrow$ lower variance, but linear approximation worsens $\rightsquigarrow$ higher bias
+  - Smaller $h$: better local fit $\rightsquigarrow$ lower bias, but fewer observations $\rightsquigarrow$ higher variance
 
 . . .
 
-- [Idea]{.note}: Find the bandwidth that minimizes the estimation error:
-
-  - [Imbens-Kalyanaraman (IK) algorithm]{.highlight} [@imbens2012optimal] does that
+- [Idea]{.note}: Choose $h$ to minimize the [MSE of $\widehat{\tau}_{SRD}$]{.highlight}:
 
   $$
-  h_{MSE} = \left(\frac{\text{Variance}}{4 \times \text{Bias}}\right)^{1/5} n^{-1/5}
+  \text{MSE}(\widehat{\tau}_{SRD}) = \text{Bias}^2(\widehat{\tau}_{SRD}) + \text{Var}(\widehat{\tau}_{SRD})
   $$
 
-. . .
+  - [Imbens-Kalyanaraman (IK) algorithm]{.highlight} [@imbens2012optimal]: $h_{MSE} \propto n^{-1/5}$
 
-- **Statistical Inference**: If we assume the local linear regression model is correct
-
-  $$
-  \text{95\% CI for } \tau_{SRD} = [\widehat{\alpha}_1 - \widehat{\alpha}_0 \ \pm 1.96 \sqrt{\widehat{\text{Var}}(\widehat{\alpha}_1) + \widehat{\text{Var}}(\widehat{\alpha}_0)}]
-  $$
-
-### Optimal Bandwidth
+### Robust Inference
 
 - **Problem**: Local linear regression is an *approximation* for estimand defined in the limit $\rightsquigarrow$ need to use a confidence interval robust to bias and adjust the bandwidth selection [e.g. @calonico2014robust].
 
@@ -767,7 +742,7 @@ df_lee |>
 
 ![](../_images/catteneo_2017.png){width="50%" fig-align="center"}
 
-- Impemented in [R]{.proglang} package `rdrobust` and reviewed in @cattaneo2022regression.
+- Implemented in [R]{.proglang} package `rdrobust` and reviewed in @cattaneo2022regression.
 
 ### Example: Incumbency Advantage
 
@@ -932,9 +907,7 @@ ggplot(results_bw, aes(x = bandwidth, y = estimate, color = color, fill = color)
     x = "Bandwidth",
     y = "Estimated Causal Effects",
     title = "RDD: Bandwidth Selection"
-  ) +
-  theme_bw(base_size = 20) +
-  custom_theme
+  )
 
 ```
 
@@ -1132,7 +1105,7 @@ plot_density_check <-
 
 - But _treatment eﬀect at $c$_ is an odd estimand: **very local**.
 
-- A variety of threats and subtleties to be careful with (non-local or compund treatments, sorting/bunching).
+- A variety of threats and subtleties to be careful with (non-local or compound treatments, sorting/bunching).
 
 . . .
 
@@ -1218,9 +1191,7 @@ plot_df |>
   annotate("text", x = 200, y = 27, label = "Actual class size", color = "#458588", hjust = 1, size = 6) +
   scale_y_continuous(limits = c(0, NA)) +
   scale_x_continuous(limits = c(0, 225), breaks = seq(0, 200, by = 40)) +
-  theme_bw(base_size = 20) +
-  theme(legend.position = "none") +
-  custom_theme
+  theme(legend.position = "none")
 
 ```
 
@@ -1251,7 +1222,7 @@ plot_df |>
 
 . . .
 
-- [Note]{.note}: This example is more complex than standard fuzzy RD [with multi-cutoffs and descrete forcing variable]{.highlight}.
+- [Note]{.note}: This example is more complex than standard fuzzy RD [with multi-cutoffs and discrete forcing variable]{.highlight}.
 
 ## Setup and Identification
 
@@ -1407,7 +1378,7 @@ rdplot(y = df_al_bwcut$classize, x = df_al_bwcut$forcing, p = 1, y.label = "Clas
 
 
 
-rdplot(y = df_al_bwcut$avgverb, x = df_al_bwcut$forcing, p = 1, y.label = "Class AVerage Exam Score", x.label = "Enrollment around Cutoffs")
+rdplot(y = df_al_bwcut$avgverb, x = df_al_bwcut$forcing, p = 1, y.label = "Class Average Exam Score", x.label = "Enrollment around Cutoffs")
 
 ```
 
@@ -1462,7 +1433,7 @@ fuzzy_fit <-
   rdrobust::rdrobust(
     y = df_al_bwcut$avgverb, x = df_al_bwcut$forcing, fuzzy = df_al_bwcut$classize,
     kernel = "uniform", p = 1, h = 5,
-    # use masspoints = "ignore" because forcing variables are descrete
+    # use masspoints = "ignore" because forcing variables are discrete
     masspoints = "off", cluster = df_al_bwcut$schlcode
   )
 
@@ -1489,7 +1460,7 @@ tibble(
 
 1. **Model Specification:** Are results sensitive to alternative specifications?
 
-2. **Placebo Test:** Does any pre-treatment covariate $Z_i$ jump at the threshold?
+2. **Placebo Test:** Does any pre-treatment covariate $W_i$ jump at the threshold?
 
 3. **Placebo Threshold:** Check if jumps occur at placebo thresholds $c^{\ast}$?
 
@@ -1504,20 +1475,20 @@ tibble(
 
 . . .
 
-- We still assume $Yi = \tau T_i + g(X_i) + \varepsilon_i$, but we assume that there is a kink in $T_i$:
+- We still assume $Y_i = \tau T_i + g(X_i) + \varepsilon_i$, but we assume that there is a kink in $T_i$:
 
 $$
-d_1 \equiv \lim_{x \downarrow x_0} \frac{\partial D_i}{\partial x} \neq \lim_{x \uparrow x_0} \frac{\partial D_i}{\partial x} \equiv d_0.
+d_1 \equiv \lim_{x \downarrow c} \frac{\partial T_i}{\partial x} \neq \lim_{x \uparrow c} \frac{\partial T_i}{\partial x} \equiv d_0.
 $$
 
-- But smoothness in the trend $g(X_i)$: $\lim_{x \uparrow x_0} \frac{\partial g(x)}{\partial x} = \lim_{x \downarrow x_0} \frac{\partial g(x)}{\partial x}$; and errors, $\varepsilon_i$.
+- But smoothness in the trend $g(X_i)$: $\lim_{x \uparrow c} \frac{\partial g(x)}{\partial x} = \lim_{x \downarrow c} \frac{\partial g(x)}{\partial x}$; and errors, $\varepsilon_i$.
 
 . . .
 
 $$
 \begin{align*}
-\tau_{KRD} &= \frac{\lim_{x \downarrow x_0} \frac{\partial \E [Y_i \given X_i = x]}{\partial x} - \lim_{x \uparrow x_0} \frac{\partial \E [Y_i \given X_i = x]}{\partial x}}{d_1 - d_0} \\
-&= \frac{\lim_{x \downarrow x_0} \frac{\partial (\tau T_i + g(x) + \E [\varepsilon_i \given X_i = x])}{\partial x} - \lim_{x \uparrow x_0} \frac{\partial (\tau T_i + g(x) + \E [\varepsilon_i \given X_i = x])}{\partial x}}{d_1 - d_0} \\
+\tau_{KRD} &= \frac{\lim_{x \downarrow c} \frac{\partial \E [Y_i \given X_i = x]}{\partial x} - \lim_{x \uparrow c} \frac{\partial \E [Y_i \given X_i = x]}{\partial x}}{d_1 - d_0} \\
+&= \frac{\lim_{x \downarrow c} \frac{\partial (\tau T_i + g(x) + \E [\varepsilon_i \given X_i = x])}{\partial x} - \lim_{x \uparrow c} \frac{\partial (\tau T_i + g(x) + \E [\varepsilon_i \given X_i = x])}{\partial x}}{d_1 - d_0} \\
 &= \frac{\tau (d_1 - d_0)}{d_1 - d_0} = \tau.
 \end{align*}
 $$
@@ -1535,7 +1506,7 @@ $$
 
 <br>
 
-- If policy rule is _deterministic_, then you can get $d_1 - d_0$ from the rule. Otherwise, a local linear specification for $i$ near $x_0$:
+- If policy rule is _deterministic_, then you can get $d_1 - d_0$ from the rule. Otherwise, a local linear specification for $i$ near $c$:
 
   $$
   T_i = \alpha_0 + \alpha_1 \widetilde{X}_i + \alpha_2 Z_i \widetilde{X}_i  + \nu_i,
