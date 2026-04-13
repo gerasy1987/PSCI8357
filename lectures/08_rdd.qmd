@@ -729,10 +729,15 @@ df_lee |>
 - [Idea]{.note}: Choose $h$ to minimize the [MSE of $\widehat{\tau}_{SRD}$]{.highlight}:
 
   $$
-  \text{MSE}(\widehat{\tau}_{SRD}) = \text{Bias}^2(\widehat{\tau}_{SRD}) + \text{Var}(\widehat{\tau}_{SRD})
+  \text{MSE}(\widehat{\tau}_{SRD}) \approx \underbrace{h^4 \cdot B^2}_{\text{Bias}^2} + \underbrace{\frac{V}{nh}}_{\text{Variance}}
   $$
 
-  - [Imbens-Kalyanaraman (IK) algorithm]{.highlight} [@imbens2012optimal]: $h_{MSE} \propto n^{-1/5}$
+  - Bias$^2 \propto h^4$: linear approx. error grows with $h$ ($\sim h^2$, then squared)
+  - Variance $\propto 1/(nh)$: wider window $\rightsquigarrow$ more obs. $\rightsquigarrow$ lower variance
+
+. . .
+
+- Minimizing over $h$ $\rightsquigarrow$ [Imbens-Kalyanaraman (IK)]{.highlight} [@imbens2012optimal]: $h_{MSE} \propto n^{-1/5}$
 
 ### Robust Inference
 

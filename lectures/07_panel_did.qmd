@@ -2261,18 +2261,15 @@ $$
 
 . . .
 
-- The [target estimand]{.highlight} is $\overline{\tau}^{\text{SA}}$, the treated-observation-weighted average of contemporaneous ATTs:
-  $$
-  \overline{\tau}_{} = \sum_{t=1}^T \tau(t, 0) \ \frac{\sum_{i=1}^n \mathbb{1}\{G_i = t\}}{\sum_{i=1}^n \mathbb{1}\{G_i \leq T\}}.
-  $$
+- The [target estimand]{.highlight} is $\overline{\tau}^{\text{SA}}$, the treated-observation-weighted average of contemporaneous ATTs: $\overline{\tau}_{} = \sum_{t=1}^T \tau(t, 0) \ \frac{\sum_{i=1}^n \mathbb{1}\{G_i = t\}}{\sum_{i=1}^n \mathbb{1}\{G_i \leq T\}}.$
 
 . . .
 
-- [Bias]{.alert}: $\E(\widehat{\tau}_{\text{SA}}) \neq \overline{\tau}^{\text{SA}}$ whenever $\tau(1,1) \neq \tau(1,0)$. The weight on $\tau(1,1)$ is $(\omega_{1\infty}/2 - \omega_{12}/2)$, which can even be [**negative**]{.alert} when $\omega_{12} > \omega_{1\infty}$ (i.e., more early-vs-late comparisons than early-vs-never).
+- [Bias]{.alert}: $\E(\widehat{\tau}_{\text{SA}}) \neq \overline{\tau}^{\text{SA}}$ whenever $\tau(1,1) \neq \tau(1,0)$. The weight on $\tau(1,1)$ is $(\omega_{1\infty}/2 - \omega_{12}/2)$, which can even be [**negative**]{.alert} when $\omega_{12} > \omega_{1\infty}$ (i.e., more early-vs-late units than early-vs-never).
 
 . . .
 
-- [Intuition]{.note}: No bias when **no dynamic treatment effects** (no HTE over time, i.e., $\tau(1, 1) = \tau(1, 0)$). **Moreover returns $\overline{\tau}^{\text{SA}}$ when no HTE at all!**
+- [Intuition]{.note}: No downward bias when **no dynamic treatment effects** (no HTE over time, i.e., $\tau(1, 1) = \tau(1, 0)$). **Moreover returns $\overline{\tau}^{\text{SA}}$ when no HTE at all!**
 
 - **Question**: When is dynamic treatment effect heterogeneity substantively plausible? (e.g., policy learning, habit formation, anticipation effects)
 
@@ -2590,9 +2587,9 @@ twfe_est_dyn |>
 
 . . .
 
-- [Why this solves the feedback problem]{.note}: TWFE uses unit FE $\alpha_i$ to absorb all time-invariant confounding, but [cannot condition on past outcomes]{.highlight} (they are post-treatment for earlier periods). SI [explicitly conditions on the treatment-outcome history]{.highlight} $\rightsquigarrow$ blocks feedback paths $(Y_{i,t-1} \to T_{it} \to Y_{it})$ by including lagged $Y$ and $T$ as covariates.
+- [Why this solves the feedback problem]{.note}: SI [explicitly conditions on the treatment-outcome history]{.highlight} $\rightsquigarrow$ blocks feedback paths $(Y_{i,t-1} \to T_{it} \to Y_{it})$ by including lagged $Y$ and $T$ as covariates.
 
-- [Trade-off]{.alert}: No unit FE $\rightsquigarrow$ any time-invariant unobserved confounder is a threat.
+- [Trade-off]{.alert}: No unit FE $\rightsquigarrow$ any time-invariant _unobserved_ confounder is a threat.
 
 ### Practical Consideration + Extensions
 
@@ -2724,7 +2721,7 @@ twfe_est_dyn |>
 Let $w^\ast$ be the weights that satisfy $\sum_{j=2}^{J+1} w_j^\ast \pmb{\mu}_j = \pmb{\mu}_1$ and $\sum_{j=2}^{J+1} w_j^\ast \mathbf{X}_j = \mathbf{X}_1$.
 :::
 
-- These are called [balancing weights]{.highlight} cause the $X_j$ term to cancel out when we take $Y_{1t}(0) - \sum_{j=2}^{J+1} w_j^\ast Y_{jt}$ for $t \leq T_{0}$ $\rightsquigarrow$ use them to approximate $Y_{1t}(0)$ for $t > T_{0}$.
+- [Balancing weights]{.highlight} cause the $X_j$ term to cancel out when we take $Y_{1t}(0) - \sum_{j=2}^{J+1} w_j^\ast Y_{jt}$ for $t \leq T_{0}$ $\rightsquigarrow$ use them to approximate $Y_{1t}(0)$ for $t > T_{0}$.
 
 ## Estimation and Inference
 
@@ -2743,7 +2740,7 @@ Let $w^\ast$ be the weights that satisfy $\sum_{j=2}^{J+1} w_j^\ast \pmb{\mu}_j 
   - $\forall t < T_0$ (pre-treatment periods) $\mathbf{W}^\ast$ minimizes
   
   $$
-  | X_{1t} - \sum_{j=2}^{J+1} w^\ast_j X_{jt}|, \quad | Y_{11} - \sum_{j=2}^{J+1} w^\ast_j Y_{j1} |.
+  | X_{1t} - \sum_{j=2}^{J+1} w^\ast_j X_{jt}|, \quad | Y_{1t} - \sum_{j=2}^{J+1} w^\ast_j Y_{jt} |.
   $$
 
   - (what is the problem here?)
@@ -2758,24 +2755,33 @@ Let $w^\ast$ be the weights that satisfy $\sum_{j=2}^{J+1} w_j^\ast \pmb{\mu}_j 
 
 ### Constructing Synthetic Weights
 
-<br>
-
-- [Analogy with matching/weighting]{.note}: SCM is essentially a [covariate balancing]{.highlight} problem -- find weights on donor units to match the treated unit.
+- [Analogy with matching/weighting]{.note}: SCM $\approx$ [covariate balancing]{.highlight} — find convex weights on donors to match treated unit's pre-treatment profile.
 
 . . .
 
-- $\mathbf{W}$ is chosen to minimize the distance between treated unit's and weighted donors' pre-treatment profiles, subject to $w_j \geq 0$ and $\sum_{j} w_j = 1$ (convex combination).
+- [Key difference from matching]{.highlight}: non-negative convex weight constraint $\rightsquigarrow$ [interpolation]{.highlight}, making donor quality transparent.
 
 . . .
 
-- [Key difference from matching]{.highlight}: the non-negative convex weight constraint $\rightsquigarrow$ synthetic control is an [interpolation]{.highlight}, also making quality of donor units transparent.
+- [Nested optimization]{.highlight} [@abadie2010synthetic]:
 
-. . .
-
-- @abadie2010synthetic choose $\Sigma$ (importance weights across predictors) to minimize the Mean Squared Prediction Error (MSPE) for pre-treatment outcomes:
+  - [Inner loop]{.note} (given $V$): choose $\mathbf{W}^\ast(V)$ to minimize weighted predictor distance
   $$
-  \text{MSPE} \ = \ \frac{1}{T_0}\sum_{t=1}^{T_0}\left(Y_{1t} - \sum_{j=2}^{J+1}w_j^\ast Y_{jt}\right)^2.
+  \mathbf{W}^\ast(V) = \arg\min_{\mathbf{W} \in \mathcal{W}} \; (\mathbf{X}_1 - \mathbf{X}_0 \mathbf{W})' V (\mathbf{X}_1 - \mathbf{X}_0 \mathbf{W})
   $$
+  where $\mathcal{W} = \{w_j \geq 0, \sum_j w_j = 1\}$ — a convex QP.
+
+. . .
+
+  - [Outer loop]{.note}: choose $V^\ast$ to minimize pre-treatment MSPE
+  $$
+  V^\ast = \arg\min_{V \succeq 0} \; \frac{1}{T_0}\sum_{t=1}^{T_0}\left(Y_{1t} - \sum_{j=2}^{J+1}w_j^\ast(V) \, Y_{jt}\right)^2
+  $$
+  solved numerically (e.g., Nelder-Mead) — $V$ diagonal, entries = predictor importance weights.
+
+. . .
+
+- [Intuition]{.note}: data-driven predictor weighting — $V$ upweights covariates that help track pre-treatment outcomes, downweights those that don't.
 
 
 ### DiD vs Synthetic Control
