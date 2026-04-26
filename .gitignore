@@ -24,6 +24,9 @@ _data/spenkuch_tillmann*
 _data/1994*
 _data/1998*
 _shiny/*
+_images/ajr_2001.png
+_images/eubank_2022_event.png
+_images/eubank_2022_table1.png
 !_data/.gitkeep
 quality_reports/*
 _archive/*
