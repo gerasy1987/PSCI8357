@@ -599,7 +599,7 @@ $$
 
 :::fragment
 $$
-\E[ Y_{i} (0) - Y_{i} (1) | X_i = x] = \tau_{CATE}
+\E[ Y_{i} (1) - Y_{i} (0) | X_i = x] = \tau_{CATE}
 $$
 :::
 
